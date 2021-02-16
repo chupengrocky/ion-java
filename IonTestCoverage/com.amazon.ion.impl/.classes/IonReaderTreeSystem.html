@@ -1,0 +1,674 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonReaderTreeSystem</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonReaderTreeSystem (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IonReaderTreeSystem</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.7%
+  </span>
+  <span class="absValue">
+    (38/ 41)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80.9%
+  </span>
+  <span class="absValue">
+    (144/ 178)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">IonReaderTreeSystem$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonReaderTreeSystem$Children</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89.3%
+  </span>
+  <span class="absValue">
+    (25/ 28)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    91.5%
+  </span>
+  <span class="absValue">
+    (43/ 47)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    82.2%
+  </span>
+  <span class="absValue">
+    (171/ 208)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.impl._Private_Utils.readFully;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;import com.amazon.ion.Decimal;
+<i>21</i>&nbsp;import com.amazon.ion.IntegerSize;
+<i>22</i>&nbsp;import com.amazon.ion.IonBool;
+<i>23</i>&nbsp;import com.amazon.ion.IonContainer;
+<i>24</i>&nbsp;import com.amazon.ion.IonDatagram;
+<i>25</i>&nbsp;import com.amazon.ion.IonDecimal;
+<i>26</i>&nbsp;import com.amazon.ion.IonException;
+<i>27</i>&nbsp;import com.amazon.ion.IonFloat;
+<i>28</i>&nbsp;import com.amazon.ion.IonInt;
+<i>29</i>&nbsp;import com.amazon.ion.IonLob;
+<i>30</i>&nbsp;import com.amazon.ion.IonNull;
+<i>31</i>&nbsp;import com.amazon.ion.IonReader;
+<i>32</i>&nbsp;import com.amazon.ion.IonStruct;
+<i>33</i>&nbsp;import com.amazon.ion.IonSymbol;
+<i>34</i>&nbsp;import com.amazon.ion.IonSystem;
+<i>35</i>&nbsp;import com.amazon.ion.IonText;
+<i>36</i>&nbsp;import com.amazon.ion.IonTimestamp;
+<i>37</i>&nbsp;import com.amazon.ion.IonType;
+<i>38</i>&nbsp;import com.amazon.ion.IonValue;
+<i>39</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>40</i>&nbsp;import com.amazon.ion.SymbolToken;
+<i>41</i>&nbsp;import com.amazon.ion.Timestamp;
+<i>42</i>&nbsp;import com.amazon.ion.impl._Private_IonValue.SymbolTableProvider;
+<i>43</i>&nbsp;import java.io.IOException;
+<i>44</i>&nbsp;import java.io.InputStream;
+<i>45</i>&nbsp;import java.math.BigDecimal;
+<i>46</i>&nbsp;import java.math.BigInteger;
+<i>47</i>&nbsp;import java.util.Date;
+<i>48</i>&nbsp;import java.util.Iterator;
+<i>49</i>&nbsp;
+<i>50</i>&nbsp;
+<b class="fc"><i>51</i>&nbsp;class IonReaderTreeSystem</b>
+<i>52</i>&nbsp;    implements IonReader, _Private_ReaderWriter
+<i>53</i>&nbsp;{
+<i>54</i>&nbsp;    protected final SymbolTable   _system_symtab;
+<i>55</i>&nbsp;    protected Iterator&lt;IonValue&gt;  _iter;
+<i>56</i>&nbsp;    protected IonValue            _parent;
+<i>57</i>&nbsp;    protected _Private_IonValue   _next;
+<i>58</i>&nbsp;    protected _Private_IonValue   _curr;
+<i>59</i>&nbsp;    protected boolean             _eof;
+<i>60</i>&nbsp;
+<i>61</i>&nbsp;    /** Holds pairs: IonValue parent, Iterator&lt;IonValue&gt; cursor */
+<b class="fc"><i>62</i>&nbsp;    private   Object[]           _stack = new Object[10];</b>
+<i>63</i>&nbsp;    protected int                _top;
+<i>64</i>&nbsp;
+<i>65</i>&nbsp;    // Interface that allows access to the _symbols value (whatever that might be in terms of
+<i>66</i>&nbsp;    // stream processing context)
+<i>67</i>&nbsp;    private   final SymbolTableProvider _symbolTableAccessor;
+<i>68</i>&nbsp;
+<i>69</i>&nbsp;    public IonReaderTreeSystem(IonValue value)
+<b class="fc"><i>70</i>&nbsp;    {</b>
+<b class="fc"><i>71</i>&nbsp;        if (value == null) {</b>
+<i>72</i>&nbsp;            // do nothing
+<b class="nc"><i>73</i>&nbsp;            _system_symtab = null;</b>
+<b class="nc"><i>74</i>&nbsp;            _symbolTableAccessor = null;</b>
+<i>75</i>&nbsp;        }
+<i>76</i>&nbsp;        else {
+<b class="fc"><i>77</i>&nbsp;            _system_symtab = value.getSystem().getSystemSymbolTable();</b>
+<b class="fc"><i>78</i>&nbsp;            re_init(value, /* hoisted */ false);</b>
+<b class="fc"><i>79</i>&nbsp;            _symbolTableAccessor = new SymbolTableProvider()</b>
+<b class="fc"><i>80</i>&nbsp;            {</b>
+<i>81</i>&nbsp;                public SymbolTable getSymbolTable()
+<i>82</i>&nbsp;                {
+<b class="fc"><i>83</i>&nbsp;                    return IonReaderTreeSystem.this.getSymbolTable();</b>
+<i>84</i>&nbsp;                }
+<i>85</i>&nbsp;            };
+<i>86</i>&nbsp;        }
+<b class="fc"><i>87</i>&nbsp;    }</b>
+<i>88</i>&nbsp;
+<i>89</i>&nbsp;
+<i>90</i>&nbsp;    /**
+<i>91</i>&nbsp;     * @return This implementation always returns null.
+<i>92</i>&nbsp;     */
+<i>93</i>&nbsp;    public &lt;T&gt; T asFacet(Class&lt;T&gt; facetType)
+<i>94</i>&nbsp;    {
+<b class="fc"><i>95</i>&nbsp;        return null;</b>
+<i>96</i>&nbsp;    }
+<i>97</i>&nbsp;
+<i>98</i>&nbsp;    //========================================================================
+<i>99</i>&nbsp;
+<i>100</i>&nbsp;    void re_init(IonValue value, boolean hoisted)
+<i>101</i>&nbsp;    {
+<b class="fc"><i>102</i>&nbsp;        _curr = null;</b>
+<b class="fc"><i>103</i>&nbsp;        _eof = false;</b>
+<b class="fc"><i>104</i>&nbsp;        _top = 0;</b>
+<b class="fc"><i>105</i>&nbsp;        if (value instanceof IonDatagram) {</b>
+<i>106</i>&nbsp;            // datagrams interacting with these readers must be
+<i>107</i>&nbsp;            // IonContainerPrivate containers
+<b class="fc"><i>108</i>&nbsp;            assert(value instanceof _Private_IonContainer);</b>
+<b class="fc"><i>109</i>&nbsp;            IonDatagram dg = (IonDatagram) value;</b>
+<b class="fc"><i>110</i>&nbsp;            _parent = dg;</b>
+<b class="fc"><i>111</i>&nbsp;            _next = null;</b>
+<b class="fc"><i>112</i>&nbsp;            _iter = dg.systemIterator(); // we want a system reader not: new Children(dg);</b>
+<b class="fc"><i>113</i>&nbsp;        }</b>
+<i>114</i>&nbsp;        else {
+<b class="fc"><i>115</i>&nbsp;            _parent = (hoisted ? null : value.getContainer());</b>
+<b class="fc"><i>116</i>&nbsp;            _next = (_Private_IonValue) value;</b>
+<i>117</i>&nbsp;        }
+<b class="fc"><i>118</i>&nbsp;    }</b>
+<i>119</i>&nbsp;
+<i>120</i>&nbsp;    public void close()
+<i>121</i>&nbsp;    {
+<b class="fc"><i>122</i>&nbsp;        _eof = true;</b>
+<b class="fc"><i>123</i>&nbsp;    }</b>
+<i>124</i>&nbsp;
+<i>125</i>&nbsp;    private void push() {
+<b class="fc"><i>126</i>&nbsp;        int oldlen = _stack.length;</b>
+<b class="fc"><i>127</i>&nbsp;        if (_top + 1 &gt;= oldlen) { // we&#39;re going to do a &quot;+2&quot; on top so we need extra space</b>
+<b class="fc"><i>128</i>&nbsp;            int newlen = oldlen * 2;</b>
+<b class="fc"><i>129</i>&nbsp;            Object[] temp = new Object[newlen];</b>
+<b class="fc"><i>130</i>&nbsp;            System.arraycopy(_stack, 0, temp, 0, oldlen);</b>
+<b class="fc"><i>131</i>&nbsp;            _stack = temp;</b>
+<i>132</i>&nbsp;        }
+<b class="fc"><i>133</i>&nbsp;        _stack[_top++] = _parent;</b>
+<b class="fc"><i>134</i>&nbsp;        _stack[_top++] = _iter;</b>
+<b class="fc"><i>135</i>&nbsp;    }</b>
+<i>136</i>&nbsp;
+<i>137</i>&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+<i>138</i>&nbsp;    private void pop() {
+<b class="fc"><i>139</i>&nbsp;        assert _top &gt;= 2;</b>
+<i>140</i>&nbsp;
+<b class="fc"><i>141</i>&nbsp;        _top--;</b>
+<b class="fc"><i>142</i>&nbsp;        _iter = (Iterator&lt;IonValue&gt;)_stack[_top];</b>
+<b class="fc"><i>143</i>&nbsp;        _stack[_top] = null;  // Allow iterator to be garbage collected!</b>
+<i>144</i>&nbsp;
+<b class="fc"><i>145</i>&nbsp;        _top--;</b>
+<b class="fc"><i>146</i>&nbsp;        _parent = (IonValue)_stack[_top];</b>
+<b class="fc"><i>147</i>&nbsp;        _stack[_top] = null;</b>
+<i>148</i>&nbsp;
+<i>149</i>&nbsp;        // We don&#39;t know if we&#39;re at the end of the container, so check again.
+<b class="fc"><i>150</i>&nbsp;        _eof = false;</b>
+<b class="fc"><i>151</i>&nbsp;    }</b>
+<i>152</i>&nbsp;
+<i>153</i>&nbsp;    public boolean hasNext()
+<i>154</i>&nbsp;    {
+<b class="fc"><i>155</i>&nbsp;        IonType next_type = next_helper_system();</b>
+<b class="fc"><i>156</i>&nbsp;        return (next_type != null);</b>
+<i>157</i>&nbsp;    }
+<i>158</i>&nbsp;
+<i>159</i>&nbsp;    public IonType next()
+<i>160</i>&nbsp;    {
+<b class="fc"><i>161</i>&nbsp;        if (this._next == null &amp;&amp; !this.hasNext()) {</b>
+<b class="fc"><i>162</i>&nbsp;            this._curr = null;</b>
+<b class="fc"><i>163</i>&nbsp;            return null;</b>
+<i>164</i>&nbsp;        }
+<b class="fc"><i>165</i>&nbsp;        this._curr = this._next;</b>
+<b class="fc"><i>166</i>&nbsp;        this._next = null;</b>
+<i>167</i>&nbsp;
+<b class="fc"><i>168</i>&nbsp;        return this._curr.getType();</b>
+<i>169</i>&nbsp;    }
+<i>170</i>&nbsp;
+<i>171</i>&nbsp;    IonType next_helper_system()
+<i>172</i>&nbsp;    {
+<b class="fc"><i>173</i>&nbsp;        if (this._eof) return null;</b>
+<b class="fc"><i>174</i>&nbsp;        if (this._next != null) return this._next.getType();</b>
+<i>175</i>&nbsp;
+<b class="fc"><i>176</i>&nbsp;        if (this._iter != null &amp;&amp; this._iter.hasNext()) {</b>
+<b class="fc"><i>177</i>&nbsp;            this._next = (_Private_IonValue) this._iter.next();</b>
+<i>178</i>&nbsp;        }
+<i>179</i>&nbsp;
+<b class="fc"><i>180</i>&nbsp;        if ((this._eof =(this._next == null)) == true) {</b>
+<b class="fc"><i>181</i>&nbsp;            return null;</b>
+<i>182</i>&nbsp;        }
+<b class="fc"><i>183</i>&nbsp;        return this._next.getType();</b>
+<i>184</i>&nbsp;    }
+<i>185</i>&nbsp;
+<i>186</i>&nbsp;    public final void stepIn()
+<i>187</i>&nbsp;    {
+<b class="fc"><i>188</i>&nbsp;        if (!(this._curr instanceof IonContainer)) {</b>
+<b class="nc"><i>189</i>&nbsp;            throw new IllegalStateException(&quot;current value must be a container&quot;);</b>
+<i>190</i>&nbsp;        }
+<b class="fc"><i>191</i>&nbsp;        push();</b>
+<b class="fc"><i>192</i>&nbsp;        _parent = _curr;</b>
+<b class="fc"><i>193</i>&nbsp;        _iter = new Children(((IonContainer)this._curr));</b>
+<b class="fc"><i>194</i>&nbsp;        _curr = null;</b>
+<b class="fc"><i>195</i>&nbsp;    }</b>
+<i>196</i>&nbsp;
+<i>197</i>&nbsp;    public final void stepOut()
+<i>198</i>&nbsp;    {
+<b class="fc"><i>199</i>&nbsp;        if (this._top &lt; 1) {</b>
+<b class="fc"><i>200</i>&nbsp;            throw new IllegalStateException(IonMessages.CANNOT_STEP_OUT);</b>
+<i>201</i>&nbsp;        }
+<b class="fc"><i>202</i>&nbsp;        pop();</b>
+<b class="fc"><i>203</i>&nbsp;        _curr = null;</b>
+<b class="fc"><i>204</i>&nbsp;    }</b>
+<i>205</i>&nbsp;
+<i>206</i>&nbsp;    public final int getDepth() {
+<b class="fc"><i>207</i>&nbsp;        return _top/2;</b>
+<i>208</i>&nbsp;    }
+<i>209</i>&nbsp;
+<i>210</i>&nbsp;    public SymbolTable getSymbolTable()
+<i>211</i>&nbsp;    {
+<b class="fc"><i>212</i>&nbsp;        return _system_symtab;</b>
+<i>213</i>&nbsp;    }
+<i>214</i>&nbsp;
+<i>215</i>&nbsp;    public IonType getType()
+<i>216</i>&nbsp;    {
+<b class="fc"><i>217</i>&nbsp;        return (_curr == null) ? null : _curr.getType();</b>
+<i>218</i>&nbsp;    }
+<i>219</i>&nbsp;
+<i>220</i>&nbsp;    public final String[] getTypeAnnotations()
+<i>221</i>&nbsp;    {
+<b class="fc"><i>222</i>&nbsp;        if (_curr == null) {</b>
+<b class="fc"><i>223</i>&nbsp;            throw new IllegalStateException();</b>
+<i>224</i>&nbsp;        }
+<b class="fc"><i>225</i>&nbsp;        return _curr.getTypeAnnotations();</b>
+<i>226</i>&nbsp;    }
+<i>227</i>&nbsp;
+<i>228</i>&nbsp;
+<i>229</i>&nbsp;    public final SymbolToken[] getTypeAnnotationSymbols()
+<i>230</i>&nbsp;    {
+<b class="fc"><i>231</i>&nbsp;        if (_curr == null) {</b>
+<b class="nc"><i>232</i>&nbsp;            throw new IllegalStateException();</b>
+<i>233</i>&nbsp;        }
+<i>234</i>&nbsp;        // TODO should this localize the symbols?
+<b class="fc"><i>235</i>&nbsp;        return _curr.getTypeAnnotationSymbols(_symbolTableAccessor);</b>
+<i>236</i>&nbsp;    }
+<i>237</i>&nbsp;
+<i>238</i>&nbsp;    public final Iterator&lt;String&gt; iterateTypeAnnotations()
+<i>239</i>&nbsp;    {
+<b class="fc"><i>240</i>&nbsp;        String [] annotations = getTypeAnnotations();</b>
+<b class="fc"><i>241</i>&nbsp;        return _Private_Utils.stringIterator(annotations);</b>
+<i>242</i>&nbsp;    }
+<i>243</i>&nbsp;
+<i>244</i>&nbsp;
+<i>245</i>&nbsp;    public boolean isInStruct()
+<i>246</i>&nbsp;    {
+<b class="fc"><i>247</i>&nbsp;        return getDepth() &gt; 0 &amp;&amp; _parent instanceof IonStruct;</b>
+<i>248</i>&nbsp;    }
+<i>249</i>&nbsp;
+<i>250</i>&nbsp;    public boolean isNullValue()
+<i>251</i>&nbsp;    {
+<b class="fc"><i>252</i>&nbsp;        if (_curr instanceof IonNull) return true;</b>
+<b class="fc"><i>253</i>&nbsp;        if (_curr == null) {</b>
+<b class="nc"><i>254</i>&nbsp;            throw new IllegalStateException(&quot;must call next() before isNullValue()&quot;);</b>
+<i>255</i>&nbsp;
+<i>256</i>&nbsp;        }
+<b class="fc"><i>257</i>&nbsp;        return _curr.isNullValue();</b>
+<i>258</i>&nbsp;    }
+<i>259</i>&nbsp;
+<i>260</i>&nbsp;    public int getFieldId()
+<i>261</i>&nbsp;    {
+<i>262</i>&nbsp;        // FIXME IonValueImpl.getFieldId doesn&#39;t return -1 as specced here!
+<b class="fc"><i>263</i>&nbsp;        return (_curr == null || _top == 0) ? SymbolTable.UNKNOWN_SYMBOL_ID : _curr.getFieldId();</b>
+<i>264</i>&nbsp;    }
+<i>265</i>&nbsp;
+<i>266</i>&nbsp;    public String getFieldName()
+<i>267</i>&nbsp;    {
+<b class="fc"><i>268</i>&nbsp;        return (_curr == null || _top == 0) ? null : _curr.getFieldName();</b>
+<i>269</i>&nbsp;    }
+<i>270</i>&nbsp;
+<i>271</i>&nbsp;    public final SymbolToken getFieldNameSymbol()
+<i>272</i>&nbsp;    {
+<b class="fc"><i>273</i>&nbsp;        if (_curr == null || _top == 0) return null;</b>
+<b class="fc"><i>274</i>&nbsp;        return _curr.getFieldNameSymbol(_symbolTableAccessor);</b>
+<i>275</i>&nbsp;    }
+<i>276</i>&nbsp;
+<i>277</i>&nbsp;
+<i>278</i>&nbsp;    public boolean booleanValue()
+<i>279</i>&nbsp;    {
+<b class="fc"><i>280</i>&nbsp;        if (_curr instanceof IonBool) {</b>
+<b class="fc"><i>281</i>&nbsp;            return ((IonBool)_curr).booleanValue();</b>
+<i>282</i>&nbsp;        }
+<b class="nc"><i>283</i>&nbsp;        throw new IllegalStateException(&quot;current value is not a boolean&quot;);</b>
+<i>284</i>&nbsp;
+<i>285</i>&nbsp;    }
+<i>286</i>&nbsp;
+<i>287</i>&nbsp;    public int intValue()
+<i>288</i>&nbsp;    {
+<b class="fc"><i>289</i>&nbsp;        if (_curr instanceof IonInt)  {</b>
+<b class="fc"><i>290</i>&nbsp;            return ((IonInt)_curr).intValue();</b>
+<i>291</i>&nbsp;        }
+<b class="fc"><i>292</i>&nbsp;        if (_curr instanceof IonFloat)  {</b>
+<b class="nc"><i>293</i>&nbsp;            return (int)((IonFloat)_curr).doubleValue();</b>
+<i>294</i>&nbsp;        }
+<b class="fc"><i>295</i>&nbsp;        if (_curr instanceof IonDecimal)  {</b>
+<b class="nc"><i>296</i>&nbsp;            return (int)((IonDecimal)_curr).doubleValue();</b>
+<i>297</i>&nbsp;        }
+<b class="fc"><i>298</i>&nbsp;        throw new IllegalStateException(&quot;current value is not an ion int, float, or decimal&quot;);</b>
+<i>299</i>&nbsp;    }
+<i>300</i>&nbsp;
+<i>301</i>&nbsp;    public long longValue()
+<i>302</i>&nbsp;    {
+<b class="fc"><i>303</i>&nbsp;        if (_curr instanceof IonInt)  {</b>
+<b class="fc"><i>304</i>&nbsp;            return ((IonInt)_curr).longValue();</b>
+<i>305</i>&nbsp;        }
+<b class="fc"><i>306</i>&nbsp;        if (_curr instanceof IonFloat)  {</b>
+<b class="nc"><i>307</i>&nbsp;            return (long)((IonFloat)_curr).doubleValue();</b>
+<i>308</i>&nbsp;        }
+<b class="fc"><i>309</i>&nbsp;        if (_curr instanceof IonDecimal)  {</b>
+<b class="fc"><i>310</i>&nbsp;            return (long)((IonDecimal)_curr).doubleValue();</b>
+<i>311</i>&nbsp;        }
+<b class="fc"><i>312</i>&nbsp;        throw new IllegalStateException(&quot;current value is not an ion int, float, or decimal&quot;);</b>
+<i>313</i>&nbsp;    }
+<i>314</i>&nbsp;
+<i>315</i>&nbsp;    public BigInteger bigIntegerValue()
+<i>316</i>&nbsp;    {
+<b class="fc"><i>317</i>&nbsp;        if (_curr instanceof IonInt)  {</b>
+<b class="fc"><i>318</i>&nbsp;            return ((IonInt)_curr).bigIntegerValue();</b>
+<i>319</i>&nbsp;        }
+<b class="fc"><i>320</i>&nbsp;        if (_curr instanceof IonFloat)  {</b>
+<i>321</i>&nbsp;            // To avoid decapitating values that are &gt; Long.MAX_VALUE, we must
+<i>322</i>&nbsp;            // convert to BigDecimal first.
+<b class="fc"><i>323</i>&nbsp;            BigDecimal bd = ((IonFloat)_curr).bigDecimalValue();</b>
+<b class="fc"><i>324</i>&nbsp;            return (bd == null ? null : bd.toBigInteger());</b>
+<i>325</i>&nbsp;        }
+<b class="fc"><i>326</i>&nbsp;        if (_curr instanceof IonDecimal)  {</b>
+<b class="fc"><i>327</i>&nbsp;            BigDecimal bd = ((IonDecimal)_curr).bigDecimalValue();</b>
+<b class="fc"><i>328</i>&nbsp;            return (bd == null ? null : bd.toBigInteger());</b>
+<i>329</i>&nbsp;        }
+<b class="fc"><i>330</i>&nbsp;        throw new IllegalStateException(&quot;current value is not an ion int, float, or decimal&quot;);</b>
+<i>331</i>&nbsp;    }
+<i>332</i>&nbsp;
+<i>333</i>&nbsp;    public double doubleValue()
+<i>334</i>&nbsp;    {
+<b class="fc"><i>335</i>&nbsp;        if (_curr instanceof IonFloat)  {</b>
+<b class="fc"><i>336</i>&nbsp;            return ((IonFloat)_curr).doubleValue();</b>
+<i>337</i>&nbsp;        }
+<b class="fc"><i>338</i>&nbsp;        if (_curr instanceof IonDecimal)  {</b>
+<b class="fc"><i>339</i>&nbsp;            return ((IonDecimal)_curr).doubleValue();</b>
+<i>340</i>&nbsp;        }
+<b class="nc"><i>341</i>&nbsp;        throw new IllegalStateException(&quot;current value is not an ion float or decimal&quot;);</b>
+<i>342</i>&nbsp;    }
+<i>343</i>&nbsp;
+<i>344</i>&nbsp;    public BigDecimal bigDecimalValue()
+<i>345</i>&nbsp;    {
+<b class="fc"><i>346</i>&nbsp;        if (_curr instanceof IonDecimal)  {</b>
+<b class="fc"><i>347</i>&nbsp;            return ((IonDecimal)_curr).bigDecimalValue();</b>
+<i>348</i>&nbsp;        }
+<b class="nc"><i>349</i>&nbsp;        throw new IllegalStateException(&quot;current value is not an ion decimal&quot;);</b>
+<i>350</i>&nbsp;    }
+<i>351</i>&nbsp;
+<i>352</i>&nbsp;    public Decimal decimalValue()
+<i>353</i>&nbsp;    {
+<b class="fc"><i>354</i>&nbsp;        if (_curr instanceof IonDecimal)  {</b>
+<b class="fc"><i>355</i>&nbsp;            return ((IonDecimal)_curr).decimalValue();</b>
+<i>356</i>&nbsp;        }
+<b class="nc"><i>357</i>&nbsp;        throw new IllegalStateException(&quot;current value is not an ion decimal&quot;);</b>
+<i>358</i>&nbsp;    }
+<i>359</i>&nbsp;
+<i>360</i>&nbsp;    public Timestamp timestampValue()
+<i>361</i>&nbsp;    {
+<b class="fc"><i>362</i>&nbsp;        if (_curr instanceof IonTimestamp) {</b>
+<b class="fc"><i>363</i>&nbsp;            return ((IonTimestamp)_curr).timestampValue();</b>
+<i>364</i>&nbsp;        }
+<b class="nc"><i>365</i>&nbsp;        throw new IllegalStateException(&quot;current value is not a timestamp&quot;);</b>
+<i>366</i>&nbsp;    }
+<i>367</i>&nbsp;
+<i>368</i>&nbsp;    public Date dateValue()
+<i>369</i>&nbsp;    {
+<b class="fc"><i>370</i>&nbsp;        if (_curr instanceof IonTimestamp)  {</b>
+<b class="fc"><i>371</i>&nbsp;            return ((IonTimestamp)_curr).dateValue();</b>
+<i>372</i>&nbsp;        }
+<b class="nc"><i>373</i>&nbsp;        throw new IllegalStateException(&quot;current value is not an ion timestamp&quot;);</b>
+<i>374</i>&nbsp;    }
+<i>375</i>&nbsp;
+<i>376</i>&nbsp;    public String stringValue()
+<i>377</i>&nbsp;    {
+<b class="fc"><i>378</i>&nbsp;        if (_curr instanceof IonText) {</b>
+<b class="fc"><i>379</i>&nbsp;            return ((IonText)_curr).stringValue();</b>
+<i>380</i>&nbsp;        }
+<b class="fc"><i>381</i>&nbsp;        throw new IllegalStateException(&quot;current value is not a symbol or string&quot;);</b>
+<i>382</i>&nbsp;    }
+<i>383</i>&nbsp;
+<i>384</i>&nbsp;    public SymbolToken symbolValue()
+<i>385</i>&nbsp;    {
+<b class="fc"><i>386</i>&nbsp;        if (! (_curr instanceof IonSymbol))</b>
+<i>387</i>&nbsp;        {
+<b class="fc"><i>388</i>&nbsp;            throw new IllegalStateException();</b>
+<i>389</i>&nbsp;        }
+<b class="fc"><i>390</i>&nbsp;        if (_curr.isNullValue()) return null;</b>
+<b class="fc"><i>391</i>&nbsp;        return ((IonSymbol)_curr).symbolValue();</b>
+<i>392</i>&nbsp;    }
+<i>393</i>&nbsp;
+<i>394</i>&nbsp;    public int byteSize()
+<i>395</i>&nbsp;    {
+<b class="fc"><i>396</i>&nbsp;        if (_curr instanceof IonLob) {</b>
+<b class="fc"><i>397</i>&nbsp;            IonLob lob = (IonLob)_curr;</b>
+<b class="fc"><i>398</i>&nbsp;            return lob.byteSize();</b>
+<i>399</i>&nbsp;        }
+<b class="nc"><i>400</i>&nbsp;        throw new IllegalStateException(&quot;current value is not an ion blob or clob&quot;);</b>
+<i>401</i>&nbsp;    }
+<i>402</i>&nbsp;
+<i>403</i>&nbsp;    public byte[] newBytes()
+<i>404</i>&nbsp;    {
+<b class="fc"><i>405</i>&nbsp;        if (_curr instanceof IonLob) {</b>
+<b class="fc"><i>406</i>&nbsp;            IonLob lob = (IonLob)_curr;</b>
+<b class="fc"><i>407</i>&nbsp;            int loblen = lob.byteSize();</b>
+<b class="fc"><i>408</i>&nbsp;            byte[] buffer = new byte[loblen];</b>
+<b class="fc"><i>409</i>&nbsp;            InputStream is = lob.newInputStream();</b>
+<i>410</i>&nbsp;            int retlen;
+<i>411</i>&nbsp;            try {
+<b class="fc"><i>412</i>&nbsp;                retlen = readFully(is, buffer, 0, loblen);</b>
+<b class="fc"><i>413</i>&nbsp;                is.close();</b>
+<i>414</i>&nbsp;            }
+<b class="nc"><i>415</i>&nbsp;            catch (IOException e) {</b>
+<b class="nc"><i>416</i>&nbsp;                throw new IonException(e);</b>
+<b class="fc"><i>417</i>&nbsp;            }</b>
+<b class="fc"><i>418</i>&nbsp;            assert (retlen == -1 ? loblen == 0 : retlen == loblen);</b>
+<b class="fc"><i>419</i>&nbsp;            return buffer;</b>
+<i>420</i>&nbsp;        }
+<b class="nc"><i>421</i>&nbsp;        throw new IllegalStateException(&quot;current value is not an ion blob or clob&quot;);</b>
+<i>422</i>&nbsp;    }
+<i>423</i>&nbsp;
+<i>424</i>&nbsp;    public int getBytes(byte[] buffer, int offset, int len)
+<i>425</i>&nbsp;    {
+<b class="nc"><i>426</i>&nbsp;        if (_curr instanceof IonLob) {</b>
+<b class="nc"><i>427</i>&nbsp;            IonLob lob = (IonLob)_curr;</b>
+<b class="nc"><i>428</i>&nbsp;            int loblen = lob.byteSize();</b>
+<b class="nc"><i>429</i>&nbsp;            if (loblen &gt; len) {</b>
+<b class="nc"><i>430</i>&nbsp;                throw new IllegalArgumentException(&quot;insufficient space in buffer for this value&quot;);</b>
+<i>431</i>&nbsp;            }
+<b class="nc"><i>432</i>&nbsp;            InputStream is = lob.newInputStream();</b>
+<i>433</i>&nbsp;            int retlen;
+<i>434</i>&nbsp;            try {
+<b class="nc"><i>435</i>&nbsp;                retlen = readFully(is, buffer, 0, loblen);</b>
+<b class="nc"><i>436</i>&nbsp;                is.close();</b>
+<i>437</i>&nbsp;            }
+<b class="nc"><i>438</i>&nbsp;            catch (IOException e) {</b>
+<b class="nc"><i>439</i>&nbsp;                throw new IonException(e);</b>
+<b class="nc"><i>440</i>&nbsp;            }</b>
+<b class="nc"><i>441</i>&nbsp;            assert retlen == loblen;</b>
+<b class="nc"><i>442</i>&nbsp;            return retlen;</b>
+<i>443</i>&nbsp;        }
+<b class="nc"><i>444</i>&nbsp;        throw new IllegalStateException(&quot;current value is not an ion blob or clob&quot;);</b>
+<i>445</i>&nbsp;    }
+<i>446</i>&nbsp;
+<i>447</i>&nbsp;    public IonValue getIonValue(IonSystem sys)
+<i>448</i>&nbsp;    {
+<b class="nc"><i>449</i>&nbsp;        return _curr;</b>
+<i>450</i>&nbsp;    }
+<i>451</i>&nbsp;
+<i>452</i>&nbsp;    public String valueToString()
+<i>453</i>&nbsp;    {
+<b class="nc"><i>454</i>&nbsp;        return (_curr == null) ? null : _curr.toString();</b>
+<i>455</i>&nbsp;    }
+<i>456</i>&nbsp;
+<i>457</i>&nbsp;
+<i>458</i>&nbsp;    private static final class Children implements Iterator&lt;IonValue&gt;
+<i>459</i>&nbsp;    {
+<i>460</i>&nbsp;        boolean             _eof;
+<i>461</i>&nbsp;        int                 _next_idx;
+<i>462</i>&nbsp;        _Private_IonContainer _parent;
+<i>463</i>&nbsp;        IonValue            _curr;
+<i>464</i>&nbsp;
+<i>465</i>&nbsp;        Children(IonContainer parent)
+<b class="fc"><i>466</i>&nbsp;        {</b>
+<b class="fc"><i>467</i>&nbsp;            if (parent instanceof _Private_IonContainer) {</b>
+<b class="fc"><i>468</i>&nbsp;                _parent = (_Private_IonContainer) parent;</b>
+<b class="fc"><i>469</i>&nbsp;                _next_idx = 0;</b>
+<b class="fc"><i>470</i>&nbsp;                _curr = null;</b>
+<b class="fc"><i>471</i>&nbsp;                if (_parent.isNullValue()) {</b>
+<i>472</i>&nbsp;                    // otherwise the empty contents member will cause trouble
+<b class="fc"><i>473</i>&nbsp;                    _eof = true;</b>
+<i>474</i>&nbsp;                }
+<i>475</i>&nbsp;            }
+<i>476</i>&nbsp;            else {
+<b class="nc"><i>477</i>&nbsp;                throw new UnsupportedOperationException(&quot;this only supports IonContainerImpl instances&quot;);</b>
+<i>478</i>&nbsp;            }
+<b class="fc"><i>479</i>&nbsp;        }</b>
+<i>480</i>&nbsp;
+<i>481</i>&nbsp;        public boolean hasNext()
+<i>482</i>&nbsp;        {
+<b class="fc"><i>483</i>&nbsp;            if (_eof) return false;</b>
+<i>484</i>&nbsp;
+<b class="fc"><i>485</i>&nbsp;            int len = _parent.get_child_count();</b>
+<i>486</i>&nbsp;
+<b class="fc"><i>487</i>&nbsp;            if (_next_idx &gt; 0) {</b>
+<i>488</i>&nbsp;                // first we have to verify the position of the
+<i>489</i>&nbsp;                // current value, since it might move if local
+<i>490</i>&nbsp;                // symbol tables get created.  In which case it
+<i>491</i>&nbsp;                // will be moved down the list.
+<b class="fc"><i>492</i>&nbsp;                int ii = _next_idx - 1;</b>
+<b class="fc"><i>493</i>&nbsp;                _next_idx = len; // if we can&#39;t find our current</b>
+<i>494</i>&nbsp;                                 // value we&#39;ll be at eof anyway
+<b class="fc"><i>495</i>&nbsp;                while (ii&lt;len) {</b>
+<b class="fc"><i>496</i>&nbsp;                    if (_curr == _parent.get_child(ii)) {</b>
+<b class="fc"><i>497</i>&nbsp;                        _next_idx = ii+1;</b>
+<b class="fc"><i>498</i>&nbsp;                        break;</b>
+<i>499</i>&nbsp;                    }
+<b class="fc"><i>500</i>&nbsp;                    ii++;</b>
+<i>501</i>&nbsp;                }
+<i>502</i>&nbsp;            }
+<i>503</i>&nbsp;            // if there anything left?
+<b class="fc"><i>504</i>&nbsp;            if (_next_idx &gt;= _parent.get_child_count()) {</b>
+<b class="fc"><i>505</i>&nbsp;                _eof = true;</b>
+<i>506</i>&nbsp;            }
+<b class="fc"><i>507</i>&nbsp;            return !_eof;</b>
+<i>508</i>&nbsp;        }
+<i>509</i>&nbsp;
+<i>510</i>&nbsp;        public IonValue next()
+<i>511</i>&nbsp;        {
+<i>512</i>&nbsp;            // the hasNext() is needed to adjust our _next_idx
+<i>513</i>&nbsp;            // value if the underlying arraylist moved under us
+<b class="fc"><i>514</i>&nbsp;            if (!hasNext()) {</b>
+<b class="nc"><i>515</i>&nbsp;                _curr = null;</b>
+<i>516</i>&nbsp;            }
+<i>517</i>&nbsp;            else {
+<b class="fc"><i>518</i>&nbsp;                _curr = _parent.get_child(_next_idx);</b>
+<b class="fc"><i>519</i>&nbsp;                _next_idx++;</b>
+<i>520</i>&nbsp;            }
+<b class="fc"><i>521</i>&nbsp;            return _curr;</b>
+<i>522</i>&nbsp;        }
+<i>523</i>&nbsp;
+<i>524</i>&nbsp;        public void remove()
+<i>525</i>&nbsp;        {
+<b class="nc"><i>526</i>&nbsp;            throw new UnsupportedOperationException();</b>
+<i>527</i>&nbsp;        }
+<i>528</i>&nbsp;    }
+<i>529</i>&nbsp;
+<i>530</i>&nbsp;    // system readers don&#39;t skip any symbol tables
+<i>531</i>&nbsp;    public SymbolTable pop_passed_symbol_table()
+<i>532</i>&nbsp;    {
+<b class="fc"><i>533</i>&nbsp;        return null;</b>
+<i>534</i>&nbsp;    }
+<i>535</i>&nbsp;
+<i>536</i>&nbsp;
+<i>537</i>&nbsp;    public IntegerSize getIntegerSize()
+<i>538</i>&nbsp;    {
+<b class="fc"><i>539</i>&nbsp;        if(_curr instanceof IonInt)</b>
+<i>540</i>&nbsp;        {
+<b class="fc"><i>541</i>&nbsp;            return ((IonInt)_curr).getIntegerSize();</b>
+<i>542</i>&nbsp;
+<i>543</i>&nbsp;        }
+<b class="fc"><i>544</i>&nbsp;        return null;</b>
+<i>545</i>&nbsp;    }
+<i>546</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

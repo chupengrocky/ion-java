@@ -1,0 +1,639 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: ValueFactory</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: ValueFactory (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ValueFactory</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import java.math.BigDecimal;
+<i>19</i>&nbsp;import java.math.BigInteger;
+<i>20</i>&nbsp;import java.util.Collection;
+<i>21</i>&nbsp;
+<i>22</i>&nbsp;/**
+<i>23</i>&nbsp; * The factory for all {@link IonValue}s.
+<i>24</i>&nbsp; * &lt;p&gt;
+<i>25</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>26</i>&nbsp; * code outside of this library.
+<i>27</i>&nbsp; */
+<i>28</i>&nbsp;public interface ValueFactory
+<i>29</i>&nbsp;{
+<i>30</i>&nbsp;    /**
+<i>31</i>&nbsp;     * Constructs a new &lt;code&gt;null.blob&lt;/code&gt; instance.
+<i>32</i>&nbsp;     */
+<i>33</i>&nbsp;    public IonBlob newNullBlob();
+<i>34</i>&nbsp;
+<i>35</i>&nbsp;
+<i>36</i>&nbsp;    /**
+<i>37</i>&nbsp;     * Constructs a new Ion {@code blob} instance, copying bytes from an array.
+<i>38</i>&nbsp;     *
+<i>39</i>&nbsp;     * @param value the data for the new blob, to be &lt;em&gt;copied&lt;/em&gt; from the
+<i>40</i>&nbsp;     * given array into the new instance.
+<i>41</i>&nbsp;     * May be {@code null} to create a {@code null.blob} value.
+<i>42</i>&nbsp;     */
+<i>43</i>&nbsp;    public IonBlob newBlob(byte[] value);
+<i>44</i>&nbsp;
+<i>45</i>&nbsp;
+<i>46</i>&nbsp;    /**
+<i>47</i>&nbsp;     * Constructs a new Ion {@code blob}, copying bytes from part of an array.
+<i>48</i>&nbsp;     * &lt;p&gt;
+<i>49</i>&nbsp;     * This method copies {@code length} bytes from the given array into the
+<i>50</i>&nbsp;     * new value, starting at the given offset in the array.
+<i>51</i>&nbsp;     *
+<i>52</i>&nbsp;     * @param value the data for the new blob, to be &lt;em&gt;copied&lt;/em&gt; from the
+<i>53</i>&nbsp;     * given array into the new instance.
+<i>54</i>&nbsp;     * May be {@code null} to create a {@code null.blob} value.
+<i>55</i>&nbsp;     * @param offset the offset within the array of the first byte to copy;
+<i>56</i>&nbsp;     * must be non-negative and no larger than {@code bytes.length}.
+<i>57</i>&nbsp;     * @param length the number of bytes to be copied from the given array;
+<i>58</i>&nbsp;     * must be non-negative and no larger than {@code bytes.length - offset}.
+<i>59</i>&nbsp;     *
+<i>60</i>&nbsp;     * @throws IndexOutOfBoundsException
+<i>61</i>&nbsp;     * if the preconditions on the {@code offset} and {@code length} parameters
+<i>62</i>&nbsp;     * are not met.
+<i>63</i>&nbsp;     */
+<i>64</i>&nbsp;    public IonBlob newBlob(byte[] value, int offset, int length);
+<i>65</i>&nbsp;
+<i>66</i>&nbsp;
+<i>67</i>&nbsp;    //-------------------------------------------------------------------------
+<i>68</i>&nbsp;
+<i>69</i>&nbsp;
+<i>70</i>&nbsp;    /**
+<i>71</i>&nbsp;     * Constructs a new &lt;code&gt;null.bool&lt;/code&gt; instance.
+<i>72</i>&nbsp;     */
+<i>73</i>&nbsp;    public IonBool newNullBool();
+<i>74</i>&nbsp;
+<i>75</i>&nbsp;
+<i>76</i>&nbsp;    /**
+<i>77</i>&nbsp;     * Constructs a new &lt;code&gt;bool&lt;/code&gt; instance with the given value.
+<i>78</i>&nbsp;     *
+<i>79</i>&nbsp;     * @param value the new {@code bool}&#39;s value.
+<i>80</i>&nbsp;     *
+<i>81</i>&nbsp;     * @return a bool with
+<i>82</i>&nbsp;     * &lt;code&gt;{@link IonBool#booleanValue()} == value&lt;/code&gt;.
+<i>83</i>&nbsp;     */
+<i>84</i>&nbsp;    public IonBool newBool(boolean value);
+<i>85</i>&nbsp;
+<i>86</i>&nbsp;
+<i>87</i>&nbsp;    /**
+<i>88</i>&nbsp;     * Constructs a new &lt;code&gt;bool&lt;/code&gt; instance with the given value.
+<i>89</i>&nbsp;     *
+<i>90</i>&nbsp;     * @param value the new {@code bool}&#39;s value.
+<i>91</i>&nbsp;     * may be {@code null} to make {@code null.bool}.
+<i>92</i>&nbsp;     */
+<i>93</i>&nbsp;    public IonBool newBool(Boolean value);
+<i>94</i>&nbsp;
+<i>95</i>&nbsp;
+<i>96</i>&nbsp;    //-------------------------------------------------------------------------
+<i>97</i>&nbsp;
+<i>98</i>&nbsp;
+<i>99</i>&nbsp;    /**
+<i>100</i>&nbsp;     * Constructs a new &lt;code&gt;null.clob&lt;/code&gt; instance.
+<i>101</i>&nbsp;     */
+<i>102</i>&nbsp;    public IonClob newNullClob();
+<i>103</i>&nbsp;
+<i>104</i>&nbsp;
+<i>105</i>&nbsp;    /**
+<i>106</i>&nbsp;     * Constructs a new Ion {@code clob} instance from a byte array.
+<i>107</i>&nbsp;     *
+<i>108</i>&nbsp;     * @param value the data for the new clob, to be &lt;em&gt;copied&lt;/em&gt; from the
+<i>109</i>&nbsp;     * given array into the new instance.
+<i>110</i>&nbsp;     * May be {@code null} to create a {@code null.clob} value.
+<i>111</i>&nbsp;     */
+<i>112</i>&nbsp;    public IonClob newClob(byte[] value);
+<i>113</i>&nbsp;
+<i>114</i>&nbsp;
+<i>115</i>&nbsp;    /**
+<i>116</i>&nbsp;     * Constructs a new Ion {@code clob}, copying bytes from part of an array.
+<i>117</i>&nbsp;     * &lt;p&gt;
+<i>118</i>&nbsp;     * This method copies {@code length} bytes from the given array into the
+<i>119</i>&nbsp;     * new value, starting at the given offset in the array.
+<i>120</i>&nbsp;     *
+<i>121</i>&nbsp;     * @param value the data for the new blob, to be &lt;em&gt;copied&lt;/em&gt; from the
+<i>122</i>&nbsp;     * given array into the new instance.
+<i>123</i>&nbsp;     * May be {@code null} to create a {@code null.clob} value.
+<i>124</i>&nbsp;     * @param offset the offset within the array of the first byte to copy;
+<i>125</i>&nbsp;     * must be non-negative an no larger than {@code bytes.length}.
+<i>126</i>&nbsp;     * @param length the number of bytes to be copied from the given array;
+<i>127</i>&nbsp;     * must be non-negative an no larger than {@code bytes.length - offset}.
+<i>128</i>&nbsp;     *
+<i>129</i>&nbsp;     * @throws IndexOutOfBoundsException
+<i>130</i>&nbsp;     * if the preconditions on the {@code offset} and {@code length} parameters
+<i>131</i>&nbsp;     * are not met.
+<i>132</i>&nbsp;     */
+<i>133</i>&nbsp;    public IonClob newClob(byte[] value, int offset, int length);
+<i>134</i>&nbsp;
+<i>135</i>&nbsp;
+<i>136</i>&nbsp;    //-------------------------------------------------------------------------
+<i>137</i>&nbsp;
+<i>138</i>&nbsp;
+<i>139</i>&nbsp;    /**
+<i>140</i>&nbsp;     * Constructs a new &lt;code&gt;null.decimal&lt;/code&gt; instance.
+<i>141</i>&nbsp;     */
+<i>142</i>&nbsp;    public IonDecimal newNullDecimal();
+<i>143</i>&nbsp;
+<i>144</i>&nbsp;
+<i>145</i>&nbsp;    /**
+<i>146</i>&nbsp;     * Constructs a new Ion {@code decimal} instance from a Java
+<i>147</i>&nbsp;     * {@code long}.
+<i>148</i>&nbsp;     */
+<i>149</i>&nbsp;    public IonDecimal newDecimal(long value);
+<i>150</i>&nbsp;
+<i>151</i>&nbsp;
+<i>152</i>&nbsp;    /**
+<i>153</i>&nbsp;     * Constructs a new Ion {@code decimal} instance from a Java
+<i>154</i>&nbsp;     * {@code double}.
+<i>155</i>&nbsp;     * &lt;p&gt;
+<i>156</i>&nbsp;     * Note that this does not generate the exact decimal representation of the
+<i>157</i>&nbsp;     * {@code double}&#39;s binary floating-point value as via
+<i>158</i>&nbsp;     * {@link BigDecimal#BigDecimal(double)}, but instead uses the more
+<i>159</i>&nbsp;     * predictable behavior of matching the double&#39;s string representation
+<i>160</i>&nbsp;     * as via {@link BigDecimal#valueOf(double)}.
+<i>161</i>&nbsp;     */
+<i>162</i>&nbsp;    public IonDecimal newDecimal(double value);
+<i>163</i>&nbsp;
+<i>164</i>&nbsp;
+<i>165</i>&nbsp;    /**
+<i>166</i>&nbsp;     * Constructs a new Ion {@code decimal} instance from a Java
+<i>167</i>&nbsp;     * {@link BigInteger}.
+<i>168</i>&nbsp;     */
+<i>169</i>&nbsp;    public IonDecimal newDecimal(BigInteger value);
+<i>170</i>&nbsp;
+<i>171</i>&nbsp;
+<i>172</i>&nbsp;    /**
+<i>173</i>&nbsp;     * Constructs a new Ion {@code decimal} instance from a Java
+<i>174</i>&nbsp;     * {@link BigDecimal}.
+<i>175</i>&nbsp;     * To create negative zero values, pass a {@link Decimal}.
+<i>176</i>&nbsp;     */
+<i>177</i>&nbsp;    public IonDecimal newDecimal(BigDecimal value);
+<i>178</i>&nbsp;
+<i>179</i>&nbsp;
+<i>180</i>&nbsp;    //-------------------------------------------------------------------------
+<i>181</i>&nbsp;
+<i>182</i>&nbsp;
+<i>183</i>&nbsp;    /**
+<i>184</i>&nbsp;     * Constructs a new {@code null.float} instance.
+<i>185</i>&nbsp;     */
+<i>186</i>&nbsp;    public IonFloat newNullFloat();
+<i>187</i>&nbsp;
+<i>188</i>&nbsp;
+<i>189</i>&nbsp;    /**
+<i>190</i>&nbsp;     * Constructs a new Ion {@code float} instance from a Java
+<i>191</i>&nbsp;     * {@code long}.
+<i>192</i>&nbsp;     */
+<i>193</i>&nbsp;    public IonFloat newFloat(long value);
+<i>194</i>&nbsp;
+<i>195</i>&nbsp;
+<i>196</i>&nbsp;    /**
+<i>197</i>&nbsp;     * Constructs a new Ion {@code float} instance from a Java
+<i>198</i>&nbsp;     * {@code double}.
+<i>199</i>&nbsp;     */
+<i>200</i>&nbsp;    public IonFloat newFloat(double value);
+<i>201</i>&nbsp;
+<i>202</i>&nbsp;
+<i>203</i>&nbsp;    //-------------------------------------------------------------------------
+<i>204</i>&nbsp;
+<i>205</i>&nbsp;
+<i>206</i>&nbsp;    /**
+<i>207</i>&nbsp;     * Constructs a new &lt;code&gt;null.int&lt;/code&gt; instance.
+<i>208</i>&nbsp;     */
+<i>209</i>&nbsp;    public IonInt newNullInt();
+<i>210</i>&nbsp;
+<i>211</i>&nbsp;
+<i>212</i>&nbsp;    /**
+<i>213</i>&nbsp;     * Constructs a new &lt;code&gt;int&lt;/code&gt; instance with the given value.
+<i>214</i>&nbsp;     *
+<i>215</i>&nbsp;     * @param value the new int&#39;s value.
+<i>216</i>&nbsp;     */
+<i>217</i>&nbsp;    public IonInt newInt(int value);
+<i>218</i>&nbsp;
+<i>219</i>&nbsp;
+<i>220</i>&nbsp;    /**
+<i>221</i>&nbsp;     * Constructs a new &lt;code&gt;int&lt;/code&gt; instance with the given value.
+<i>222</i>&nbsp;     *
+<i>223</i>&nbsp;     * @param value the new int&#39;s value.
+<i>224</i>&nbsp;     */
+<i>225</i>&nbsp;    public IonInt newInt(long value);
+<i>226</i>&nbsp;
+<i>227</i>&nbsp;
+<i>228</i>&nbsp;    /**
+<i>229</i>&nbsp;     * Constructs a new &lt;code&gt;int&lt;/code&gt; instance with the given value.
+<i>230</i>&nbsp;     * The integer portion of the number is used, any fractional portion is
+<i>231</i>&nbsp;     * ignored.
+<i>232</i>&nbsp;     *
+<i>233</i>&nbsp;     * @param value the new int&#39;s value;
+<i>234</i>&nbsp;     * may be &lt;code&gt;null&lt;/code&gt; to make &lt;code&gt;null.int&lt;/code&gt;.
+<i>235</i>&nbsp;     */
+<i>236</i>&nbsp;    public IonInt newInt(Number value);
+<i>237</i>&nbsp;
+<i>238</i>&nbsp;
+<i>239</i>&nbsp;    //-------------------------------------------------------------------------
+<i>240</i>&nbsp;
+<i>241</i>&nbsp;
+<i>242</i>&nbsp;    /**
+<i>243</i>&nbsp;     * Constructs a new &lt;code&gt;null.list&lt;/code&gt; instance.
+<i>244</i>&nbsp;     */
+<i>245</i>&nbsp;    public IonList newNullList();
+<i>246</i>&nbsp;
+<i>247</i>&nbsp;
+<i>248</i>&nbsp;    /**
+<i>249</i>&nbsp;     * Constructs a new empty (not null) &lt;code&gt;list&lt;/code&gt; instance.
+<i>250</i>&nbsp;     */
+<i>251</i>&nbsp;    public IonList newEmptyList();
+<i>252</i>&nbsp;
+<i>253</i>&nbsp;    /**
+<i>254</i>&nbsp;     * Constructs a new &lt;code&gt;list&lt;/code&gt; with given children.
+<i>255</i>&nbsp;     *
+<i>256</i>&nbsp;     * @param values
+<i>257</i>&nbsp;     *  the initial set of children.  If &lt;code&gt;null&lt;/code&gt;, then the new
+<i>258</i>&nbsp;     *  instance will have &lt;code&gt;{@link IonValue#isNullValue()} == true&lt;/code&gt;.
+<i>259</i>&nbsp;     *
+<i>260</i>&nbsp;     * @throws ContainedValueException
+<i>261</i>&nbsp;     *  if any value in {@code values}
+<i>262</i>&nbsp;     *  has &lt;code&gt;{@link IonValue#getContainer()} != null&lt;/code&gt;.
+<i>263</i>&nbsp;     * @throws NullPointerException
+<i>264</i>&nbsp;     *   if any value in {@code values} is null.
+<i>265</i>&nbsp;     * @throws IllegalArgumentException
+<i>266</i>&nbsp;     *   if any value in {@code values} is an {@link IonDatagram}.
+<i>267</i>&nbsp;     *
+<i>268</i>&nbsp;     * @deprecated This method can be invoked
+<i>269</i>&nbsp;     *  (accidentally and incorrectly) with an {@link IonSequence}!
+<i>270</i>&nbsp;     *  Use either {@link #newList(IonValue...)}
+<i>271</i>&nbsp;     *  or {@link #newList(IonValue...) newList()}{@link
+<i>272</i>&nbsp;     *  IonSequence#addAll(Collection) .addAll(Collection)}.
+<i>273</i>&nbsp;     */
+<i>274</i>&nbsp;    @Deprecated
+<i>275</i>&nbsp;    public IonList newList(Collection&lt;? extends IonValue&gt; values)
+<i>276</i>&nbsp;        throws ContainedValueException, NullPointerException;
+<i>277</i>&nbsp;
+<i>278</i>&nbsp;
+<i>279</i>&nbsp;    /**
+<i>280</i>&nbsp;     * Constructs a new {@code list} with the given child.
+<i>281</i>&nbsp;     * &lt;p&gt;
+<i>282</i>&nbsp;     * &lt;b&gt;This method is temporary&lt;/b&gt; until {@link #newList(Collection)} is
+<i>283</i>&nbsp;     * removed.  It&#39;s sole purpose is to avoid the doomed attempt to add all
+<i>284</i>&nbsp;     * of the parameter&#39;s children to the new list; that will always throw
+<i>285</i>&nbsp;     * {@link ContainedValueException}.
+<i>286</i>&nbsp;     *
+<i>287</i>&nbsp;     * @param child the initial child of the new list.
+<i>288</i>&nbsp;     *
+<i>289</i>&nbsp;     * @throws NullPointerException if {@code child} is null.
+<i>290</i>&nbsp;     * @throws IllegalArgumentException if {@code child} is an {@link IonDatagram}.
+<i>291</i>&nbsp;     * @throws ContainedValueException
+<i>292</i>&nbsp;     *  if {@code child}
+<i>293</i>&nbsp;     *  has &lt;code&gt;{@link IonValue#getContainer()} != null&lt;/code&gt;.
+<i>294</i>&nbsp;     */
+<i>295</i>&nbsp;    public IonList newList(IonSequence child)
+<i>296</i>&nbsp;        throws ContainedValueException, NullPointerException;
+<i>297</i>&nbsp;
+<i>298</i>&nbsp;
+<i>299</i>&nbsp;    /**
+<i>300</i>&nbsp;     * Constructs a new {@code list} with the given children.
+<i>301</i>&nbsp;     * &lt;p&gt;
+<i>302</i>&nbsp;     * Some edge cases are worth examples:
+<i>303</i>&nbsp;     *&lt;pre&gt;
+<i>304</i>&nbsp;     *    factory.newList();                     // returns []
+<i>305</i>&nbsp;     *    factory.newList((IonValue[]) null);    // returns null.list
+<i>306</i>&nbsp;     *&lt;/pre&gt;
+<i>307</i>&nbsp;     * For clarity, applications should prefer {@link #newEmptyList()} and
+<i>308</i>&nbsp;     * {@link #newNullList()} instead.
+<i>309</i>&nbsp;     *
+<i>310</i>&nbsp;     * @param children
+<i>311</i>&nbsp;     *  the initial sequence of children.  If &lt;code&gt;null&lt;/code&gt;, then the new
+<i>312</i>&nbsp;     *  instance will have &lt;code&gt;{@link IonValue#isNullValue()} == true&lt;/code&gt;.
+<i>313</i>&nbsp;     *
+<i>314</i>&nbsp;     * @throws NullPointerException if any child is null.
+<i>315</i>&nbsp;     * @throws IllegalArgumentException if any child is an {@link IonDatagram}.
+<i>316</i>&nbsp;     * @throws ContainedValueException
+<i>317</i>&nbsp;     *  if any child has &lt;code&gt;{@link IonValue#getContainer()} != null&lt;/code&gt;.
+<i>318</i>&nbsp;     */
+<i>319</i>&nbsp;    public IonList newList(IonValue... children)
+<i>320</i>&nbsp;        throws ContainedValueException, NullPointerException;
+<i>321</i>&nbsp;
+<i>322</i>&nbsp;
+<i>323</i>&nbsp;    /**
+<i>324</i>&nbsp;     * Constructs a new &lt;code&gt;list&lt;/code&gt; with given &lt;code&gt;int&lt;/code&gt; children.
+<i>325</i>&nbsp;     *
+<i>326</i>&nbsp;     * @param values
+<i>327</i>&nbsp;     *  the initial set of child values.  If &lt;code&gt;null&lt;/code&gt;, then the new
+<i>328</i>&nbsp;     *  instance will have &lt;code&gt;{@link IonValue#isNullValue()} == true&lt;/code&gt;.
+<i>329</i>&nbsp;     *  Otherwise, the resulting sequence will contain new {@link IonInt}s with
+<i>330</i>&nbsp;     *  the given values.
+<i>331</i>&nbsp;     *
+<i>332</i>&nbsp;     * @return a new list where each element is an {@link IonInt}.
+<i>333</i>&nbsp;     */
+<i>334</i>&nbsp;    public IonList newList(int[] values);
+<i>335</i>&nbsp;
+<i>336</i>&nbsp;
+<i>337</i>&nbsp;    /**
+<i>338</i>&nbsp;     * Constructs a new &lt;code&gt;list&lt;/code&gt; with given &lt;code&gt;long&lt;/code&gt; child
+<i>339</i>&nbsp;     * elements.
+<i>340</i>&nbsp;     *
+<i>341</i>&nbsp;     * @param values
+<i>342</i>&nbsp;     *  the initial set of child values.  If &lt;code&gt;null&lt;/code&gt;, then the new
+<i>343</i>&nbsp;     *  instance will have &lt;code&gt;{@link IonValue#isNullValue()} == true&lt;/code&gt;.
+<i>344</i>&nbsp;     *  Otherwise, the resulting sequence will contain new {@link IonInt}s with
+<i>345</i>&nbsp;     *  the given values.
+<i>346</i>&nbsp;     *
+<i>347</i>&nbsp;     * @return a new list where each element is an {@link IonInt}.
+<i>348</i>&nbsp;     */
+<i>349</i>&nbsp;    public IonList newList(long[] values);
+<i>350</i>&nbsp;
+<i>351</i>&nbsp;
+<i>352</i>&nbsp;    //-------------------------------------------------------------------------
+<i>353</i>&nbsp;
+<i>354</i>&nbsp;
+<i>355</i>&nbsp;    /**
+<i>356</i>&nbsp;     * Constructs a new &lt;code&gt;null.null&lt;/code&gt; instance.
+<i>357</i>&nbsp;     */
+<i>358</i>&nbsp;    public IonNull newNull();
+<i>359</i>&nbsp;
+<i>360</i>&nbsp;
+<i>361</i>&nbsp;    /**
+<i>362</i>&nbsp;     * Constructs a new Ion null value with the given type.
+<i>363</i>&nbsp;     *
+<i>364</i>&nbsp;     * @param type must not be Java null, but it may be {@link IonType#NULL}.
+<i>365</i>&nbsp;     *
+<i>366</i>&nbsp;     * @return a new value such that {@link IonValue#isNullValue()} is
+<i>367</i>&nbsp;     * {@code true}.
+<i>368</i>&nbsp;     */
+<i>369</i>&nbsp;    public IonValue newNull(IonType type);
+<i>370</i>&nbsp;
+<i>371</i>&nbsp;
+<i>372</i>&nbsp;    //-------------------------------------------------------------------------
+<i>373</i>&nbsp;
+<i>374</i>&nbsp;
+<i>375</i>&nbsp;    /**
+<i>376</i>&nbsp;     * Constructs a new &lt;code&gt;null.sexp&lt;/code&gt; instance.
+<i>377</i>&nbsp;     */
+<i>378</i>&nbsp;    public IonSexp newNullSexp();
+<i>379</i>&nbsp;
+<i>380</i>&nbsp;
+<i>381</i>&nbsp;    /**
+<i>382</i>&nbsp;     * Constructs a new empty (not null) &lt;code&gt;sexp&lt;/code&gt; instance.
+<i>383</i>&nbsp;     */
+<i>384</i>&nbsp;    public IonSexp newEmptySexp();
+<i>385</i>&nbsp;
+<i>386</i>&nbsp;
+<i>387</i>&nbsp;    /**
+<i>388</i>&nbsp;     * Constructs a new &lt;code&gt;sexp&lt;/code&gt; with given child elements.
+<i>389</i>&nbsp;     *
+<i>390</i>&nbsp;     * @param values
+<i>391</i>&nbsp;     *  the initial set of children.  If &lt;code&gt;null&lt;/code&gt;, then the new
+<i>392</i>&nbsp;     *  instance will have &lt;code&gt;{@link IonValue#isNullValue()} == true&lt;/code&gt;.
+<i>393</i>&nbsp;     *
+<i>394</i>&nbsp;     * @throws ContainedValueException
+<i>395</i>&nbsp;     *  if any value in {@code values}
+<i>396</i>&nbsp;     *  has &lt;code&gt;{@link IonValue#getContainer()} != null&lt;/code&gt;.
+<i>397</i>&nbsp;     * @throws NullPointerException
+<i>398</i>&nbsp;     *   if any value in {@code values} is null.
+<i>399</i>&nbsp;     * @throws IllegalArgumentException
+<i>400</i>&nbsp;     *   if any value in {@code values} is an {@link IonDatagram}.
+<i>401</i>&nbsp;     *
+<i>402</i>&nbsp;     * @deprecated This method can be invoked
+<i>403</i>&nbsp;     *  (accidentally and incorrectly) with an {@link IonSequence}!
+<i>404</i>&nbsp;     *  Use either {@link #newSexp(IonValue...)}
+<i>405</i>&nbsp;     *  or {@link #newSexp(IonValue...) newSexp()}{@link
+<i>406</i>&nbsp;     *  IonSequence#addAll(Collection) .addAll(Collection)}.
+<i>407</i>&nbsp;     */
+<i>408</i>&nbsp;    @Deprecated
+<i>409</i>&nbsp;    public IonSexp newSexp(Collection&lt;? extends IonValue&gt; values)
+<i>410</i>&nbsp;        throws ContainedValueException, NullPointerException;
+<i>411</i>&nbsp;
+<i>412</i>&nbsp;    /**
+<i>413</i>&nbsp;     * Constructs a new {@code sexp} with the given child.
+<i>414</i>&nbsp;     * &lt;p&gt;
+<i>415</i>&nbsp;     * &lt;b&gt;This method is temporary&lt;/b&gt; until {@link #newSexp(Collection)} is
+<i>416</i>&nbsp;     * removed.  It&#39;s sole purpose is to avoid the doomed attempt to add all
+<i>417</i>&nbsp;     * of the parameter&#39;s children to the new sequence; that will always throw
+<i>418</i>&nbsp;     * {@link ContainedValueException}.
+<i>419</i>&nbsp;     *
+<i>420</i>&nbsp;     * @param child the initial child of the new sexp.
+<i>421</i>&nbsp;     *
+<i>422</i>&nbsp;     * @throws NullPointerException if {@code child} is null.
+<i>423</i>&nbsp;     * @throws IllegalArgumentException
+<i>424</i>&nbsp;     *  if {@code child} is an {@link IonDatagram}.
+<i>425</i>&nbsp;     * @throws ContainedValueException
+<i>426</i>&nbsp;     *  if {@code child}
+<i>427</i>&nbsp;     *  has &lt;code&gt;{@link IonValue#getContainer()} != null&lt;/code&gt;.
+<i>428</i>&nbsp;     */
+<i>429</i>&nbsp;    public IonSexp newSexp(IonSequence child)
+<i>430</i>&nbsp;        throws ContainedValueException, NullPointerException;
+<i>431</i>&nbsp;
+<i>432</i>&nbsp;    /**
+<i>433</i>&nbsp;     * Constructs a new &lt;code&gt;sexp&lt;/code&gt; with given child elements.
+<i>434</i>&nbsp;     * &lt;p&gt;
+<i>435</i>&nbsp;     * Some edge cases are worth examples:
+<i>436</i>&nbsp;     *&lt;pre&gt;
+<i>437</i>&nbsp;     *    factory.newSexp();                     // returns ()
+<i>438</i>&nbsp;     *    factory.newSexp((IonValue[]) null);    // returns null.sexp
+<i>439</i>&nbsp;     *&lt;/pre&gt;
+<i>440</i>&nbsp;     * For clarity, applications should prefer {@link #newEmptySexp()} and
+<i>441</i>&nbsp;     * {@link #newNullSexp()} instead.
+<i>442</i>&nbsp;     *
+<i>443</i>&nbsp;     * @param children
+<i>444</i>&nbsp;     *  the initial set of children.  If &lt;code&gt;null&lt;/code&gt;, then the new
+<i>445</i>&nbsp;     *  instance will have &lt;code&gt;{@link IonValue#isNullValue()} == true&lt;/code&gt;.
+<i>446</i>&nbsp;     *
+<i>447</i>&nbsp;     * @throws NullPointerException if any child is null.
+<i>448</i>&nbsp;     * @throws IllegalArgumentException if any child is an {@link IonDatagram}.
+<i>449</i>&nbsp;     * @throws ContainedValueException
+<i>450</i>&nbsp;     *  if any child has &lt;code&gt;{@link IonValue#getContainer()} != null&lt;/code&gt;.
+<i>451</i>&nbsp;     */
+<i>452</i>&nbsp;    public IonSexp newSexp(IonValue... children)
+<i>453</i>&nbsp;        throws ContainedValueException, NullPointerException;
+<i>454</i>&nbsp;
+<i>455</i>&nbsp;
+<i>456</i>&nbsp;    /**
+<i>457</i>&nbsp;     * Constructs a new &lt;code&gt;sexp&lt;/code&gt; with given &lt;code&gt;int&lt;/code&gt; child
+<i>458</i>&nbsp;     * values.
+<i>459</i>&nbsp;     *
+<i>460</i>&nbsp;     * @param values
+<i>461</i>&nbsp;     *  the initial set of child values.  If &lt;code&gt;null&lt;/code&gt;, then the new
+<i>462</i>&nbsp;     *  instance will have &lt;code&gt;{@link IonValue#isNullValue()} == true&lt;/code&gt;.
+<i>463</i>&nbsp;     *  Otherwise, the resulting sequence will contain new {@link IonInt}s with
+<i>464</i>&nbsp;     *  the given values.
+<i>465</i>&nbsp;     *
+<i>466</i>&nbsp;     * @return a new sexp where each element is an {@link IonInt}.
+<i>467</i>&nbsp;     */
+<i>468</i>&nbsp;    public IonSexp newSexp(int[] values);
+<i>469</i>&nbsp;
+<i>470</i>&nbsp;
+<i>471</i>&nbsp;    /**
+<i>472</i>&nbsp;     * Constructs a new &lt;code&gt;sexp&lt;/code&gt; with given &lt;code&gt;long&lt;/code&gt; child
+<i>473</i>&nbsp;     * elements.
+<i>474</i>&nbsp;     *
+<i>475</i>&nbsp;     * @param values
+<i>476</i>&nbsp;     *  the initial set of child values.  If &lt;code&gt;null&lt;/code&gt;, then the new
+<i>477</i>&nbsp;     *  instance will have &lt;code&gt;{@link IonValue#isNullValue()} == true&lt;/code&gt;.
+<i>478</i>&nbsp;     *  Otherwise, the resulting sequence will contain new {@link IonInt}s with
+<i>479</i>&nbsp;     *  the given values.
+<i>480</i>&nbsp;     *
+<i>481</i>&nbsp;     * @return a new sexp where each element is an {@link IonInt}.
+<i>482</i>&nbsp;     */
+<i>483</i>&nbsp;    public IonSexp newSexp(long[] values);
+<i>484</i>&nbsp;
+<i>485</i>&nbsp;
+<i>486</i>&nbsp;    //-------------------------------------------------------------------------
+<i>487</i>&nbsp;
+<i>488</i>&nbsp;
+<i>489</i>&nbsp;    /**
+<i>490</i>&nbsp;     * Constructs a new &lt;code&gt;null.string&lt;/code&gt; instance.
+<i>491</i>&nbsp;     */
+<i>492</i>&nbsp;    public IonString newNullString();
+<i>493</i>&nbsp;
+<i>494</i>&nbsp;
+<i>495</i>&nbsp;    /**
+<i>496</i>&nbsp;     * Constructs a new Ion string with the given value.
+<i>497</i>&nbsp;     *
+<i>498</i>&nbsp;     * @param value the text of the new string;
+<i>499</i>&nbsp;     * may be &lt;code&gt;null&lt;/code&gt; to make &lt;code&gt;null.string&lt;/code&gt;.
+<i>500</i>&nbsp;     */
+<i>501</i>&nbsp;    public IonString newString(String value);
+<i>502</i>&nbsp;
+<i>503</i>&nbsp;
+<i>504</i>&nbsp;    //-------------------------------------------------------------------------
+<i>505</i>&nbsp;
+<i>506</i>&nbsp;
+<i>507</i>&nbsp;    /**
+<i>508</i>&nbsp;     * Constructs a new &lt;code&gt;null.struct&lt;/code&gt; instance.
+<i>509</i>&nbsp;     */
+<i>510</i>&nbsp;    public IonStruct newNullStruct();
+<i>511</i>&nbsp;
+<i>512</i>&nbsp;
+<i>513</i>&nbsp;    /**
+<i>514</i>&nbsp;     * Constructs a new empty (not null) &lt;code&gt;struct&lt;/code&gt; instance.
+<i>515</i>&nbsp;     */
+<i>516</i>&nbsp;    public IonStruct newEmptyStruct();
+<i>517</i>&nbsp;
+<i>518</i>&nbsp;
+<i>519</i>&nbsp;    //-------------------------------------------------------------------------
+<i>520</i>&nbsp;
+<i>521</i>&nbsp;
+<i>522</i>&nbsp;    /**
+<i>523</i>&nbsp;     * Constructs a new &lt;code&gt;null.symbol&lt;/code&gt; instance.
+<i>524</i>&nbsp;     */
+<i>525</i>&nbsp;    public IonSymbol newNullSymbol();
+<i>526</i>&nbsp;
+<i>527</i>&nbsp;
+<i>528</i>&nbsp;    /**
+<i>529</i>&nbsp;     * Constructs a new Ion symbol with the given value.
+<i>530</i>&nbsp;     *
+<i>531</i>&nbsp;     * @param value the text of the symbol;
+<i>532</i>&nbsp;     * may be &lt;code&gt;null&lt;/code&gt; to make &lt;code&gt;null.symbol&lt;/code&gt;.
+<i>533</i>&nbsp;     */
+<i>534</i>&nbsp;    public IonSymbol newSymbol(String value);
+<i>535</i>&nbsp;
+<i>536</i>&nbsp;
+<i>537</i>&nbsp;    /**
+<i>538</i>&nbsp;     * Constructs a new Ion symbol with the given symbol token.
+<i>539</i>&nbsp;     * &lt;p&gt;
+<i>540</i>&nbsp;     * &lt;b&gt;This is an &quot;expert method&quot;: correct use requires deep understanding
+<i>541</i>&nbsp;     * of the Ion binary format. You almost certainly don&#39;t want to use it.&lt;/b&gt;
+<i>542</i>&nbsp;     *
+<i>543</i>&nbsp;     * @param value the text and/or SID of the symbol;
+<i>544</i>&nbsp;     * may be &lt;code&gt;null&lt;/code&gt; to make &lt;code&gt;null.symbol&lt;/code&gt;.
+<i>545</i>&nbsp;     *
+<i>546</i>&nbsp;     */
+<i>547</i>&nbsp;    public IonSymbol newSymbol(SymbolToken value);
+<i>548</i>&nbsp;
+<i>549</i>&nbsp;
+<i>550</i>&nbsp;    //-------------------------------------------------------------------------
+<i>551</i>&nbsp;
+<i>552</i>&nbsp;
+<i>553</i>&nbsp;    /**
+<i>554</i>&nbsp;     * Constructs a new &lt;code&gt;null.timestamp&lt;/code&gt; instance.
+<i>555</i>&nbsp;     */
+<i>556</i>&nbsp;    public IonTimestamp newNullTimestamp();
+<i>557</i>&nbsp;
+<i>558</i>&nbsp;
+<i>559</i>&nbsp;    /**
+<i>560</i>&nbsp;     * Constructs a new {@code timestamp} instance with the given value.
+<i>561</i>&nbsp;     *
+<i>562</i>&nbsp;     * @param value may be {@code null} to make {@code null.timestamp}.
+<i>563</i>&nbsp;     */
+<i>564</i>&nbsp;    public IonTimestamp newTimestamp(Timestamp value);
+<i>565</i>&nbsp;
+<i>566</i>&nbsp;
+<i>567</i>&nbsp;    //-------------------------------------------------------------------------
+<i>568</i>&nbsp;
+<i>569</i>&nbsp;
+<i>570</i>&nbsp;    /**
+<i>571</i>&nbsp;     * Creates a deep copy of an Ion value.  This method can properly clone
+<i>572</i>&nbsp;     * {@link IonDatagram}s.
+<i>573</i>&nbsp;     * &lt;p&gt;
+<i>574</i>&nbsp;     * The given value can be in the context of any {@code ValueFactory},
+<i>575</i>&nbsp;     * and the result will be in the context of this one. This allows you to
+<i>576</i>&nbsp;     * shift data from one factory instance to another.
+<i>577</i>&nbsp;     *
+<i>578</i>&nbsp;     * @param value the value to copy.
+<i>579</i>&nbsp;     *
+<i>580</i>&nbsp;     * @return a deep copy of value, with no container.
+<i>581</i>&nbsp;     *
+<i>582</i>&nbsp;     * @throws NullPointerException if {@code value} is null.
+<i>583</i>&nbsp;     * @throws IonException if there&#39;s a problem creating the clone.
+<i>584</i>&nbsp;     * @throws UnknownSymbolException
+<i>585</i>&nbsp;     *          if any part of this value has unknown text but known Sid for
+<i>586</i>&nbsp;     *          its field name, annotation or symbol.
+<i>587</i>&nbsp;     *
+<i>588</i>&nbsp;     * @see IonValue#clone()
+<i>589</i>&nbsp;     */
+<i>590</i>&nbsp;    public &lt;T extends IonValue&gt; T clone(T value)
+<i>591</i>&nbsp;        throws IonException;
+<i>592</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

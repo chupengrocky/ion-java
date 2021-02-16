@@ -1,0 +1,380 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonBinaryWriterAdapter</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl.bin</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonBinaryWriterAdapter (com.amazon.ion.impl.bin)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IonBinaryWriterAdapter</td>
+<td class="coverageStat">
+  <span class="percent">
+    74.4%
+  </span>
+  <span class="absValue">
+    (29/ 39)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    74.7%
+  </span>
+  <span class="absValue">
+    (56/ 75)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">IonBinaryWriterAdapter$Factory</td>
+  </tr>
+  <tr>
+    <td class="name">IonBinaryWriterAdapter$InternalByteArrayOutputStream</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/ 2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    73.2%
+  </span>
+  <span class="absValue">
+    (30/ 41)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    74%
+  </span>
+  <span class="absValue">
+    (57/ 77)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl.bin;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import com.amazon.ion.IonBinaryWriter;
+<i>19</i>&nbsp;import com.amazon.ion.IonReader;
+<i>20</i>&nbsp;import com.amazon.ion.IonType;
+<i>21</i>&nbsp;import com.amazon.ion.IonValue;
+<i>22</i>&nbsp;import com.amazon.ion.IonWriter;
+<i>23</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>24</i>&nbsp;import com.amazon.ion.SymbolToken;
+<i>25</i>&nbsp;import com.amazon.ion.Timestamp;
+<i>26</i>&nbsp;import java.io.ByteArrayOutputStream;
+<i>27</i>&nbsp;import java.io.IOException;
+<i>28</i>&nbsp;import java.io.OutputStream;
+<i>29</i>&nbsp;import java.math.BigDecimal;
+<i>30</i>&nbsp;import java.math.BigInteger;
+<i>31</i>&nbsp;import java.util.Date;
+<i>32</i>&nbsp;
+<i>33</i>&nbsp;/**
+<i>34</i>&nbsp; * Adapts arbitrary {@link IonWriter} implementations to an {@link IonBinaryWriter} instances.
+<i>35</i>&nbsp; * &lt;p&gt;
+<i>36</i>&nbsp; * This class is provided as a shim for compatibility to allow binary writer implementations to be adaptable to
+<i>37</i>&nbsp; * the legacy interface.
+<i>38</i>&nbsp; */
+<i>39</i>&nbsp;@Deprecated
+<i>40</i>&nbsp;/*package*/ final class IonBinaryWriterAdapter implements IonBinaryWriter
+<i>41</i>&nbsp;{
+<i>42</i>&nbsp;    /**
+<i>43</i>&nbsp;     * Simple interface for constructing an {@link IonWriter} from an output stream.
+<i>44</i>&nbsp;     * Essentially used as a polymorphic constructor.
+<i>45</i>&nbsp;     */
+<i>46</i>&nbsp;    public interface Factory
+<i>47</i>&nbsp;    {
+<i>48</i>&nbsp;        IonWriter create(final OutputStream out) throws IOException;
+<i>49</i>&nbsp;    }
+<i>50</i>&nbsp;
+<i>51</i>&nbsp;    /** Internal {@link ByteArrayOutputStream} implementation to get access to the buffer. */
+<b class="fc"><i>52</i>&nbsp;    private static class InternalByteArrayOutputStream extends ByteArrayOutputStream</b>
+<i>53</i>&nbsp;    {
+<i>54</i>&nbsp;        public byte[] bytes()
+<i>55</i>&nbsp;        {
+<b class="nc"><i>56</i>&nbsp;            return buf;</b>
+<i>57</i>&nbsp;        }
+<i>58</i>&nbsp;    }
+<i>59</i>&nbsp;
+<i>60</i>&nbsp;    private final InternalByteArrayOutputStream buffer;
+<i>61</i>&nbsp;    private final IonWriter delegate;
+<i>62</i>&nbsp;
+<i>63</i>&nbsp;    public IonBinaryWriterAdapter(final Factory factory) throws IOException
+<b class="fc"><i>64</i>&nbsp;    {</b>
+<b class="fc"><i>65</i>&nbsp;        this.buffer = new InternalByteArrayOutputStream();</b>
+<b class="fc"><i>66</i>&nbsp;        this.delegate = factory.create(buffer);</b>
+<b class="fc"><i>67</i>&nbsp;    }</b>
+<i>68</i>&nbsp;
+<i>69</i>&nbsp;    /*package*/ IonWriter getDelegate()
+<i>70</i>&nbsp;    {
+<b class="fc"><i>71</i>&nbsp;        return delegate;</b>
+<i>72</i>&nbsp;    }
+<i>73</i>&nbsp;
+<i>74</i>&nbsp;    /*package*/ void reset()
+<i>75</i>&nbsp;    {
+<b class="fc"><i>76</i>&nbsp;        buffer.reset();</b>
+<b class="fc"><i>77</i>&nbsp;    }</b>
+<i>78</i>&nbsp;
+<i>79</i>&nbsp;    // Adapter Methods
+<i>80</i>&nbsp;
+<i>81</i>&nbsp;    public int byteSize()
+<i>82</i>&nbsp;    {
+<b class="fc"><i>83</i>&nbsp;        return buffer.size();</b>
+<i>84</i>&nbsp;    }
+<i>85</i>&nbsp;
+<i>86</i>&nbsp;    public byte[] getBytes() throws IOException
+<i>87</i>&nbsp;    {
+<b class="fc"><i>88</i>&nbsp;        return buffer.toByteArray();</b>
+<i>89</i>&nbsp;    }
+<i>90</i>&nbsp;
+<i>91</i>&nbsp;    public int getBytes(byte[] bytes, int offset, int maxlen) throws IOException
+<i>92</i>&nbsp;    {
+<b class="nc"><i>93</i>&nbsp;        final int amount = Math.min(maxlen, buffer.size());</b>
+<b class="nc"><i>94</i>&nbsp;        System.arraycopy(buffer.bytes(), 0, bytes, offset, amount);</b>
+<b class="nc"><i>95</i>&nbsp;        return amount;</b>
+<i>96</i>&nbsp;    }
+<i>97</i>&nbsp;
+<i>98</i>&nbsp;    public int writeBytes(OutputStream userstream) throws IOException
+<i>99</i>&nbsp;    {
+<b class="nc"><i>100</i>&nbsp;        buffer.writeTo(userstream);</b>
+<b class="nc"><i>101</i>&nbsp;        return buffer.size();</b>
+<i>102</i>&nbsp;    }
+<i>103</i>&nbsp;
+<i>104</i>&nbsp;    // Delegates
+<i>105</i>&nbsp;
+<i>106</i>&nbsp;    public SymbolTable getSymbolTable()
+<i>107</i>&nbsp;    {
+<b class="fc"><i>108</i>&nbsp;        return delegate.getSymbolTable();</b>
+<i>109</i>&nbsp;    }
+<i>110</i>&nbsp;
+<i>111</i>&nbsp;    public void flush() throws IOException
+<i>112</i>&nbsp;    {
+<b class="fc"><i>113</i>&nbsp;        delegate.flush();</b>
+<b class="fc"><i>114</i>&nbsp;    }</b>
+<i>115</i>&nbsp;
+<i>116</i>&nbsp;    public void finish() throws IOException
+<i>117</i>&nbsp;    {
+<b class="fc"><i>118</i>&nbsp;        delegate.finish();</b>
+<b class="fc"><i>119</i>&nbsp;    }</b>
+<i>120</i>&nbsp;
+<i>121</i>&nbsp;    public void close() throws IOException
+<i>122</i>&nbsp;    {
+<b class="fc"><i>123</i>&nbsp;        delegate.close();</b>
+<b class="fc"><i>124</i>&nbsp;    }</b>
+<i>125</i>&nbsp;
+<i>126</i>&nbsp;    public void setFieldName(String name)
+<i>127</i>&nbsp;    {
+<b class="fc"><i>128</i>&nbsp;        delegate.setFieldName(name);</b>
+<b class="fc"><i>129</i>&nbsp;    }</b>
+<i>130</i>&nbsp;
+<i>131</i>&nbsp;    public void setFieldNameSymbol(SymbolToken name)
+<i>132</i>&nbsp;    {
+<b class="fc"><i>133</i>&nbsp;        delegate.setFieldNameSymbol(name);</b>
+<b class="fc"><i>134</i>&nbsp;    }</b>
+<i>135</i>&nbsp;
+<i>136</i>&nbsp;    public void setTypeAnnotations(String... annotations)
+<i>137</i>&nbsp;    {
+<b class="fc"><i>138</i>&nbsp;        delegate.setTypeAnnotations(annotations);</b>
+<b class="fc"><i>139</i>&nbsp;    }</b>
+<i>140</i>&nbsp;
+<i>141</i>&nbsp;    public void setTypeAnnotationSymbols(SymbolToken... annotations)
+<i>142</i>&nbsp;    {
+<b class="fc"><i>143</i>&nbsp;        delegate.setTypeAnnotationSymbols(annotations);</b>
+<b class="fc"><i>144</i>&nbsp;    }</b>
+<i>145</i>&nbsp;
+<i>146</i>&nbsp;    public void addTypeAnnotation(String annotation)
+<i>147</i>&nbsp;    {
+<b class="fc"><i>148</i>&nbsp;        delegate.addTypeAnnotation(annotation);</b>
+<b class="fc"><i>149</i>&nbsp;    }</b>
+<i>150</i>&nbsp;
+<i>151</i>&nbsp;    public void stepIn(IonType containerType) throws IOException
+<i>152</i>&nbsp;    {
+<b class="fc"><i>153</i>&nbsp;        delegate.stepIn(containerType);</b>
+<b class="fc"><i>154</i>&nbsp;    }</b>
+<i>155</i>&nbsp;
+<i>156</i>&nbsp;    public void stepOut() throws IOException
+<i>157</i>&nbsp;    {
+<b class="fc"><i>158</i>&nbsp;        delegate.stepOut();</b>
+<b class="fc"><i>159</i>&nbsp;    }</b>
+<i>160</i>&nbsp;
+<i>161</i>&nbsp;    public boolean isInStruct()
+<i>162</i>&nbsp;    {
+<b class="nc"><i>163</i>&nbsp;        return delegate.isInStruct();</b>
+<i>164</i>&nbsp;    }
+<i>165</i>&nbsp;
+<i>166</i>&nbsp;    // Write Methods
+<i>167</i>&nbsp;
+<i>168</i>&nbsp;    public void writeValue(IonValue value) throws IOException
+<i>169</i>&nbsp;    {
+<b class="nc"><i>170</i>&nbsp;        delegate.writeValue(value);</b>
+<b class="nc"><i>171</i>&nbsp;    }</b>
+<i>172</i>&nbsp;
+<i>173</i>&nbsp;    public void writeValue(IonReader reader) throws IOException
+<i>174</i>&nbsp;    {
+<b class="nc"><i>175</i>&nbsp;        delegate.writeValue(reader);</b>
+<b class="nc"><i>176</i>&nbsp;    }</b>
+<i>177</i>&nbsp;
+<i>178</i>&nbsp;    public void writeValues(IonReader reader) throws IOException
+<i>179</i>&nbsp;    {
+<b class="nc"><i>180</i>&nbsp;        delegate.writeValues(reader);</b>
+<b class="nc"><i>181</i>&nbsp;    }</b>
+<i>182</i>&nbsp;
+<i>183</i>&nbsp;    public void writeNull() throws IOException
+<i>184</i>&nbsp;    {
+<b class="fc"><i>185</i>&nbsp;        delegate.writeNull();</b>
+<b class="fc"><i>186</i>&nbsp;    }</b>
+<i>187</i>&nbsp;
+<i>188</i>&nbsp;    public void writeNull(IonType type) throws IOException
+<i>189</i>&nbsp;    {
+<b class="fc"><i>190</i>&nbsp;        delegate.writeNull(type);</b>
+<b class="fc"><i>191</i>&nbsp;    }</b>
+<i>192</i>&nbsp;
+<i>193</i>&nbsp;    public void writeBool(boolean value) throws IOException
+<i>194</i>&nbsp;    {
+<b class="fc"><i>195</i>&nbsp;        delegate.writeBool(value);</b>
+<b class="fc"><i>196</i>&nbsp;    }</b>
+<i>197</i>&nbsp;
+<i>198</i>&nbsp;    public void writeInt(long value) throws IOException
+<i>199</i>&nbsp;    {
+<b class="fc"><i>200</i>&nbsp;        delegate.writeInt(value);</b>
+<b class="fc"><i>201</i>&nbsp;    }</b>
+<i>202</i>&nbsp;
+<i>203</i>&nbsp;    public void writeInt(BigInteger value) throws IOException
+<i>204</i>&nbsp;    {
+<b class="fc"><i>205</i>&nbsp;        delegate.writeInt(value);</b>
+<b class="fc"><i>206</i>&nbsp;    }</b>
+<i>207</i>&nbsp;
+<i>208</i>&nbsp;    public void writeFloat(double value) throws IOException
+<i>209</i>&nbsp;    {
+<b class="fc"><i>210</i>&nbsp;        delegate.writeFloat(value);</b>
+<b class="fc"><i>211</i>&nbsp;    }</b>
+<i>212</i>&nbsp;
+<i>213</i>&nbsp;    public void writeDecimal(BigDecimal value) throws IOException
+<i>214</i>&nbsp;    {
+<b class="fc"><i>215</i>&nbsp;        delegate.writeDecimal(value);</b>
+<b class="fc"><i>216</i>&nbsp;    }</b>
+<i>217</i>&nbsp;
+<i>218</i>&nbsp;    public void writeTimestamp(Timestamp value) throws IOException
+<i>219</i>&nbsp;    {
+<b class="fc"><i>220</i>&nbsp;        delegate.writeTimestamp(value);</b>
+<b class="fc"><i>221</i>&nbsp;    }</b>
+<i>222</i>&nbsp;
+<i>223</i>&nbsp;    public void writeTimestampUTC(Date value) throws IOException
+<i>224</i>&nbsp;    {
+<b class="nc"><i>225</i>&nbsp;        delegate.writeTimestampUTC(value);</b>
+<b class="nc"><i>226</i>&nbsp;    }</b>
+<i>227</i>&nbsp;
+<i>228</i>&nbsp;    public void writeSymbol(String content) throws IOException
+<i>229</i>&nbsp;    {
+<b class="fc"><i>230</i>&nbsp;        delegate.writeSymbol(content);</b>
+<b class="fc"><i>231</i>&nbsp;    }</b>
+<i>232</i>&nbsp;
+<i>233</i>&nbsp;    public void writeSymbolToken(SymbolToken content) throws IOException
+<i>234</i>&nbsp;    {
+<b class="fc"><i>235</i>&nbsp;        delegate.writeSymbolToken(content);</b>
+<b class="fc"><i>236</i>&nbsp;    }</b>
+<i>237</i>&nbsp;
+<i>238</i>&nbsp;    public void writeString(String value) throws IOException
+<i>239</i>&nbsp;    {
+<b class="fc"><i>240</i>&nbsp;        delegate.writeString(value);</b>
+<b class="fc"><i>241</i>&nbsp;    }</b>
+<i>242</i>&nbsp;
+<i>243</i>&nbsp;    public void writeClob(byte[] value) throws IOException
+<i>244</i>&nbsp;    {
+<b class="fc"><i>245</i>&nbsp;        delegate.writeClob(value);</b>
+<b class="fc"><i>246</i>&nbsp;    }</b>
+<i>247</i>&nbsp;
+<i>248</i>&nbsp;    public void writeClob(byte[] value, int start, int len) throws IOException
+<i>249</i>&nbsp;    {
+<b class="nc"><i>250</i>&nbsp;        delegate.writeClob(value, start, len);</b>
+<b class="nc"><i>251</i>&nbsp;    }</b>
+<i>252</i>&nbsp;
+<i>253</i>&nbsp;    public void writeBlob(byte[] value) throws IOException
+<i>254</i>&nbsp;    {
+<b class="fc"><i>255</i>&nbsp;        delegate.writeBlob(value);</b>
+<b class="fc"><i>256</i>&nbsp;    }</b>
+<i>257</i>&nbsp;
+<i>258</i>&nbsp;    public void writeBlob(byte[] value, int start, int len) throws IOException
+<i>259</i>&nbsp;    {
+<b class="nc"><i>260</i>&nbsp;        delegate.writeBlob(value, start, len);</b>
+<b class="nc"><i>261</i>&nbsp;    }</b>
+<i>262</i>&nbsp;
+<i>263</i>&nbsp;    public &lt;T&gt; T asFacet(Class&lt;T&gt; facetType)
+<i>264</i>&nbsp;    {
+<i>265</i>&nbsp;        // This implementation has no facets.
+<b class="nc"><i>266</i>&nbsp;        return null;</b>
+<i>267</i>&nbsp;    }
+<i>268</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

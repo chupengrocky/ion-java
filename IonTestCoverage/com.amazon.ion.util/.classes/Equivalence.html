@@ -1,0 +1,821 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: Equivalence</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.util</a> ]
+</div>
+
+<h1>Coverage Summary for Class: Equivalence (com.amazon.ion.util)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Equivalence</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/ 14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    95.6%
+  </span>
+  <span class="absValue">
+    (129/ 135)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Equivalence$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Equivalence$Builder</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/ 8)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Equivalence$Configuration</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/ 5)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Equivalence$Field</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/ 15)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (25/ 25)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.3%
+  </span>
+  <span class="absValue">
+    (158/ 164)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.util;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.impl._Private_IonConstants.UNKNOWN_SYMBOL_TEXT_PREFIX;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;import com.amazon.ion.Decimal;
+<i>21</i>&nbsp;import com.amazon.ion.IonBool;
+<i>22</i>&nbsp;import com.amazon.ion.IonDecimal;
+<i>23</i>&nbsp;import com.amazon.ion.IonException;
+<i>24</i>&nbsp;import com.amazon.ion.IonFloat;
+<i>25</i>&nbsp;import com.amazon.ion.IonInt;
+<i>26</i>&nbsp;import com.amazon.ion.IonLob;
+<i>27</i>&nbsp;import com.amazon.ion.IonSequence;
+<i>28</i>&nbsp;import com.amazon.ion.IonStruct;
+<i>29</i>&nbsp;import com.amazon.ion.IonSymbol;
+<i>30</i>&nbsp;import com.amazon.ion.IonText;
+<i>31</i>&nbsp;import com.amazon.ion.IonTimestamp;
+<i>32</i>&nbsp;import com.amazon.ion.IonType;
+<i>33</i>&nbsp;import com.amazon.ion.IonValue;
+<i>34</i>&nbsp;import com.amazon.ion.SymbolToken;
+<i>35</i>&nbsp;import java.io.IOException;
+<i>36</i>&nbsp;import java.io.InputStream;
+<i>37</i>&nbsp;import java.util.HashMap;
+<i>38</i>&nbsp;import java.util.Iterator;
+<i>39</i>&nbsp;import java.util.Map;
+<i>40</i>&nbsp;import java.util.Set;
+<i>41</i>&nbsp;
+<i>42</i>&nbsp;/**
+<i>43</i>&nbsp; * Provides equivalence comparisons between two {@link IonValue}s, following
+<i>44</i>&nbsp; * the contract of {@link IonValue#equals(Object)}.
+<i>45</i>&nbsp; *
+<i>46</i>&nbsp; * &lt;p&gt;
+<i>47</i>&nbsp; * Basic usage of this class is as follows:
+<i>48</i>&nbsp; *
+<i>49</i>&nbsp; *&lt;pre&gt;
+<i>50</i>&nbsp; *    IonValue v1 = ...;
+<i>51</i>&nbsp; *    IonValue v2 = ...;
+<i>52</i>&nbsp; *    com.amazon.ion.util.Equivalence.ionEquals( v1, v2 );
+<i>53</i>&nbsp; *&lt;/pre&gt;
+<i>54</i>&nbsp; *
+<i>55</i>&nbsp; * More likely, a static import would make using this class easier.
+<i>56</i>&nbsp; *
+<i>57</i>&nbsp; *&lt;pre&gt;
+<i>58</i>&nbsp; *    import static com.amazon.ion.util.Equivalence.ionEquals;
+<i>59</i>&nbsp; *    ...
+<i>60</i>&nbsp; *    boolean equivalent = ionEquals( v1, v2 );
+<i>61</i>&nbsp; *&lt;/pre&gt;
+<i>62</i>&nbsp; *
+<i>63</i>&nbsp; * &lt;p&gt;
+<i>64</i>&nbsp; * Additional options are available by configuring an &lt;code&gt;Equivalence&lt;/code&gt;
+<i>65</i>&nbsp; * instance using {@link Equivalence.Builder}. For example:
+<i>66</i>&nbsp; *
+<i>67</i>&nbsp; * &lt;pre&gt;
+<i>68</i>&nbsp; *     com.amazon.ion.util.Equivalence equivalence =
+<i>69</i>&nbsp; *         new com.amazon.ion.util.Equivalence.Builder()
+<i>70</i>&nbsp; *             .withEpsilon(1e-6)
+<i>71</i>&nbsp; *             .build();
+<i>72</i>&nbsp; *     IonValue v1 = ...;
+<i>73</i>&nbsp; *     IonValue v2 = ...;
+<i>74</i>&nbsp; *     equivalence.ionValueEquals( v1, v2 );
+<i>75</i>&nbsp; * &lt;/pre&gt;
+<i>76</i>&nbsp; *
+<i>77</i>&nbsp; * &lt;p&gt;
+<i>78</i>&nbsp; * &lt;h3&gt;Ion Equivalence&lt;/h3&gt;
+<i>79</i>&nbsp; * In order to make Ion a useful model to describe data, we must first define
+<i>80</i>&nbsp; * the notion of equivalence for all values representable in Ion. Equivalence
+<i>81</i>&nbsp; * with respect to Ion values means that if two Ion values, X and Y, are
+<i>82</i>&nbsp; * equivalent, they represent the same data and can be substituted for the other
+<i>83</i>&nbsp; * without loss of information.
+<i>84</i>&nbsp; *
+<i>85</i>&nbsp; * This relationship is:
+<i>86</i>&nbsp; * &lt;ul&gt;
+<i>87</i>&nbsp; *   &lt;li&gt;
+<i>88</i>&nbsp; *     symmetric: X is equivalent to Y if and only if Y is equivalent to X.
+<i>89</i>&nbsp; *   &lt;/li&gt;
+<i>90</i>&nbsp; *   &lt;li&gt;
+<i>91</i>&nbsp; *     transitive: if X is equivalent to Y and Y is equivalent to Z, then X is
+<i>92</i>&nbsp; *     equivalent to Z.
+<i>93</i>&nbsp; *   &lt;/li&gt;
+<i>94</i>&nbsp; *   &lt;li&gt;
+<i>95</i>&nbsp; *     reflexive: X is equivalent to X.
+<i>96</i>&nbsp; *   &lt;/li&gt;
+<i>97</i>&nbsp; * &lt;/ul&gt;
+<i>98</i>&nbsp; *
+<i>99</i>&nbsp; * &lt;h4&gt;Ordered Sequence Equivalence&lt;/h4&gt;
+<i>100</i>&nbsp; * When an ordered sequence (i.e. tuple) of elements is specified in this
+<i>101</i>&nbsp; * document, equivalence over such an ordered sequence is defined as follows.
+<i>102</i>&nbsp; *
+<i>103</i>&nbsp; * A tuple, A = (a1, a2, ..., an), is equivalent to another tuple, B = (b1, b2,
+<i>104</i>&nbsp; * ..., bm) if and only if the cardinality (number of elements) of A equals the
+<i>105</i>&nbsp; * cardinality of B (i.e. n == m) and ai is equivalent to bi for i = 1 ... n.
+<i>106</i>&nbsp; *
+<i>107</i>&nbsp; * &lt;h4&gt;Un-Ordered Sequence Equivalence&lt;/h4&gt;
+<i>108</i>&nbsp; * When an un-ordered sequence (i.e. bag or multi-set) is specified in this
+<i>109</i>&nbsp; * document, equivalence over such a sequence is defined as follows.
+<i>110</i>&nbsp; *
+<i>111</i>&nbsp; * A bag, A = {a1, a2, ..., an} is equivalent to B = {b1, b2, ..., bm} if and
+<i>112</i>&nbsp; * only if the cardinality of A is equal to the cardinality of B and for each
+<i>113</i>&nbsp; * element, x, in A there exists a distinct element, y, in B for which x is
+<i>114</i>&nbsp; * equivalent to y.
+<i>115</i>&nbsp; *
+<i>116</i>&nbsp; * &lt;h4&gt;Values&lt;/h4&gt;
+<i>117</i>&nbsp; * Any arbitrary, atomic value in the Ion Language can be denoted as the tuple,
+<i>118</i>&nbsp; * (A, V), where A is an ordered list of annotations, and V is an Ion Primitive
+<i>119</i>&nbsp; * Data or Ion Complex Data value. The list of annotations, A is an tuple of Ion
+<i>120</i>&nbsp; * Symbols (a specific type of Ion Primitive).
+<i>121</i>&nbsp; *
+<i>122</i>&nbsp; * &lt;p&gt;
+<i>123</i>&nbsp; * &lt;h3&gt;Terminology&lt;/h3&gt;
+<i>124</i>&nbsp; * Within this class, &lt;i&gt;strict&lt;/i&gt; equivalence refers to Ion data model
+<i>125</i>&nbsp; * equivalence as defined above and by the
+<i>126</i>&nbsp; * &lt;a href=&quot;http://amzn.github.io/ion-docs/docs/spec.html&quot;&gt;Ion
+<i>127</i>&nbsp; * Specification&lt;/a&gt;. &lt;i&gt;Structural&lt;/i&gt; or &lt;i&gt;non-strict&lt;/i&gt; equivalence
+<i>128</i>&nbsp; * follows the same rules as strict equivalence, except that
+<i>129</i>&nbsp; * &lt;ul&gt;
+<i>130</i>&nbsp; *   &lt;li&gt;Annotations are not considered, and&lt;/li&gt;
+<i>131</i>&nbsp; *   &lt;li&gt;Timestamps that represent the same instant in time are always
+<i>132</i>&nbsp; *   considered equivalent.&lt;/li&gt;
+<i>133</i>&nbsp; * &lt;/ul&gt;
+<i>134</i>&nbsp; */
+<b class="fc"><i>135</i>&nbsp;public final class Equivalence {</b>
+<i>136</i>&nbsp;
+<i>137</i>&nbsp;    /**
+<i>138</i>&nbsp;     * TODO amzn/ion-java/issues/26 Marker for code that needs to be altered in order to
+<i>139</i>&nbsp;     * support a public comparison API to determine ordering of values, not
+<i>140</i>&nbsp;     * just equality.
+<i>141</i>&nbsp;     */
+<i>142</i>&nbsp;    private static final boolean PUBLIC_COMPARISON_API = false;
+<i>143</i>&nbsp;
+<i>144</i>&nbsp;    /**
+<i>145</i>&nbsp;     * Configuration that requires strict data equivalence.
+<i>146</i>&nbsp;     * @see #ionEquals(IonValue, IonValue)
+<i>147</i>&nbsp;     */
+<b class="fc"><i>148</i>&nbsp;    private static final Configuration STRICT_CONFIGURATION = new Configuration(new Builder().withStrict(true));</b>
+<i>149</i>&nbsp;
+<i>150</i>&nbsp;    /**
+<i>151</i>&nbsp;     * Configuration that requires structural equivalence without considering annotations.
+<i>152</i>&nbsp;     * @see #ionEqualsByContent(IonValue, IonValue)
+<i>153</i>&nbsp;     */
+<b class="fc"><i>154</i>&nbsp;    private static final Configuration NON_STRICT_CONFIGURATION = new Configuration(new Builder().withStrict(false));</b>
+<i>155</i>&nbsp;
+<i>156</i>&nbsp;    /**
+<i>157</i>&nbsp;     * Contains the configuration to use when comparing Ion values.
+<i>158</i>&nbsp;     */
+<b class="fc"><i>159</i>&nbsp;    static final class Configuration {</b>
+<i>160</i>&nbsp;        private final boolean isStrict;
+<i>161</i>&nbsp;        private final Double epsilon;
+<i>162</i>&nbsp;
+<b class="fc"><i>163</i>&nbsp;        Configuration(Builder builder) {</b>
+<b class="fc"><i>164</i>&nbsp;            this.isStrict = builder.isStrict;</b>
+<b class="fc"><i>165</i>&nbsp;            this.epsilon = builder.epsilon;</b>
+<b class="fc"><i>166</i>&nbsp;        }</b>
+<i>167</i>&nbsp;    }
+<i>168</i>&nbsp;
+<i>169</i>&nbsp;    /**
+<i>170</i>&nbsp;     * Constructs {@link Equivalence} instances.
+<i>171</i>&nbsp;     */
+<b class="fc"><i>172</i>&nbsp;    public static final class Builder {</b>
+<i>173</i>&nbsp;
+<b class="fc"><i>174</i>&nbsp;        private boolean isStrict = true;</b>
+<b class="fc"><i>175</i>&nbsp;        private Double epsilon = null;</b>
+<i>176</i>&nbsp;
+<i>177</i>&nbsp;        /**
+<i>178</i>&nbsp;         * When true, checks for strict data equivalence over two Ion Values.
+<i>179</i>&nbsp;         * When false, checks for structural data equivalence over two Ion
+<i>180</i>&nbsp;         * Values. See {@link Equivalence} for discussion of the differences
+<i>181</i>&nbsp;         * between the two.
+<i>182</i>&nbsp;         * Default: true.
+<i>183</i>&nbsp;         * @param isStrict the value.
+<i>184</i>&nbsp;         * @return this builder.
+<i>185</i>&nbsp;         */
+<i>186</i>&nbsp;        public Builder withStrict(boolean isStrict) {
+<b class="fc"><i>187</i>&nbsp;            this.isStrict = isStrict;</b>
+<b class="fc"><i>188</i>&nbsp;            return this;</b>
+<i>189</i>&nbsp;        }
+<i>190</i>&nbsp;
+<i>191</i>&nbsp;        /**
+<i>192</i>&nbsp;         * The maximum absolute difference between two Ion float values for
+<i>193</i>&nbsp;         * which the two values will be considered equivalent. Default: Ion
+<i>194</i>&nbsp;         * float values will only be considered equivalent when
+<i>195</i>&nbsp;         * &lt;code&gt;Double.compare(a, b) == 0&lt;/code&gt;.
+<i>196</i>&nbsp;         * @param epsilon the value.
+<i>197</i>&nbsp;         * @return this builder.
+<i>198</i>&nbsp;         */
+<i>199</i>&nbsp;        public Builder withEpsilon(double epsilon) {
+<b class="fc"><i>200</i>&nbsp;            this.epsilon = epsilon;</b>
+<b class="fc"><i>201</i>&nbsp;            return this;</b>
+<i>202</i>&nbsp;        }
+<i>203</i>&nbsp;
+<i>204</i>&nbsp;        /**
+<i>205</i>&nbsp;         * @return a new Equivalence using this builder&#39;s configuration.
+<i>206</i>&nbsp;         */
+<i>207</i>&nbsp;        public Equivalence build() {
+<b class="fc"><i>208</i>&nbsp;            return new Equivalence(new Configuration(this));</b>
+<i>209</i>&nbsp;        }
+<i>210</i>&nbsp;    }
+<i>211</i>&nbsp;
+<i>212</i>&nbsp;    private final Configuration configuration;
+<i>213</i>&nbsp;
+<b class="fc"><i>214</i>&nbsp;    private Equivalence(Configuration configuration) {</b>
+<b class="fc"><i>215</i>&nbsp;        this.configuration = configuration;</b>
+<b class="fc"><i>216</i>&nbsp;    }</b>
+<i>217</i>&nbsp;
+<i>218</i>&nbsp;
+<i>219</i>&nbsp;    private static int compareAnnotations(SymbolToken[] ann1,
+<i>220</i>&nbsp;                                          SymbolToken[] ann2)
+<i>221</i>&nbsp;    {
+<b class="fc"><i>222</i>&nbsp;        int len = ann1.length;</b>
+<b class="fc"><i>223</i>&nbsp;        int result = len - ann2.length;</b>
+<i>224</i>&nbsp;
+<b class="fc"><i>225</i>&nbsp;        if (result == 0) {</b>
+<b class="fc"><i>226</i>&nbsp;            for (int i=0; (result == 0) &amp;&amp; (i &lt; len); i++) {</b>
+<b class="fc"><i>227</i>&nbsp;                result = compareSymbolTokens(ann1[i], ann2[i]);</b>
+<i>228</i>&nbsp;            }
+<i>229</i>&nbsp;        }
+<i>230</i>&nbsp;
+<b class="fc"><i>231</i>&nbsp;        return result;</b>
+<i>232</i>&nbsp;    }
+<i>233</i>&nbsp;
+<i>234</i>&nbsp;
+<i>235</i>&nbsp;    private static int compareSymbolTokens(SymbolToken tok1,
+<i>236</i>&nbsp;                                           SymbolToken tok2)
+<i>237</i>&nbsp;    {
+<b class="fc"><i>238</i>&nbsp;        String text1 = tok1.getText();</b>
+<b class="fc"><i>239</i>&nbsp;        String text2 = tok2.getText();</b>
+<b class="fc"><i>240</i>&nbsp;        if (text1 == null || text2 == null) {</b>
+<b class="fc"><i>241</i>&nbsp;            if (text1 != null) return  1;</b>
+<b class="fc"><i>242</i>&nbsp;            if (text2 != null) return -1;</b>
+<i>243</i>&nbsp;
+<b class="fc"><i>244</i>&nbsp;            int sid1 = tok1.getSid();</b>
+<b class="fc"><i>245</i>&nbsp;            int sid2 = tok2.getSid();</b>
+<b class="fc"><i>246</i>&nbsp;            if (sid1 &lt; sid2) return -1;</b>
+<b class="fc"><i>247</i>&nbsp;            if (sid1 &gt; sid2) return  1;</b>
+<b class="fc"><i>248</i>&nbsp;            return 0;</b>
+<i>249</i>&nbsp;        }
+<i>250</i>&nbsp;
+<b class="fc"><i>251</i>&nbsp;        return text1.compareTo(text2);</b>
+<i>252</i>&nbsp;    }
+<i>253</i>&nbsp;
+<i>254</i>&nbsp;
+<i>255</i>&nbsp;    /**
+<i>256</i>&nbsp;     * Converts an IonStruct to a multi-set for use in IonStruct equality
+<i>257</i>&nbsp;     * checks. This method returns the multi-set as a {@code Map&lt;Field, Field&gt;}.
+<i>258</i>&nbsp;     * &lt;p&gt;
+<i>259</i>&nbsp;     * A multi-set supports order-independent equality, and may have duplicate
+<i>260</i>&nbsp;     * elements.
+<i>261</i>&nbsp;     * &lt;p&gt;
+<i>262</i>&nbsp;     * Take special note that {@link Set} is missing a {@code get()} API,
+<i>263</i>&nbsp;     * and cannot contain duplicate elements, hence we cannot use it.
+<i>264</i>&nbsp;     */
+<i>265</i>&nbsp;    private static final Map&lt;Field, Field&gt;
+<i>266</i>&nbsp;        convertToMultiSet(final IonStruct struct, final Configuration configuration) {
+<i>267</i>&nbsp;
+<b class="fc"><i>268</i>&nbsp;        final Map&lt;Field, Field&gt; structMultiSet =</b>
+<i>269</i>&nbsp;            new HashMap&lt;Field, Field&gt;();
+<i>270</i>&nbsp;
+<b class="fc"><i>271</i>&nbsp;        for (final IonValue val : struct) {</b>
+<b class="fc"><i>272</i>&nbsp;            final Field item = new Field(val, configuration);</b>
+<b class="fc"><i>273</i>&nbsp;            Field curr = structMultiSet.put(item, item);</b>
+<i>274</i>&nbsp;            // curr will be non-null if the multi-set already contains the
+<i>275</i>&nbsp;            // name/value pair
+<b class="fc"><i>276</i>&nbsp;            if (curr != null) {</b>
+<i>277</i>&nbsp;                // Set the &#39;occurrences&#39; of the Field that is contained in
+<i>278</i>&nbsp;                // the multi-set (i.e. item) to that of the previously mapped
+<i>279</i>&nbsp;                // Field (i.e. curr)
+<b class="fc"><i>280</i>&nbsp;                item.occurrences = curr.occurrences;</b>
+<i>281</i>&nbsp;            }
+<i>282</i>&nbsp;            // At this point, item will be an existing
+<i>283</i>&nbsp;            // name/value pair in the multi-set - increment its occurrence
+<b class="fc"><i>284</i>&nbsp;            item.occurrences++;</b>
+<b class="fc"><i>285</i>&nbsp;        }</b>
+<i>286</i>&nbsp;
+<b class="fc"><i>287</i>&nbsp;        return structMultiSet;</b>
+<i>288</i>&nbsp;    }
+<i>289</i>&nbsp;
+<i>290</i>&nbsp;
+<i>291</i>&nbsp;    private static int compareStructs(final IonStruct s1,
+<i>292</i>&nbsp;                                      final IonStruct s2,
+<i>293</i>&nbsp;                                      final Configuration configuration)
+<i>294</i>&nbsp;    {
+<b class="fc"><i>295</i>&nbsp;        int result = s1.size() - s2.size();</b>
+<b class="fc"><i>296</i>&nbsp;        if (result == 0) {</b>
+<i>297</i>&nbsp;            // We convert IonStruct s1 to a multi-set (which is a
+<i>298</i>&nbsp;            // Map&lt;Field, Field&gt;). Refer to convertToMultiSet()&#39;s
+<i>299</i>&nbsp;            // documentation for more info
+<b class="fc"><i>300</i>&nbsp;            final Map&lt;Field, Field&gt; s1MultiSet</b>
+<b class="fc"><i>301</i>&nbsp;                    = convertToMultiSet(s1, configuration);</b>
+<i>302</i>&nbsp;
+<i>303</i>&nbsp;            // Iterates through each name/value pair in IonStruct s2 and
+<i>304</i>&nbsp;            // determine if it also occurs in s1MultiSet.
+<i>305</i>&nbsp;            // During each iteration:
+<i>306</i>&nbsp;            //          If it does, remove an occurrence from s1MultiSet
+<i>307</i>&nbsp;            //          If it doesn&#39;t, the two IonStructs aren&#39;t equal
+<b class="fc"><i>308</i>&nbsp;            for (IonValue val : s2) {</b>
+<b class="fc"><i>309</i>&nbsp;                Field field = new Field(val, configuration);</b>
+<i>310</i>&nbsp;
+<i>311</i>&nbsp;                // Find an occurrence of the name/value pair in s1MultiSet
+<b class="fc"><i>312</i>&nbsp;                Field mappedValue = s1MultiSet.get(field);</b>
+<i>313</i>&nbsp;
+<b class="fc"><i>314</i>&nbsp;                if (mappedValue == null || mappedValue.occurrences == 0) {</b>
+<i>315</i>&nbsp;                    // No match in occurrences, the IonStructs aren&#39;t equal
+<b class="fc"><i>316</i>&nbsp;                    return -1;</b>
+<i>317</i>&nbsp;                }
+<i>318</i>&nbsp;
+<i>319</i>&nbsp;                // Remove an occurrence by decrementing count instead of
+<i>320</i>&nbsp;                // explicitly calling Map.remove(), as Map.remove() is a slower
+<i>321</i>&nbsp;                // operation
+<b class="fc"><i>322</i>&nbsp;                mappedValue.occurrences--;</b>
+<b class="fc"><i>323</i>&nbsp;            }</b>
+<i>324</i>&nbsp;        }
+<b class="fc"><i>325</i>&nbsp;        return result;</b>
+<i>326</i>&nbsp;    }
+<i>327</i>&nbsp;
+<i>328</i>&nbsp;
+<i>329</i>&nbsp;    private static int compareSequences(final IonSequence s1,
+<i>330</i>&nbsp;                                        final IonSequence s2,
+<i>331</i>&nbsp;                                        final Configuration configuration)
+<i>332</i>&nbsp;    {
+<b class="fc"><i>333</i>&nbsp;        int result = s1.size() - s2.size();</b>
+<b class="fc"><i>334</i>&nbsp;        if (result == 0) {</b>
+<b class="fc"><i>335</i>&nbsp;            Iterator&lt;IonValue&gt; iter1 = s1.iterator();</b>
+<b class="fc"><i>336</i>&nbsp;            Iterator&lt;IonValue&gt; iter2 = s2.iterator();</b>
+<b class="fc"><i>337</i>&nbsp;            while (iter1.hasNext()) {</b>
+<b class="fc"><i>338</i>&nbsp;                result = ionCompareToImpl(iter1.next(),</b>
+<b class="fc"><i>339</i>&nbsp;                                          iter2.next(),</b>
+<i>340</i>&nbsp;                                          configuration);
+<b class="fc"><i>341</i>&nbsp;                if (result != 0) {</b>
+<b class="fc"><i>342</i>&nbsp;                    break;</b>
+<i>343</i>&nbsp;                }
+<i>344</i>&nbsp;            }
+<i>345</i>&nbsp;        }
+<b class="fc"><i>346</i>&nbsp;        return result;</b>
+<i>347</i>&nbsp;    }
+<i>348</i>&nbsp;
+<i>349</i>&nbsp;
+<i>350</i>&nbsp;    /** Compare LOB content by stream--assuming non-null. */
+<i>351</i>&nbsp;    private static int compareLobContents(final IonLob lob1, final IonLob lob2)
+<i>352</i>&nbsp;    {
+<b class="fc"><i>353</i>&nbsp;        int in1 = lob1.byteSize();</b>
+<b class="fc"><i>354</i>&nbsp;        int in2 = lob2.byteSize();</b>
+<b class="fc"><i>355</i>&nbsp;        int result = (in1- in2);</b>
+<i>356</i>&nbsp;
+<b class="fc"><i>357</i>&nbsp;        if (result == 0) {</b>
+<b class="fc"><i>358</i>&nbsp;            final InputStream stream1 = lob1.newInputStream();</b>
+<b class="fc"><i>359</i>&nbsp;            final InputStream stream2 = lob2.newInputStream();</b>
+<i>360</i>&nbsp;
+<i>361</i>&nbsp;            // too bad Java doesn&#39;t do RAII with better syntax...
+<i>362</i>&nbsp;            try {
+<i>363</i>&nbsp;              try {
+<i>364</i>&nbsp;                try {
+<b class="fc"><i>365</i>&nbsp;                  while (result == 0) {</b>
+<b class="fc"><i>366</i>&nbsp;                      in1 = stream1.read();</b>
+<b class="fc"><i>367</i>&nbsp;                      in2 = stream2.read();</b>
+<b class="fc"><i>368</i>&nbsp;                      if (in1 == -1 || in2 == -1) {</b>
+<b class="fc"><i>369</i>&nbsp;                        if (in1 != -1) result = 1;</b>
+<b class="fc"><i>370</i>&nbsp;                        if (in2 != -1) result = -1;</b>
+<i>371</i>&nbsp;                        break;
+<i>372</i>&nbsp;                      }
+<b class="fc"><i>373</i>&nbsp;                      result = (in1 - in2);</b>
+<i>374</i>&nbsp;                  }
+<i>375</i>&nbsp;                } finally {
+<b class="fc"><i>376</i>&nbsp;                  stream1.close();</b>
+<b class="fc"><i>377</i>&nbsp;                }</b>
+<i>378</i>&nbsp;              } finally {
+<b class="fc"><i>379</i>&nbsp;                stream2.close();</b>
+<b class="fc"><i>380</i>&nbsp;              }</b>
+<b class="nc"><i>381</i>&nbsp;            } catch (final IOException e) {</b>
+<i>382</i>&nbsp;                // XXX hopefully won&#39;t happen with LOB streams--if it does rethrow unchecked.
+<i>383</i>&nbsp;                //     this would violate Object.equals() would it not?
+<b class="nc"><i>384</i>&nbsp;                throw new IonException(e);</b>
+<b class="fc"><i>385</i>&nbsp;            }</b>
+<i>386</i>&nbsp;        }
+<i>387</i>&nbsp;
+<b class="fc"><i>388</i>&nbsp;        return result;</b>
+<i>389</i>&nbsp;    }
+<i>390</i>&nbsp;
+<i>391</i>&nbsp;
+<i>392</i>&nbsp;    /**
+<i>393</i>&nbsp;     * Class that denotes a name/value pair in Structs.
+<i>394</i>&nbsp;     * &lt;p&gt;
+<i>395</i>&nbsp;     * Structs are unordered collections of name/value pairs. The names are
+<i>396</i>&nbsp;     * symbol tokens, and the values are unrestricted. Each name/value pair is
+<i>397</i>&nbsp;     * called a &lt;em&gt;field&lt;/em&gt;.
+<i>398</i>&nbsp;     * &lt;p&gt;
+<i>399</i>&nbsp;     * The responsibilities of this class is to expose a
+<i>400</i>&nbsp;     * {@code Map&lt;Field, Field&gt;} as a multi-set. A Field instance holds the name
+<i>401</i>&nbsp;     * and value of a Struct field, and counts the number of times that
+<i>402</i>&nbsp;     * name/value pair occurs within the multi-set.
+<i>403</i>&nbsp;     * &lt;p&gt;
+<i>404</i>&nbsp;     * For example, an IonStruct:
+<i>405</i>&nbsp;     *&lt;pre&gt;
+<i>406</i>&nbsp;     *  {
+<i>407</i>&nbsp;     *    a : 123,
+<i>408</i>&nbsp;     *    a : 123
+<i>409</i>&nbsp;     *  }
+<i>410</i>&nbsp;     *&lt;/pre&gt;
+<i>411</i>&nbsp;     * will be converted into a multi-set {@code Map&lt;Field, Field&gt;} with
+<i>412</i>&nbsp;     * a single {@code Field} -&gt; {@code Field} with {@code occurrences} of 2.
+<i>413</i>&nbsp;     * &lt;p&gt;
+<i>414</i>&nbsp;     * Refer to
+<i>415</i>&nbsp;     * {@link Equivalence#convertToMultiSet(IonStruct, Configuration)} and
+<i>416</i>&nbsp;     * {@link Field#equals(Object)} for more info.
+<i>417</i>&nbsp;     * &lt;p&gt;
+<i>418</i>&nbsp;     * NOTE: This class should only be instantiated for the sole purpose of
+<i>419</i>&nbsp;     * using it as either a &lt;em&gt;key&lt;/em&gt; or &lt;em&gt;value&lt;/em&gt; in a {@link Map}.
+<i>420</i>&nbsp;     */
+<b class="fc"><i>421</i>&nbsp;    static class Field {</b>
+<i>422</i>&nbsp;        private final String    name; // aka field name
+<i>423</i>&nbsp;        private final IonValue  value;
+<i>424</i>&nbsp;        private final Configuration configuration;
+<i>425</i>&nbsp;
+<i>426</i>&nbsp;        /**
+<i>427</i>&nbsp;         * Number of times that this specific field (with the same name
+<i>428</i>&nbsp;         * and value) occurs within the struct.
+<i>429</i>&nbsp;         */
+<i>430</i>&nbsp;        private int occurrences;
+<i>431</i>&nbsp;
+<i>432</i>&nbsp;        Field(final IonValue value, final Configuration configuration)
+<b class="fc"><i>433</i>&nbsp;        {</b>
+<b class="fc"><i>434</i>&nbsp;            SymbolToken tok = value.getFieldNameSymbol();</b>
+<b class="fc"><i>435</i>&nbsp;            String name = tok.getText();</b>
+<b class="fc"><i>436</i>&nbsp;            if (name == null) {</b>
+<i>437</i>&nbsp;                // TODO amzn/ion-java/issues/23 Problematic with unknown field names.
+<b class="fc"><i>438</i>&nbsp;                name = UNKNOWN_SYMBOL_TEXT_PREFIX + tok.getSid();</b>
+<i>439</i>&nbsp;            }
+<b class="fc"><i>440</i>&nbsp;            this.name = name;</b>
+<b class="fc"><i>441</i>&nbsp;            this.value = value;</b>
+<b class="fc"><i>442</i>&nbsp;            this.configuration = configuration;</b>
+<i>443</i>&nbsp;
+<i>444</i>&nbsp;            // Occurrences of this name/value pair is 0 initially
+<b class="fc"><i>445</i>&nbsp;            this.occurrences = 0;</b>
+<b class="fc"><i>446</i>&nbsp;        }</b>
+<i>447</i>&nbsp;
+<i>448</i>&nbsp;        @Override
+<i>449</i>&nbsp;        public int hashCode() {
+<b class="fc"><i>450</i>&nbsp;            return name.hashCode();</b>
+<i>451</i>&nbsp;            // TODO amzn/ion-java/issues/58 : implement hash code such that it respects
+<i>452</i>&nbsp;            // &#39;strict&#39;. The prevously attempted fix is commented out below but
+<i>453</i>&nbsp;            // is not sufficient because value.hasCode will always include
+<i>454</i>&nbsp;            // type annotations in the hash computation. Type annotations
+<i>455</i>&nbsp;            // should not be part of the hash computation if strict=true.
+<i>456</i>&nbsp;//            result = (31 * result) + value.hashCode();
+<i>457</i>&nbsp;//            return result;
+<i>458</i>&nbsp;        }
+<i>459</i>&nbsp;
+<i>460</i>&nbsp;        /**
+<i>461</i>&nbsp;         * This method is implicitly called by {@link Map#get(Object)} to
+<i>462</i>&nbsp;         * obtain a value to which {@code other} is mapped.
+<i>463</i>&nbsp;         */
+<i>464</i>&nbsp;        @Override
+<i>465</i>&nbsp;        public boolean equals(final Object other) {
+<i>466</i>&nbsp;            // We can assume other is always a Field and strict
+<i>467</i>&nbsp;            // is the same - internal usage dictates it.
+<b class="fc"><i>468</i>&nbsp;            final Field sOther = (Field) other;</b>
+<i>469</i>&nbsp;
+<b class="fc"><i>470</i>&nbsp;            return name.equals(sOther.name)</b>
+<b class="fc"><i>471</i>&nbsp;                &amp;&amp; ionEqualsImpl(value, ((Field) other).value, configuration);</b>
+<i>472</i>&nbsp;        }
+<i>473</i>&nbsp;    }
+<i>474</i>&nbsp;
+<i>475</i>&nbsp;    private static boolean ionEqualsImpl(final IonValue v1,
+<i>476</i>&nbsp;                                         final IonValue v2,
+<i>477</i>&nbsp;                                         final Configuration configuration)
+<i>478</i>&nbsp;    {
+<b class="fc"><i>479</i>&nbsp;        return (ionCompareToImpl(v1, v2, configuration) == 0);</b>
+<i>480</i>&nbsp;    }
+<i>481</i>&nbsp;
+<i>482</i>&nbsp;    private static int ionCompareToImpl(final IonValue v1,
+<i>483</i>&nbsp;                                        final IonValue v2,
+<i>484</i>&nbsp;                                        final Configuration configuration)
+<i>485</i>&nbsp;    {
+<b class="fc"><i>486</i>&nbsp;        int result = 0;</b>
+<i>487</i>&nbsp;
+<b class="fc"><i>488</i>&nbsp;        if (v1 == null || v2 == null) {</b>
+<b class="fc"><i>489</i>&nbsp;            if (v1 != null) result = 1;</b>
+<b class="fc"><i>490</i>&nbsp;            if (v2 != null) result = -1;</b>
+<i>491</i>&nbsp;            // otherwise v1 == v2 == null and result == 0
+<b class="fc"><i>492</i>&nbsp;            return result;</b>
+<i>493</i>&nbsp;        }
+<i>494</i>&nbsp;
+<i>495</i>&nbsp;        // check type
+<b class="fc"><i>496</i>&nbsp;        IonType ty1 = v1.getType();</b>
+<b class="fc"><i>497</i>&nbsp;        IonType ty2 = v2.getType();</b>
+<b class="fc"><i>498</i>&nbsp;        result = ty1.compareTo(ty2);</b>
+<i>499</i>&nbsp;
+<b class="fc"><i>500</i>&nbsp;        if (result == 0) {</b>
+<b class="fc"><i>501</i>&nbsp;            boolean bo1 = v1.isNullValue();</b>
+<b class="fc"><i>502</i>&nbsp;            boolean bo2 = v2.isNullValue();</b>
+<i>503</i>&nbsp;
+<b class="fc"><i>504</i>&nbsp;            if (bo1 || bo2) {</b>
+<i>505</i>&nbsp;                 // null combination case--we already know they are
+<i>506</i>&nbsp;                 // the same type
+<b class="fc"><i>507</i>&nbsp;                if (!bo1) result = 1;</b>
+<b class="fc"><i>508</i>&nbsp;                if (!bo2) result = -1;</b>
+<i>509</i>&nbsp;                // othersize they&#39;re equal (and null values)
+<i>510</i>&nbsp;            }
+<i>511</i>&nbsp;            else {
+<i>512</i>&nbsp;                // value compare only if both are not null
+<b class="fc"><i>513</i>&nbsp;                switch (ty1)</b>
+<i>514</i>&nbsp;                {
+<i>515</i>&nbsp;                case NULL:
+<i>516</i>&nbsp;                    // never visited, precondition is that both are not null
+<b class="nc"><i>517</i>&nbsp;                    break;</b>
+<i>518</i>&nbsp;                case BOOL:
+<b class="fc"><i>519</i>&nbsp;                    if (((IonBool) v1).booleanValue()) {</b>
+<b class="fc"><i>520</i>&nbsp;                        result = ((IonBool) v2).booleanValue() ? 0 : 1;</b>
+<i>521</i>&nbsp;                    }
+<i>522</i>&nbsp;                    else {
+<b class="fc"><i>523</i>&nbsp;                        result = ((IonBool) v2).booleanValue() ? -1 : 0;</b>
+<i>524</i>&nbsp;                    }
+<b class="fc"><i>525</i>&nbsp;                    break;</b>
+<i>526</i>&nbsp;                case INT:
+<b class="fc"><i>527</i>&nbsp;                    result = ((IonInt) v1).bigIntegerValue().compareTo(</b>
+<b class="fc"><i>528</i>&nbsp;                             ((IonInt) v2).bigIntegerValue());</b>
+<b class="fc"><i>529</i>&nbsp;                    break;</b>
+<i>530</i>&nbsp;                case FLOAT:
+<b class="fc"><i>531</i>&nbsp;                    double double1 = ((IonFloat) v1).doubleValue();</b>
+<b class="fc"><i>532</i>&nbsp;                    double double2 = ((IonFloat) v2).doubleValue();</b>
+<b class="fc"><i>533</i>&nbsp;                    if (configuration.epsilon != null</b>
+<b class="fc"><i>534</i>&nbsp;                            &amp;&amp; (double1 == double2 || Math.abs(double1 - double2) &lt;= configuration.epsilon)) {</b>
+<b class="fc"><i>535</i>&nbsp;                        result = 0;</b>
+<i>536</i>&nbsp;                    } else {
+<b class="fc"><i>537</i>&nbsp;                        result = Double.compare(double1, double2);</b>
+<i>538</i>&nbsp;                    }
+<b class="fc"><i>539</i>&nbsp;                    break;</b>
+<i>540</i>&nbsp;                case DECIMAL:
+<i>541</i>&nbsp;                    assert !PUBLIC_COMPARISON_API; // TODO amzn/ion-java/issues/26
+<b class="fc"><i>542</i>&nbsp;                    result = Decimal.equals(((IonDecimal) v1).decimalValue(),</b>
+<b class="fc"><i>543</i>&nbsp;                                            ((IonDecimal) v2).decimalValue())</b>
+<b class="fc"><i>544</i>&nbsp;                                            ? 0 : 1;</b>
+<b class="fc"><i>545</i>&nbsp;                    break;</b>
+<i>546</i>&nbsp;                case TIMESTAMP:
+<b class="fc"><i>547</i>&nbsp;                    if (configuration.isStrict) {</b>
+<i>548</i>&nbsp;                        assert !PUBLIC_COMPARISON_API; // TODO amzn/ion-java/issues/26
+<b class="fc"><i>549</i>&nbsp;                        result = (((IonTimestamp) v1).timestampValue().equals(</b>
+<b class="fc"><i>550</i>&nbsp;                                  ((IonTimestamp) v2).timestampValue())</b>
+<b class="fc"><i>551</i>&nbsp;                                  ? 0 : 1);</b>
+<i>552</i>&nbsp;                    }
+<i>553</i>&nbsp;                    else {
+<i>554</i>&nbsp;                        // This is kind of lying here, the &#39;strict&#39; boolean
+<i>555</i>&nbsp;                        // (if false) denotes ONLY that annotations are not
+<i>556</i>&nbsp;                        // check for equality. But what this is doing here is
+<i>557</i>&nbsp;                        // that it is also ignoring IonTimesamps&#39; precision and
+<i>558</i>&nbsp;                        // local offset.
+<b class="nc"><i>559</i>&nbsp;                        result = ((IonTimestamp) v1).timestampValue().compareTo(</b>
+<b class="nc"><i>560</i>&nbsp;                                 ((IonTimestamp) v2).timestampValue());</b>
+<i>561</i>&nbsp;                    }
+<b class="nc"><i>562</i>&nbsp;                    break;</b>
+<i>563</i>&nbsp;                case STRING:
+<b class="fc"><i>564</i>&nbsp;                    result = (((IonText) v1).stringValue()).compareTo(</b>
+<b class="fc"><i>565</i>&nbsp;                              ((IonText) v2).stringValue());</b>
+<b class="fc"><i>566</i>&nbsp;                    break;</b>
+<i>567</i>&nbsp;                case SYMBOL:
+<b class="fc"><i>568</i>&nbsp;                    result = compareSymbolTokens(((IonSymbol) v1).symbolValue(),</b>
+<b class="fc"><i>569</i>&nbsp;                                                 ((IonSymbol) v2).symbolValue());</b>
+<b class="fc"><i>570</i>&nbsp;                    break;</b>
+<i>571</i>&nbsp;                case BLOB:
+<i>572</i>&nbsp;                case CLOB:
+<b class="fc"><i>573</i>&nbsp;                    result = compareLobContents((IonLob) v1, (IonLob) v2);</b>
+<b class="fc"><i>574</i>&nbsp;                    break;</b>
+<i>575</i>&nbsp;                case STRUCT:
+<i>576</i>&nbsp;                    assert !PUBLIC_COMPARISON_API; // TODO amzn/ion-java/issues/26
+<b class="fc"><i>577</i>&nbsp;                    result = compareStructs((IonStruct) v1,</b>
+<i>578</i>&nbsp;                                            (IonStruct) v2,
+<i>579</i>&nbsp;                                            configuration);
+<b class="fc"><i>580</i>&nbsp;                    break;</b>
+<i>581</i>&nbsp;                case LIST:
+<i>582</i>&nbsp;                case SEXP:
+<i>583</i>&nbsp;                case DATAGRAM:
+<b class="fc"><i>584</i>&nbsp;                    result = compareSequences((IonSequence) v1,</b>
+<i>585</i>&nbsp;                                              (IonSequence) v2,
+<i>586</i>&nbsp;                                              configuration);
+<i>587</i>&nbsp;                    break;
+<i>588</i>&nbsp;                }
+<i>589</i>&nbsp;            }
+<i>590</i>&nbsp;        }
+<i>591</i>&nbsp;
+<i>592</i>&nbsp;        // if the values are otherwise equal, but the caller wants strict
+<i>593</i>&nbsp;        // comparison, then we check the annotations
+<b class="fc"><i>594</i>&nbsp;        if ((result == 0) &amp;&amp; configuration.isStrict) {</b>
+<i>595</i>&nbsp;            // check tuple equality over the annotations
+<i>596</i>&nbsp;            // (which are symbol tokens)
+<b class="fc"><i>597</i>&nbsp;            result = compareAnnotations(v1.getTypeAnnotationSymbols(),</b>
+<b class="fc"><i>598</i>&nbsp;                                        v2.getTypeAnnotationSymbols());</b>
+<i>599</i>&nbsp;        }
+<i>600</i>&nbsp;
+<b class="fc"><i>601</i>&nbsp;        return result;</b>
+<i>602</i>&nbsp;    }
+<i>603</i>&nbsp;
+<i>604</i>&nbsp;    /**
+<i>605</i>&nbsp;     * Checks for strict data equivalence over two Ion Values.
+<i>606</i>&nbsp;     *
+<i>607</i>&nbsp;     * @param v1
+<i>608</i>&nbsp;     *            The first Ion value to compare.
+<i>609</i>&nbsp;     * @param v2
+<i>610</i>&nbsp;     *            The second Ion value to compare.
+<i>611</i>&nbsp;     *
+<i>612</i>&nbsp;     * @return true if two Ion Values represent the same data.
+<i>613</i>&nbsp;     */
+<i>614</i>&nbsp;    public static boolean ionEquals(final IonValue v1,
+<i>615</i>&nbsp;                                    final IonValue v2)
+<i>616</i>&nbsp;    {
+<b class="fc"><i>617</i>&nbsp;        return ionEqualsImpl(v1, v2, STRICT_CONFIGURATION);</b>
+<i>618</i>&nbsp;    }
+<i>619</i>&nbsp;
+<i>620</i>&nbsp;    /**
+<i>621</i>&nbsp;     * Checks for structural data equivalence over two Ion Values. That is,
+<i>622</i>&nbsp;     * equivalence without considering any annotations.
+<i>623</i>&nbsp;     *
+<i>624</i>&nbsp;     * @param v1
+<i>625</i>&nbsp;     *            The first Ion value to compare.
+<i>626</i>&nbsp;     * @param v2
+<i>627</i>&nbsp;     *            The second Ion value to compare.
+<i>628</i>&nbsp;     *
+<i>629</i>&nbsp;     * @return true if two Ion Values represent the same data without regard to
+<i>630</i>&nbsp;     *         annotations.
+<i>631</i>&nbsp;     */
+<i>632</i>&nbsp;    public static boolean ionEqualsByContent(final IonValue v1,
+<i>633</i>&nbsp;                                             final IonValue v2)
+<i>634</i>&nbsp;    {
+<b class="fc"><i>635</i>&nbsp;        return ionEqualsImpl(v1, v2, NON_STRICT_CONFIGURATION);</b>
+<i>636</i>&nbsp;    }
+<i>637</i>&nbsp;
+<i>638</i>&nbsp;    /**
+<i>639</i>&nbsp;     * Checks for data equivalence over two Ion values using this Equivalence&#39;s
+<i>640</i>&nbsp;     * configuration
+<i>641</i>&nbsp;     *
+<i>642</i>&nbsp;     * @see Builder
+<i>643</i>&nbsp;     *
+<i>644</i>&nbsp;     * @param v1
+<i>645</i>&nbsp;     *            The first Ion value to compare.
+<i>646</i>&nbsp;     * @param v2
+<i>647</i>&nbsp;     *            The second Ion value to compare.
+<i>648</i>&nbsp;     *
+<i>649</i>&nbsp;     * @return true if two Ion Values represent the same data.
+<i>650</i>&nbsp;     */
+<i>651</i>&nbsp;    public boolean ionValueEquals(final IonValue v1, final IonValue v2) {
+<b class="fc"><i>652</i>&nbsp;        return ionEqualsImpl(v1, v2, configuration);</b>
+<i>653</i>&nbsp;    }
+<i>654</i>&nbsp;
+<i>655</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,212 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: Facets</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.facet</a> ]
+</div>
+
+<h1>Coverage Summary for Class: Facets (com.amazon.ion.facet)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Facets</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (4/ 5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94.7%
+  </span>
+  <span class="absValue">
+    (18/ 19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.facet;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;/**
+<i>19</i>&nbsp; * Utility methods for working with facets.
+<i>20</i>&nbsp; *
+<i>21</i>&nbsp; * @see Faceted
+<i>22</i>&nbsp; *
+<i>23</i>&nbsp; */
+<b class="nc"><i>24</i>&nbsp;public class Facets</b>
+<i>25</i>&nbsp;{
+<i>26</i>&nbsp;    //   *** IMPLEMENTATION NOTE ***
+<i>27</i>&nbsp;    //
+<i>28</i>&nbsp;    // In order to ensure fast operation, the code here is denormalized.
+<i>29</i>&nbsp;    // It&#39;s very simple so I find that preferable to additional null-checks
+<i>30</i>&nbsp;    // that would be required by following the &quot;Once And Only Once&quot; rule.
+<i>31</i>&nbsp;
+<i>32</i>&nbsp;
+<i>33</i>&nbsp;    /**
+<i>34</i>&nbsp;     * Returns a facet of the given subject if supported, returning null
+<i>35</i>&nbsp;     * otherwise.
+<i>36</i>&nbsp;     * &lt;p&gt;
+<i>37</i>&nbsp;     * This does not attempt to cast the subject to the requested type, since
+<i>38</i>&nbsp;     * the {@link Faceted} interface declares the intent to control the
+<i>39</i>&nbsp;     * conversion.
+<i>40</i>&nbsp;     *
+<i>41</i>&nbsp;     * @return the requested facet, or null if {@code subject} is null or if
+<i>42</i>&nbsp;     *  subject doesn&#39;t support the requested facet type.
+<i>43</i>&nbsp;     */
+<i>44</i>&nbsp;    public static &lt;T&gt; T asFacet(Class&lt;T&gt; facetType, Faceted subject)
+<i>45</i>&nbsp;    {
+<b class="fc"><i>46</i>&nbsp;        return subject == null ? null : subject.asFacet(facetType);</b>
+<i>47</i>&nbsp;    }
+<i>48</i>&nbsp;
+<i>49</i>&nbsp;
+<i>50</i>&nbsp;    /**
+<i>51</i>&nbsp;     * Returns a facet of the given subject if supported, returning null
+<i>52</i>&nbsp;     * otherwise.
+<i>53</i>&nbsp;     * &lt;p&gt;
+<i>54</i>&nbsp;     * If the subject implements {@link Faceted}, then this conversion is
+<i>55</i>&nbsp;     * delegated to {@link Faceted#asFacet(Class)}. Otherwise, a simple
+<i>56</i>&nbsp;     * cast of the subject is attempted.
+<i>57</i>&nbsp;     *
+<i>58</i>&nbsp;     * @return the requested facet, or null if {@code subject} is null or if
+<i>59</i>&nbsp;     *  subject doesn&#39;t support the requested facet type.
+<i>60</i>&nbsp;     */
+<i>61</i>&nbsp;    public static &lt;T&gt; T asFacet(Class&lt;T&gt; facetType, Object subject)
+<i>62</i>&nbsp;    {
+<b class="fc"><i>63</i>&nbsp;        T facet = null;</b>
+<b class="fc"><i>64</i>&nbsp;        if (subject instanceof Faceted)</b>
+<i>65</i>&nbsp;        {
+<b class="fc"><i>66</i>&nbsp;            facet = ((Faceted)subject).asFacet(facetType);</b>
+<i>67</i>&nbsp;        }
+<b class="fc"><i>68</i>&nbsp;        else if (facetType.isInstance(subject))</b>
+<i>69</i>&nbsp;        {
+<b class="fc"><i>70</i>&nbsp;            facet = facetType.cast(subject);</b>
+<i>71</i>&nbsp;        }
+<i>72</i>&nbsp;
+<b class="fc"><i>73</i>&nbsp;        return facet;</b>
+<i>74</i>&nbsp;    }
+<i>75</i>&nbsp;
+<i>76</i>&nbsp;
+<i>77</i>&nbsp;    /**
+<i>78</i>&nbsp;     * Returns a facet of the given subject if supported, throwing an
+<i>79</i>&nbsp;     * exception otherwise.
+<i>80</i>&nbsp;     * &lt;p&gt;
+<i>81</i>&nbsp;     * This does not attempt to cast the subject to the requested type, since
+<i>82</i>&nbsp;     * the {@link Faceted} interface declares the intent to control the
+<i>83</i>&nbsp;     * conversion.
+<i>84</i>&nbsp;     *
+<i>85</i>&nbsp;     * @return not null.
+<i>86</i>&nbsp;     *
+<i>87</i>&nbsp;     * @throws UnsupportedFacetException if {@code subject} is null or if the
+<i>88</i>&nbsp;     *  subject doesn&#39;t support the requested facet type.
+<i>89</i>&nbsp;     */
+<i>90</i>&nbsp;    public static &lt;T&gt; T assumeFacet(Class&lt;T&gt; facetType, Faceted subject)
+<i>91</i>&nbsp;    {
+<b class="fc"><i>92</i>&nbsp;        if (subject != null)</b>
+<i>93</i>&nbsp;        {
+<b class="fc"><i>94</i>&nbsp;            T facet = subject.asFacet(facetType);</b>
+<b class="fc"><i>95</i>&nbsp;            if (facet != null) return facet;</b>
+<i>96</i>&nbsp;        }
+<i>97</i>&nbsp;
+<b class="fc"><i>98</i>&nbsp;        throw new UnsupportedFacetException(facetType, subject);</b>
+<i>99</i>&nbsp;    }
+<i>100</i>&nbsp;
+<i>101</i>&nbsp;
+<i>102</i>&nbsp;    /**
+<i>103</i>&nbsp;     * Returns a facet of the given subject if supported, throwing an
+<i>104</i>&nbsp;     * exception otherwise.
+<i>105</i>&nbsp;     * &lt;p&gt;
+<i>106</i>&nbsp;     * If the subject implements {@link Faceted}, then this conversion is
+<i>107</i>&nbsp;     * delegated to {@link Faceted#asFacet(Class)}. Otherwise, a simple
+<i>108</i>&nbsp;     * cast of the subject is attempted.
+<i>109</i>&nbsp;     *
+<i>110</i>&nbsp;     * @return not null.
+<i>111</i>&nbsp;     *
+<i>112</i>&nbsp;     * @throws UnsupportedFacetException if {@code subject} is null or if the
+<i>113</i>&nbsp;     *  subject doesn&#39;t support the requested facet type.
+<i>114</i>&nbsp;     */
+<i>115</i>&nbsp;    public static &lt;T&gt; T assumeFacet(Class&lt;T&gt; facetType, Object subject)
+<i>116</i>&nbsp;    {
+<b class="fc"><i>117</i>&nbsp;        if (subject instanceof Faceted)</b>
+<i>118</i>&nbsp;        {
+<b class="fc"><i>119</i>&nbsp;            T facet = ((Faceted)subject).asFacet(facetType);</b>
+<b class="fc"><i>120</i>&nbsp;            if (facet != null) return facet;</b>
+<b class="fc"><i>121</i>&nbsp;        }</b>
+<b class="fc"><i>122</i>&nbsp;        else if (facetType.isInstance(subject))</b>
+<i>123</i>&nbsp;        {
+<b class="fc"><i>124</i>&nbsp;            return facetType.cast(subject);</b>
+<i>125</i>&nbsp;        }
+<i>126</i>&nbsp;
+<b class="fc"><i>127</i>&nbsp;        throw new UnsupportedFacetException(facetType, subject);</b>
+<i>128</i>&nbsp;    }
+<i>129</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

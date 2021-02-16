@@ -1,0 +1,763 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonSystem</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonSystem (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonSystem</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import com.amazon.ion.system.IonSystemBuilder;
+<i>19</i>&nbsp;import com.amazon.ion.system.IonTextWriterBuilder;
+<i>20</i>&nbsp;import java.io.IOException;
+<i>21</i>&nbsp;import java.io.InputStream;
+<i>22</i>&nbsp;import java.io.OutputStream;
+<i>23</i>&nbsp;import java.io.Reader;
+<i>24</i>&nbsp;import java.util.Date;
+<i>25</i>&nbsp;import java.util.Iterator;
+<i>26</i>&nbsp;
+<i>27</i>&nbsp;/**
+<i>28</i>&nbsp; * Entry point to all things Ion.
+<i>29</i>&nbsp; * &lt;p&gt;
+<i>30</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>31</i>&nbsp; * code outside of this library.
+<i>32</i>&nbsp; * &lt;p&gt;
+<i>33</i>&nbsp; * In general, {@link IonValue} instances returned from one system instance
+<i>34</i>&nbsp; * are not interoperable with those returned by other instances.
+<i>35</i>&nbsp; * The intended usage pattern is for an application to construct a single
+<i>36</i>&nbsp; * &lt;code&gt;IonSystem&lt;/code&gt; instance and use it throughout,
+<i>37</i>&nbsp; * rather than constructing multiple systems and intermingling their use.
+<i>38</i>&nbsp; * To create a copy of a value for use by a different system, use
+<i>39</i>&nbsp; * {@link #clone(IonValue)}.
+<i>40</i>&nbsp; * &lt;p&gt;
+<i>41</i>&nbsp; * To create an {@code IonSystem},
+<i>42</i>&nbsp; * see {@link com.amazon.ion.system.IonSystemBuilder}.
+<i>43</i>&nbsp; * &lt;p&gt;
+<i>44</i>&nbsp; * &lt;b&gt;Implementations of this interface are safe for use by multiple
+<i>45</i>&nbsp; * threads.&lt;/b&gt;
+<i>46</i>&nbsp; *
+<i>47</i>&nbsp; * @see IonSystemBuilder
+<i>48</i>&nbsp; */
+<i>49</i>&nbsp;public interface IonSystem
+<i>50</i>&nbsp;    extends ValueFactory
+<i>51</i>&nbsp;{
+<i>52</i>&nbsp;    /**
+<i>53</i>&nbsp;     * Gets the default system symbol table.
+<i>54</i>&nbsp;     *
+<i>55</i>&nbsp;     * @return not null.
+<i>56</i>&nbsp;     */
+<i>57</i>&nbsp;    public SymbolTable getSystemSymbolTable();
+<i>58</i>&nbsp;
+<i>59</i>&nbsp;
+<i>60</i>&nbsp;    /**
+<i>61</i>&nbsp;     * Gets a system symbol table for a specific version of Ion.
+<i>62</i>&nbsp;     *
+<i>63</i>&nbsp;     * @param ionVersionId must be of the form &lt;code&gt;&quot;$ion_X_Y&quot;&lt;/code&gt;.
+<i>64</i>&nbsp;     * @return the requested system table.
+<i>65</i>&nbsp;     *
+<i>66</i>&nbsp;     * @throws UnsupportedIonVersionException if the requested version of
+<i>67</i>&nbsp;     * Ion is not supported by this implementation.
+<i>68</i>&nbsp;     */
+<i>69</i>&nbsp;    public SymbolTable getSystemSymbolTable(String ionVersionId)
+<i>70</i>&nbsp;        throws UnsupportedIonVersionException;
+<i>71</i>&nbsp;
+<i>72</i>&nbsp;
+<i>73</i>&nbsp;    /**
+<i>74</i>&nbsp;     * Gets the catalog used by this system.  Unless otherwise noted,
+<i>75</i>&nbsp;     * all objects derived from this system will use this catalog.
+<i>76</i>&nbsp;     *
+<i>77</i>&nbsp;     * @return this system&#39;s default catalog; not null.
+<i>78</i>&nbsp;     */
+<i>79</i>&nbsp;    public IonCatalog getCatalog();
+<i>80</i>&nbsp;
+<i>81</i>&nbsp;
+<i>82</i>&nbsp;    /**
+<i>83</i>&nbsp;     * Creates a new local symbol table based on specific imported tables.
+<i>84</i>&nbsp;     * If the first imported table is a system table, then the local table will
+<i>85</i>&nbsp;     * use it appropriately. Otherwise, the local table will use this system&#39;s
+<i>86</i>&nbsp;     * {@linkplain #getSystemSymbolTable() default system symbol table}.
+<i>87</i>&nbsp;     *
+<i>88</i>&nbsp;     * @param imports the set of shared symbol tables to import.
+<i>89</i>&nbsp;     * The first (and only the first) may be a system table.
+<i>90</i>&nbsp;     *
+<i>91</i>&nbsp;     * @return a new local symbol table.
+<i>92</i>&nbsp;     *
+<i>93</i>&nbsp;     * @throws IllegalArgumentException if any import is a local table,
+<i>94</i>&nbsp;     * or if any but the first is a system table.
+<i>95</i>&nbsp;     * @throws NullPointerException if any import is null.
+<i>96</i>&nbsp;     */
+<i>97</i>&nbsp;    // TODO amzn/ion-java/issues/38 Should we allow substituted imports as valid args?
+<i>98</i>&nbsp;    public SymbolTable newLocalSymbolTable(SymbolTable... imports);
+<i>99</i>&nbsp;
+<i>100</i>&nbsp;
+<i>101</i>&nbsp;    //-------------------------------------------------------------------------
+<i>102</i>&nbsp;    // Shared symtab factory methods
+<i>103</i>&nbsp;
+<i>104</i>&nbsp;
+<i>105</i>&nbsp;    /*              ===========================
+<i>106</i>&nbsp;     *              =                         =
+<i>107</i>&nbsp;     *              =    I M P O R T A N T    =
+<i>108</i>&nbsp;     *              =                         =
+<i>109</i>&nbsp;     *              ===========================
+<i>110</i>&nbsp;     *
+<i>111</i>&nbsp;     * Any new factory methods MUST be added to the SharedSymtabMaker
+<i>112</i>&nbsp;     * enumeration to ensure complete test coverage!
+<i>113</i>&nbsp;     */
+<i>114</i>&nbsp;
+<i>115</i>&nbsp;
+<i>116</i>&nbsp;    /**
+<i>117</i>&nbsp;     * Creates a new shared symbol table containing a given set of symbols.
+<i>118</i>&nbsp;     * The table will contain symbols in the following order:
+<i>119</i>&nbsp;     * &lt;ol&gt;
+<i>120</i>&nbsp;     *   &lt;li&gt;
+<i>121</i>&nbsp;     *     If {@code version} is larger than 1, the prior version of the
+<i>122</i>&nbsp;     *     named table is retrieved from the catalog and all of its symbols
+<i>123</i>&nbsp;     *     are added.
+<i>124</i>&nbsp;     *   &lt;/li&gt;
+<i>125</i>&nbsp;     *   &lt;li&gt;
+<i>126</i>&nbsp;     *     For each non-system table in {@code imports}, add all of its
+<i>127</i>&nbsp;     *     declared symbols.
+<i>128</i>&nbsp;     *   &lt;/li&gt;
+<i>129</i>&nbsp;     *   &lt;li&gt;
+<i>130</i>&nbsp;     *     Add all of the symbols provided by {@code newSymbols}.
+<i>131</i>&nbsp;     *   &lt;/li&gt;
+<i>132</i>&nbsp;     * &lt;/ol&gt;
+<i>133</i>&nbsp;     * Any duplicate symbol texts or null strings are ignored.
+<i>134</i>&nbsp;     * &lt;p&gt;
+<i>135</i>&nbsp;     * This method is intended for use by utilities that are defining new
+<i>136</i>&nbsp;     * symbol tables for use by applications. The result will typically be
+<i>137</i>&nbsp;     * added to an {@link IonCatalog} which is responsible for persistence.
+<i>138</i>&nbsp;     * Shared symbol tables are serialized via
+<i>139</i>&nbsp;     * {@link SymbolTable#writeTo(IonWriter)} and materialized via
+<i>140</i>&nbsp;     * {@link #newSharedSymbolTable(IonReader)}.
+<i>141</i>&nbsp;     *
+<i>142</i>&nbsp;     * @param name the symbol table name, a non-empty string.
+<i>143</i>&nbsp;     * @param version at least one.
+<i>144</i>&nbsp;     * @param newSymbols provides symbol names; may be null.
+<i>145</i>&nbsp;     * @param imports other tables from which to import symbols.
+<i>146</i>&nbsp;     *
+<i>147</i>&nbsp;     * @return a new shared symbol table with the given name and version.
+<i>148</i>&nbsp;     *
+<i>149</i>&nbsp;     * @throws IonException if {@code version &gt; 1} and the prior version does
+<i>150</i>&nbsp;     * not exist in this system&#39;s catalog.
+<i>151</i>&nbsp;     */
+<i>152</i>&nbsp;    public SymbolTable newSharedSymbolTable(String name,
+<i>153</i>&nbsp;                                            int version,
+<i>154</i>&nbsp;                                            Iterator&lt;String&gt; newSymbols,
+<i>155</i>&nbsp;                                            SymbolTable... imports);
+<i>156</i>&nbsp;
+<i>157</i>&nbsp;    /**
+<i>158</i>&nbsp;     * Materializes a shared symbol table from its serialized form.
+<i>159</i>&nbsp;     * This method expects the reader to be positioned before the struct.
+<i>160</i>&nbsp;     * Which is to say the reader&#39;s next() method has not been called
+<i>161</i>&nbsp;     * to position the reader on the symbol table struct.
+<i>162</i>&nbsp;     *
+<i>163</i>&nbsp;     * @param reader must not be null.
+<i>164</i>&nbsp;     *
+<i>165</i>&nbsp;     * @return a new symbol table instance.
+<i>166</i>&nbsp;     */
+<i>167</i>&nbsp;    public SymbolTable newSharedSymbolTable(IonReader reader);
+<i>168</i>&nbsp;
+<i>169</i>&nbsp;    /**
+<i>170</i>&nbsp;     * Materializes a shared symbol table from its serialized form.
+<i>171</i>&nbsp;     *
+<i>172</i>&nbsp;     * @param reader must not be null.
+<i>173</i>&nbsp;     * @param alreadyOnStruct is true if the caller has aleady next-ed onto the struct, false if a next call is needed
+<i>174</i>&nbsp;     *
+<i>175</i>&nbsp;     * @return a new symbol table instance.
+<i>176</i>&nbsp;     */
+<i>177</i>&nbsp;    public SymbolTable newSharedSymbolTable(IonReader reader, boolean alreadyOnStruct);
+<i>178</i>&nbsp;
+<i>179</i>&nbsp;
+<i>180</i>&nbsp;    //-------------------------------------------------------------------------
+<i>181</i>&nbsp;
+<i>182</i>&nbsp;    /**
+<i>183</i>&nbsp;     * Constructs a new loader instance using the
+<i>184</i>&nbsp;     * {@linkplain #getCatalog() default system catalog}.
+<i>185</i>&nbsp;     */
+<i>186</i>&nbsp;    public IonLoader newLoader();
+<i>187</i>&nbsp;
+<i>188</i>&nbsp;    /**
+<i>189</i>&nbsp;     * Constructs a new loader instance using the given catalog.
+<i>190</i>&nbsp;     *
+<i>191</i>&nbsp;     * @param catalog may be null, in which case the loader will use the
+<i>192</i>&nbsp;     * {@linkplain #getCatalog() default system catalog}.
+<i>193</i>&nbsp;     *
+<i>194</i>&nbsp;     * @see #newLoader()
+<i>195</i>&nbsp;     */
+<i>196</i>&nbsp;    public IonLoader newLoader(IonCatalog catalog);
+<i>197</i>&nbsp;
+<i>198</i>&nbsp;    /**
+<i>199</i>&nbsp;     * Gets the default system loader.  Applications may replace this loader
+<i>200</i>&nbsp;     * with one configured appropriately, and then access it here.
+<i>201</i>&nbsp;     *
+<i>202</i>&nbsp;     * @return not &lt;code&gt;null&lt;/code&gt;.
+<i>203</i>&nbsp;     */
+<i>204</i>&nbsp;    public IonLoader getLoader();
+<i>205</i>&nbsp;
+<i>206</i>&nbsp;
+<i>207</i>&nbsp;    /**
+<i>208</i>&nbsp;     * Creates an iterator over a stream of Ion text data.
+<i>209</i>&nbsp;     * Values returned by the iterator have no container.
+<i>210</i>&nbsp;     * &lt;p&gt;
+<i>211</i>&nbsp;     * The iterator will automatically consume Ion system IDs and local symbol
+<i>212</i>&nbsp;     * tables; they will not be returned by the iterator.
+<i>213</i>&nbsp;     * &lt;p&gt;
+<i>214</i>&nbsp;     * If the input source throws an {@link IOException} during iteration, it
+<i>215</i>&nbsp;     * will be wrapped in an {@link IonException}. See documentation there for
+<i>216</i>&nbsp;     * tips on how to recover the cause.
+<i>217</i>&nbsp;     * &lt;p&gt;
+<i>218</i>&nbsp;     * This method is suitable for use over unbounded streams with a reasonable
+<i>219</i>&nbsp;     * schema.
+<i>220</i>&nbsp;     * &lt;p&gt;
+<i>221</i>&nbsp;     * Applications should generally use {@link #iterate(InputStream)}
+<i>222</i>&nbsp;     * whenever possible, since this library has much faster Unicode decoding
+<i>223</i>&nbsp;     * than the Java IO framework.
+<i>224</i>&nbsp;     * &lt;p&gt;
+<i>225</i>&nbsp;     * Because this library performs its own buffering, it&#39;s recommended that
+<i>226</i>&nbsp;     * you avoid adding additional buffering to the given stream.
+<i>227</i>&nbsp;     *
+<i>228</i>&nbsp;     * @param ionText a stream of Ion text data.  The caller is responsible for
+<i>229</i>&nbsp;     * closing the Reader after iteration is complete.
+<i>230</i>&nbsp;     *
+<i>231</i>&nbsp;     * @return a new iterator instance.
+<i>232</i>&nbsp;     *
+<i>233</i>&nbsp;     * @throws NullPointerException if &lt;code&gt;ionText&lt;/code&gt; is null.
+<i>234</i>&nbsp;     * @throws IonException if the source throws {@link IOException}.
+<i>235</i>&nbsp;     */
+<i>236</i>&nbsp;    public Iterator&lt;IonValue&gt; iterate(Reader ionText);
+<i>237</i>&nbsp;
+<i>238</i>&nbsp;
+<i>239</i>&nbsp;    /**
+<i>240</i>&nbsp;     * &lt;p&gt;
+<i>241</i>&nbsp;     * &lt;strong&gt;WARNING: Will cause a memory leak when reading a gzipped stream, use
+<i>242</i>&nbsp;     * {@link IonSystem#iterate(IonReader)} instead.&lt;/strong&gt;
+<i>243</i>&nbsp;     * &lt;/p&gt;
+<i>244</i>&nbsp;     *
+<i>245</i>&nbsp;     * Creates an iterator over a stream of Ion data,
+<i>246</i>&nbsp;     * detecting whether it&#39;s text or binary data.
+<i>247</i>&nbsp;     * Values returned by the iterator have no container.
+<i>248</i>&nbsp;     * &lt;p&gt;
+<i>249</i>&nbsp;     * The iterator will automatically consume Ion system IDs and local symbol
+<i>250</i>&nbsp;     * tables; they will not be returned by the iterator.
+<i>251</i>&nbsp;     * &lt;p&gt;
+<i>252</i>&nbsp;     * If the input source throws an {@link IOException} during iteration, it
+<i>253</i>&nbsp;     * will be wrapped in an {@link IonException}. See documentation there for
+<i>254</i>&nbsp;     * tips on how to recover the cause.
+<i>255</i>&nbsp;     * &lt;p&gt;
+<i>256</i>&nbsp;     * This method is suitable for use over unbounded streams with a reasonable
+<i>257</i>&nbsp;     * schema.
+<i>258</i>&nbsp;     * &lt;p&gt;
+<i>259</i>&nbsp;     * This method will auto-detect and uncompress GZIPped Ion data.
+<i>260</i>&nbsp;     * &lt;p&gt;
+<i>261</i>&nbsp;     * Because this library performs its own buffering, it&#39;s recommended that
+<i>262</i>&nbsp;     * you avoid adding additional buffering to the given stream.
+<i>263</i>&nbsp;     *
+<i>264</i>&nbsp;     * @param ionData a stream of Ion data.  The caller is responsible for
+<i>265</i>&nbsp;     * closing the InputStream after iteration is complete.
+<i>266</i>&nbsp;     *
+<i>267</i>&nbsp;     * @return a new iterator instance.
+<i>268</i>&nbsp;     *
+<i>269</i>&nbsp;     * @throws NullPointerException if &lt;code&gt;ionData&lt;/code&gt; is null.
+<i>270</i>&nbsp;     * @throws IonException if the source throws {@link IOException}.
+<i>271</i>&nbsp;     *
+<i>272</i>&nbsp;     * @deprecated Will cause a memory leak when reading a gzipped stream.
+<i>273</i>&nbsp;     * Use {@link IonSystem#iterate(IonReader)} instead.
+<i>274</i>&nbsp;     */
+<i>275</i>&nbsp;    @Deprecated
+<i>276</i>&nbsp;    public Iterator&lt;IonValue&gt; iterate(InputStream ionData);
+<i>277</i>&nbsp;
+<i>278</i>&nbsp;    /**
+<i>279</i>&nbsp;     * Creates an iterator over a string containing Ion text data.
+<i>280</i>&nbsp;     * Values returned by the iterator have no container.
+<i>281</i>&nbsp;     * &lt;p&gt;
+<i>282</i>&nbsp;     * The iterator will automatically consume Ion system IDs and local symbol
+<i>283</i>&nbsp;     * tables; they will not be returned by the iterator.
+<i>284</i>&nbsp;     *
+<i>285</i>&nbsp;     * @param ionText must not be null.
+<i>286</i>&nbsp;     *
+<i>287</i>&nbsp;     * @return a new iterator instance.
+<i>288</i>&nbsp;     *
+<i>289</i>&nbsp;     * @throws NullPointerException if &lt;code&gt;ionText&lt;/code&gt; is null.
+<i>290</i>&nbsp;     */
+<i>291</i>&nbsp;    public Iterator&lt;IonValue&gt; iterate(String ionText);
+<i>292</i>&nbsp;
+<i>293</i>&nbsp;    /**
+<i>294</i>&nbsp;     * &lt;p&gt;
+<i>295</i>&nbsp;     * &lt;strong&gt;WARNING: Will cause a memory leak when reading a gzipped byte[], use
+<i>296</i>&nbsp;     * {@link IonSystem#iterate(IonReader)} instead.&lt;/strong&gt;
+<i>297</i>&nbsp;     * &lt;/p&gt;
+<i>298</i>&nbsp;     *
+<i>299</i>&nbsp;     * Creates an iterator over Ion data.
+<i>300</i>&nbsp;     * Values returned by the iterator have no container.
+<i>301</i>&nbsp;     * &lt;p&gt;
+<i>302</i>&nbsp;     * The iterator will automatically consume Ion system IDs and local symbol
+<i>303</i>&nbsp;     * tables; they will not be returned by the iterator.
+<i>304</i>&nbsp;     * &lt;p&gt;
+<i>305</i>&nbsp;     * This method will auto-detect and uncompress GZIPped Ion data.
+<i>306</i>&nbsp;     *
+<i>307</i>&nbsp;     * @param ionData may be either Ion binary data or (UTF-8) Ion text, or
+<i>308</i>&nbsp;     * GZIPped Ion data.
+<i>309</i>&nbsp;     * &lt;em&gt;This method assumes ownership of the array&lt;/em&gt; and may modify it at
+<i>310</i>&nbsp;     * will.
+<i>311</i>&nbsp;     *
+<i>312</i>&nbsp;     * @return a new iterator instance.
+<i>313</i>&nbsp;     *
+<i>314</i>&nbsp;     * @throws NullPointerException if &lt;code&gt;ionData&lt;/code&gt; is null.
+<i>315</i>&nbsp;     *
+<i>316</i>&nbsp;     * @deprecated Will cause a memory leak when reading a gzipped byte[].
+<i>317</i>&nbsp;     * Use {@link IonSystem#iterate(IonReader)} instead.
+<i>318</i>&nbsp;     */
+<i>319</i>&nbsp;    @Deprecated
+<i>320</i>&nbsp;    public Iterator&lt;IonValue&gt; iterate(byte[] ionData);
+<i>321</i>&nbsp;
+<i>322</i>&nbsp;    /**
+<i>323</i>&nbsp;     * &lt;p&gt;
+<i>324</i>&nbsp;     * Creates an iterator over Ion data.
+<i>325</i>&nbsp;     * Values returned by the iterator have no container.
+<i>326</i>&nbsp;     * &lt;/p&gt;
+<i>327</i>&nbsp;     * &lt;p&gt;
+<i>328</i>&nbsp;     * The iterator will automatically consume Ion system IDs and local symbol
+<i>329</i>&nbsp;     * tables; they will not be returned by the iterator.
+<i>330</i>&nbsp;     * &lt;/p&gt;
+<i>331</i>&nbsp;     *
+<i>332</i>&nbsp;     * @param reader source of the Ion data to iterate over.
+<i>333</i>&nbsp;     *
+<i>334</i>&nbsp;     * @return a new iterator instance.
+<i>335</i>&nbsp;     *
+<i>336</i>&nbsp;     * @throws NullPointerException if &lt;code&gt;reader&lt;/code&gt; is null.
+<i>337</i>&nbsp;     */
+<i>338</i>&nbsp;    public Iterator&lt;IonValue&gt; iterate(IonReader reader);
+<i>339</i>&nbsp;
+<i>340</i>&nbsp;    /**
+<i>341</i>&nbsp;     * Extracts a single value from Ion text data.
+<i>342</i>&nbsp;     *
+<i>343</i>&nbsp;     * @param ionText must not be null.
+<i>344</i>&nbsp;     *
+<i>345</i>&nbsp;     * @return the first (and only) user value in the data; not null.
+<i>346</i>&nbsp;     *
+<i>347</i>&nbsp;     * @throws NullPointerException if &lt;code&gt;ionText&lt;/code&gt; is null.
+<i>348</i>&nbsp;     * @throws UnexpectedEofException if the data doesn&#39;t contain any user
+<i>349</i>&nbsp;     * values.
+<i>350</i>&nbsp;     * @throws IonException if the data does not contain exactly one user
+<i>351</i>&nbsp;     * value.
+<i>352</i>&nbsp;     */
+<i>353</i>&nbsp;    public IonValue singleValue(String ionText);
+<i>354</i>&nbsp;
+<i>355</i>&nbsp;
+<i>356</i>&nbsp;    /**
+<i>357</i>&nbsp;     * Extracts a single value from Ion text or binary data.
+<i>358</i>&nbsp;     * &lt;p&gt;
+<i>359</i>&nbsp;     * This method will auto-detect and uncompress GZIPped Ion data.
+<i>360</i>&nbsp;     *
+<i>361</i>&nbsp;     * @param ionData may be either Ion binary data or (UTF-8) Ion text, or
+<i>362</i>&nbsp;     * GZIPped Ion data.
+<i>363</i>&nbsp;     * &lt;em&gt;This method assumes ownership of the array&lt;/em&gt; and may modify it at
+<i>364</i>&nbsp;     * will.
+<i>365</i>&nbsp;     *
+<i>366</i>&nbsp;     * @return the first (and only) user value in the data; not null.
+<i>367</i>&nbsp;     *
+<i>368</i>&nbsp;     * @throws NullPointerException if {@code ionData} is null.
+<i>369</i>&nbsp;     * @throws UnexpectedEofException if the data doesn&#39;t contain any user
+<i>370</i>&nbsp;     * values.
+<i>371</i>&nbsp;     * @throws IonException if the data does not contain exactly one user
+<i>372</i>&nbsp;     * value.
+<i>373</i>&nbsp;     */
+<i>374</i>&nbsp;    public IonValue singleValue(byte[] ionData);
+<i>375</i>&nbsp;
+<i>376</i>&nbsp;    /**
+<i>377</i>&nbsp;     * Extracts a single value from Ion text or binary data.
+<i>378</i>&nbsp;     * &lt;p&gt;
+<i>379</i>&nbsp;     * This method will auto-detect and uncompress GZIPped Ion data.
+<i>380</i>&nbsp;     *
+<i>381</i>&nbsp;     * @param ionData is used only within the range of bytes starting at
+<i>382</i>&nbsp;     * {@code offset} for {@code len} bytes.
+<i>383</i>&nbsp;     * The data in that range may be either Ion binary data, or UTF-8 Ion text.
+<i>384</i>&nbsp;     * @param offset must be non-negative and less than {@code ionData.length}.
+<i>385</i>&nbsp;     * @param len must be non-negative and {@code offset+len} must not exceed
+<i>386</i>&nbsp;     *
+<i>387</i>&nbsp;     * @return the first (and only) user value in the data; not null.
+<i>388</i>&nbsp;     *
+<i>389</i>&nbsp;     * @throws NullPointerException if {@code ionData} is null.
+<i>390</i>&nbsp;     * @throws UnexpectedEofException if the data doesn&#39;t contain any user
+<i>391</i>&nbsp;     * values.
+<i>392</i>&nbsp;     * @throws IonException if the data does not contain exactly one user
+<i>393</i>&nbsp;     * value.
+<i>394</i>&nbsp;     */
+<i>395</i>&nbsp;    public IonValue singleValue(byte[] ionData, int offset, int len);
+<i>396</i>&nbsp;
+<i>397</i>&nbsp;
+<i>398</i>&nbsp;    //-------------------------------------------------------------------------
+<i>399</i>&nbsp;    // IonReader creation
+<i>400</i>&nbsp;
+<i>401</i>&nbsp;    /*              ===========================
+<i>402</i>&nbsp;     *              =                         =
+<i>403</i>&nbsp;     *              =    I M P O R T A N T    =
+<i>404</i>&nbsp;     *              =                         =
+<i>405</i>&nbsp;     *              ===========================
+<i>406</i>&nbsp;     *
+<i>407</i>&nbsp;     * Any new factory methods MUST be added to the ReaderMaker
+<i>408</i>&nbsp;     * enumeration to ensure complete test coverage!
+<i>409</i>&nbsp;     */
+<i>410</i>&nbsp;
+<i>411</i>&nbsp;    /**
+<i>412</i>&nbsp;     * Creates an new {@link IonReader} instance over Ion text data.
+<i>413</i>&nbsp;     * &lt;p&gt;
+<i>414</i>&nbsp;     * The text is parsed incrementally by the reader, so any syntax errors
+<i>415</i>&nbsp;     * will not be detected during this call.
+<i>416</i>&nbsp;     *
+<i>417</i>&nbsp;     * @param ionText must not be null.
+<i>418</i>&nbsp;     */
+<i>419</i>&nbsp;    @SuppressWarnings(&quot;deprecation&quot;)
+<i>420</i>&nbsp;    public IonTextReader newReader(String ionText);
+<i>421</i>&nbsp;
+<i>422</i>&nbsp;    /**
+<i>423</i>&nbsp;     * Creates an new {@link IonReader} instance over a block of Ion data,
+<i>424</i>&nbsp;     * detecting whether it&#39;s text or binary data.
+<i>425</i>&nbsp;     * &lt;p&gt;
+<i>426</i>&nbsp;     * This method will auto-detect and uncompress GZIPped Ion data.
+<i>427</i>&nbsp;     *
+<i>428</i>&nbsp;     * @param ionData may be either Ion binary data, or UTF-8 Ion text.
+<i>429</i>&nbsp;     * The reader retains a reference to the array, so its data must not be
+<i>430</i>&nbsp;     * modified while the reader is active.
+<i>431</i>&nbsp;     */
+<i>432</i>&nbsp;    public IonReader newReader(byte[] ionData);
+<i>433</i>&nbsp;
+<i>434</i>&nbsp;    /**
+<i>435</i>&nbsp;     * Creates an new {@link IonReader} instance over a block of Ion data,
+<i>436</i>&nbsp;     * detecting whether it&#39;s text or binary data.
+<i>437</i>&nbsp;     * &lt;p&gt;
+<i>438</i>&nbsp;     * This method will auto-detect and uncompress GZIPped Ion data.
+<i>439</i>&nbsp;     *
+<i>440</i>&nbsp;     * @param ionData is used only within the range of bytes starting at
+<i>441</i>&nbsp;     * {@code offset} for {@code len} bytes.
+<i>442</i>&nbsp;     * The data in that range may be either Ion binary data, or UTF-8 Ion text.
+<i>443</i>&nbsp;     * The reader retains a reference to the array, so its data must not be
+<i>444</i>&nbsp;     * modified while the reader is active.
+<i>445</i>&nbsp;     * @param offset must be non-negative and less than {@code ionData.length}.
+<i>446</i>&nbsp;     * @param len must be non-negative and {@code offset+len} must not exceed
+<i>447</i>&nbsp;     * {@code ionData.length}.
+<i>448</i>&nbsp;     */
+<i>449</i>&nbsp;    public IonReader newReader(byte[] ionData, int offset, int len);
+<i>450</i>&nbsp;
+<i>451</i>&nbsp;    /**
+<i>452</i>&nbsp;     * Creates a new {@link IonReader} instance over a stream of Ion data,
+<i>453</i>&nbsp;     * detecting whether it&#39;s text or binary data.
+<i>454</i>&nbsp;     * &lt;p&gt;
+<i>455</i>&nbsp;     * This method will auto-detect and uncompress GZIPped Ion data.
+<i>456</i>&nbsp;     * &lt;p&gt;
+<i>457</i>&nbsp;     * Because this library performs its own buffering, it&#39;s recommended that
+<i>458</i>&nbsp;     * you avoid adding additional buffering to the given stream.
+<i>459</i>&nbsp;     *
+<i>460</i>&nbsp;     * @param ionData must not be null.
+<i>461</i>&nbsp;     *
+<i>462</i>&nbsp;     * @return a new reader instance.
+<i>463</i>&nbsp;     * Callers must call {@link IonReader#close()} when finished with it.
+<i>464</i>&nbsp;     *
+<i>465</i>&nbsp;     * @throws IonException if the source throws {@link IOException}.
+<i>466</i>&nbsp;     */
+<i>467</i>&nbsp;    public IonReader newReader(InputStream ionData);
+<i>468</i>&nbsp;
+<i>469</i>&nbsp;    /**
+<i>470</i>&nbsp;     * Creates an new {@link IonReader} instance over Ion text data.
+<i>471</i>&nbsp;     * &lt;p&gt;
+<i>472</i>&nbsp;     * Applications should generally us {@link #newReader(InputStream)}
+<i>473</i>&nbsp;     * whenever possible, since this library has much faster Unicode decoding
+<i>474</i>&nbsp;     * than the Java IO framework.
+<i>475</i>&nbsp;     * &lt;p&gt;
+<i>476</i>&nbsp;     * Because this library performs its own buffering, it&#39;s recommended that
+<i>477</i>&nbsp;     * you avoid adding additional buffering to the given stream.
+<i>478</i>&nbsp;     *
+<i>479</i>&nbsp;     * @throws IonException if the source throws {@link IOException}.
+<i>480</i>&nbsp;     */
+<i>481</i>&nbsp;    public IonReader newReader(Reader ionText);
+<i>482</i>&nbsp;
+<i>483</i>&nbsp;    /**
+<i>484</i>&nbsp;     * Creates an new {@link IonReader} instance over an {@link IonValue} data
+<i>485</i>&nbsp;     * model. Typically this is used to iterate over a collection, such as an
+<i>486</i>&nbsp;     * {@link IonStruct}.
+<i>487</i>&nbsp;     *
+<i>488</i>&nbsp;     * The given value and its children, if any, must not be modified until after
+<i>489</i>&nbsp;     * the IonReader constructed by this method is closed. Violating this
+<i>490</i>&nbsp;     * constraint results in undefined behavior.
+<i>491</i>&nbsp;     *
+<i>492</i>&nbsp;     * @param value must not be null.
+<i>493</i>&nbsp;     */
+<i>494</i>&nbsp;    public IonReader newReader(IonValue value);
+<i>495</i>&nbsp;
+<i>496</i>&nbsp;
+<i>497</i>&nbsp;    //-------------------------------------------------------------------------
+<i>498</i>&nbsp;    // IonWriter creation
+<i>499</i>&nbsp;
+<i>500</i>&nbsp;    /**
+<i>501</i>&nbsp;     * Creates a new writer that will add {@link IonValue}s to the given
+<i>502</i>&nbsp;     * container.
+<i>503</i>&nbsp;     *
+<i>504</i>&nbsp;     * @param container a container that will receive new children from the
+<i>505</i>&nbsp;     * the returned writer.
+<i>506</i>&nbsp;     * Must not be null.
+<i>507</i>&nbsp;     *
+<i>508</i>&nbsp;     * @return a new {@link IonWriter} instance; not {@code null}.
+<i>509</i>&nbsp;     */
+<i>510</i>&nbsp;    public IonWriter newWriter(IonContainer container);
+<i>511</i>&nbsp;
+<i>512</i>&nbsp;    /**
+<i>513</i>&nbsp;     * Creates a new writer that will write UTF-8 text to the given output
+<i>514</i>&nbsp;     * stream.
+<i>515</i>&nbsp;     *
+<i>516</i>&nbsp;     * @param out the stream that will receive UTF-8 Ion text data.
+<i>517</i>&nbsp;     * Must not be null.
+<i>518</i>&nbsp;     *
+<i>519</i>&nbsp;     * @return a new {@link IonWriter} instance; not {@code null}.
+<i>520</i>&nbsp;     *
+<i>521</i>&nbsp;     * @see IonTextWriterBuilder
+<i>522</i>&nbsp;     */
+<i>523</i>&nbsp;    public IonWriter newTextWriter(OutputStream out);
+<i>524</i>&nbsp;
+<i>525</i>&nbsp;    /**
+<i>526</i>&nbsp;     * Creates a new writer that will write text to the given output
+<i>527</i>&nbsp;     * stream.
+<i>528</i>&nbsp;     *
+<i>529</i>&nbsp;     * @param out the stream that will receive Ion text data.
+<i>530</i>&nbsp;     * Must not be null.
+<i>531</i>&nbsp;     *
+<i>532</i>&nbsp;     * @return a new {@link IonWriter} instance; not {@code null}.
+<i>533</i>&nbsp;     *
+<i>534</i>&nbsp;     * @see IonTextWriterBuilder
+<i>535</i>&nbsp;     */
+<i>536</i>&nbsp;    public IonWriter newTextWriter(Appendable out);
+<i>537</i>&nbsp;
+<i>538</i>&nbsp;    /**
+<i>539</i>&nbsp;     * Creates a new writer that will write UTF-8 text to the given output
+<i>540</i>&nbsp;     * stream, using the given shared symbol tables as imports.
+<i>541</i>&nbsp;     * &lt;p&gt;
+<i>542</i>&nbsp;     * The output stream will start with an Ion Version Marker and a
+<i>543</i>&nbsp;     * local symbol table that uses the given {@code imports}.
+<i>544</i>&nbsp;     *
+<i>545</i>&nbsp;     * @param out the stream that will receive UTF-8 Ion text data.
+<i>546</i>&nbsp;     * Must not be null.
+<i>547</i>&nbsp;     * @param imports a sequence of shared symbol tables
+<i>548</i>&nbsp;     *
+<i>549</i>&nbsp;     * @return a new {@link IonWriter} instance; not {@code null}.
+<i>550</i>&nbsp;     *
+<i>551</i>&nbsp;     * @throws IOException if its thrown by the output stream.
+<i>552</i>&nbsp;     *
+<i>553</i>&nbsp;     * @see IonTextWriterBuilder
+<i>554</i>&nbsp;     */
+<i>555</i>&nbsp;    public IonWriter newTextWriter(OutputStream out, SymbolTable... imports)
+<i>556</i>&nbsp;        throws IOException;
+<i>557</i>&nbsp;
+<i>558</i>&nbsp;    /**
+<i>559</i>&nbsp;     * Creates a new writer that will write text to the given output
+<i>560</i>&nbsp;     * stream, using the given shared symbol tables as imports.
+<i>561</i>&nbsp;     * &lt;p&gt;
+<i>562</i>&nbsp;     * The output stream will start with an Ion Version Marker and a
+<i>563</i>&nbsp;     * local symbol table that uses the given {@code imports}.
+<i>564</i>&nbsp;     *
+<i>565</i>&nbsp;     * @param out the stream that will receive Ion text data.
+<i>566</i>&nbsp;     * Must not be null.
+<i>567</i>&nbsp;     * @param imports a sequence of shared symbol tables.
+<i>568</i>&nbsp;     * The first (and only the first) may be a system table.
+<i>569</i>&nbsp;     *
+<i>570</i>&nbsp;     * @return a new {@link IonWriter} instance; not {@code null}.
+<i>571</i>&nbsp;     *
+<i>572</i>&nbsp;     * @throws IOException if its thrown by the output stream.
+<i>573</i>&nbsp;     *
+<i>574</i>&nbsp;     * @see IonTextWriterBuilder
+<i>575</i>&nbsp;     */
+<i>576</i>&nbsp;    public IonWriter newTextWriter(Appendable out, SymbolTable... imports)
+<i>577</i>&nbsp;        throws IOException;
+<i>578</i>&nbsp;
+<i>579</i>&nbsp;
+<i>580</i>&nbsp;    /**
+<i>581</i>&nbsp;     * Creates a new writer that will encode binary Ion data,
+<i>582</i>&nbsp;     * using the given shared symbol tables as imports.
+<i>583</i>&nbsp;     * &lt;p&gt;
+<i>584</i>&nbsp;     * The output stream will start with an Ion Version Marker and a
+<i>585</i>&nbsp;     * local symbol table that uses the given {@code imports}.
+<i>586</i>&nbsp;     *
+<i>587</i>&nbsp;     * @param out the stream to receive binary Ion data; not null.
+<i>588</i>&nbsp;     * @param imports a sequence of shared symbol tables to import.
+<i>589</i>&nbsp;     * The first (and only the first) may be a system table.
+<i>590</i>&nbsp;     *
+<i>591</i>&nbsp;     * @return a new {@link IonWriter} instance; not null.
+<i>592</i>&nbsp;     *
+<i>593</i>&nbsp;     * @throws IllegalArgumentException if any import is a local table,
+<i>594</i>&nbsp;     * or if any but the first is a system table.
+<i>595</i>&nbsp;     * @throws NullPointerException if any import is null.
+<i>596</i>&nbsp;     */
+<i>597</i>&nbsp;    public IonWriter newBinaryWriter(OutputStream out, SymbolTable... imports);
+<i>598</i>&nbsp;
+<i>599</i>&nbsp;    /**
+<i>600</i>&nbsp;     * Creates a new writer that will encode binary Ion data.
+<i>601</i>&nbsp;     *
+<i>602</i>&nbsp;     * @return a new {@link IonBinaryWriter} instance; not {@code null}.
+<i>603</i>&nbsp;     *
+<i>604</i>&nbsp;     * @deprecated Use?{@link #newBinaryWriter(OutputStream, SymbolTable...)} instead.
+<i>605</i>&nbsp;     */
+<i>606</i>&nbsp;    @Deprecated
+<i>607</i>&nbsp;    public IonBinaryWriter newBinaryWriter();
+<i>608</i>&nbsp;
+<i>609</i>&nbsp;    /**
+<i>610</i>&nbsp;     * Creates a new writer that will encode binary Ion data,
+<i>611</i>&nbsp;     * using the given shared symbol tables as imports.
+<i>612</i>&nbsp;     * &lt;p&gt;
+<i>613</i>&nbsp;     * The output stream will be start with an Ion Version Marker and a
+<i>614</i>&nbsp;     * local symbol table that uses the given {@code imports}.
+<i>615</i>&nbsp;     *
+<i>616</i>&nbsp;     * @param imports a sequence of shared symbol tables
+<i>617</i>&nbsp;     *
+<i>618</i>&nbsp;     * @return a new {@link IonBinaryWriter} instance; not {@code null}.
+<i>619</i>&nbsp;     *
+<i>620</i>&nbsp;     * @deprecated Use {@link #newBinaryWriter(OutputStream, SymbolTable...)} instead.
+<i>621</i>&nbsp;     */
+<i>622</i>&nbsp;    @Deprecated
+<i>623</i>&nbsp;    public IonBinaryWriter newBinaryWriter(SymbolTable... imports);
+<i>624</i>&nbsp;
+<i>625</i>&nbsp;
+<i>626</i>&nbsp;    //-------------------------------------------------------------------------
+<i>627</i>&nbsp;    // DOM creation
+<i>628</i>&nbsp;
+<i>629</i>&nbsp;
+<i>630</i>&nbsp;    /**
+<i>631</i>&nbsp;     * Creates a new empty datagram.
+<i>632</i>&nbsp;     *
+<i>633</i>&nbsp;     * @return a new datagram with no user values.
+<i>634</i>&nbsp;     */
+<i>635</i>&nbsp;    public IonDatagram newDatagram();
+<i>636</i>&nbsp;
+<i>637</i>&nbsp;
+<i>638</i>&nbsp;    /**
+<i>639</i>&nbsp;     * Creates a new datagram containing one value.  If the given value is
+<i>640</i>&nbsp;     * contained elsewhere, it is cloned before insertion.
+<i>641</i>&nbsp;     *
+<i>642</i>&nbsp;     * @param initialChild becomes the first and only (user) value in the
+<i>643</i>&nbsp;     * datagram.  The child&#39;s {@link IonValue#getSystem() system}
+<i>644</i>&nbsp;     * must be &lt;em&gt;this&lt;/em&gt; system.
+<i>645</i>&nbsp;     * If {@code null}, then the returned datagram will have no
+<i>646</i>&nbsp;     * user values.
+<i>647</i>&nbsp;     *
+<i>648</i>&nbsp;     * @return a new datagram.
+<i>649</i>&nbsp;     *
+<i>650</i>&nbsp;     * @throws IllegalArgumentException
+<i>651</i>&nbsp;     *   if {@code initialChild} is an {@link IonDatagram}.
+<i>652</i>&nbsp;     */
+<i>653</i>&nbsp;    public IonDatagram newDatagram(IonValue initialChild);
+<i>654</i>&nbsp;
+<i>655</i>&nbsp;
+<i>656</i>&nbsp;    /**
+<i>657</i>&nbsp;     * Creates a new datagram, bootstrapped with imported symbol tables.
+<i>658</i>&nbsp;     * Generally an application will use this to aquire a datagram, then adds
+<i>659</i>&nbsp;     * values to it, then calls {@link IonDatagram#getBytes(byte[])}
+<i>660</i>&nbsp;     * (or similar) to extract binary data.
+<i>661</i>&nbsp;     *
+<i>662</i>&nbsp;     * @param imports the set of shared symbol tables to import.
+<i>663</i>&nbsp;     * The first (and only the first) may be a system table.
+<i>664</i>&nbsp;     *
+<i>665</i>&nbsp;     * @return a new datagram with no user values.
+<i>666</i>&nbsp;     *
+<i>667</i>&nbsp;     * @throws IllegalArgumentException if any import is a local table,
+<i>668</i>&nbsp;     * or if any but the first is a system table.
+<i>669</i>&nbsp;     *
+<i>670</i>&nbsp;     * @see #newLocalSymbolTable(SymbolTable...)
+<i>671</i>&nbsp;     */
+<i>672</i>&nbsp;    @SuppressWarnings(&quot;javadoc&quot;)
+<i>673</i>&nbsp;    public IonDatagram newDatagram(SymbolTable... imports);
+<i>674</i>&nbsp;
+<i>675</i>&nbsp;
+<i>676</i>&nbsp;    /**
+<i>677</i>&nbsp;     * Extracts the current value from a reader into an {@link IonValue}.
+<i>678</i>&nbsp;     * The caller must position the reader on the correct value by calling
+<i>679</i>&nbsp;     * {@link IonReader#next()} beforehand.
+<i>680</i>&nbsp;     *
+<i>681</i>&nbsp;     * @return a new value object, not null.
+<i>682</i>&nbsp;     */
+<i>683</i>&nbsp;    public IonValue newValue(IonReader reader);
+<i>684</i>&nbsp;
+<i>685</i>&nbsp;
+<i>686</i>&nbsp;    /**
+<i>687</i>&nbsp;     * Constructs a new UTC &lt;code&gt;timestamp&lt;/code&gt; initialized to represent
+<i>688</i>&nbsp;     * the specified number of milliseconds since the standard base time known
+<i>689</i>&nbsp;     * as &quot;the epoch&quot;, namely 1970-01-01T00:00:00Z.
+<i>690</i>&nbsp;     *
+<i>691</i>&nbsp;     * @param millis the milliseconds since 1970-01-01T00:00:00Z.
+<i>692</i>&nbsp;     */
+<i>693</i>&nbsp;    public IonTimestamp newUtcTimestampFromMillis(long millis);
+<i>694</i>&nbsp;
+<i>695</i>&nbsp;
+<i>696</i>&nbsp;    /**
+<i>697</i>&nbsp;     * Constructs a new UTC &lt;code&gt;timestamp&lt;/code&gt; instance initialized so that
+<i>698</i>&nbsp;     * it represents the given time.  As per {@link Date} class, this will have
+<i>699</i>&nbsp;     * millisecond precision.
+<i>700</i>&nbsp;     * &lt;p&gt;
+<i>701</i>&nbsp;     * This is equivalent to
+<i>702</i>&nbsp;     * &lt;code&gt;{@linkplain #newUtcTimestampFromMillis newUtcTimestampFromMillis}(utcDate.getTime())&lt;/code&gt;.
+<i>703</i>&nbsp;     *
+<i>704</i>&nbsp;     * @param utcDate the time of the new instance;
+<i>705</i>&nbsp;     * may be &lt;code&gt;null&lt;/code&gt; to make &lt;code&gt;null.timestamp&lt;/code&gt;.
+<i>706</i>&nbsp;     */
+<i>707</i>&nbsp;    public IonTimestamp newUtcTimestamp(Date utcDate);
+<i>708</i>&nbsp;
+<i>709</i>&nbsp;
+<i>710</i>&nbsp;    /**
+<i>711</i>&nbsp;     * Constructs a new UTC &lt;code&gt;timestamp&lt;/code&gt; instance initialized so that
+<i>712</i>&nbsp;     * it represents the time at which it was allocated, measured to the nearest
+<i>713</i>&nbsp;     * millisecond.
+<i>714</i>&nbsp;     */
+<i>715</i>&nbsp;    public IonTimestamp newCurrentUtcTimestamp();
+<i>716</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

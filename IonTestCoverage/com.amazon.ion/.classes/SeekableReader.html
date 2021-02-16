@@ -1,0 +1,136 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: SeekableReader</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: SeekableReader (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">SeekableReader</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;/**
+<i>19</i>&nbsp; * An {@link IonReader} facet providing the ability to retrieve
+<i>20</i>&nbsp; * {@link Span}s (abstract value positions) and seek to positions
+<i>21</i>&nbsp; * within the source.
+<i>22</i>&nbsp; * &lt;p&gt;
+<i>23</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>24</i>&nbsp; * code outside of this library.
+<i>25</i>&nbsp; * &lt;p&gt;
+<i>26</i>&nbsp; * A span may be used to seek a different reader instance than the one that
+<i>27</i>&nbsp; * generated it, provided that the two readers have the same source.
+<i>28</i>&nbsp; * Violations of this constraint may not be detected reliably, so be careful
+<i>29</i>&nbsp; * or you&#39;ll get unsatisfying results.
+<i>30</i>&nbsp; *
+<i>31</i>&nbsp; */
+<i>32</i>&nbsp;public interface SeekableReader
+<i>33</i>&nbsp;    extends SpanProvider
+<i>34</i>&nbsp;{
+<i>35</i>&nbsp;    /**
+<i>36</i>&nbsp;     * Seeks this reader to produce the given span as if its values were at
+<i>37</i>&nbsp;     * top-level.
+<i>38</i>&nbsp;     * The caller cannot {@link IonReader#stepOut stepOut} from the span nor
+<i>39</i>&nbsp;     * continue reading beyond it.
+<i>40</i>&nbsp;     * &lt;p&gt;
+<i>41</i>&nbsp;     * After calling this method, this reader&#39;s current span will be empty and
+<i>42</i>&nbsp;     * positioned just before the first value of the given span; the caller
+<i>43</i>&nbsp;     * must call {@link IonReader#next() next()} to begin reading values.
+<i>44</i>&nbsp;     * At the end of the span, the reader will behave as if it&#39;s at EOF
+<i>45</i>&nbsp;     * regardless whether the source has more data beyond the span.
+<i>46</i>&nbsp;     * &lt;p&gt;
+<i>47</i>&nbsp;     * Hoisting makes the span&#39;s values appear to be at top-level even if they
+<i>48</i>&nbsp;     * have containers in the source.
+<i>49</i>&nbsp;     * The {@linkplain IonReader#getDepth() depth} will be zero, and
+<i>50</i>&nbsp;     * calls to {@link IonReader#getFieldName() getFieldName()} will return
+<i>51</i>&nbsp;     * null even if the span&#39;s original parent was a struct.
+<i>52</i>&nbsp;     *
+<i>53</i>&nbsp;     * @throws IonException if the given span is unbalanced.
+<i>54</i>&nbsp;     */
+<i>55</i>&nbsp;    public void hoist(Span span);
+<i>56</i>&nbsp;
+<i>57</i>&nbsp;
+<i>58</i>&nbsp;    /**
+<i>59</i>&nbsp;     * Seeks this reader to produce the given subsequence as if the values
+<i>60</i>&nbsp;     * were the body of a container.
+<i>61</i>&nbsp;     * The caller can {@link IonReader#stepOut stepOut} from the subsequence
+<i>62</i>&nbsp;     * but cannot continue reading beyond it.
+<i>63</i>&nbsp;     * &lt;p&gt;
+<i>64</i>&nbsp;     * After calling this method, this reader&#39;s current span will be empty and
+<i>65</i>&nbsp;     * positioned just before the first value of the given span; the caller
+<i>66</i>&nbsp;     * must call {@link #next()} to begin reading values.
+<i>67</i>&nbsp;     * The {@linkplain #getDepth() depth} will be one.
+<i>68</i>&nbsp;     * &lt;p&gt;
+<i>69</i>&nbsp;     * If the original parent was a struct, then this reader will implement
+<i>70</i>&nbsp;     * {@link #isInStruct()} and {@link #getFieldName()}.
+<i>71</i>&nbsp;     *
+<i>72</i>&nbsp;     * @throws IonException if the given span is unbalanced or at top-level.
+<i>73</i>&nbsp;     */
+<i>74</i>&nbsp;//  public void stepIn(Span span);
+<i>75</i>&nbsp;
+<i>76</i>&nbsp;
+<i>77</i>&nbsp;    /**
+<i>78</i>&nbsp;     * Seeks this reader to produce data from the left of the given span,
+<i>79</i>&nbsp;     * continuing &quot;up and out&quot; from the current container to the end of the
+<i>80</i>&nbsp;     * source.
+<i>81</i>&nbsp;     * &lt;p&gt;
+<i>82</i>&nbsp;     * After calling this method, the reader&#39;s current span will be empty and
+<i>83</i>&nbsp;     * positioned just before the first value of the given span; the caller
+<i>84</i>&nbsp;     * must call {@link #next()} to begin reading values.
+<i>85</i>&nbsp;     * The {@linkplain #getDepth() depth} will be the same as in the source.
+<i>86</i>&nbsp;     * &lt;p&gt;
+<i>87</i>&nbsp;     */
+<i>88</i>&nbsp;//    public void start(Span span);  // TODO later
+<i>89</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

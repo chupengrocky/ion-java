@@ -1,0 +1,490 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonReader</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonReader (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonReader</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import com.amazon.ion.facet.Faceted;
+<i>19</i>&nbsp;import java.io.Closeable;
+<i>20</i>&nbsp;import java.io.IOException;
+<i>21</i>&nbsp;import java.math.BigDecimal;
+<i>22</i>&nbsp;import java.math.BigInteger;
+<i>23</i>&nbsp;import java.util.Date;
+<i>24</i>&nbsp;import java.util.Iterator;
+<i>25</i>&nbsp;
+<i>26</i>&nbsp;/* One design goal is for the readers and writers to be independent of an
+<i>27</i>&nbsp; * IonSystem or ValueFactory and thus independent of particular implementations
+<i>28</i>&nbsp; * of the DOM.
+<i>29</i>&nbsp; *
+<i>30</i>&nbsp; * The issue is that one needs a ValueFactory in order to construct the tree.
+<i>31</i>&nbsp; * So one either needs to pass a ValueFactory / IonSystem to the reader, or
+<i>32</i>&nbsp; * pass the reader to the system.  I decided that the dependencies were better
+<i>33</i>&nbsp; * the latter way.  So we have IonSystem.newValue(IonReader) instead of
+<i>34</i>&nbsp; * IonReader.nextValue(IonSystem).
+<i>35</i>&nbsp; */
+<i>36</i>&nbsp;
+<i>37</i>&nbsp;/**
+<i>38</i>&nbsp; * Provides stream-based access to Ion data independent of its underlying
+<i>39</i>&nbsp; * representation (text, binary, or {@link IonValue} tree).
+<i>40</i>&nbsp; * &lt;p&gt;
+<i>41</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>42</i>&nbsp; * code outside of this library.
+<i>43</i>&nbsp; * We still have some work to do before this interface is stable.
+<i>44</i>&nbsp; * See &lt;a href=&quot;https://github.com/amzn/ion-java/issues/11&quot;&gt;issue amzn/ion-java/issues/11&lt;/a&gt;
+<i>45</i>&nbsp; * &lt;p&gt;
+<i>46</i>&nbsp; * An {@code IonReader} has a &quot;cursor&quot; tracking the &lt;em&gt;current value&lt;/em&gt; on
+<i>47</i>&nbsp; * which the reader is positioned. Generally, newly created readers are not
+<i>48</i>&nbsp; * positioned on any value. To begin traversing the Ion data, one would use
+<i>49</i>&nbsp; * {@link #next()} to advance the cursor onto the first value (or learn there isn&#39;t
+<i>50</i>&nbsp; * one). Once positioned, the current value&#39;s data can be accessed with the
+<i>51</i>&nbsp; * {@code *Value()} methods.
+<i>52</i>&nbsp; * &lt;p&gt;
+<i>53</i>&nbsp; * When the current value is a container, calling {@link #next()} moves the
+<i>54</i>&nbsp; * cursor to the &lt;em&gt;next sibling&lt;/em&gt; of the container, at the same depth,
+<i>55</i>&nbsp; * skipping over any children the container may have.
+<i>56</i>&nbsp; * To read the children, call {@link #stepIn()},
+<i>57</i>&nbsp; * then {@link #next()} to position onto the first child value (or learn there
+<i>58</i>&nbsp; * isn&#39;t one).  Calling {@link #stepOut()} skips over any remaining children
+<i>59</i>&nbsp; * and moves the cursor just beyond the container; call {@link #next()} to
+<i>60</i>&nbsp; * move the cursor to the following value.
+<i>61</i>&nbsp; * &lt;p&gt;
+<i>62</i>&nbsp; * In general, method names are intended to parallel similar methods in the
+<i>63</i>&nbsp; * {@link IonValue} hierarchy.  For example, to get the text of a symbol one
+<i>64</i>&nbsp; * would use {@link #stringValue()}, mirroring {@link IonSymbol#stringValue()}.
+<i>65</i>&nbsp; *
+<i>66</i>&nbsp; * &lt;h2&gt;Exception Handling&lt;/h2&gt;
+<i>67</i>&nbsp; * {@code IonReader} is a generic interface for traversing Ion data, and it&#39;s
+<i>68</i>&nbsp; * not possible to fully specify the set of exceptions that could be thrown
+<i>69</i>&nbsp; * from the underlying data source.  Thus all failures are thrown as instances
+<i>70</i>&nbsp; * of {@link IonException}, wrapping the original cause.  If an application
+<i>71</i>&nbsp; * wants to handle (say) {@link IOException}s specially, then it needs to
+<i>72</i>&nbsp; * extract that from the wrappers; the documentation of {@link IonException}
+<i>73</i>&nbsp; * explains how to do that.
+<i>74</i>&nbsp; *
+<i>75</i>&nbsp; * &lt;h2&gt;Reader Facets&lt;/h2&gt;
+<i>76</i>&nbsp; * Readers are {@link Faceted} and implementations may provide additional
+<i>77</i>&nbsp; * functionality accessible via the {@link #asFacet(Class)} method.
+<i>78</i>&nbsp; *
+<i>79</i>&nbsp; * &lt;h3&gt;The {@link SpanProvider} Facet&lt;/h3&gt;
+<i>80</i>&nbsp; * This facet is available on all readers that directly consume an Ion source.
+<i>81</i>&nbsp; * It provides access to the &quot;{@linkplain SpanProvider#currentSpan() current
+<i>82</i>&nbsp; * span}&quot; covering the reader&#39;s current value.
+<i>83</i>&nbsp; * There is &lt;em&gt;not&lt;/em&gt; a current span at the start of the source, immediately
+<i>84</i>&nbsp; * after a call to {@link #stepIn()} or {@link #stepOut()}, or when the prior
+<i>85</i>&nbsp; * call to {@link #next()} returned null (meaning: end of container or end of
+<i>86</i>&nbsp; * stream). In such states, {@link SpanProvider#currentSpan()} will fail.
+<i>87</i>&nbsp; *
+<i>88</i>&nbsp; * &lt;h3&gt;The {@link SeekableReader} Facet&lt;/h3&gt;
+<i>89</i>&nbsp; * This facet is available on all readers &lt;em&gt;except&lt;/em&gt; those created from
+<i>90</i>&nbsp; * an {@link java.io.InputStream InputStream}.
+<i>91</i>&nbsp; * (See &lt;a href=&quot;https://github.com/amzn/ion-java/issues/17&quot;&gt;issue amzn/ion-java/issues/17&lt;/a&gt;.)
+<i>92</i>&nbsp; * It allows the user to reposition the reader to a {@link Span} over the
+<i>93</i>&nbsp; * same reader instance or another reader with the same source.
+<i>94</i>&nbsp; *
+<i>95</i>&nbsp; * &lt;h2&gt;Span Facets&lt;/h2&gt;
+<i>96</i>&nbsp; * Readers that support the {@link SpanProvider} facet vend {@link Span}s that
+<i>97</i>&nbsp; * are also faceted.
+<i>98</i>&nbsp; *
+<i>99</i>&nbsp; * &lt;h3&gt;The {@link OffsetSpan} Facet&lt;/h3&gt;
+<i>100</i>&nbsp; * This facet is support by all readers of Ion binary and text data.
+<i>101</i>&nbsp; *
+<i>102</i>&nbsp; * &lt;h3&gt;The {@link TextSpan} Facet&lt;/h3&gt;
+<i>103</i>&nbsp; * This facet is supported by all readers of Ion text data.
+<i>104</i>&nbsp; */
+<i>105</i>&nbsp;public interface IonReader
+<i>106</i>&nbsp;    extends Closeable, Faceted
+<i>107</i>&nbsp;{
+<i>108</i>&nbsp;
+<i>109</i>&nbsp;    /**
+<i>110</i>&nbsp;     * Determines whether there is another value at the current depth;
+<i>111</i>&nbsp;     * in other words whether there is a sibling value that may be reached
+<i>112</i>&nbsp;     * using {@link #next()}.
+<i>113</i>&nbsp;     * This method may be
+<i>114</i>&nbsp;     * called multiple times, which does not move the current position.
+<i>115</i>&nbsp;     * &lt;p&gt;
+<i>116</i>&nbsp;     * &lt;b&gt;WARNING:&lt;/b&gt; this method alters the internal state of the reader such
+<i>117</i>&nbsp;     * that you cannot reliably get values from the &quot;current&quot; element. The only
+<i>118</i>&nbsp;     * thing you should call after {@code hasNext()} is {@link #next()}!
+<i>119</i>&nbsp;     *
+<i>120</i>&nbsp;     * @deprecated Applications should detect the end of the current level by
+<i>121</i>&nbsp;     * checking for a {@code null} response from {@link #next()}.
+<i>122</i>&nbsp;     */
+<i>123</i>&nbsp;    @Deprecated
+<i>124</i>&nbsp;    public boolean hasNext();
+<i>125</i>&nbsp;
+<i>126</i>&nbsp;    /**
+<i>127</i>&nbsp;     * Positions this reader on the next sibling after the current value,
+<i>128</i>&nbsp;     * returning the type of that value.  Once so positioned the contents of
+<i>129</i>&nbsp;     * this value can be accessed with the {@code *Value()} methods.
+<i>130</i>&nbsp;     * &lt;p&gt;
+<i>131</i>&nbsp;     * A sequence of {@code next()} calls traverses the data at a constant
+<i>132</i>&nbsp;     * depth, within the same container.
+<i>133</i>&nbsp;     * Use {@link #stepIn()} to traverse down into any containers, and
+<i>134</i>&nbsp;     * {@link #stepOut()} to traverse up to the parent container.
+<i>135</i>&nbsp;     *
+<i>136</i>&nbsp;     * @return the type of the next Ion value (never {@link IonType#DATAGRAM}),
+<i>137</i>&nbsp;     * or {@code null} when there are no more elements at the current depth in
+<i>138</i>&nbsp;     * the same container.
+<i>139</i>&nbsp;     */
+<i>140</i>&nbsp;    public IonType next();
+<i>141</i>&nbsp;
+<i>142</i>&nbsp;
+<i>143</i>&nbsp;    /**
+<i>144</i>&nbsp;     * Positions the reader just before the contents of the current value,
+<i>145</i>&nbsp;     * which must be a container (list, sexp, or struct).
+<i>146</i>&nbsp;     * There&#39;s no current value immediately after stepping in, so the next
+<i>147</i>&nbsp;     * thing you&#39;ll want to do is call {@link #next()} to move onto the first
+<i>148</i>&nbsp;     * child value (or learn that there&#39;s not one).
+<i>149</i>&nbsp;     * &lt;p&gt;
+<i>150</i>&nbsp;     * Stepping into a null container ({@code null.list}, {@code null.sexp},
+<i>151</i>&nbsp;     * or {@code null.struct}) behaves as if the container were empty
+<i>152</i>&nbsp;     * ({@code []}, {@code ()}, or &lt;code&gt;{}&lt;/code&gt;).
+<i>153</i>&nbsp;     * &lt;p&gt;
+<i>154</i>&nbsp;     * At any time {@link #stepOut()} may be called to move the cursor back to
+<i>155</i>&nbsp;     * (just after) the parent value, even if there&#39;s more children remaining.
+<i>156</i>&nbsp;     *
+<i>157</i>&nbsp;     * @throws IllegalStateException if the current value isn&#39;t an Ion container.
+<i>158</i>&nbsp;     */
+<i>159</i>&nbsp;    public void stepIn();
+<i>160</i>&nbsp;
+<i>161</i>&nbsp;    /**
+<i>162</i>&nbsp;     * Positions the iterator after the current parent&#39;s value, moving up one
+<i>163</i>&nbsp;     * level in the data hierarchy.
+<i>164</i>&nbsp;     * There&#39;s no current value immediately after stepping out, so the next
+<i>165</i>&nbsp;     * thing you&#39;ll want to do is call {@link #next()} to move onto the
+<i>166</i>&nbsp;     * following value.
+<i>167</i>&nbsp;     *
+<i>168</i>&nbsp;     * @throws IllegalStateException if the current value wasn&#39;t stepped into.
+<i>169</i>&nbsp;     */
+<i>170</i>&nbsp;    public void stepOut();
+<i>171</i>&nbsp;
+<i>172</i>&nbsp;    /**
+<i>173</i>&nbsp;     * Returns the depth into the Ion value that this reader has traversed.
+<i>174</i>&nbsp;     * At top level the depth is 0, and it increases by one on each call to
+<i>175</i>&nbsp;     * {@link #stepIn()}.
+<i>176</i>&nbsp;     */
+<i>177</i>&nbsp;    public int getDepth();
+<i>178</i>&nbsp;
+<i>179</i>&nbsp;
+<i>180</i>&nbsp;    /**
+<i>181</i>&nbsp;     * Returns the symbol table that is applicable to the current value.
+<i>182</i>&nbsp;     * This may be either a system or local symbol table.
+<i>183</i>&nbsp;     */
+<i>184</i>&nbsp;    public SymbolTable getSymbolTable();
+<i>185</i>&nbsp;
+<i>186</i>&nbsp;
+<i>187</i>&nbsp;    /**
+<i>188</i>&nbsp;     * Returns the type of the current value, or null if there is no
+<i>189</i>&nbsp;     * current value.
+<i>190</i>&nbsp;     */
+<i>191</i>&nbsp;    public IonType getType();
+<i>192</i>&nbsp;
+<i>193</i>&nbsp;    /**
+<i>194</i>&nbsp;     * Returns an {@link IntegerSize} representing the smallest-possible
+<i>195</i>&nbsp;     * Java type of the Ion {@code int} at the current value.
+<i>196</i>&nbsp;     *
+<i>197</i>&nbsp;     * If the current value is {@code null.int} or is not an Ion
+<i>198</i>&nbsp;     * {@code int}, or if there is no current value, {@code null} will
+<i>199</i>&nbsp;     * be returned.
+<i>200</i>&nbsp;     *
+<i>201</i>&nbsp;     * @see IonInt#getIntegerSize()
+<i>202</i>&nbsp;     */
+<i>203</i>&nbsp;    public IntegerSize getIntegerSize();
+<i>204</i>&nbsp;
+<i>205</i>&nbsp;    /**
+<i>206</i>&nbsp;     * Return the annotations of the current value as an array of strings.
+<i>207</i>&nbsp;     *
+<i>208</i>&nbsp;     * @return the (ordered) annotations on the current value, or an empty
+<i>209</i>&nbsp;     * array (not {@code null}) if there are none.
+<i>210</i>&nbsp;     *
+<i>211</i>&nbsp;     * @throws UnknownSymbolException if any annotation has unknown text.
+<i>212</i>&nbsp;     */
+<i>213</i>&nbsp;    public String[] getTypeAnnotations();
+<i>214</i>&nbsp;
+<i>215</i>&nbsp;    /**
+<i>216</i>&nbsp;     * Gets the current value&#39;s annotations as symbol tokens (text + ID).
+<i>217</i>&nbsp;     *
+<i>218</i>&nbsp;     * @return the (ordered) annotations on the current value, or an empty
+<i>219</i>&nbsp;     * array (not {@code null}) if there are none.
+<i>220</i>&nbsp;     *
+<i>221</i>&nbsp;     */
+<i>222</i>&nbsp;    public SymbolToken[] getTypeAnnotationSymbols();
+<i>223</i>&nbsp;
+<i>224</i>&nbsp;    /**
+<i>225</i>&nbsp;     * Return the annotations on the curent value as an iterator.  The
+<i>226</i>&nbsp;     * iterator is empty (hasNext() returns false on the first call) if
+<i>227</i>&nbsp;     * there are no annotations on the current value.
+<i>228</i>&nbsp;     *
+<i>229</i>&nbsp;     * @throws UnknownSymbolException if any annotation has unknown text.
+<i>230</i>&nbsp;     *
+<i>231</i>&nbsp;     * @return not null.
+<i>232</i>&nbsp;     */
+<i>233</i>&nbsp;    public Iterator&lt;String&gt; iterateTypeAnnotations();
+<i>234</i>&nbsp;
+<i>235</i>&nbsp;    /**
+<i>236</i>&nbsp;
+<i>237</i>&nbsp;    /**
+<i>238</i>&nbsp;     * Gets the symbol ID of the field name attached to the current value.
+<i>239</i>&nbsp;     * &lt;p&gt;
+<i>240</i>&nbsp;     * &lt;b&gt;This is an &quot;expert method&quot;: correct use requires deep understanding
+<i>241</i>&nbsp;     * of the Ion binary format. You almost certainly don&#39;t want to use it.&lt;/b&gt;
+<i>242</i>&nbsp;     *
+<i>243</i>&nbsp;     * @return the symbol ID of the field name, if the current value is a
+<i>244</i>&nbsp;     * field within a struct.
+<i>245</i>&nbsp;     * If the current value is not a field, or if the symbol ID cannot be
+<i>246</i>&nbsp;     * determined, this method returns a value &lt;em&gt;less than one&lt;/em&gt;.
+<i>247</i>&nbsp;     *
+<i>248</i>&nbsp;     * @deprecated Use {@link #getFieldNameSymbol()} instead.
+<i>249</i>&nbsp;     */
+<i>250</i>&nbsp;    @Deprecated
+<i>251</i>&nbsp;    public int getFieldId();
+<i>252</i>&nbsp;
+<i>253</i>&nbsp;    /**
+<i>254</i>&nbsp;     * Return the field name of the current value. Or null if there is no valid
+<i>255</i>&nbsp;     * current value or if the current value is not a field of a struct.
+<i>256</i>&nbsp;     *
+<i>257</i>&nbsp;     * @throws UnknownSymbolException if the field name has unknown text.
+<i>258</i>&nbsp;     */
+<i>259</i>&nbsp;    public String getFieldName();
+<i>260</i>&nbsp;
+<i>261</i>&nbsp;    /**
+<i>262</i>&nbsp;     * Gets the current value&#39;s field name as a symbol token (text + ID).
+<i>263</i>&nbsp;     * If the text of the token isn&#39;t known, the result&#39;s
+<i>264</i>&nbsp;     * {@link SymbolToken#getText()} will be null.
+<i>265</i>&nbsp;     * If the symbol ID of the token isn&#39;t known, the result&#39;s
+<i>266</i>&nbsp;     * {@link SymbolToken#getSid()} will be
+<i>267</i>&nbsp;     * {@link SymbolTable#UNKNOWN_SYMBOL_ID}.
+<i>268</i>&nbsp;     * At least one of the two fields will be defined.
+<i>269</i>&nbsp;     *
+<i>270</i>&nbsp;     * @return null if there is no current value or if the current value is
+<i>271</i>&nbsp;     *  not a field of a struct.
+<i>272</i>&nbsp;     *
+<i>273</i>&nbsp;
+<i>274</i>&nbsp;     */
+<i>275</i>&nbsp;    public SymbolToken getFieldNameSymbol();
+<i>276</i>&nbsp;
+<i>277</i>&nbsp;
+<i>278</i>&nbsp;    /**
+<i>279</i>&nbsp;     * Determines whether the current value is a null Ion value of any type
+<i>280</i>&nbsp;     * (for example, &lt;code&gt;null&lt;/code&gt; or &lt;code&gt;null.int&lt;/code&gt;).
+<i>281</i>&nbsp;     * It should be called before
+<i>282</i>&nbsp;     * calling getters that return value types (int, long, boolean,
+<i>283</i>&nbsp;     * double).
+<i>284</i>&nbsp;     */
+<i>285</i>&nbsp;    public boolean isNullValue();
+<i>286</i>&nbsp;
+<i>287</i>&nbsp;    /**
+<i>288</i>&nbsp;     * Determines whether this reader is currently traversing the fields of an
+<i>289</i>&nbsp;     * Ion struct. It returns false if the iteration
+<i>290</i>&nbsp;     * is in a list, a sexp, or a datagram.
+<i>291</i>&nbsp;     */
+<i>292</i>&nbsp;    public boolean isInStruct();
+<i>293</i>&nbsp;
+<i>294</i>&nbsp;
+<i>295</i>&nbsp;    //=========================================================================
+<i>296</i>&nbsp;    // Value reading
+<i>297</i>&nbsp;
+<i>298</i>&nbsp;    /**
+<i>299</i>&nbsp;     * Returns the current value as an boolean.
+<i>300</i>&nbsp;     * This is only valid when {@link #getType()} returns {@link IonType#BOOL}.
+<i>301</i>&nbsp;     */
+<i>302</i>&nbsp;    public boolean booleanValue();
+<i>303</i>&nbsp;
+<i>304</i>&nbsp;    /**
+<i>305</i>&nbsp;     * Returns the current value as an int.  This is only valid if there is
+<i>306</i>&nbsp;     * an underlying value and the value is of a numeric type (int, float, or
+<i>307</i>&nbsp;     * decimal).
+<i>308</i>&nbsp;     */
+<i>309</i>&nbsp;    public int intValue();
+<i>310</i>&nbsp;
+<i>311</i>&nbsp;    /**
+<i>312</i>&nbsp;     * Returns the current value as a long.  This is only valid if there is
+<i>313</i>&nbsp;     * an underlying value and the value is of a numeric type (int, float, or
+<i>314</i>&nbsp;     * decimal).
+<i>315</i>&nbsp;     */
+<i>316</i>&nbsp;    public long longValue();
+<i>317</i>&nbsp;
+<i>318</i>&nbsp;    /**
+<i>319</i>&nbsp;     * Returns the current value as a {@link BigInteger}.  This is only valid if there
+<i>320</i>&nbsp;     * is an underlying value and the value is of a numeric type (int, float, or
+<i>321</i>&nbsp;     * decimal).
+<i>322</i>&nbsp;     */
+<i>323</i>&nbsp;    public BigInteger bigIntegerValue();
+<i>324</i>&nbsp;
+<i>325</i>&nbsp;    /**
+<i>326</i>&nbsp;     * Returns the current value as a double.  This is only valid if there is
+<i>327</i>&nbsp;     * an underlying value and the value is either float, or decimal.
+<i>328</i>&nbsp;     */
+<i>329</i>&nbsp;    public double doubleValue();
+<i>330</i>&nbsp;
+<i>331</i>&nbsp;    /**
+<i>332</i>&nbsp;     * Returns the current value as a {@link BigDecimal}.
+<i>333</i>&nbsp;     * This method should not return a {@link Decimal}, so it lacks support for
+<i>334</i>&nbsp;     * negative zeros.
+<i>335</i>&nbsp;     * &lt;p&gt;
+<i>336</i>&nbsp;     * This method is only valid when {@link #getType()} returns
+<i>337</i>&nbsp;     * {@link IonType#DECIMAL}.
+<i>338</i>&nbsp;     *
+<i>339</i>&nbsp;     * @return the current value as a {@link BigDecimal},
+<i>340</i>&nbsp;     * or {@code null} if the current value is {@code null.decimal}.
+<i>341</i>&nbsp;     */
+<i>342</i>&nbsp;    public BigDecimal bigDecimalValue();
+<i>343</i>&nbsp;
+<i>344</i>&nbsp;    /**
+<i>345</i>&nbsp;     * Returns the current value as a {@link Decimal}, which extends
+<i>346</i>&nbsp;     * {@link BigDecimal} with support for negative zeros.
+<i>347</i>&nbsp;     * This is only valid when {@link #getType()} returns
+<i>348</i>&nbsp;     * {@link IonType#DECIMAL}.
+<i>349</i>&nbsp;     *
+<i>350</i>&nbsp;     * @return the current value as a {@link Decimal},
+<i>351</i>&nbsp;     * or {@code null} if the current value is {@code null.decimal}.
+<i>352</i>&nbsp;     */
+<i>353</i>&nbsp;    public Decimal decimalValue();
+<i>354</i>&nbsp;
+<i>355</i>&nbsp;
+<i>356</i>&nbsp;    /**
+<i>357</i>&nbsp;     * Returns the current value as a {@link java.util.Date}.
+<i>358</i>&nbsp;     * This is only valid when {@link #getType()} returns
+<i>359</i>&nbsp;     * {@link IonType#TIMESTAMP}.
+<i>360</i>&nbsp;     *
+<i>361</i>&nbsp;     * @return the current value as a {@link Date},
+<i>362</i>&nbsp;     * or {@code null} if the current value is {@code null.timestamp}.
+<i>363</i>&nbsp;     */
+<i>364</i>&nbsp;    public Date dateValue();
+<i>365</i>&nbsp;
+<i>366</i>&nbsp;    /**
+<i>367</i>&nbsp;     * Returns the current value as a {@link Timestamp}.
+<i>368</i>&nbsp;     * This is only valid when {@link #getType()} returns
+<i>369</i>&nbsp;     * {@link IonType#TIMESTAMP}.
+<i>370</i>&nbsp;     *
+<i>371</i>&nbsp;     * @return the current value as a {@link Timestamp},
+<i>372</i>&nbsp;     * or {@code null} if the current value is {@code null.timestamp}.
+<i>373</i>&nbsp;     */
+<i>374</i>&nbsp;    public Timestamp timestampValue();
+<i>375</i>&nbsp;
+<i>376</i>&nbsp;    /**
+<i>377</i>&nbsp;     * Returns the current value as a Java String.
+<i>378</i>&nbsp;     * This is only valid when {@link #getType()} returns
+<i>379</i>&nbsp;     * {@link IonType#STRING} or {@link IonType#SYMBOL}.
+<i>380</i>&nbsp;     *
+<i>381</i>&nbsp;     * @throws UnknownSymbolException if the current value is a symbol
+<i>382</i>&nbsp;     * with unknown text.
+<i>383</i>&nbsp;     *
+<i>384</i>&nbsp;     * @see #symbolValue()
+<i>385</i>&nbsp;     */
+<i>386</i>&nbsp;    public String stringValue();
+<i>387</i>&nbsp;
+<i>388</i>&nbsp;
+<i>389</i>&nbsp;    /**
+<i>390</i>&nbsp;     * Returns the current value as a symbol token (text + ID).
+<i>391</i>&nbsp;     * This is only valid when {@link #getType()} returns
+<i>392</i>&nbsp;     * {@link IonType#SYMBOL}.
+<i>393</i>&nbsp;     *
+<i>394</i>&nbsp;     * @return null if {@link #isNullValue()}
+<i>395</i>&nbsp;     *
+<i>396</i>&nbsp;
+<i>397</i>&nbsp;     */
+<i>398</i>&nbsp;    public SymbolToken symbolValue();
+<i>399</i>&nbsp;
+<i>400</i>&nbsp;
+<i>401</i>&nbsp;    /**
+<i>402</i>&nbsp;     * Gets the size in bytes of the current lob value.
+<i>403</i>&nbsp;     * This is only valid when {@link #getType()} returns {@link IonType#BLOB}
+<i>404</i>&nbsp;     * or {@link IonType#CLOB}.
+<i>405</i>&nbsp;     *
+<i>406</i>&nbsp;     * @return the lob&#39;s size in bytes.
+<i>407</i>&nbsp;     */
+<i>408</i>&nbsp;    public int byteSize();
+<i>409</i>&nbsp;
+<i>410</i>&nbsp;    /**
+<i>411</i>&nbsp;     * Returns the current value as a newly-allocated byte array.
+<i>412</i>&nbsp;     * This is only valid when {@link #getType()} returns {@link IonType#BLOB}
+<i>413</i>&nbsp;     * or {@link IonType#CLOB}.
+<i>414</i>&nbsp;     */
+<i>415</i>&nbsp;    public byte[] newBytes();
+<i>416</i>&nbsp;
+<i>417</i>&nbsp;    /**
+<i>418</i>&nbsp;     * Copies the current value into the passed in a byte array.
+<i>419</i>&nbsp;     * This is only valid when {@link #getType()} returns {@link IonType#BLOB}
+<i>420</i>&nbsp;     * or {@link IonType#CLOB}.
+<i>421</i>&nbsp;     *
+<i>422</i>&nbsp;     * @param buffer destination to copy the value into, this must not be null.
+<i>423</i>&nbsp;     * @param offset the first position to copy into, this must be non null and
+<i>424</i>&nbsp;     *  less than the length of buffer.
+<i>425</i>&nbsp;     * @param len the number of bytes available in the buffer to copy into,
+<i>426</i>&nbsp;     *  this must be long enough to hold the whole value and not extend outside
+<i>427</i>&nbsp;     *  of buffer.
+<i>428</i>&nbsp;     */
+<i>429</i>&nbsp;    public int getBytes(byte[] buffer, int offset, int len);
+<i>430</i>&nbsp;
+<i>431</i>&nbsp;    /**
+<i>432</i>&nbsp;     * Returns the current value as a String using the Ion toString() serialization
+<i>433</i>&nbsp;     * format.  This is only valid if there is an underlying value.  This is
+<i>434</i>&nbsp;     * logically equivalent to getIonValue().toString() but may be more efficient
+<i>435</i>&nbsp;     * and does not require an IonSystem context to operate.
+<i>436</i>&nbsp;     */
+<i>437</i>&nbsp;    // 2008-10-30 Disabled this because semantics are cloudy.
+<i>438</i>&nbsp;    // In particular, does this move the cursor beyond the current value?
+<i>439</i>&nbsp;    // Also, this could be problematic to use since other value-extraction
+<i>440</i>&nbsp;    // methods are read-once, so one can&#39;t look at the value before calling this.
+<i>441</i>&nbsp;//    public String valueToString();
+<i>442</i>&nbsp;
+<i>443</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

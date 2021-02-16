@@ -1,0 +1,128 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: _Private_LocalSymbolTableFactory</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: _Private_LocalSymbolTableFactory (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">_Private_LocalSymbolTableFactory</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import com.amazon.ion.IonCatalog;
+<i>19</i>&nbsp;import com.amazon.ion.IonReader;
+<i>20</i>&nbsp;import com.amazon.ion.IonType;
+<i>21</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>22</i>&nbsp;
+<i>23</i>&nbsp;/**
+<i>24</i>&nbsp; * NOT FOR APPLICATION USE
+<i>25</i>&nbsp; *
+<i>26</i>&nbsp; * Implementations of this interface may be provided to IonReaders in order
+<i>27</i>&nbsp; * to force them to construct LocalSymbolTables in a different way.
+<i>28</i>&nbsp; *
+<i>29</i>&nbsp; * In practice, this is used to construct a different LocalSymbolTable
+<i>30</i>&nbsp; * implementation for use with the DOM than is used purely by readers
+<i>31</i>&nbsp; * and writers.
+<i>32</i>&nbsp; *
+<i>33</i>&nbsp; * If {@link LocalSymbolTableAsStruct} is ever deleted, this can go away
+<i>34</i>&nbsp; * too.
+<i>35</i>&nbsp; */
+<i>36</i>&nbsp;@SuppressWarnings(&quot;javadoc&quot;)
+<i>37</i>&nbsp;public interface _Private_LocalSymbolTableFactory
+<i>38</i>&nbsp;{
+<i>39</i>&nbsp;    /**
+<i>40</i>&nbsp;     * Constructs a new local symbol table represented by the current value of
+<i>41</i>&nbsp;     * the passed in {@link IonReader}.
+<i>42</i>&nbsp;     * &lt;p&gt;
+<i>43</i>&nbsp;     * &lt;b&gt;NOTE:&lt;/b&gt; It is assumed that the passed in reader is positioned
+<i>44</i>&nbsp;     * properly on/before a value that represents a local symtab semantically.
+<i>45</i>&nbsp;     * That is, no exception-checks are made on the {@link IonType}
+<i>46</i>&nbsp;     * and annotation, callers are responsible for checking this!
+<i>47</i>&nbsp;     *
+<i>48</i>&nbsp;     * @param catalog
+<i>49</i>&nbsp;     *          the catalog containing shared symtabs referenced by import
+<i>50</i>&nbsp;     *          declarations within the local symtab
+<i>51</i>&nbsp;     * @param reader
+<i>52</i>&nbsp;     *          the reader positioned on the local symbol table represented as
+<i>53</i>&nbsp;     *          a struct
+<i>54</i>&nbsp;     * @param alreadyInStruct
+<i>55</i>&nbsp;     *          denotes whether the reader is already positioned on the struct;
+<i>56</i>&nbsp;     *          false if it is positioned before the struct
+<i>57</i>&nbsp;     */
+<i>58</i>&nbsp;    public SymbolTable newLocalSymtab(IonCatalog catalog,
+<i>59</i>&nbsp;                                      IonReader reader,
+<i>60</i>&nbsp;                                      boolean alreadyInStruct);
+<i>61</i>&nbsp;
+<i>62</i>&nbsp;    /**
+<i>63</i>&nbsp;     * Constructs a new local symtab with given imports and local symbols.
+<i>64</i>&nbsp;     *
+<i>65</i>&nbsp;     * @param defaultSystemSymtab
+<i>66</i>&nbsp;     *          the default system symtab, which will be used if the first
+<i>67</i>&nbsp;     *          import in {@code imports} isn&#39;t a system symtab, never null
+<i>68</i>&nbsp;     * @param imports
+<i>69</i>&nbsp;     *          the set of shared symbol tables to import; the first (and only
+<i>70</i>&nbsp;     *          the first) may be a system table, in which case the
+<i>71</i>&nbsp;     *          {@code defaultSystemSymtab} is ignored
+<i>72</i>&nbsp;     *
+<i>73</i>&nbsp;     * @throws IllegalArgumentException
+<i>74</i>&nbsp;     *          if any import is a local table, or if any but the first is a
+<i>75</i>&nbsp;     *          system table
+<i>76</i>&nbsp;     * @throws NullPointerException
+<i>77</i>&nbsp;     *          if any import is null
+<i>78</i>&nbsp;     */
+<i>79</i>&nbsp;    public SymbolTable newLocalSymtab(SymbolTable defaultSystemSymtab,
+<i>80</i>&nbsp;                                      SymbolTable... imports);
+<i>81</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

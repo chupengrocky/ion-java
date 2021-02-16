@@ -1,0 +1,1307 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonValueLite</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl.lite</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonValueLite (com.amazon.ion.impl.lite)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IonValueLite</td>
+<td class="coverageStat">
+  <span class="percent">
+    88.2%
+  </span>
+  <span class="absValue">
+    (67/ 76)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.2%
+  </span>
+  <span class="absValue">
+    (332/ 368)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">IonValueLite$LazySymbolTableProvider</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/ 7)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    88.5%
+  </span>
+  <span class="absValue">
+    (69/ 78)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.4%
+  </span>
+  <span class="absValue">
+    (339/ 375)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl.lite;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.SymbolTable.UNKNOWN_SYMBOL_ID;
+<i>19</i>&nbsp;import static com.amazon.ion.impl._Private_Utils.EMPTY_STRING_ARRAY;
+<i>20</i>&nbsp;import static com.amazon.ion.impl._Private_Utils.newSymbolToken;
+<i>21</i>&nbsp;import static com.amazon.ion.util.Equivalence.ionEquals;
+<i>22</i>&nbsp;
+<i>23</i>&nbsp;import com.amazon.ion.IonDatagram;
+<i>24</i>&nbsp;import com.amazon.ion.IonException;
+<i>25</i>&nbsp;import com.amazon.ion.IonType;
+<i>26</i>&nbsp;import com.amazon.ion.IonValue;
+<i>27</i>&nbsp;import com.amazon.ion.IonWriter;
+<i>28</i>&nbsp;import com.amazon.ion.NullValueException;
+<i>29</i>&nbsp;import com.amazon.ion.ReadOnlyValueException;
+<i>30</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>31</i>&nbsp;import com.amazon.ion.SymbolToken;
+<i>32</i>&nbsp;import com.amazon.ion.UnknownSymbolException;
+<i>33</i>&nbsp;import com.amazon.ion.ValueVisitor;
+<i>34</i>&nbsp;import com.amazon.ion.impl._Private_IonValue;
+<i>35</i>&nbsp;import com.amazon.ion.impl._Private_IonWriter;
+<i>36</i>&nbsp;import com.amazon.ion.impl._Private_Utils;
+<i>37</i>&nbsp;import com.amazon.ion.system.IonTextWriterBuilder;
+<i>38</i>&nbsp;import com.amazon.ion.util.Printer;
+<i>39</i>&nbsp;import java.io.IOException;
+<i>40</i>&nbsp;import java.io.PrintWriter;
+<i>41</i>&nbsp;
+<i>42</i>&nbsp;/**
+<i>43</i>&nbsp; *  Base class of the light weight implementation of
+<i>44</i>&nbsp; *  Ion values.
+<i>45</i>&nbsp; */
+<b class="fc"><i>46</i>&nbsp;abstract class IonValueLite</b>
+<i>47</i>&nbsp;    implements _Private_IonValue
+<i>48</i>&nbsp;{
+<b class="fc"><i>49</i>&nbsp;    private static final int TYPE_ANNOTATION_HASH_SIGNATURE =</b>
+<b class="fc"><i>50</i>&nbsp;        &quot;TYPE ANNOTATION&quot;.hashCode();</b>
+<i>51</i>&nbsp;
+<i>52</i>&nbsp;    /**
+<i>53</i>&nbsp;     * this hold all the various boolean flags we have
+<i>54</i>&nbsp;     * in a single int.  Use set_flag(), clear_flag(), is_true()
+<i>55</i>&nbsp;     * and the associated int flag to check the various flags.
+<i>56</i>&nbsp;     * This is to avoid the overhead java seems to impose
+<i>57</i>&nbsp;     * for a boolean value - it should be a bit, but it seems
+<i>58</i>&nbsp;     * to be an int (4 bytes for 1 bit seems excessive).
+<i>59</i>&nbsp;     */
+<i>60</i>&nbsp;    protected static final int IS_LOCKED          = 0x01;
+<i>61</i>&nbsp;    protected static final int IS_SYSTEM_VALUE    = 0x02;
+<i>62</i>&nbsp;    protected static final int IS_NULL_VALUE      = 0x04;
+<i>63</i>&nbsp;    protected static final int IS_BOOL_TRUE       = 0x08;
+<i>64</i>&nbsp;    protected static final int IS_IVM             = 0x10;
+<i>65</i>&nbsp;    protected static final int IS_AUTO_CREATED    = 0x20;
+<i>66</i>&nbsp;    protected static final int IS_SYMBOL_PRESENT  = 0x40;
+<i>67</i>&nbsp;    /**
+<i>68</i>&nbsp;     * Symbol ID present refers to there being the &lt;i&gt;possibility&lt;/i&gt; that the IonValueLite, or it&#39;s contained sub graph
+<i>69</i>&nbsp;     * &lt;i&gt;(e.g. if it is a {@link IonContainerLite} based sub type)&lt;/i&gt; contains one or more defined
+<i>70</i>&nbsp;     * Symbol ID&#39;s (SID)&#39;s. This flag is used to track lifecycle, such that operations that require SID&#39;s are purged
+<i>71</i>&nbsp;     * from the IonValueLite and it&#39;s contained sub-DOM can conduct a fast evaluation rather than having to do a full
+<i>72</i>&nbsp;     * contained graph traversal on each and every invocation.
+<i>73</i>&nbsp;     */
+<i>74</i>&nbsp;    protected static final int IS_SYMBOL_ID_PRESENT = 0x80;
+<i>75</i>&nbsp;
+<i>76</i>&nbsp;    private   static final int ELEMENT_MASK       = 0xff;
+<i>77</i>&nbsp;    protected static final int ELEMENT_SHIFT      = 8; // low 8 bits is flag, upper 24 (or 48 is element id)
+<i>78</i>&nbsp;
+<i>79</i>&nbsp;    /**
+<i>80</i>&nbsp;     * Used by subclasses to retrieve metadata set by
+<i>81</i>&nbsp;     * {@link #_setMetadata(int, int, int)}.
+<i>82</i>&nbsp;     * @param mask the location of the metadata to retrieve.
+<i>83</i>&nbsp;     * @param shift the number of bits to right-shift the metadata so that
+<i>84</i>&nbsp;     *              it starts at bit index 0.
+<i>85</i>&nbsp;     * @return the metadata from _flags at the given mask.
+<i>86</i>&nbsp;     */
+<i>87</i>&nbsp;    protected final int _getMetadata(int mask, int shift) {
+<b class="fc"><i>88</i>&nbsp;        return (_flags &amp; mask) &gt;&gt;&gt; shift;</b>
+<i>89</i>&nbsp;    }
+<i>90</i>&nbsp;
+<i>91</i>&nbsp;    /**
+<i>92</i>&nbsp;     * May be used by subclasses to reuse _flag bits for purposes specific
+<i>93</i>&nbsp;     * to that subclass. It is important that only flag bits not currently
+<i>94</i>&nbsp;     * used by that subclass are chosen; otherwise important data may be
+<i>95</i>&nbsp;     * overwritten. NOTE: only the lower 8 bits may be used, because the
+<i>96</i>&nbsp;     * upper 24 are reserved for the element ID.
+<i>97</i>&nbsp;     * @param metadata the metadata to set.
+<i>98</i>&nbsp;     * @param mask the location at which to set the metadata. Must be within
+<i>99</i>&nbsp;     *             the lower 8 bits.
+<i>100</i>&nbsp;     * @param shift the number of bits to left-shift the metadata so that
+<i>101</i>&nbsp;     *              it starts at the index of the mask&#39;s LSB.
+<i>102</i>&nbsp;     */
+<i>103</i>&nbsp;    protected final void _setMetadata(int metadata, int mask, int shift) {
+<b class="fc"><i>104</i>&nbsp;        assert(mask &lt;= ELEMENT_MASK); // don&#39;t overwrite the element ID</b>
+<b class="fc"><i>105</i>&nbsp;        _flags &amp;= ~mask;</b>
+<b class="fc"><i>106</i>&nbsp;        _flags |= ((metadata &lt;&lt; shift) &amp; mask);</b>
+<b class="fc"><i>107</i>&nbsp;    }</b>
+<i>108</i>&nbsp;
+<i>109</i>&nbsp;    protected final void _elementid(int elementid) {
+<b class="fc"><i>110</i>&nbsp;        _flags &amp;= ELEMENT_MASK;</b>
+<b class="fc"><i>111</i>&nbsp;        _flags |= (elementid &lt;&lt; ELEMENT_SHIFT);</b>
+<b class="fc"><i>112</i>&nbsp;        assert(_elementid() == elementid);</b>
+<b class="fc"><i>113</i>&nbsp;    }</b>
+<i>114</i>&nbsp;    protected final int _elementid() {
+<b class="fc"><i>115</i>&nbsp;        int elementid =  _flags  &gt;&gt;&gt; ELEMENT_SHIFT;</b>
+<b class="fc"><i>116</i>&nbsp;        return elementid;</b>
+<i>117</i>&nbsp;    }
+<i>118</i>&nbsp;
+<i>119</i>&nbsp;    private final boolean is_true(int flag_bit) {
+<b class="fc"><i>120</i>&nbsp;        return ((_flags &amp; flag_bit) != 0);</b>
+<i>121</i>&nbsp;    }
+<i>122</i>&nbsp;    private final void set_flag(int flag_bit) {
+<b class="fc"><i>123</i>&nbsp;        assert(flag_bit != 0);</b>
+<b class="fc"><i>124</i>&nbsp;        _flags |= flag_bit;</b>
+<b class="fc"><i>125</i>&nbsp;    }</b>
+<i>126</i>&nbsp;    private final void clear_flag(int flag_bit) {
+<b class="fc"><i>127</i>&nbsp;        assert(flag_bit != 0);</b>
+<b class="fc"><i>128</i>&nbsp;        _flags &amp;= ~flag_bit;</b>
+<b class="fc"><i>129</i>&nbsp;    }</b>
+<i>130</i>&nbsp;
+<b class="fc"><i>131</i>&nbsp;    protected final boolean _isLocked() { return is_true(IS_LOCKED); }</b>
+<i>132</i>&nbsp;    protected final boolean _isLocked(boolean flag) {
+<b class="fc"><i>133</i>&nbsp;        if (flag) {</b>
+<b class="fc"><i>134</i>&nbsp;            set_flag(IS_LOCKED);</b>
+<i>135</i>&nbsp;        }
+<i>136</i>&nbsp;        else {
+<b class="nc"><i>137</i>&nbsp;            clear_flag(IS_LOCKED);</b>
+<i>138</i>&nbsp;        }
+<b class="fc"><i>139</i>&nbsp;        return flag;</b>
+<i>140</i>&nbsp;    }
+<b class="nc"><i>141</i>&nbsp;    protected final boolean _isSystemValue() { return is_true(IS_SYSTEM_VALUE); }</b>
+<i>142</i>&nbsp;    protected final boolean _isSystemValue(boolean flag) {
+<b class="nc"><i>143</i>&nbsp;        if (flag) {</b>
+<b class="nc"><i>144</i>&nbsp;            set_flag(IS_SYSTEM_VALUE);</b>
+<i>145</i>&nbsp;        }
+<i>146</i>&nbsp;        else {
+<b class="nc"><i>147</i>&nbsp;            clear_flag(IS_SYSTEM_VALUE);</b>
+<i>148</i>&nbsp;        }
+<b class="nc"><i>149</i>&nbsp;        return flag;</b>
+<i>150</i>&nbsp;    }
+<b class="fc"><i>151</i>&nbsp;    protected final boolean _isNullValue() { return is_true(IS_NULL_VALUE); }</b>
+<i>152</i>&nbsp;    protected final boolean _isNullValue(boolean flag) {
+<b class="fc"><i>153</i>&nbsp;        if (flag) {</b>
+<b class="fc"><i>154</i>&nbsp;            set_flag(IS_NULL_VALUE);</b>
+<i>155</i>&nbsp;        }
+<i>156</i>&nbsp;        else {
+<b class="fc"><i>157</i>&nbsp;            clear_flag(IS_NULL_VALUE);</b>
+<i>158</i>&nbsp;        }
+<b class="fc"><i>159</i>&nbsp;        return flag;</b>
+<i>160</i>&nbsp;    }
+<b class="fc"><i>161</i>&nbsp;    protected final boolean _isBoolTrue() { return is_true(IS_BOOL_TRUE); }</b>
+<i>162</i>&nbsp;    protected final boolean _isBoolTrue(boolean flag) {
+<b class="fc"><i>163</i>&nbsp;        if (flag) {</b>
+<b class="fc"><i>164</i>&nbsp;            set_flag(IS_BOOL_TRUE);</b>
+<i>165</i>&nbsp;        }
+<i>166</i>&nbsp;        else {
+<b class="fc"><i>167</i>&nbsp;            clear_flag(IS_BOOL_TRUE);</b>
+<i>168</i>&nbsp;        }
+<b class="fc"><i>169</i>&nbsp;        return flag;</b>
+<i>170</i>&nbsp;    }
+<i>171</i>&nbsp;
+<b class="nc"><i>172</i>&nbsp;    protected final boolean _isIVM() { return is_true(IS_IVM); }</b>
+<i>173</i>&nbsp;    protected final boolean _isIVM(boolean flag) {
+<b class="nc"><i>174</i>&nbsp;        if (flag) {</b>
+<b class="nc"><i>175</i>&nbsp;            set_flag(IS_IVM);</b>
+<i>176</i>&nbsp;        }
+<i>177</i>&nbsp;        else {
+<b class="nc"><i>178</i>&nbsp;            clear_flag(IS_IVM);</b>
+<i>179</i>&nbsp;        }
+<b class="nc"><i>180</i>&nbsp;        return flag;</b>
+<i>181</i>&nbsp;    }
+<i>182</i>&nbsp;
+<b class="fc"><i>183</i>&nbsp;    protected final boolean _isAutoCreated() { return is_true(IS_AUTO_CREATED); }</b>
+<i>184</i>&nbsp;    protected final boolean _isAutoCreated(boolean flag) {
+<b class="nc"><i>185</i>&nbsp;        if (flag) {</b>
+<b class="nc"><i>186</i>&nbsp;            set_flag(IS_AUTO_CREATED);</b>
+<i>187</i>&nbsp;        }
+<i>188</i>&nbsp;        else {
+<b class="nc"><i>189</i>&nbsp;            clear_flag(IS_AUTO_CREATED);</b>
+<i>190</i>&nbsp;        }
+<b class="nc"><i>191</i>&nbsp;        return flag;</b>
+<i>192</i>&nbsp;    }
+<i>193</i>&nbsp;
+<b class="fc"><i>194</i>&nbsp;    protected final boolean _isSymbolPresent() { return is_true(IS_SYMBOL_PRESENT); }</b>
+<i>195</i>&nbsp;    protected final boolean _isSymbolPresent(boolean flag) {
+<b class="fc"><i>196</i>&nbsp;        if (flag) {</b>
+<b class="fc"><i>197</i>&nbsp;            set_flag(IS_SYMBOL_PRESENT);</b>
+<i>198</i>&nbsp;        }
+<i>199</i>&nbsp;        else {
+<b class="nc"><i>200</i>&nbsp;            clear_flag(IS_SYMBOL_PRESENT);</b>
+<i>201</i>&nbsp;        }
+<b class="fc"><i>202</i>&nbsp;        return flag;</b>
+<i>203</i>&nbsp;    }
+<i>204</i>&nbsp;
+<b class="fc"><i>205</i>&nbsp;    protected final boolean _isSymbolIdPresent() { return is_true(IS_SYMBOL_ID_PRESENT); }</b>
+<i>206</i>&nbsp;    protected final boolean _isSymbolIdPresent(boolean flag) {
+<b class="fc"><i>207</i>&nbsp;        if (flag) {</b>
+<b class="fc"><i>208</i>&nbsp;            set_flag(IS_SYMBOL_ID_PRESENT);</b>
+<i>209</i>&nbsp;        }
+<i>210</i>&nbsp;        else {
+<b class="fc"><i>211</i>&nbsp;            clear_flag(IS_SYMBOL_ID_PRESENT);</b>
+<i>212</i>&nbsp;        }
+<b class="fc"><i>213</i>&nbsp;        return flag;</b>
+<i>214</i>&nbsp;    }
+<i>215</i>&nbsp;
+<i>216</i>&nbsp;    /**
+<i>217</i>&nbsp;     * Lazy memoized symtab provider. Should be used when a call path
+<i>218</i>&nbsp;     * conditionally needs access to a value&#39;s symbol table. This provider
+<i>219</i>&nbsp;     * can be &quot;passed down&quot; through the path, cutting down on
+<i>220</i>&nbsp;     * potentially expensive IonValue#getSymbolTable calls.
+<i>221</i>&nbsp;     */
+<i>222</i>&nbsp;    static class LazySymbolTableProvider
+<i>223</i>&nbsp;        implements SymbolTableProvider
+<i>224</i>&nbsp;    {
+<b class="fc"><i>225</i>&nbsp;        SymbolTable symtab = null;</b>
+<i>226</i>&nbsp;        final IonValueLite value;
+<i>227</i>&nbsp;
+<i>228</i>&nbsp;        LazySymbolTableProvider(IonValueLite value)
+<b class="fc"><i>229</i>&nbsp;        {</b>
+<b class="fc"><i>230</i>&nbsp;            this.value = value;</b>
+<b class="fc"><i>231</i>&nbsp;        }</b>
+<i>232</i>&nbsp;
+<i>233</i>&nbsp;        public SymbolTable getSymbolTable()
+<i>234</i>&nbsp;        {
+<b class="fc"><i>235</i>&nbsp;            if (symtab == null)</b>
+<i>236</i>&nbsp;            {
+<b class="fc"><i>237</i>&nbsp;                symtab = value.getSymbolTable();</b>
+<i>238</i>&nbsp;            }
+<b class="fc"><i>239</i>&nbsp;            return symtab;</b>
+<i>240</i>&nbsp;        }
+<i>241</i>&nbsp;
+<i>242</i>&nbsp;    }
+<i>243</i>&nbsp;
+<i>244</i>&nbsp;    /*
+<i>245</i>&nbsp;     * KEEP ALL MEMBER FIELDS HERE!
+<i>246</i>&nbsp;     *
+<i>247</i>&nbsp;     * This impl is intended to have a very light memory footprint. So tracking
+<i>248</i>&nbsp;     * member fields is especially important.
+<i>249</i>&nbsp;     *
+<i>250</i>&nbsp;     * SO PLEASE KEEP THE MEMBER DECLARATIONS HERE AND TOGETHER!
+<i>251</i>&nbsp;     *
+<i>252</i>&nbsp;     * Thank you.
+<i>253</i>&nbsp;     *
+<i>254</i>&nbsp;     * If this instance is not a struct field, then
+<i>255</i>&nbsp;     *   _fieldId = UNKNOWN_SYMBOL_ID  and  _fieldName = null
+<i>256</i>&nbsp;     * Otherwise, at least one must be defined.
+<i>257</i>&nbsp;     */
+<i>258</i>&nbsp;    private   int              _flags;
+<b class="fc"><i>259</i>&nbsp;    private   int              _fieldId = UNKNOWN_SYMBOL_ID;</b>
+<i>260</i>&nbsp;
+<i>261</i>&nbsp;    /** Not null. */
+<i>262</i>&nbsp;    protected IonContext       _context;
+<i>263</i>&nbsp;    private   String           _fieldName;
+<i>264</i>&nbsp;
+<i>265</i>&nbsp;    /**
+<i>266</i>&nbsp;     * The annotation sequence. This array is overallocated and may have
+<i>267</i>&nbsp;     * nulls at the end denoting unused slots.
+<i>268</i>&nbsp;     */
+<i>269</i>&nbsp;    private   SymbolToken[] _annotations;
+<i>270</i>&nbsp;
+<i>271</i>&nbsp;    // current size 32 bit: 3*4 + 4 +  8 = 24 (32 bytes allocated)
+<i>272</i>&nbsp;    //              64 bit: 3*8 + 4 + 16 = 52 (56 bytes allocated)
+<i>273</i>&nbsp;
+<i>274</i>&nbsp;    /**
+<i>275</i>&nbsp;     * The constructor, which is called from the concrete subclasses&#39;
+<i>276</i>&nbsp;     * constructors.
+<i>277</i>&nbsp;     *
+<i>278</i>&nbsp;     * @param context the context that this value is associated with
+<i>279</i>&nbsp;     * @param isNull if true, sets the null bit in the flags member field
+<i>280</i>&nbsp;     */
+<i>281</i>&nbsp;    IonValueLite(ContainerlessContext context, boolean isNull)
+<b class="fc"><i>282</i>&nbsp;    {</b>
+<b class="fc"><i>283</i>&nbsp;        assert context != null;</b>
+<b class="fc"><i>284</i>&nbsp;        _context = context;</b>
+<b class="fc"><i>285</i>&nbsp;        if (isNull) {</b>
+<b class="fc"><i>286</i>&nbsp;            set_flag(IS_NULL_VALUE);</b>
+<i>287</i>&nbsp;        }
+<b class="fc"><i>288</i>&nbsp;    }</b>
+<i>289</i>&nbsp;
+<i>290</i>&nbsp;    /**
+<i>291</i>&nbsp;     * Copy Constructor *purely* for cloning - NOTE; this means that the clone is not &lt;i&gt;perfect&lt;/i&gt;
+<i>292</i>&nbsp;     * as if the original entity was &lt;b&gt;read-only&lt;/b&gt; the cloned value will now be &lt;b&gt;mutable&lt;/b&gt;.
+<i>293</i>&nbsp;     *
+<i>294</i>&nbsp;     * @param existing the non-null existing IonValueLite entity to clone
+<i>295</i>&nbsp;     * @param context the non-null parent context to use for the cloned entity.
+<i>296</i>&nbsp;     */
+<b class="fc"><i>297</i>&nbsp;    IonValueLite(IonValueLite existing, IonContext context) {</b>
+<i>298</i>&nbsp;        // Symbols are *immutable* therefore a shallow copy is sufficient
+<b class="fc"><i>299</i>&nbsp;        boolean hasSIDsRetained = false;</b>
+<b class="fc"><i>300</i>&nbsp;        if (null == existing._annotations) {</b>
+<b class="fc"><i>301</i>&nbsp;            this._annotations = null;</b>
+<i>302</i>&nbsp;        } else {
+<b class="fc"><i>303</i>&nbsp;            int size = existing._annotations.length;</b>
+<b class="fc"><i>304</i>&nbsp;            this._annotations = new SymbolToken[size];</b>
+<b class="fc"><i>305</i>&nbsp;            for (int i = 0; i &lt; size; i++) {</b>
+<b class="fc"><i>306</i>&nbsp;                SymbolToken existingToken = existing._annotations[i];</b>
+<b class="fc"><i>307</i>&nbsp;                if (existingToken != null) {</b>
+<b class="fc"><i>308</i>&nbsp;                    String text = existingToken.getText();</b>
+<b class="fc"><i>309</i>&nbsp;                    if (text != null) {</b>
+<b class="fc"><i>310</i>&nbsp;                        this._annotations[i] =</b>
+<b class="fc"><i>311</i>&nbsp;                            _Private_Utils.newSymbolToken(text, UNKNOWN_SYMBOL_ID);</b>
+<i>312</i>&nbsp;                    } else {
+<i>313</i>&nbsp;                        // TODO - amzn/ion-java/issues/223 needs consistent handling, should attempt to resolve and if it cant; fail
+<b class="fc"><i>314</i>&nbsp;                        this._annotations[i] = existing._annotations[i];</b>
+<b class="fc"><i>315</i>&nbsp;                        hasSIDsRetained |= this._annotations[i].getSid() &gt; UNKNOWN_SYMBOL_ID;</b>
+<i>316</i>&nbsp;                    }
+<i>317</i>&nbsp;                }
+<i>318</i>&nbsp;            }
+<i>319</i>&nbsp;        }
+<i>320</i>&nbsp;        // We don&#39;t copy the field name, that happens in IonStruct&#39;s clone
+<b class="fc"><i>321</i>&nbsp;        this._flags       = existing._flags;</b>
+<b class="fc"><i>322</i>&nbsp;        this._context     = context;</b>
+<i>323</i>&nbsp;
+<i>324</i>&nbsp;        // as IonValue.clone() mandates that the returned value is mutable, regardless of the
+<i>325</i>&nbsp;        // existing &#39;read only&#39; flag - we force the deep-copy back to being mutable
+<b class="fc"><i>326</i>&nbsp;        clear_flag(IS_LOCKED);</b>
+<i>327</i>&nbsp;        // whilst the clone *should* guarantee symbol context is purged, the annotation behavior existing above
+<i>328</i>&nbsp;        // under the TO DO for amzn/ion-java/issues/223 does mean that SID context can be propogated through a clone, therefore
+<i>329</i>&nbsp;        // the encoding flag has to reflect this reality
+<b class="fc"><i>330</i>&nbsp;        _isSymbolIdPresent(hasSIDsRetained);</b>
+<b class="fc"><i>331</i>&nbsp;    }</b>
+<i>332</i>&nbsp;
+<i>333</i>&nbsp;    public abstract void accept(ValueVisitor visitor) throws Exception;
+<i>334</i>&nbsp;
+<i>335</i>&nbsp;    public /* synchronized */ void addTypeAnnotation(String annotation)
+<i>336</i>&nbsp;    {
+<b class="fc"><i>337</i>&nbsp;        checkForLock();</b>
+<i>338</i>&nbsp;
+<b class="fc"><i>339</i>&nbsp;        if (annotation == null || annotation.length() &lt; 1) {</b>
+<b class="nc"><i>340</i>&nbsp;            throw new IllegalArgumentException(&quot;a user type annotation must be a non-empty string&quot;);</b>
+<i>341</i>&nbsp;        }
+<i>342</i>&nbsp;
+<i>343</i>&nbsp;        // we don&#39;t add duplicate annotations
+<b class="fc"><i>344</i>&nbsp;        if (hasTypeAnnotation(annotation)) return;</b>
+<i>345</i>&nbsp;
+<b class="fc"><i>346</i>&nbsp;        SymbolToken sym = newSymbolToken(annotation, UNKNOWN_SYMBOL_ID);</b>
+<i>347</i>&nbsp;
+<b class="fc"><i>348</i>&nbsp;        int old_len = (_annotations == null) ? 0 : _annotations.length;</b>
+<b class="fc"><i>349</i>&nbsp;        if (old_len &gt; 0) {</b>
+<b class="fc"><i>350</i>&nbsp;            for (int ii=0; ii&lt;old_len; ii++) {</b>
+<b class="fc"><i>351</i>&nbsp;                if (_annotations[ii] == null) {</b>
+<b class="fc"><i>352</i>&nbsp;                    _annotations[ii] = sym;</b>
+<b class="fc"><i>353</i>&nbsp;                    return;</b>
+<i>354</i>&nbsp;                }
+<i>355</i>&nbsp;            }
+<i>356</i>&nbsp;        }
+<i>357</i>&nbsp;
+<b class="fc"><i>358</i>&nbsp;        int new_len = (old_len == 0) ? 1 : old_len * 2;</b>
+<b class="fc"><i>359</i>&nbsp;        SymbolToken temp[] = new SymbolToken[new_len];</b>
+<b class="fc"><i>360</i>&nbsp;        if (old_len &gt; 0) {</b>
+<b class="fc"><i>361</i>&nbsp;            System.arraycopy(_annotations, 0, temp, 0, old_len);</b>
+<i>362</i>&nbsp;        }
+<b class="fc"><i>363</i>&nbsp;        _annotations = temp;</b>
+<b class="fc"><i>364</i>&nbsp;        _annotations[old_len] = sym;</b>
+<b class="fc"><i>365</i>&nbsp;    }</b>
+<i>366</i>&nbsp;
+<i>367</i>&nbsp;    public final /* synchronized */ void clearTypeAnnotations()
+<i>368</i>&nbsp;    {
+<b class="fc"><i>369</i>&nbsp;        checkForLock();</b>
+<i>370</i>&nbsp;
+<b class="fc"><i>371</i>&nbsp;        int old_len = (_annotations == null) ? 0 : _annotations.length;</b>
+<b class="fc"><i>372</i>&nbsp;        if (old_len &gt; 0) {</b>
+<b class="fc"><i>373</i>&nbsp;            for (int ii=0; ii&lt;old_len; ii++) {</b>
+<b class="fc"><i>374</i>&nbsp;                if (_annotations[ii] == null) {</b>
+<b class="nc"><i>375</i>&nbsp;                    break;</b>
+<i>376</i>&nbsp;                }
+<b class="fc"><i>377</i>&nbsp;                _annotations[ii] = null;</b>
+<i>378</i>&nbsp;            }
+<i>379</i>&nbsp;        }
+<i>380</i>&nbsp;
+<i>381</i>&nbsp;        // although annotations have been removed from the node, which *may* mean the sub-graph from this Node is
+<i>382</i>&nbsp;        // now without encodings... the check is expensive for container types (need to check all immediate children)
+<i>383</i>&nbsp;        // and so we will opt to clear down encoding present in a lazy fashion (e.g. when something actually needs it)
+<b class="fc"><i>384</i>&nbsp;    }</b>
+<i>385</i>&nbsp;
+<i>386</i>&nbsp;    /**
+<i>387</i>&nbsp;     * {@inheritDoc}
+<i>388</i>&nbsp;     * &lt;p&gt;
+<i>389</i>&nbsp;     * The user can only call this method on the concrete (not abstract)
+<i>390</i>&nbsp;     * subclasses of IonValueLite (e.g. IonIntLite). The explicit clone logic
+<i>391</i>&nbsp;     * is contained in {@link #clone(IonContext)} which should in turn be implemented by
+<i>392</i>&nbsp;     * using a copy-constructor.
+<i>393</i>&nbsp;     */
+<i>394</i>&nbsp;    @Override
+<i>395</i>&nbsp;    public abstract IonValue clone();
+<i>396</i>&nbsp;
+<i>397</i>&nbsp;    abstract IonValueLite clone(IonContext parentContext);
+<i>398</i>&nbsp;
+<i>399</i>&nbsp;
+<i>400</i>&nbsp;    /**
+<i>401</i>&nbsp;     * Since {@link #equals(Object)} is overridden, each concrete class must provide
+<i>402</i>&nbsp;     * an implementation of {@link Object#hashCode()}.
+<i>403</i>&nbsp;     * @return hash code for instance consistent with equals().
+<i>404</i>&nbsp;     */
+<i>405</i>&nbsp;    /*
+<i>406</i>&nbsp;     * internally ALL implementations will be delegated too with the SymbolTable
+<i>407</i>&nbsp;     * which is to prevent the SymbolTable being continually re-located in complex structures.
+<i>408</i>&nbsp;     *
+<i>409</i>&nbsp;     * This is near universally true - however does not apply for IonDatagramLite - hence it
+<i>410</i>&nbsp;     * explicitly overrides hashCode()
+<i>411</i>&nbsp;     */
+<i>412</i>&nbsp;    @Override
+<i>413</i>&nbsp;    public int hashCode() {
+<i>414</i>&nbsp;        // Supply a lazy symbol table provider, which will call getSymbolTable()
+<i>415</i>&nbsp;        // only once it&#39;s actually necessary.
+<i>416</i>&nbsp;        // This works for all child types with the exception of
+<i>417</i>&nbsp;        // IonDatagramLite which has a different, explicit behavior for hashCode()
+<i>418</i>&nbsp;        // (hence this method cannot be final).
+<b class="fc"><i>419</i>&nbsp;        return hashCode(new LazySymbolTableProvider(this));</b>
+<i>420</i>&nbsp;    }
+<i>421</i>&nbsp;
+<i>422</i>&nbsp;    /*
+<i>423</i>&nbsp;     * Internal HashCode implementation which utilizes a SymbolTableProvider
+<i>424</i>&nbsp;     * to resolve the SymbolTable to use in encoding the sub-graph.
+<i>425</i>&nbsp;     */
+<i>426</i>&nbsp;    abstract int hashCode(SymbolTableProvider symbolTableProvider);
+<i>427</i>&nbsp;
+<i>428</i>&nbsp;    public IonContainerLite getContainer()
+<i>429</i>&nbsp;    {
+<b class="fc"><i>430</i>&nbsp;        return _context.getContextContainer();</b>
+<i>431</i>&nbsp;    }
+<i>432</i>&nbsp;
+<i>433</i>&nbsp;    public IonValueLite topLevelValue()
+<i>434</i>&nbsp;    {
+<b class="fc"><i>435</i>&nbsp;        assert ! (this instanceof IonDatagram);</b>
+<i>436</i>&nbsp;
+<b class="fc"><i>437</i>&nbsp;        IonValueLite value = this;</b>
+<i>438</i>&nbsp;        for (;;) {
+<b class="fc"><i>439</i>&nbsp;            IonContainerLite c = value._context.getContextContainer();</b>
+<b class="fc"><i>440</i>&nbsp;            if (c == null || c instanceof IonDatagram) {</b>
+<b class="fc"><i>441</i>&nbsp;                break;</b>
+<i>442</i>&nbsp;            }
+<b class="fc"><i>443</i>&nbsp;            value = c;</b>
+<b class="fc"><i>444</i>&nbsp;        }</b>
+<b class="fc"><i>445</i>&nbsp;        return value;</b>
+<i>446</i>&nbsp;    }
+<i>447</i>&nbsp;
+<i>448</i>&nbsp;
+<i>449</i>&nbsp;    public final int getElementId()
+<i>450</i>&nbsp;    {
+<b class="fc"><i>451</i>&nbsp;        return this._elementid();</b>
+<i>452</i>&nbsp;    }
+<i>453</i>&nbsp;
+<i>454</i>&nbsp;
+<i>455</i>&nbsp;    public final int getFieldId()
+<i>456</i>&nbsp;    {
+<b class="fc"><i>457</i>&nbsp;        if (_fieldId != UNKNOWN_SYMBOL_ID || _fieldName == null)</b>
+<i>458</i>&nbsp;        {
+<b class="fc"><i>459</i>&nbsp;            return _fieldId;</b>
+<i>460</i>&nbsp;        }
+<i>461</i>&nbsp;
+<b class="fc"><i>462</i>&nbsp;        SymbolToken tok = getSymbolTable().find(_fieldName);</b>
+<i>463</i>&nbsp;
+<b class="fc"><i>464</i>&nbsp;        return (tok != null ? tok.getSid() : UNKNOWN_SYMBOL_ID);</b>
+<i>465</i>&nbsp;    }
+<i>466</i>&nbsp;
+<i>467</i>&nbsp;
+<i>468</i>&nbsp;    public SymbolToken getFieldNameSymbol()
+<i>469</i>&nbsp;    {
+<i>470</i>&nbsp;        // TODO amzn/ion-java/issues/27 We should memoize the results of symtab lookups.
+<i>471</i>&nbsp;        // BUT: that could cause thread-safety problems for read-only values.
+<i>472</i>&nbsp;        // I think makeReadOnly should populate the tokens fully
+<i>473</i>&nbsp;        // so that we only need to lookup from mutable instances.
+<i>474</i>&nbsp;        // However, the current invariants on these fields are nonexistant so
+<i>475</i>&nbsp;        // I do not trust that its safe to alter them here.
+<i>476</i>&nbsp;
+<b class="fc"><i>477</i>&nbsp;        return getFieldNameSymbol(new LazySymbolTableProvider(this));</b>
+<i>478</i>&nbsp;    }
+<i>479</i>&nbsp;
+<i>480</i>&nbsp;    public final SymbolToken getFieldNameSymbol(SymbolTableProvider symbolTableProvider)
+<i>481</i>&nbsp;    {
+<b class="fc"><i>482</i>&nbsp;        int sid = _fieldId;</b>
+<b class="fc"><i>483</i>&nbsp;        String text = _fieldName;</b>
+<b class="fc"><i>484</i>&nbsp;        if (text != null)</b>
+<i>485</i>&nbsp;        {
+<b class="fc"><i>486</i>&nbsp;            if (sid == UNKNOWN_SYMBOL_ID)</b>
+<i>487</i>&nbsp;            {
+<b class="fc"><i>488</i>&nbsp;                SymbolToken tok = symbolTableProvider.getSymbolTable().find(text);</b>
+<b class="fc"><i>489</i>&nbsp;                if (tok != null)</b>
+<i>490</i>&nbsp;                {
+<b class="fc"><i>491</i>&nbsp;                    return tok;</b>
+<i>492</i>&nbsp;                }
+<b class="fc"><i>493</i>&nbsp;            }</b>
+<i>494</i>&nbsp;        }
+<b class="fc"><i>495</i>&nbsp;        else if (sid &gt; 0) {</b>
+<b class="fc"><i>496</i>&nbsp;            text = symbolTableProvider.getSymbolTable().findKnownSymbol(sid);</b>
+<i>497</i>&nbsp;        }
+<b class="fc"><i>498</i>&nbsp;        else if(sid != 0){</b>
+<i>499</i>&nbsp;            // not a struct field
+<b class="fc"><i>500</i>&nbsp;            return null;</b>
+<i>501</i>&nbsp;        }
+<b class="fc"><i>502</i>&nbsp;        return _Private_Utils.newSymbolToken(text, sid);</b>
+<i>503</i>&nbsp;    }
+<i>504</i>&nbsp;
+<i>505</i>&nbsp;    public final SymbolToken getKnownFieldNameSymbol()
+<i>506</i>&nbsp;    {
+<b class="fc"><i>507</i>&nbsp;        SymbolToken token = this.getFieldNameSymbol();</b>
+<b class="fc"><i>508</i>&nbsp;        if (token.getText() == null &amp;&amp; token.getSid() != 0) {</b>
+<b class="nc"><i>509</i>&nbsp;            throw new UnknownSymbolException(_fieldId);</b>
+<i>510</i>&nbsp;        }
+<b class="fc"><i>511</i>&nbsp;        return token;</b>
+<i>512</i>&nbsp;    }
+<i>513</i>&nbsp;
+<i>514</i>&nbsp;    final boolean clearSymbolIDValues()
+<i>515</i>&nbsp;    {
+<i>516</i>&nbsp;        // short circuit exit - no SID&#39;s present to remove - so can exit immediately
+<b class="fc"><i>517</i>&nbsp;        if (!_isSymbolIdPresent())</b>
+<i>518</i>&nbsp;        {
+<b class="fc"><i>519</i>&nbsp;            return true;</b>
+<i>520</i>&nbsp;        }
+<i>521</i>&nbsp;
+<b class="fc"><i>522</i>&nbsp;        boolean allSIDsRemoved = attemptClearSymbolIDValues();</b>
+<i>523</i>&nbsp;        // if all the SID&#39;s have been successfully removed - the SID Present flag can be set to false
+<b class="fc"><i>524</i>&nbsp;        if (allSIDsRemoved)</b>
+<i>525</i>&nbsp;        {
+<i>526</i>&nbsp;            // clear the symbolID status flag
+<b class="fc"><i>527</i>&nbsp;            _isSymbolIdPresent(false);</b>
+<i>528</i>&nbsp;        }
+<b class="fc"><i>529</i>&nbsp;        return allSIDsRemoved;</b>
+<i>530</i>&nbsp;    }
+<i>531</i>&nbsp;
+<i>532</i>&nbsp;    /**
+<i>533</i>&nbsp;     * Sets this value&#39;s symbol table to null, and erases any SIDs here and
+<i>534</i>&nbsp;     * recursively.
+<i>535</i>&nbsp;     *
+<i>536</i>&nbsp;     * @return true if all SID&#39;s have been successfully removed, otherwise false
+<i>537</i>&nbsp;     */
+<i>538</i>&nbsp;    boolean attemptClearSymbolIDValues()
+<i>539</i>&nbsp;    {
+<b class="fc"><i>540</i>&nbsp;        boolean sidsRemain = false;</b>
+<b class="fc"><i>541</i>&nbsp;        if (_fieldName != null)</b>
+<i>542</i>&nbsp;        {
+<b class="fc"><i>543</i>&nbsp;            _fieldId = UNKNOWN_SYMBOL_ID;</b>
+<b class="fc"><i>544</i>&nbsp;        } else if (_fieldId &gt; UNKNOWN_SYMBOL_ID)</b>
+<i>545</i>&nbsp;        {
+<i>546</i>&nbsp;            // retaining the field SID, as it couldn&#39;t be cleared due to loss of context
+<i>547</i>&nbsp;            // TODO - for SID handling consistency; this should attempt resolution first
+<b class="fc"><i>548</i>&nbsp;            sidsRemain = true;</b>
+<i>549</i>&nbsp;        }
+<i>550</i>&nbsp;
+<b class="fc"><i>551</i>&nbsp;        if (_annotations != null)</b>
+<i>552</i>&nbsp;        {
+<b class="fc"><i>553</i>&nbsp;            for (int i = 0; i &lt; _annotations.length; i++)</b>
+<i>554</i>&nbsp;            {
+<b class="fc"><i>555</i>&nbsp;                SymbolToken annotation = _annotations[i];</b>
+<i>556</i>&nbsp;
+<i>557</i>&nbsp;                // _annotations may have nulls at the end.
+<b class="fc"><i>558</i>&nbsp;                if (annotation == null) break;</b>
+<i>559</i>&nbsp;
+<b class="fc"><i>560</i>&nbsp;                String text = annotation.getText();</b>
+<i>561</i>&nbsp;                // TODO - for SID handling consistency; this should attempt resolution first, not just drop entry
+<b class="fc"><i>562</i>&nbsp;                if (text != null &amp;&amp; annotation.getSid() != UNKNOWN_SYMBOL_ID)</b>
+<i>563</i>&nbsp;                {
+<b class="fc"><i>564</i>&nbsp;                    _annotations[i] =</b>
+<b class="fc"><i>565</i>&nbsp;                        newSymbolToken(text, UNKNOWN_SYMBOL_ID);</b>
+<i>566</i>&nbsp;                }
+<i>567</i>&nbsp;            }
+<i>568</i>&nbsp;        }
+<i>569</i>&nbsp;
+<b class="fc"><i>570</i>&nbsp;        return !sidsRemain;</b>
+<i>571</i>&nbsp;    }
+<i>572</i>&nbsp;
+<i>573</i>&nbsp;    protected void cascadeSIDPresentToContextRoot() {
+<i>574</i>&nbsp;        // start with self
+<b class="fc"><i>575</i>&nbsp;        IonValueLite node = this;</b>
+<i>576</i>&nbsp;        // iterate from leaf to context root setting encoding present until either context root is hit OR a node is
+<i>577</i>&nbsp;        // encountered that already has encodings present (and so no further propogation is required).
+<b class="fc"><i>578</i>&nbsp;        while (null != node &amp;&amp; !node._isSymbolIdPresent()) {</b>
+<b class="fc"><i>579</i>&nbsp;            node._isSymbolIdPresent(true);</b>
+<b class="fc"><i>580</i>&nbsp;            node = node.getContainer();</b>
+<i>581</i>&nbsp;        }
+<b class="fc"><i>582</i>&nbsp;    }</b>
+<i>583</i>&nbsp;
+<i>584</i>&nbsp;    final void setFieldName(String name)
+<i>585</i>&nbsp;    {
+<b class="fc"><i>586</i>&nbsp;        assert getContainer() instanceof IonStructLite;</b>
+<i>587</i>&nbsp;        // We can never change a field name once it&#39;s set.
+<b class="fc"><i>588</i>&nbsp;        assert _fieldId == UNKNOWN_SYMBOL_ID &amp;&amp; _fieldName == null;</b>
+<b class="fc"><i>589</i>&nbsp;        _fieldName = name;</b>
+<b class="fc"><i>590</i>&nbsp;    }</b>
+<i>591</i>&nbsp;
+<i>592</i>&nbsp;    /**
+<i>593</i>&nbsp;     * Sets the field name and ID based on a SymbolToken.
+<i>594</i>&nbsp;     * Both parts of the SymbolToken are trusted!
+<i>595</i>&nbsp;     *
+<i>596</i>&nbsp;     * @param name is not retained by this value, but both fields are copied.
+<i>597</i>&nbsp;     */
+<i>598</i>&nbsp;    final void setFieldNameSymbol(SymbolToken name)
+<i>599</i>&nbsp;    {
+<b class="fc"><i>600</i>&nbsp;        assert _fieldId == UNKNOWN_SYMBOL_ID &amp;&amp; _fieldName == null;</b>
+<b class="fc"><i>601</i>&nbsp;        _fieldName = name.getText();</b>
+<b class="fc"><i>602</i>&nbsp;        _fieldId   = name.getSid();</b>
+<i>603</i>&nbsp;
+<i>604</i>&nbsp;        // if a SID has been added by this operation to a previously SID-less node we have to mark upwards
+<i>605</i>&nbsp;        // towards the context root that a SID is present
+<b class="fc"><i>606</i>&nbsp;        if (UNKNOWN_SYMBOL_ID != _fieldId &amp;&amp; !_isSymbolIdPresent()) {</b>
+<b class="fc"><i>607</i>&nbsp;            cascadeSIDPresentToContextRoot();</b>
+<i>608</i>&nbsp;        }
+<b class="fc"><i>609</i>&nbsp;    }</b>
+<i>610</i>&nbsp;
+<i>611</i>&nbsp;    public final String getFieldName()
+<i>612</i>&nbsp;    {
+<b class="fc"><i>613</i>&nbsp;        if (_fieldName != null) return _fieldName;</b>
+<b class="fc"><i>614</i>&nbsp;        if (_fieldId &lt;= 0) return null;</b>
+<i>615</i>&nbsp;
+<i>616</i>&nbsp;        // TODO amzn/ion-java/issues/27 why no symtab lookup, like getFieldNameSymbol()?
+<b class="fc"><i>617</i>&nbsp;        throw new UnknownSymbolException(_fieldId);</b>
+<i>618</i>&nbsp;    }
+<i>619</i>&nbsp;
+<i>620</i>&nbsp;    public final int getFieldNameId()
+<i>621</i>&nbsp;    {
+<b class="nc"><i>622</i>&nbsp;        return getFieldId();</b>
+<i>623</i>&nbsp;    }
+<i>624</i>&nbsp;
+<i>625</i>&nbsp;    /**
+<i>626</i>&nbsp;     * @return not null, &lt;b&gt;in conflict with the public documentation&lt;/b&gt;.
+<i>627</i>&nbsp;     */
+<i>628</i>&nbsp;    public SymbolTable getSymbolTable()
+<i>629</i>&nbsp;    {
+<b class="fc"><i>630</i>&nbsp;        assert ! (this instanceof IonDatagram);</b>
+<i>631</i>&nbsp;
+<b class="fc"><i>632</i>&nbsp;        SymbolTable symbols = topLevelValue()._context.getContextSymbolTable();</b>
+<b class="fc"><i>633</i>&nbsp;        if (symbols != null) {</b>
+<b class="fc"><i>634</i>&nbsp;            return symbols;</b>
+<i>635</i>&nbsp;        }
+<b class="fc"><i>636</i>&nbsp;        return _context.getSystem().getSystemSymbolTable();</b>
+<i>637</i>&nbsp;    }
+<i>638</i>&nbsp;
+<i>639</i>&nbsp;    public SymbolTable getAssignedSymbolTable()
+<i>640</i>&nbsp;    {
+<b class="fc"><i>641</i>&nbsp;        assert ! (this instanceof IonDatagram);</b>
+<i>642</i>&nbsp;
+<b class="fc"><i>643</i>&nbsp;        SymbolTable symbols = _context.getContextSymbolTable();</b>
+<b class="fc"><i>644</i>&nbsp;        return symbols;</b>
+<i>645</i>&nbsp;    }
+<i>646</i>&nbsp;
+<i>647</i>&nbsp;    public IonSystemLite getSystem()
+<i>648</i>&nbsp;    {
+<b class="fc"><i>649</i>&nbsp;        return _context.getSystem();</b>
+<i>650</i>&nbsp;    }
+<i>651</i>&nbsp;
+<i>652</i>&nbsp;    public IonType getType()
+<i>653</i>&nbsp;    {
+<b class="nc"><i>654</i>&nbsp;        throw new UnsupportedOperationException(&quot;this type &quot;+this.getClass().getSimpleName()+&quot; should not be instanciated, there is not IonType associated with it&quot;);</b>
+<i>655</i>&nbsp;    }
+<i>656</i>&nbsp;
+<i>657</i>&nbsp;    public SymbolToken[] getTypeAnnotationSymbols()
+<i>658</i>&nbsp;    {
+<b class="fc"><i>659</i>&nbsp;        return getTypeAnnotationSymbols(new LazySymbolTableProvider(this));</b>
+<i>660</i>&nbsp;    }
+<i>661</i>&nbsp;
+<i>662</i>&nbsp;    public final SymbolToken[] getTypeAnnotationSymbols(SymbolTableProvider symbolTableProvider)
+<i>663</i>&nbsp;    {
+<i>664</i>&nbsp;        // first we have to count the number of non-null
+<i>665</i>&nbsp;        // elements there are in the annotations array
+<b class="fc"><i>666</i>&nbsp;        int count = 0;</b>
+<b class="fc"><i>667</i>&nbsp;        if (_annotations != null) {</b>
+<b class="fc"><i>668</i>&nbsp;            for (int i = 0; i &lt; _annotations.length; i++) {</b>
+<b class="fc"><i>669</i>&nbsp;                if (_annotations[i] != null) {</b>
+<b class="fc"><i>670</i>&nbsp;                    count++;</b>
+<i>671</i>&nbsp;                }
+<i>672</i>&nbsp;            }
+<i>673</i>&nbsp;        }
+<i>674</i>&nbsp;        // if there aren&#39;t any, we&#39;re done
+<b class="fc"><i>675</i>&nbsp;        if (count == 0) {</b>
+<b class="fc"><i>676</i>&nbsp;            return SymbolToken.EMPTY_ARRAY;</b>
+<i>677</i>&nbsp;        }
+<i>678</i>&nbsp;
+<b class="fc"><i>679</i>&nbsp;        SymbolToken[] users_copy = new SymbolToken[count];</b>
+<b class="fc"><i>680</i>&nbsp;        for (int i = 0; i &lt; count; i++)</b>
+<i>681</i>&nbsp;        {
+<b class="fc"><i>682</i>&nbsp;            SymbolToken token = _annotations[i];</b>
+<b class="fc"><i>683</i>&nbsp;            String text = token.getText();</b>
+<b class="fc"><i>684</i>&nbsp;            if (text != null &amp;&amp; token.getSid() == UNKNOWN_SYMBOL_ID)</b>
+<i>685</i>&nbsp;            {
+<i>686</i>&nbsp;                // TODO amzn/ion-java/issues/27 We should memoize the result of symtab lookups
+<i>687</i>&nbsp;                // into _annotations.
+<i>688</i>&nbsp;                // See getFieldNameSymbol() for challenges doing so.
+<i>689</i>&nbsp;
+<b class="fc"><i>690</i>&nbsp;                SymbolToken interned = symbolTableProvider.getSymbolTable().find(text);</b>
+<b class="fc"><i>691</i>&nbsp;                if (interned != null)</b>
+<i>692</i>&nbsp;                {
+<b class="fc"><i>693</i>&nbsp;                    token = interned;</b>
+<i>694</i>&nbsp;                }
+<i>695</i>&nbsp;            }
+<i>696</i>&nbsp;
+<b class="fc"><i>697</i>&nbsp;            users_copy[i] = token;</b>
+<i>698</i>&nbsp;        }
+<b class="fc"><i>699</i>&nbsp;        return users_copy;</b>
+<i>700</i>&nbsp;    }
+<i>701</i>&nbsp;
+<i>702</i>&nbsp;    public void setTypeAnnotationSymbols(SymbolToken... annotations)
+<i>703</i>&nbsp;    {
+<b class="fc"><i>704</i>&nbsp;        checkForLock();</b>
+<i>705</i>&nbsp;
+<b class="fc"><i>706</i>&nbsp;        if (annotations == null || annotations.length == 0)</b>
+<i>707</i>&nbsp;        {
+<i>708</i>&nbsp;            // Normalize all empty lists to the same instance.
+<b class="fc"><i>709</i>&nbsp;            _annotations = SymbolToken.EMPTY_ARRAY;</b>
+<i>710</i>&nbsp;        }
+<i>711</i>&nbsp;        else
+<i>712</i>&nbsp;        {
+<b class="fc"><i>713</i>&nbsp;            _annotations = annotations.clone();</b>
+<i>714</i>&nbsp;
+<i>715</i>&nbsp;            // new annotations could have SID&#39;s - so if this node is not currently marked as SID
+<i>716</i>&nbsp;            // present then the new annotations have to be interrogated to see if they contain SID&#39;s and if they
+<i>717</i>&nbsp;            // do - the SID Present flag must be cascaded.
+<b class="fc"><i>718</i>&nbsp;            if (!_isSymbolIdPresent()) {</b>
+<b class="fc"><i>719</i>&nbsp;                for (SymbolToken token : _annotations) {</b>
+<i>720</i>&nbsp;                    // upon finding first match of a symbol token containing a SID - cascade upwards and exit
+<b class="fc"><i>721</i>&nbsp;                    if (null != token &amp;&amp; UNKNOWN_SYMBOL_ID != token.getSid()) {</b>
+<b class="fc"><i>722</i>&nbsp;                        cascadeSIDPresentToContextRoot();</b>
+<b class="fc"><i>723</i>&nbsp;                        break;</b>
+<i>724</i>&nbsp;                    }
+<i>725</i>&nbsp;                }
+<i>726</i>&nbsp;            }
+<i>727</i>&nbsp;        }
+<b class="fc"><i>728</i>&nbsp;    }</b>
+<i>729</i>&nbsp;
+<i>730</i>&nbsp;    public final String[] getTypeAnnotations()
+<i>731</i>&nbsp;    {
+<i>732</i>&nbsp;        // first we have to count the number of non-null
+<i>733</i>&nbsp;        // elements there are in the annotations array
+<b class="fc"><i>734</i>&nbsp;        int count = 0;</b>
+<b class="fc"><i>735</i>&nbsp;        if (_annotations != null) {</b>
+<b class="fc"><i>736</i>&nbsp;            for (int ii=0; ii&lt;_annotations.length; ) {</b>
+<b class="fc"><i>737</i>&nbsp;                if (_annotations[ii] == null) {</b>
+<b class="fc"><i>738</i>&nbsp;                    break;</b>
+<i>739</i>&nbsp;                }
+<b class="fc"><i>740</i>&nbsp;                ii++;</b>
+<b class="fc"><i>741</i>&nbsp;                count = ii;</b>
+<i>742</i>&nbsp;            }
+<i>743</i>&nbsp;        }
+<i>744</i>&nbsp;        // if there aren&#39;t any, we&#39;re done
+<b class="fc"><i>745</i>&nbsp;        if (count == 0) {</b>
+<b class="fc"><i>746</i>&nbsp;            return EMPTY_STRING_ARRAY;</b>
+<i>747</i>&nbsp;        }
+<i>748</i>&nbsp;
+<b class="fc"><i>749</i>&nbsp;        return _Private_Utils.toStrings(_annotations, count);</b>
+<i>750</i>&nbsp;    }
+<i>751</i>&nbsp;
+<i>752</i>&nbsp;    public void setTypeAnnotations(String... annotations)
+<i>753</i>&nbsp;    {
+<b class="fc"><i>754</i>&nbsp;        checkForLock();</b>
+<i>755</i>&nbsp;
+<b class="fc"><i>756</i>&nbsp;        _annotations = _Private_Utils.newSymbolTokens(getSymbolTable(),</b>
+<i>757</i>&nbsp;                                                       annotations);
+<b class="fc"><i>758</i>&nbsp;    }</b>
+<i>759</i>&nbsp;
+<i>760</i>&nbsp;    public final boolean hasTypeAnnotation(String annotation)
+<i>761</i>&nbsp;    {
+<b class="fc"><i>762</i>&nbsp;        if (annotation != null &amp;&amp; annotation.length() &gt; 0) {</b>
+<b class="fc"><i>763</i>&nbsp;            int pos = findTypeAnnotation(annotation);</b>
+<b class="fc"><i>764</i>&nbsp;            if (pos &gt;= 0) {</b>
+<b class="fc"><i>765</i>&nbsp;                return true;</b>
+<i>766</i>&nbsp;            }
+<i>767</i>&nbsp;        }
+<b class="fc"><i>768</i>&nbsp;        return false;</b>
+<i>769</i>&nbsp;    }
+<i>770</i>&nbsp;
+<i>771</i>&nbsp;    public final int findTypeAnnotation(String annotation)
+<i>772</i>&nbsp;    {
+<b class="fc"><i>773</i>&nbsp;        assert(annotation != null &amp;&amp; annotation.length() &gt; 0);</b>
+<i>774</i>&nbsp;
+<b class="fc"><i>775</i>&nbsp;        if (_annotations != null) {</b>
+<b class="fc"><i>776</i>&nbsp;            for (int ii=0; ii&lt;_annotations.length; ii++) {</b>
+<b class="fc"><i>777</i>&nbsp;                SymbolToken a = _annotations[ii];</b>
+<b class="fc"><i>778</i>&nbsp;                if (a == null) {</b>
+<b class="fc"><i>779</i>&nbsp;                    break;</b>
+<i>780</i>&nbsp;                }
+<b class="fc"><i>781</i>&nbsp;                if (annotation.equals(a.getText())) {</b>
+<b class="fc"><i>782</i>&nbsp;                    return ii;</b>
+<i>783</i>&nbsp;                }
+<i>784</i>&nbsp;            }
+<i>785</i>&nbsp;        }
+<b class="fc"><i>786</i>&nbsp;        return -1;</b>
+<i>787</i>&nbsp;    }
+<i>788</i>&nbsp;
+<i>789</i>&nbsp;    protected int hashTypeAnnotations(final int original, SymbolTableProvider symbolTableProvider)
+<i>790</i>&nbsp;    {
+<b class="fc"><i>791</i>&nbsp;        final SymbolToken[] tokens = getTypeAnnotationSymbols(symbolTableProvider);</b>
+<b class="fc"><i>792</i>&nbsp;        if (tokens.length == 0)</b>
+<i>793</i>&nbsp;        {
+<b class="fc"><i>794</i>&nbsp;            return original;</b>
+<i>795</i>&nbsp;        }
+<i>796</i>&nbsp;
+<b class="fc"><i>797</i>&nbsp;        final int sidHashSalt   = 127;      // prime to salt sid of annotation</b>
+<b class="fc"><i>798</i>&nbsp;        final int textHashSalt  = 31;       // prime to salt text of annotation</b>
+<b class="fc"><i>799</i>&nbsp;        final int prime = 8191;</b>
+<b class="fc"><i>800</i>&nbsp;        int result = original ^ TYPE_ANNOTATION_HASH_SIGNATURE;</b>
+<i>801</i>&nbsp;
+<b class="fc"><i>802</i>&nbsp;        result = prime * original + tokens.length;</b>
+<i>803</i>&nbsp;
+<b class="fc"><i>804</i>&nbsp;        for (final SymbolToken token : tokens)</b>
+<i>805</i>&nbsp;        {
+<b class="fc"><i>806</i>&nbsp;            String text = token.getText();</b>
+<i>807</i>&nbsp;
+<b class="fc"><i>808</i>&nbsp;            int tokenHashCode = text == null</b>
+<b class="fc"><i>809</i>&nbsp;                ? token.getSid()  * sidHashSalt</b>
+<b class="fc"><i>810</i>&nbsp;                : text.hashCode() * textHashSalt;</b>
+<i>811</i>&nbsp;
+<i>812</i>&nbsp;            // mixing to account for small text and sid deltas
+<b class="fc"><i>813</i>&nbsp;            tokenHashCode ^= (tokenHashCode &lt;&lt; 19) ^ (tokenHashCode &gt;&gt; 13);</b>
+<i>814</i>&nbsp;
+<b class="fc"><i>815</i>&nbsp;            result = prime * result + tokenHashCode;</b>
+<i>816</i>&nbsp;
+<i>817</i>&nbsp;            // mixing at each step to make the hash code order-dependent
+<b class="fc"><i>818</i>&nbsp;            result ^= (result &lt;&lt; 25) ^ (result &gt;&gt; 7);</b>
+<i>819</i>&nbsp;        }
+<i>820</i>&nbsp;
+<b class="fc"><i>821</i>&nbsp;        return result;</b>
+<i>822</i>&nbsp;    }
+<i>823</i>&nbsp;
+<i>824</i>&nbsp;    /**
+<i>825</i>&nbsp;     * Implements equality over values.
+<i>826</i>&nbsp;     * This is currently defined using the Equivalence class.
+<i>827</i>&nbsp;     *
+<i>828</i>&nbsp;     * @see com.amazon.ion.util.Equivalence
+<i>829</i>&nbsp;     *
+<i>830</i>&nbsp;     * @param   other   The value to compare with.
+<i>831</i>&nbsp;     *
+<i>832</i>&nbsp;     * @return  A boolean, true if the other value is an Ion Value that is the same
+<i>833</i>&nbsp;     *          content and annotations.
+<i>834</i>&nbsp;     */
+<i>835</i>&nbsp;    @Override
+<i>836</i>&nbsp;    public final boolean equals(final Object other)
+<i>837</i>&nbsp;    {
+<b class="fc"><i>838</i>&nbsp;        if (other == this) {</b>
+<i>839</i>&nbsp;            // we shouldn&#39;t make 3 deep method calls for this common case
+<b class="fc"><i>840</i>&nbsp;            return true;</b>
+<i>841</i>&nbsp;        }
+<b class="fc"><i>842</i>&nbsp;        if (other instanceof IonValue)</b>
+<i>843</i>&nbsp;        {
+<b class="fc"><i>844</i>&nbsp;            return ionEquals(this, (IonValue) other);</b>
+<i>845</i>&nbsp;        }
+<b class="fc"><i>846</i>&nbsp;        return false;</b>
+<i>847</i>&nbsp;    }
+<i>848</i>&nbsp;
+<i>849</i>&nbsp;
+<i>850</i>&nbsp;    public final boolean isNullValue()
+<i>851</i>&nbsp;    {
+<b class="fc"><i>852</i>&nbsp;        return _isNullValue();</b>
+<i>853</i>&nbsp;    }
+<i>854</i>&nbsp;
+<i>855</i>&nbsp;    public final boolean isReadOnly()
+<i>856</i>&nbsp;    {
+<b class="fc"><i>857</i>&nbsp;        return _isLocked();</b>
+<i>858</i>&nbsp;    }
+<i>859</i>&nbsp;
+<i>860</i>&nbsp;    public void makeReadOnly()
+<i>861</i>&nbsp;    {
+<b class="fc"><i>862</i>&nbsp;        if (!_isLocked()) {</b>
+<b class="fc"><i>863</i>&nbsp;            makeReadOnlyInternal();</b>
+<i>864</i>&nbsp;        }
+<b class="fc"><i>865</i>&nbsp;    }</b>
+<i>866</i>&nbsp;
+<i>867</i>&nbsp;    void makeReadOnlyInternal()
+<i>868</i>&nbsp;    {
+<b class="fc"><i>869</i>&nbsp;        clearSymbolIDValues();</b>
+<b class="fc"><i>870</i>&nbsp;        _isLocked(true);</b>
+<b class="fc"><i>871</i>&nbsp;    }</b>
+<i>872</i>&nbsp;
+<i>873</i>&nbsp;    /**
+<i>874</i>&nbsp;     * Verifies that this value is not read-only.
+<i>875</i>&nbsp;     *
+<i>876</i>&nbsp;     * @throws ReadOnlyValueException
+<i>877</i>&nbsp;     *   if this value {@link #isReadOnly()}.
+<i>878</i>&nbsp;     */
+<i>879</i>&nbsp;    final void checkForLock()
+<i>880</i>&nbsp;        throws ReadOnlyValueException
+<i>881</i>&nbsp;    {
+<b class="fc"><i>882</i>&nbsp;        if (_isLocked()) {</b>
+<b class="fc"><i>883</i>&nbsp;            throw new ReadOnlyValueException();</b>
+<i>884</i>&nbsp;        }
+<b class="fc"><i>885</i>&nbsp;    }</b>
+<i>886</i>&nbsp;
+<i>887</i>&nbsp;
+<i>888</i>&nbsp;    public boolean removeFromContainer()
+<i>889</i>&nbsp;    {
+<b class="fc"><i>890</i>&nbsp;        checkForLock();</b>
+<i>891</i>&nbsp;
+<b class="fc"><i>892</i>&nbsp;        boolean removed = false;</b>
+<b class="fc"><i>893</i>&nbsp;        IonContainerLite parent = _context.getContextContainer();</b>
+<b class="fc"><i>894</i>&nbsp;        if (parent != null) {</b>
+<b class="fc"><i>895</i>&nbsp;            removed = parent.remove(this);</b>
+<i>896</i>&nbsp;        }
+<b class="fc"><i>897</i>&nbsp;        return removed;</b>
+<i>898</i>&nbsp;    }
+<i>899</i>&nbsp;
+<i>900</i>&nbsp;    public void removeTypeAnnotation(String annotation)
+<i>901</i>&nbsp;    {
+<b class="fc"><i>902</i>&nbsp;        checkForLock();</b>
+<i>903</i>&nbsp;
+<b class="fc"><i>904</i>&nbsp;        if (annotation != null &amp;&amp; annotation.length() &gt; 0) {</b>
+<b class="fc"><i>905</i>&nbsp;            int pos = findTypeAnnotation(annotation);</b>
+<b class="fc"><i>906</i>&nbsp;            if (pos &lt; 0) {</b>
+<b class="fc"><i>907</i>&nbsp;                return;</b>
+<i>908</i>&nbsp;            }
+<i>909</i>&nbsp;            int ii;
+<b class="fc"><i>910</i>&nbsp;            for (ii=pos; ii&lt;_annotations.length - 1; ii++) {</b>
+<b class="fc"><i>911</i>&nbsp;                SymbolToken a = _annotations[ii+1];</b>
+<b class="fc"><i>912</i>&nbsp;                if (a == null) {</b>
+<b class="fc"><i>913</i>&nbsp;                    break;</b>
+<i>914</i>&nbsp;                }
+<b class="fc"><i>915</i>&nbsp;                _annotations[ii] = a;</b>
+<i>916</i>&nbsp;            }
+<b class="fc"><i>917</i>&nbsp;            if (ii&lt;_annotations.length) {</b>
+<b class="fc"><i>918</i>&nbsp;                _annotations[ii] = null;</b>
+<i>919</i>&nbsp;            }
+<i>920</i>&nbsp;        }
+<b class="fc"><i>921</i>&nbsp;    }</b>
+<i>922</i>&nbsp;
+<i>923</i>&nbsp;    @Override
+<i>924</i>&nbsp;    public String toString()
+<i>925</i>&nbsp;    {
+<b class="fc"><i>926</i>&nbsp;        StringBuilder buf = new StringBuilder(1024);</b>
+<i>927</i>&nbsp;        try
+<i>928</i>&nbsp;        {
+<b class="fc"><i>929</i>&nbsp;            Printer p = new Printer();</b>
+<b class="fc"><i>930</i>&nbsp;            p.print(this, buf);</b>
+<i>931</i>&nbsp;        }
+<b class="nc"><i>932</i>&nbsp;        catch (IOException e)</b>
+<i>933</i>&nbsp;        {
+<b class="nc"><i>934</i>&nbsp;            throw new IonException(e);</b>
+<b class="fc"><i>935</i>&nbsp;        }</b>
+<b class="fc"><i>936</i>&nbsp;        return buf.toString();</b>
+<i>937</i>&nbsp;    }
+<i>938</i>&nbsp;
+<i>939</i>&nbsp;    public String toString(IonTextWriterBuilder writerBuilder)
+<i>940</i>&nbsp;    {
+<b class="fc"><i>941</i>&nbsp;        StringBuilder buf = new StringBuilder(1024);</b>
+<i>942</i>&nbsp;        try
+<i>943</i>&nbsp;        {
+<b class="fc"><i>944</i>&nbsp;            IonWriter writer = writerBuilder.build(buf);</b>
+<b class="fc"><i>945</i>&nbsp;            writeTo(writer);</b>
+<b class="fc"><i>946</i>&nbsp;            writer.finish();</b>
+<i>947</i>&nbsp;        }
+<b class="nc"><i>948</i>&nbsp;        catch (IOException e)</b>
+<i>949</i>&nbsp;        {
+<b class="nc"><i>950</i>&nbsp;            throw new IonException(e);</b>
+<b class="fc"><i>951</i>&nbsp;        }</b>
+<b class="fc"><i>952</i>&nbsp;        return buf.toString();</b>
+<i>953</i>&nbsp;    }
+<i>954</i>&nbsp;
+<i>955</i>&nbsp;    public String toPrettyString()
+<i>956</i>&nbsp;    {
+<b class="fc"><i>957</i>&nbsp;        return toString(IonTextWriterBuilder.pretty());</b>
+<i>958</i>&nbsp;    }
+<i>959</i>&nbsp;
+<i>960</i>&nbsp;    public void writeTo(IonWriter writer)
+<i>961</i>&nbsp;    {
+<i>962</i>&nbsp;        // we use a Lazy 1-time resolution of the SymbolTable in case there is no need to
+<i>963</i>&nbsp;        // pull the symbol table, including situations where no symbol table would logically
+<i>964</i>&nbsp;        // be attached
+<b class="fc"><i>965</i>&nbsp;        writeTo(writer, new LazySymbolTableProvider(this));</b>
+<b class="fc"><i>966</i>&nbsp;    }</b>
+<i>967</i>&nbsp;
+<i>968</i>&nbsp;    final void writeChildren(IonWriter writer, Iterable&lt;IonValue&gt; container,
+<i>969</i>&nbsp;                             SymbolTableProvider symbolTableProvider)
+<i>970</i>&nbsp;    {
+<b class="fc"><i>971</i>&nbsp;        boolean isDatagram = this instanceof IonDatagram;</b>
+<i>972</i>&nbsp;        // unfortunately JDK5 does not allow for generic co-variant returns; i.e. specifying
+<i>973</i>&nbsp;        // IonContainerLite#iterator() return type as Iterator&lt;IonValueLite&gt; causes a compile-time
+<i>974</i>&nbsp;        // error under JDK5 as it doesn&#39;t understand this is an acceptable co-variant for
+<i>975</i>&nbsp;        // Iterator&lt;IonValue&gt; IonContainer#iterator(). This said we know the underlying data
+<i>976</i>&nbsp;        // structure is IonValueLite[] - so we can conduct the cast within the loop. When ion-java is
+<i>977</i>&nbsp;        // moved to allow JDK6+ compile time dependency we can remove these crufty casts.
+<b class="fc"><i>978</i>&nbsp;        for (IonValue iv : container) {</b>
+<b class="fc"><i>979</i>&nbsp;            IonValueLite vlite = (IonValueLite) iv;</b>
+<b class="fc"><i>980</i>&nbsp;            if(isDatagram)</b>
+<i>981</i>&nbsp;            {
+<b class="nc"><i>982</i>&nbsp;                vlite.writeTo(writer);</b>
+<i>983</i>&nbsp;            }
+<i>984</i>&nbsp;            else
+<i>985</i>&nbsp;            {
+<b class="fc"><i>986</i>&nbsp;                vlite.writeTo(writer, symbolTableProvider);</b>
+<i>987</i>&nbsp;            }
+<b class="fc"><i>988</i>&nbsp;        }</b>
+<b class="fc"><i>989</i>&nbsp;    }</b>
+<i>990</i>&nbsp;
+<i>991</i>&nbsp;    final void writeTo(IonWriter writer, SymbolTableProvider symbolTableProvider)
+<i>992</i>&nbsp;    {
+<b class="fc"><i>993</i>&nbsp;        if (writer.isInStruct()</b>
+<b class="fc"><i>994</i>&nbsp;            &amp;&amp; ! ((_Private_IonWriter) writer).isFieldNameSet())</b>
+<i>995</i>&nbsp;        {
+<b class="fc"><i>996</i>&nbsp;            SymbolToken tok = getFieldNameSymbol(symbolTableProvider);</b>
+<b class="fc"><i>997</i>&nbsp;            if (tok == null)</b>
+<i>998</i>&nbsp;            {
+<b class="nc"><i>999</i>&nbsp;                throw new IllegalStateException(&quot;Field name not set&quot;);</b>
+<i>1000</i>&nbsp;            }
+<i>1001</i>&nbsp;
+<b class="fc"><i>1002</i>&nbsp;            writer.setFieldNameSymbol(tok);</b>
+<i>1003</i>&nbsp;        }
+<i>1004</i>&nbsp;
+<b class="fc"><i>1005</i>&nbsp;        SymbolToken[] annotations = getTypeAnnotationSymbols(symbolTableProvider);</b>
+<b class="fc"><i>1006</i>&nbsp;        writer.setTypeAnnotationSymbols(annotations);</b>
+<i>1007</i>&nbsp;
+<i>1008</i>&nbsp;        try
+<i>1009</i>&nbsp;        {
+<b class="fc"><i>1010</i>&nbsp;            writeBodyTo(writer, symbolTableProvider);</b>
+<i>1011</i>&nbsp;        }
+<b class="nc"><i>1012</i>&nbsp;        catch (IOException e)</b>
+<i>1013</i>&nbsp;        {
+<b class="nc"><i>1014</i>&nbsp;            throw new IonException(e);</b>
+<b class="fc"><i>1015</i>&nbsp;        }</b>
+<b class="fc"><i>1016</i>&nbsp;    }</b>
+<i>1017</i>&nbsp;
+<i>1018</i>&nbsp;    abstract void writeBodyTo(IonWriter writer, SymbolTableProvider symbolTableProvider)
+<i>1019</i>&nbsp;        throws IOException;
+<i>1020</i>&nbsp;
+<i>1021</i>&nbsp;
+<i>1022</i>&nbsp;    public void setSymbolTable(SymbolTable symbols)
+<i>1023</i>&nbsp;    {
+<b class="fc"><i>1024</i>&nbsp;        if (getContext() instanceof TopLevelContext){</b>
+<b class="nc"><i>1025</i>&nbsp;            IonDatagramLite datagram = (IonDatagramLite) getContainer();</b>
+<b class="nc"><i>1026</i>&nbsp;            datagram.setSymbolTableAtIndex(_elementid(), symbols);</b>
+<b class="nc"><i>1027</i>&nbsp;        } else if (this.topLevelValue() == this) {</b>
+<b class="fc"><i>1028</i>&nbsp;            setContext(ContainerlessContext.wrap(getContext().getSystem(), symbols));</b>
+<i>1029</i>&nbsp;        } else {
+<b class="nc"><i>1030</i>&nbsp;            throw new UnsupportedOperationException(&quot;can&#39;t set the symboltable of a child value&quot;);</b>
+<i>1031</i>&nbsp;        }
+<b class="fc"><i>1032</i>&nbsp;    }</b>
+<i>1033</i>&nbsp;
+<i>1034</i>&nbsp;    /**
+<i>1035</i>&nbsp;     * This method is used to re-set the context of an
+<i>1036</i>&nbsp;     * IonValue.  This may occur when the value is added into
+<i>1037</i>&nbsp;     * or removed from a container.  It may occur when the
+<i>1038</i>&nbsp;     * symbol table state of a container changes.
+<i>1039</i>&nbsp;     *
+<i>1040</i>&nbsp;     * @param context must not be null.
+<i>1041</i>&nbsp;     */
+<i>1042</i>&nbsp;    final void setContext(IonContext context)
+<i>1043</i>&nbsp;    {
+<b class="fc"><i>1044</i>&nbsp;        assert context != null;</b>
+<b class="fc"><i>1045</i>&nbsp;        checkForLock();</b>
+<i>1046</i>&nbsp;
+<i>1047</i>&nbsp;        //Clear all known sIDs.
+<b class="fc"><i>1048</i>&nbsp;        this.clearSymbolIDValues();</b>
+<b class="fc"><i>1049</i>&nbsp;        _context = context;</b>
+<b class="fc"><i>1050</i>&nbsp;    }</b>
+<i>1051</i>&nbsp;
+<i>1052</i>&nbsp;    /**
+<i>1053</i>&nbsp;     * used to query the current context.
+<i>1054</i>&nbsp;     *
+<i>1055</i>&nbsp;     * @return this value&#39;s context. Not null.
+<i>1056</i>&nbsp;     */
+<i>1057</i>&nbsp;    IonContext getContext()
+<i>1058</i>&nbsp;    {
+<b class="fc"><i>1059</i>&nbsp;        return _context;</b>
+<i>1060</i>&nbsp;    }
+<i>1061</i>&nbsp;
+<i>1062</i>&nbsp;    /**
+<i>1063</i>&nbsp;     * Ensures that this value is not an Ion null.  Used as a helper for
+<i>1064</i>&nbsp;     * methods that have that precondition.
+<i>1065</i>&nbsp;     * @throws NullValueException if &lt;code&gt;this.isNullValue()&lt;/code&gt;
+<i>1066</i>&nbsp;     */
+<i>1067</i>&nbsp;    final void validateThisNotNull()
+<i>1068</i>&nbsp;        throws NullValueException
+<i>1069</i>&nbsp;    {
+<b class="fc"><i>1070</i>&nbsp;        if (_isNullValue())</b>
+<i>1071</i>&nbsp;        {
+<b class="fc"><i>1072</i>&nbsp;            throw new NullValueException();</b>
+<i>1073</i>&nbsp;        }
+<b class="fc"><i>1074</i>&nbsp;    }</b>
+<i>1075</i>&nbsp;
+<i>1076</i>&nbsp;    /**
+<i>1077</i>&nbsp;     * Removes this value from its container, ensuring that all data stays
+<i>1078</i>&nbsp;     * available.  Dirties this value and it&#39;s original container.
+<i>1079</i>&nbsp;     */
+<i>1080</i>&nbsp;    final void detachFromContainer() // throws IOException
+<i>1081</i>&nbsp;    {
+<b class="fc"><i>1082</i>&nbsp;        checkForLock();</b>
+<i>1083</i>&nbsp;
+<b class="fc"><i>1084</i>&nbsp;        clearSymbolIDValues();</b>
+<b class="fc"><i>1085</i>&nbsp;        _context = ContainerlessContext.wrap(getSystem());</b>
+<i>1086</i>&nbsp;
+<b class="fc"><i>1087</i>&nbsp;        _fieldName = null;</b>
+<b class="fc"><i>1088</i>&nbsp;        _fieldId = UNKNOWN_SYMBOL_ID;</b>
+<b class="fc"><i>1089</i>&nbsp;        _elementid(0);</b>
+<b class="fc"><i>1090</i>&nbsp;    }</b>
+<i>1091</i>&nbsp;
+<i>1092</i>&nbsp;    public void dump(PrintWriter out)
+<i>1093</i>&nbsp;    {
+<b class="nc"><i>1094</i>&nbsp;        out.println(this);</b>
+<b class="nc"><i>1095</i>&nbsp;    }</b>
+<i>1096</i>&nbsp;
+<i>1097</i>&nbsp;    public String validate()
+<i>1098</i>&nbsp;    {
+<b class="nc"><i>1099</i>&nbsp;        return null;</b>
+<i>1100</i>&nbsp;    }
+<i>1101</i>&nbsp;}
+<i>1102</i>&nbsp;
+<i>1103</i>&nbsp;// current size 32 bit: 5*4 + 2 + 1 +  8 = 31 bytes (32 allocated)
+<i>1104</i>&nbsp;//              64 bit: 5*8 + 2 + 1 + 16 = 59 bytes (64 allocated)
+<i>1105</i>&nbsp;
+<i>1106</i>&nbsp;/*
+<i>1107</i>&nbsp;
+<i>1108</i>&nbsp;private byte             _flags;
+<i>1109</i>&nbsp;
+<i>1110</i>&nbsp;private IonValueContextLite _context {
+<i>1111</i>&nbsp;    private IonContainerLite _parent;
+<i>1112</i>&nbsp;    private IonSystem        _system;
+<i>1113</i>&nbsp;    private SymbolTable      _symbolTable;
+<i>1114</i>&nbsp;}
+<i>1115</i>&nbsp;
+<i>1116</i>&nbsp;/ * nope: the cost of cloning a value when
+<i>1117</i>&nbsp;* a field name is added seems like over
+<i>1118</i>&nbsp;* kill.
+<i>1119</i>&nbsp;*
+<i>1120</i>&nbsp;* The cost of virtual calls for all value
+<i>1121</i>&nbsp;* access also seems like too high a price
+<i>1122</i>&nbsp;* to pay for the 1 reference saving.
+<i>1123</i>&nbsp;*
+<i>1124</i>&nbsp;* So we&#39;ll leave fieldName as a local member
+<i>1125</i>&nbsp;*
+<i>1126</i>&nbsp;//    private IonValueContentLite {
+<i>1127</i>&nbsp;//        union IonValueValueLite {
+<i>1128</i>&nbsp;//            IonContainer
+<i>1129</i>&nbsp;//            IonScalar
+<i>1130</i>&nbsp;//            IonField {
+<i>1131</i>&nbsp;//                String _fieldName;
+<i>1132</i>&nbsp;//            }
+<i>1133</i>&nbsp;//        }
+<i>1134</i>&nbsp;//    }
+<i>1135</i>&nbsp;
+<i>1136</i>&nbsp;
+<i>1137</i>&nbsp;/ * nope:  by the time you have the reference to the
+<i>1138</i>&nbsp; *        array list like object (IonValueAnnotations
+<i>1139</i>&nbsp; *        below) you have half the overhead.  The vast
+<i>1140</i>&nbsp; *        majority of values have no annotations.  Of
+<i>1141</i>&nbsp; *        those that have annotations the vast majority
+<i>1142</i>&nbsp; *        have only 1.  2 and more drop off very quickly.
+<i>1143</i>&nbsp; *
+<i>1144</i>&nbsp; *        As such just an array that realloc-ed and the
+<i>1145</i>&nbsp; *        annotations come and go should be fine.
+<i>1146</i>&nbsp; *        Certainly the realloc cost is high but the
+<i>1147</i>&nbsp; *        normal case is alloc for 1 and you&#39;re done.
+<i>1148</i>&nbsp; *
+<i>1149</i>&nbsp; *        adding support for ignoring null references
+<i>1150</i>&nbsp; *        means we can mostly calculate the count as
+<i>1151</i>&nbsp; *        needed, drop out of search loops soon, and
+<i>1152</i>&nbsp; *        just pay a scan on add annotation.
+<i>1153</i>&nbsp; *
+<i>1154</i>&nbsp; * private IonValueAnnotations {
+<i>1155</i>&nbsp; *   private String[]         _annotations;
+<i>1156</i>&nbsp; *   private short            _annotation_count;
+<i>1157</i>&nbsp; * }
+<i>1158</i>&nbsp; * /
+<i>1159</i>&nbsp;private String[]         _annotations; // just realloc as needed
+<i>1160</i>&nbsp;
+<i>1161</i>&nbsp;32 bit: 3*4 + 1
+<i>1162</i>&nbsp;
+<i>1163</i>&nbsp;*/
+<i>1164</i>&nbsp;
+<i>1165</i>&nbsp;/**
+<i>1166</i>&nbsp; * ContainingContext is an interface supported
+<i>1167</i>&nbsp; * by all containers + a ConcreteContext object.
+<i>1168</i>&nbsp; *
+<i>1169</i>&nbsp; * For IonDatagramLite and any &quot;uncontained&quot; value
+<i>1170</i>&nbsp; * the _context member points to a ConcreteContext
+<i>1171</i>&nbsp; * where:
+<i>1172</i>&nbsp; *      getContainer return null
+<i>1173</i>&nbsp; *      getSymbolTable returns the current symbol table
+<i>1174</i>&nbsp; *      getSystem returns the instance of IonSystemLite
+<i>1175</i>&nbsp; *        that created this datagram (and it&#39;s contained
+<i>1176</i>&nbsp; *        values)
+<i>1177</i>&nbsp; *
+<i>1178</i>&nbsp; * For IonContainerLite each container implements the
+<i>1179</i>&nbsp; * interface directly.  In addition their _context
+<i>1180</i>&nbsp; * member has either their parent container or a concrete
+<i>1181</i>&nbsp; * context.  The IonContainerLite implementations return:
+<i>1182</i>&nbsp; *
+<i>1183</i>&nbsp; *      getContainer returns this
+<i>1184</i>&nbsp; *      getSymbolTable delegates to the _context object
+<i>1185</i>&nbsp; *      getSystem delegates to the _context object
+<i>1186</i>&nbsp; *
+<i>1187</i>&nbsp; *
+<i>1188</i>&nbsp; *    interface IonContainingContextLite {
+<i>1189</i>&nbsp; *        IonContainer getParent();
+<i>1190</i>&nbsp; *        IonSystem    getSystem();
+<i>1191</i>&nbsp; *        SymbolTable  getSymbolTable();
+<i>1192</i>&nbsp; *    }
+<i>1193</i>&nbsp; *
+<i>1194</i>&nbsp; *   private IonContainerLite _parent;
+<i>1195</i>&nbsp; *   private IonSystem        _system;
+<i>1196</i>&nbsp; *   private SymbolTable      _symbolTable;
+<i>1197</i>&nbsp; *
+<i>1198</i>&nbsp; */
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

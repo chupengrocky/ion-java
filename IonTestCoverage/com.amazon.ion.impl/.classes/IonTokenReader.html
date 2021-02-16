@@ -1,0 +1,1827 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonTokenReader</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonTokenReader (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IonTokenReader</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 38)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 627)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">IonTokenReader$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonTokenReader$Context</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 8)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonTokenReader$LocalReader</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 18)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonTokenReader$NumberType</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 7)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonTokenReader$Type</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 81)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonTokenReader$Type$timeinfo</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 8)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 59)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 750)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.util.IonTextUtils.isDigit;
+<i>19</i>&nbsp;import static com.amazon.ion.util.IonTextUtils.isOperatorPart;
+<i>20</i>&nbsp;import static com.amazon.ion.util.IonTextUtils.isWhitespace;
+<i>21</i>&nbsp;import static com.amazon.ion.util.IonTextUtils.printCodePointAsString;
+<i>22</i>&nbsp;
+<i>23</i>&nbsp;import com.amazon.ion.Decimal;
+<i>24</i>&nbsp;import com.amazon.ion.IonException;
+<i>25</i>&nbsp;import com.amazon.ion.Timestamp;
+<i>26</i>&nbsp;import com.amazon.ion.UnexpectedEofException;
+<i>27</i>&nbsp;import com.amazon.ion.impl._Private_IonConstants.HighNibble;
+<i>28</i>&nbsp;import com.amazon.ion.util.IonTextUtils;
+<i>29</i>&nbsp;import java.io.IOException;
+<i>30</i>&nbsp;import java.io.PushbackReader;
+<i>31</i>&nbsp;import java.io.Reader;
+<i>32</i>&nbsp;import java.math.BigDecimal;
+<i>33</i>&nbsp;import java.math.BigInteger;
+<i>34</i>&nbsp;import java.util.Stack;
+<i>35</i>&nbsp;
+<i>36</i>&nbsp;/**
+<i>37</i>&nbsp; *  This class is responsible for breaking the input stream into Tokens.
+<i>38</i>&nbsp; *  It does both the token recognition (aka the scanner) and the state
+<i>39</i>&nbsp; *  management needed to use the value underlying some of these tokens.
+<i>40</i>&nbsp; */
+<b class="nc"><i>41</i>&nbsp;final class IonTokenReader</b>
+<i>42</i>&nbsp;{
+<i>43</i>&nbsp;    // TODO clean up, many of these are unused.
+<b class="nc"><i>44</i>&nbsp;    public static int isPunctuation = 0x0001;</b>
+<b class="nc"><i>45</i>&nbsp;    public static int isKeyword     = 0x0002;</b>
+<b class="nc"><i>46</i>&nbsp;    public static int isTypeName    = 0x0004;</b>
+<b class="nc"><i>47</i>&nbsp;    public static int isConstant    = 0x0008;</b>
+<b class="nc"><i>48</i>&nbsp;    private static int isPosInt     = 0x0010;</b>
+<b class="nc"><i>49</i>&nbsp;    private static int isNegInt     = 0x0020;</b>
+<b class="nc"><i>50</i>&nbsp;    public static int isFloat       = 0x0040;</b>
+<b class="nc"><i>51</i>&nbsp;    public static int isDecimal     = 0x0080;</b>
+<b class="nc"><i>52</i>&nbsp;    public static int isTag         = 0x0100;</b>
+<i>53</i>&nbsp;
+<b class="nc"><i>54</i>&nbsp;    static public enum Type {</b>
+<i>55</i>&nbsp;
+<b class="nc"><i>56</i>&nbsp;        eof                 (isPunctuation,         &quot;&lt;eof&gt;&quot;    ),</b>
+<b class="nc"><i>57</i>&nbsp;        tOpenParen          (isPunctuation,         &quot;(&quot;        ),</b>
+<b class="nc"><i>58</i>&nbsp;        tCloseParen         (isPunctuation,         &quot;)&quot;        ),</b>
+<b class="nc"><i>59</i>&nbsp;        tOpenSquare         (isPunctuation,         &quot;[&quot;        ),</b>
+<b class="nc"><i>60</i>&nbsp;        tCloseSquare        (isPunctuation,         &quot;[&quot;        ),</b>
+<b class="nc"><i>61</i>&nbsp;        tOpenCurly          (isPunctuation,         &quot;{&quot;        ),</b>
+<b class="nc"><i>62</i>&nbsp;        tCloseCurly         (isPunctuation,         &quot;}&quot;        ),</b>
+<b class="nc"><i>63</i>&nbsp;        tOpenDoubleCurly    (isPunctuation,         &quot;{{&quot;    ),</b>
+<i>64</i>&nbsp;        //tCloseDoubleCurly (isPunctuation,         &quot;}}&quot;    ), // only valid at end of blob, not recognized in token read
+<b class="nc"><i>65</i>&nbsp;        tSingleQuote        (isPunctuation,         &quot;&#39;&quot;        ),</b>
+<b class="nc"><i>66</i>&nbsp;        tDoubleQuote        (isPunctuation,         &quot;\&quot;&quot;    ),</b>
+<i>67</i>&nbsp;        //tColon            (isPunctuation,         &quot;:&quot;        ), // filled in during identifier scan with lookahead
+<i>68</i>&nbsp;        //tDoubleColon      (isPunctuation,         &quot;::&quot;    ), // ditto
+<b class="nc"><i>69</i>&nbsp;        tComma              (isPunctuation,         &quot;,&quot;        ),</b>
+<i>70</i>&nbsp;
+<b class="nc"><i>71</i>&nbsp;        kwTrue            ((isConstant + isTag + isKeyword),  &quot;true&quot;,           HighNibble.hnBoolean),</b>
+<b class="nc"><i>72</i>&nbsp;        kwFalse           ((isConstant + isTag + isKeyword),  &quot;false&quot;,          HighNibble.hnBoolean),</b>
+<b class="nc"><i>73</i>&nbsp;        kwNull            ((isConstant + isTag + isKeyword),  &quot;null&quot;,           HighNibble.hnNull),</b>
+<i>74</i>&nbsp;
+<b class="nc"><i>75</i>&nbsp;        kwNullNull        ((isConstant + isTag + isKeyword),  &quot;null.null&quot;,      HighNibble.hnNull),</b>
+<b class="nc"><i>76</i>&nbsp;        kwNullInt         ((isConstant + isTag + isKeyword),  &quot;null.int&quot;,       HighNibble.hnPosInt),</b>
+<b class="nc"><i>77</i>&nbsp;        kwNullList        ((isConstant + isTag + isKeyword),  &quot;null.list&quot;,      HighNibble.hnList),</b>
+<b class="nc"><i>78</i>&nbsp;        kwNullSexp        ((isConstant + isTag + isKeyword),  &quot;null.sexp&quot;,      HighNibble.hnSexp),</b>
+<b class="nc"><i>79</i>&nbsp;        kwNullFloat       ((isConstant + isTag + isKeyword),  &quot;null.float&quot;,     HighNibble.hnFloat),</b>
+<b class="nc"><i>80</i>&nbsp;        kwNullBlob        ((isConstant + isTag + isKeyword),  &quot;null.blob&quot;,      HighNibble.hnBlob),</b>
+<b class="nc"><i>81</i>&nbsp;        kwNullClob        ((isConstant + isTag + isKeyword),  &quot;null.clob&quot;,      HighNibble.hnClob),</b>
+<b class="nc"><i>82</i>&nbsp;        kwNullString      ((isConstant + isTag + isKeyword),  &quot;null.string&quot;,    HighNibble.hnString),</b>
+<b class="nc"><i>83</i>&nbsp;        kwNullStruct      ((isConstant + isTag + isKeyword),  &quot;null.struct&quot;,    HighNibble.hnStruct),  // LN</b>
+<b class="nc"><i>84</i>&nbsp;        kwNullSymbol      ((isConstant + isTag + isKeyword),  &quot;null.symbol&quot;,    HighNibble.hnSymbol),</b>
+<b class="nc"><i>85</i>&nbsp;        kwNullBoolean     ((isConstant + isTag + isKeyword),  &quot;null.bool&quot;,      HighNibble.hnBoolean),</b>
+<b class="nc"><i>86</i>&nbsp;        kwNullDecimal     ((isConstant + isTag + isKeyword),  &quot;null.decimal&quot;,   HighNibble.hnDecimal),</b>
+<b class="nc"><i>87</i>&nbsp;        kwNullTimestamp   ((isConstant + isTag + isKeyword),  &quot;null.timestamp&quot;, HighNibble.hnTimestamp),</b>
+<i>88</i>&nbsp;
+<b class="nc"><i>89</i>&nbsp;        kwNan             ((isConstant + isKeyword),          &quot;nan&quot;,            HighNibble.hnFloat),</b>
+<b class="nc"><i>90</i>&nbsp;        kwPosInf          ((isConstant + isKeyword),          &quot;+inf&quot;,           HighNibble.hnFloat),</b>
+<b class="nc"><i>91</i>&nbsp;        kwNegInf          ((isConstant + isKeyword),          &quot;-inf&quot;,           HighNibble.hnFloat),</b>
+<i>92</i>&nbsp;
+<b class="nc"><i>93</i>&nbsp;        constNegInt       ((isConstant + isNegInt),           &quot;cNegInt&quot;,        HighNibble.hnNegInt),</b>
+<b class="nc"><i>94</i>&nbsp;        constPosInt       ((isConstant + isPosInt),           &quot;cPosInt&quot;,        HighNibble.hnPosInt),</b>
+<b class="nc"><i>95</i>&nbsp;        constFloat        ((isConstant + isFloat),            &quot;cFloat&quot;,         HighNibble.hnFloat),</b>
+<b class="nc"><i>96</i>&nbsp;        constDecimal      ((isConstant + isDecimal),          &quot;cDec&quot;,           HighNibble.hnDecimal),</b>
+<b class="nc"><i>97</i>&nbsp;        constTime         ((isConstant),                      &quot;cTime&quot;,          HighNibble.hnTimestamp),</b>
+<b class="nc"><i>98</i>&nbsp;        constString       ((isConstant + isTag),              &quot;cString&quot;,        HighNibble.hnString),</b>
+<b class="nc"><i>99</i>&nbsp;        constSymbol       ((isConstant + isTag),              &quot;cSymbol&quot;,        HighNibble.hnSymbol),</b>
+<b class="nc"><i>100</i>&nbsp;        constMemberName   ((isConstant + isTag),              &quot;cMemberName&quot;,    HighNibble.hnSymbol),</b>
+<b class="nc"><i>101</i>&nbsp;        constUserTypeDecl ((isConstant + isTag),              &quot;cUserTypeDecl&quot;,  HighNibble.hnSymbol),</b>
+<i>102</i>&nbsp;
+<b class="nc"><i>103</i>&nbsp;        none(0);</b>
+<i>104</i>&nbsp;
+<i>105</i>&nbsp;        private int            flags;
+<i>106</i>&nbsp;        private String        image;
+<i>107</i>&nbsp;        private HighNibble    highNibble;
+<i>108</i>&nbsp;
+<i>109</i>&nbsp;        Type() {}
+<b class="nc"><i>110</i>&nbsp;        Type(int v) {</b>
+<b class="nc"><i>111</i>&nbsp;            this.flags = v;</b>
+<i>112</i>&nbsp;        }
+<b class="nc"><i>113</i>&nbsp;        Type(int v, String name) {</b>
+<b class="nc"><i>114</i>&nbsp;            flags = v;</b>
+<b class="nc"><i>115</i>&nbsp;            image = name;</b>
+<i>116</i>&nbsp;        }
+<b class="nc"><i>117</i>&nbsp;        Type(int v, String name, HighNibble ln) {</b>
+<b class="nc"><i>118</i>&nbsp;            flags = v;</b>
+<b class="nc"><i>119</i>&nbsp;            image = name;</b>
+<b class="nc"><i>120</i>&nbsp;            highNibble = ln;</b>
+<i>121</i>&nbsp;        }
+<i>122</i>&nbsp;
+<i>123</i>&nbsp;        /**
+<i>124</i>&nbsp;         * TODO why this class exists at all.  We should store
+<i>125</i>&nbsp;         * this stuff directly in IonTimestampImpl as a BigDecimal (time) and
+<i>126</i>&nbsp;         * int (offset, -1==unknown) and avoid constructing more objects.
+<i>127</i>&nbsp;         * &lt;p&gt;
+<i>128</i>&nbsp;         * Also, we probably don&#39;t need the DateFormats.  The parser already
+<i>129</i>&nbsp;         * matches against a regex, so we should be able to pull the data
+<i>130</i>&nbsp;         * straight from the string to compute the value.
+<i>131</i>&nbsp;         */
+<b class="nc"><i>132</i>&nbsp;        public static class timeinfo {  // TODO remove vestigial class timeinfo</b>
+<i>133</i>&nbsp;
+<i>134</i>&nbsp;            static public Timestamp parse(String s) {
+<b class="nc"><i>135</i>&nbsp;                Timestamp t = null;</b>
+<b class="nc"><i>136</i>&nbsp;                s = s.trim(); // TODO why is this necessary?</b>
+<i>137</i>&nbsp;                try {
+<b class="nc"><i>138</i>&nbsp;                    t = Timestamp.valueOf(s);  // TODO should Timestamp just throw an IonException?</b>
+<i>139</i>&nbsp;                }
+<b class="nc"><i>140</i>&nbsp;                catch (IllegalArgumentException e) {</b>
+<b class="nc"><i>141</i>&nbsp;                    throw new IonException(e);</b>
+<b class="nc"><i>142</i>&nbsp;                }</b>
+<b class="nc"><i>143</i>&nbsp;                return t;</b>
+<i>144</i>&nbsp;            }
+<i>145</i>&nbsp;
+<i>146</i>&nbsp;        }
+<i>147</i>&nbsp;
+<i>148</i>&nbsp;        // TODO move out of this class into TR.
+<i>149</i>&nbsp;        public Type setNumericValue(IonTokenReader tr, String s) {
+<b class="nc"><i>150</i>&nbsp;            switch (this) {</b>
+<i>151</i>&nbsp;            case kwNan:
+<b class="nc"><i>152</i>&nbsp;                tr.doubleValue = Double.NaN;</b>
+<b class="nc"><i>153</i>&nbsp;                return this;</b>
+<i>154</i>&nbsp;            case kwPosInf:
+<b class="nc"><i>155</i>&nbsp;                tr.doubleValue = Double.POSITIVE_INFINITY;</b>
+<b class="nc"><i>156</i>&nbsp;                return this;</b>
+<i>157</i>&nbsp;            case kwNegInf:
+<b class="nc"><i>158</i>&nbsp;                tr.doubleValue = Double.NEGATIVE_INFINITY;</b>
+<b class="nc"><i>159</i>&nbsp;                return this;</b>
+<i>160</i>&nbsp;            case constNegInt:
+<i>161</i>&nbsp;            case constPosInt:
+<b class="nc"><i>162</i>&nbsp;                if (NumberType.NT_HEX.equals(tr.numberType)) {</b>
+<b class="nc"><i>163</i>&nbsp;                    tr.intValue = new BigInteger(s, 16);</b>
+<i>164</i>&nbsp;                    // In hex case we&#39;ve discarded the prefix [+-]?0x so
+<i>165</i>&nbsp;                    // reconstruct the sign
+<b class="nc"><i>166</i>&nbsp;                    if (this == constNegInt) tr.intValue = tr.intValue.negate();</b>
+<i>167</i>&nbsp;                }
+<i>168</i>&nbsp;                else {
+<b class="nc"><i>169</i>&nbsp;                    tr.intValue = new BigInteger(s, 10);</b>
+<i>170</i>&nbsp;
+<i>171</i>&nbsp;                    // Make sure that sign aligns with type.
+<i>172</i>&nbsp;                    // Note that this allows negative zero.
+<b class="nc"><i>173</i>&nbsp;                    assert (BigInteger.ZERO.equals(tr.intValue)</b>
+<i>174</i>&nbsp;                             ? true
+<b class="nc"><i>175</i>&nbsp;                             : this == (tr.intValue.signum() &lt; 0 ? constNegInt : constPosInt));</b>
+<i>176</i>&nbsp;                }
+<b class="nc"><i>177</i>&nbsp;                return this;</b>
+<i>178</i>&nbsp;            case constFloat:
+<b class="nc"><i>179</i>&nbsp;                tr.doubleValue = Double.parseDouble(s);</b>
+<b class="nc"><i>180</i>&nbsp;                return this;</b>
+<i>181</i>&nbsp;            case constDecimal:
+<i>182</i>&nbsp;                // BigDecimal parses using e instead of d or D
+<b class="nc"><i>183</i>&nbsp;                String eFormat = s.replace(&#39;d&#39;, &#39;e&#39;);</b>
+<b class="nc"><i>184</i>&nbsp;                if (eFormat == s) {</b>
+<i>185</i>&nbsp;                    // No match for &#39;d&#39; but look for &#39;D&#39;
+<b class="nc"><i>186</i>&nbsp;                    eFormat = s.replace(&#39;D&#39;, &#39;e&#39;);</b>
+<i>187</i>&nbsp;                }
+<b class="nc"><i>188</i>&nbsp;                tr.decimalValue = Decimal.valueOf(eFormat);</b>
+<b class="nc"><i>189</i>&nbsp;                return this;</b>
+<i>190</i>&nbsp;            case constTime:
+<b class="nc"><i>191</i>&nbsp;                tr.dateValue = timeinfo.parse(s);</b>
+<b class="nc"><i>192</i>&nbsp;                return this;</b>
+<i>193</i>&nbsp;            default:
+<b class="nc"><i>194</i>&nbsp;                throw new  AssertionError(&quot;Unknown op for numeric case: &quot; + this);</b>
+<i>195</i>&nbsp;            }
+<i>196</i>&nbsp;        }
+<i>197</i>&nbsp;
+<b class="nc"><i>198</i>&nbsp;        public boolean isKeyword()     { return ((flags &amp; isKeyword) != 0); }</b>
+<b class="nc"><i>199</i>&nbsp;        public boolean isConstant()    { return ((flags &amp; isConstant) != 0); }</b>
+<b class="nc"><i>200</i>&nbsp;        public boolean isNumeric()     { return ((flags &amp; (isPosInt + isNegInt + isFloat + isDecimal)) != 0); }</b>
+<i>201</i>&nbsp;
+<b class="nc"><i>202</i>&nbsp;        public String  getImage()      { return (image == null) ? this.name() : image; }</b>
+<i>203</i>&nbsp;
+<b class="nc"><i>204</i>&nbsp;        public HighNibble getHighNibble() { return highNibble; }</b>
+<i>205</i>&nbsp;
+<i>206</i>&nbsp;        @Override
+<i>207</i>&nbsp;        public String toString() {
+<b class="nc"><i>208</i>&nbsp;            if (this.getImage() != null) return this.getImage();</b>
+<b class="nc"><i>209</i>&nbsp;            return super.toString();</b>
+<i>210</i>&nbsp;        }
+<i>211</i>&nbsp;    }
+<i>212</i>&nbsp;
+<i>213</i>&nbsp;    //
+<i>214</i>&nbsp;    // this is a temp reader we use when converting blob&#39;s into
+<i>215</i>&nbsp;    // blob values
+<i>216</i>&nbsp;    //
+<i>217</i>&nbsp;    static class LocalReader extends Reader {
+<i>218</i>&nbsp;
+<i>219</i>&nbsp;        IonTokenReader _tr;
+<i>220</i>&nbsp;        int            _sboffset;
+<i>221</i>&nbsp;        int            _sbavailable;
+<i>222</i>&nbsp;
+<b class="nc"><i>223</i>&nbsp;        LocalReader(IonTokenReader tr) {</b>
+<b class="nc"><i>224</i>&nbsp;            _tr = tr;</b>
+<i>225</i>&nbsp;        }
+<i>226</i>&nbsp;
+<i>227</i>&nbsp;        @Override
+<i>228</i>&nbsp;        public void close() throws IOException {
+<b class="nc"><i>229</i>&nbsp;            _tr = null;</b>
+<i>230</i>&nbsp;            return;
+<i>231</i>&nbsp;        }
+<i>232</i>&nbsp;
+<i>233</i>&nbsp;        @Override
+<i>234</i>&nbsp;        public void reset() {
+<b class="nc"><i>235</i>&nbsp;            _sboffset = 0;</b>
+<b class="nc"><i>236</i>&nbsp;            _sbavailable = _tr.value.length();</b>
+<i>237</i>&nbsp;        }
+<i>238</i>&nbsp;
+<i>239</i>&nbsp;        @Override
+<i>240</i>&nbsp;        public int read() throws IOException {
+<b class="nc"><i>241</i>&nbsp;            int c = -1;</b>
+<i>242</i>&nbsp;
+<b class="nc"><i>243</i>&nbsp;            if (_sbavailable &gt; 0) {</b>
+<b class="nc"><i>244</i>&nbsp;                c = _tr.value.charAt(_sboffset++);</b>
+<b class="nc"><i>245</i>&nbsp;                _sbavailable--;</b>
+<i>246</i>&nbsp;            }
+<i>247</i>&nbsp;            else {
+<b class="nc"><i>248</i>&nbsp;                c = _tr.read();</b>
+<i>249</i>&nbsp;            }
+<b class="nc"><i>250</i>&nbsp;            return c;</b>
+<i>251</i>&nbsp;        }
+<i>252</i>&nbsp;
+<i>253</i>&nbsp;        @Override
+<i>254</i>&nbsp;        public int read(char[] dst, int dstoffset, int len) throws IOException {
+<b class="nc"><i>255</i>&nbsp;            int needed = len;</b>
+<i>256</i>&nbsp;
+<b class="nc"><i>257</i>&nbsp;            while (needed-- &gt; 0) {</b>
+<b class="nc"><i>258</i>&nbsp;                int c = this.read();</b>
+<b class="nc"><i>259</i>&nbsp;                if (c &lt; 0) break;</b>
+<b class="nc"><i>260</i>&nbsp;                dst[dstoffset++] = (char)c;</b>
+<b class="nc"><i>261</i>&nbsp;            }</b>
+<b class="nc"><i>262</i>&nbsp;            return len - needed;</b>
+<i>263</i>&nbsp;        }
+<i>264</i>&nbsp;    }
+<i>265</i>&nbsp;
+<i>266</i>&nbsp;    // easy to use number types
+<b class="nc"><i>267</i>&nbsp;    static enum NumberType {</b>
+<b class="nc"><i>268</i>&nbsp;        NT_POSINT,</b>
+<b class="nc"><i>269</i>&nbsp;        NT_NEGINT,</b>
+<b class="nc"><i>270</i>&nbsp;        NT_HEX, // pos or neg</b>
+<b class="nc"><i>271</i>&nbsp;        NT_FLOAT,</b>
+<b class="nc"><i>272</i>&nbsp;        NT_DECIMAL,</b>
+<b class="nc"><i>273</i>&nbsp;        NT_DECIMAL_NEGATIVE_ZERO</b>
+<i>274</i>&nbsp;    }
+<i>275</i>&nbsp;
+<i>276</i>&nbsp;    /**
+<i>277</i>&nbsp;     * Magic &quot;character&quot; to represent an escape sequence with an empty expansion.
+<i>278</i>&nbsp;     * (or, in other words, a non-eof character that should be ignored)
+<i>279</i>&nbsp;     */
+<i>280</i>&nbsp;    static final int EMPTY_ESCAPE_SEQUENCE = -2;
+<i>281</i>&nbsp;
+<i>282</i>&nbsp;
+<i>283</i>&nbsp;    //--------------------------------------------------------------------
+<i>284</i>&nbsp;    //
+<i>285</i>&nbsp;    // this is the parsing context to manage the in list, in struct,
+<i>286</i>&nbsp;    // waiting for identifier tag (usertypedecl or member name) vs value
+<i>287</i>&nbsp;    //
+<i>288</i>&nbsp;    //
+<b class="nc"><i>289</i>&nbsp;    static public enum Context {</b>
+<b class="nc"><i>290</i>&nbsp;        NONE,</b>
+<b class="nc"><i>291</i>&nbsp;        STRING,</b>
+<b class="nc"><i>292</i>&nbsp;        BLOB,</b>
+<b class="nc"><i>293</i>&nbsp;        CLOB,</b>
+<b class="nc"><i>294</i>&nbsp;        EXPRESSION,</b>
+<b class="nc"><i>295</i>&nbsp;        DATALIST,</b>
+<b class="nc"><i>296</i>&nbsp;        STRUCT;</b>
+<i>297</i>&nbsp;    }
+<b class="nc"><i>298</i>&nbsp;    public Stack&lt;Context&gt; contextStack = new Stack&lt;Context&gt;();</b>
+<b class="nc"><i>299</i>&nbsp;    public Context context = Context.NONE;</b>
+<i>300</i>&nbsp;
+<i>301</i>&nbsp;    public  void pushContext(Context newcontext) {
+<b class="nc"><i>302</i>&nbsp;        contextStack.push(newcontext);</b>
+<b class="nc"><i>303</i>&nbsp;        context = newcontext;</b>
+<i>304</i>&nbsp;    }
+<i>305</i>&nbsp;    public Context popContext() {
+<b class="nc"><i>306</i>&nbsp;        context = contextStack.pop();</b>
+<b class="nc"><i>307</i>&nbsp;        return context;</b>
+<i>308</i>&nbsp;    }
+<i>309</i>&nbsp;
+<i>310</i>&nbsp;    //--------------------------------------------------------------------
+<i>311</i>&nbsp;    //
+<i>312</i>&nbsp;    // state that keeps us on track ...
+<i>313</i>&nbsp;    //
+<i>314</i>&nbsp;
+<i>315</i>&nbsp;    private IonCharacterReader  in;
+<i>316</i>&nbsp;    private LocalReader         localReader;
+<i>317</i>&nbsp;    private PushbackReader      pushbackReader;
+<i>318</i>&nbsp;
+<i>319</i>&nbsp;    public boolean          inQuotedContent;
+<i>320</i>&nbsp;    public boolean          isIncomplete;
+<i>321</i>&nbsp;    public boolean          isLongString;
+<i>322</i>&nbsp;    public boolean          quotedIdentifier;
+<i>323</i>&nbsp;    public int              embeddedSlash;
+<i>324</i>&nbsp;    public int              endquote;
+<i>325</i>&nbsp;
+<i>326</i>&nbsp;
+<b class="nc"><i>327</i>&nbsp;    public Type             t        = Type.none;</b>
+<b class="nc"><i>328</i>&nbsp;    public Type             keyword  = Type.none;</b>
+<b class="nc"><i>329</i>&nbsp;    public StringBuilder    value    = new StringBuilder();</b>
+<i>330</i>&nbsp;
+<i>331</i>&nbsp;    public String           stringValue;
+<i>332</i>&nbsp;    public Double           doubleValue;
+<i>333</i>&nbsp;    public BigInteger       intValue;
+<i>334</i>&nbsp;
+<i>335</i>&nbsp;    public Timestamp        dateValue;
+<i>336</i>&nbsp;    public BigDecimal       decimalValue;
+<i>337</i>&nbsp;    public boolean          isNegative;
+<i>338</i>&nbsp;    public NumberType       numberType;
+<i>339</i>&nbsp;
+<b class="nc"><i>340</i>&nbsp;    public IonTokenReader(final Reader r) {</b>
+<b class="nc"><i>341</i>&nbsp;        this.in = new IonCharacterReader( r );</b>
+<i>342</i>&nbsp;    }
+<i>343</i>&nbsp;
+<i>344</i>&nbsp;    public long getConsumedAmount() {
+<b class="nc"><i>345</i>&nbsp;        return in.getConsumedAmount();</b>
+<i>346</i>&nbsp;    }
+<i>347</i>&nbsp;
+<i>348</i>&nbsp;    public int getLineNumber() {
+<b class="nc"><i>349</i>&nbsp;        return in.getLineNumber();</b>
+<i>350</i>&nbsp;    }
+<i>351</i>&nbsp;
+<i>352</i>&nbsp;    public int getColumn() {
+<b class="nc"><i>353</i>&nbsp;        return in.getColumn();</b>
+<i>354</i>&nbsp;    }
+<i>355</i>&nbsp;
+<i>356</i>&nbsp;    public String position() {
+<b class="nc"><i>357</i>&nbsp;        return &quot;line &quot; + this.getLineNumber() + &quot; column &quot; + this.getColumn();</b>
+<i>358</i>&nbsp;    }
+<i>359</i>&nbsp;
+<i>360</i>&nbsp;    public String getValueString(boolean is_in_expression) throws IOException {
+<b class="nc"><i>361</i>&nbsp;        if (this.isIncomplete) {</b>
+<b class="nc"><i>362</i>&nbsp;            finishScanString(is_in_expression);</b>
+<b class="nc"><i>363</i>&nbsp;            stringValue = value.toString();  // TODO combine with below?</b>
+<b class="nc"><i>364</i>&nbsp;            this.inQuotedContent = false;</b>
+<i>365</i>&nbsp;        }
+<b class="nc"><i>366</i>&nbsp;        else if (stringValue == null) {</b>
+<b class="nc"><i>367</i>&nbsp;            stringValue = value.toString();</b>
+<i>368</i>&nbsp;        }
+<b class="nc"><i>369</i>&nbsp;        return stringValue;</b>
+<i>370</i>&nbsp;    }
+<i>371</i>&nbsp;
+<i>372</i>&nbsp;    void resetValue() {
+<b class="nc"><i>373</i>&nbsp;        isIncomplete = false;</b>
+<b class="nc"><i>374</i>&nbsp;        stringValue = null;</b>
+<b class="nc"><i>375</i>&nbsp;        doubleValue = null;</b>
+<b class="nc"><i>376</i>&nbsp;        intValue = null;</b>
+<b class="nc"><i>377</i>&nbsp;        dateValue = null;</b>
+<b class="nc"><i>378</i>&nbsp;        decimalValue = null;</b>
+<b class="nc"><i>379</i>&nbsp;        isNegative = false;</b>
+<b class="nc"><i>380</i>&nbsp;        numberType = null;</b>
+<b class="nc"><i>381</i>&nbsp;        t = null;</b>
+<b class="nc"><i>382</i>&nbsp;        value.setLength(0);</b>
+<i>383</i>&nbsp;    }
+<i>384</i>&nbsp;
+<i>385</i>&nbsp;    public PushbackReader getPushbackReader() {
+<b class="nc"><i>386</i>&nbsp;        if (localReader == null) {</b>
+<b class="nc"><i>387</i>&nbsp;            localReader = new LocalReader(this);</b>
+<b class="nc"><i>388</i>&nbsp;            pushbackReader =</b>
+<i>389</i>&nbsp;                new PushbackReader(localReader,
+<i>390</i>&nbsp;                                   _Private_Utils.MAX_LOOKAHEAD_UTF16);
+<i>391</i>&nbsp;        }
+<b class="nc"><i>392</i>&nbsp;        localReader.reset();</b>
+<b class="nc"><i>393</i>&nbsp;        return pushbackReader ;</b>
+<i>394</i>&nbsp;    }
+<i>395</i>&nbsp;
+<i>396</i>&nbsp;    /**
+<i>397</i>&nbsp;     * Reads the next character using the underlying stream.
+<i>398</i>&nbsp;     * @return -1 on end of stream.
+<i>399</i>&nbsp;     * @throws IOException
+<i>400</i>&nbsp;     */
+<i>401</i>&nbsp;    final int read() throws IOException {
+<b class="nc"><i>402</i>&nbsp;        final int ch = in.read();</b>
+<b class="nc"><i>403</i>&nbsp;        assert ch != &#39;\r&#39;;</b>
+<b class="nc"><i>404</i>&nbsp;        return ch;</b>
+<i>405</i>&nbsp;    }
+<i>406</i>&nbsp;
+<i>407</i>&nbsp;
+<i>408</i>&nbsp;    int readIgnoreWhitespace() throws IOException {
+<b class="nc"><i>409</i>&nbsp;        assert !inQuotedContent;</b>
+<i>410</i>&nbsp;
+<i>411</i>&nbsp;        int c;
+<i>412</i>&nbsp;
+<i>413</i>&nbsp;        // read through comments - this detects and rejects double slash
+<i>414</i>&nbsp;        // and slash star style comments and their contents
+<i>415</i>&nbsp;        for (;;) {
+<b class="nc"><i>416</i>&nbsp;            c = read();</b>
+<i>417</i>&nbsp;
+<b class="nc"><i>418</i>&nbsp;            if (c == &#39;/&#39;) { // possibly a start of a comment</b>
+<b class="nc"><i>419</i>&nbsp;                int c2 = read();</b>
+<i>420</i>&nbsp;
+<b class="nc"><i>421</i>&nbsp;                if (c2 == &#39;/&#39;) {</b>
+<i>422</i>&nbsp;                    // we have a // comment, scan for the terminating new line
+<b class="nc"><i>423</i>&nbsp;                    while (c2 != &#39;\n&#39; &amp;&amp; c2 != -1) {</b>
+<b class="nc"><i>424</i>&nbsp;                        c2 = read();</b>
+<i>425</i>&nbsp;                    }
+<b class="nc"><i>426</i>&nbsp;                    c = c2;</b>
+<i>427</i>&nbsp;                }
+<b class="nc"><i>428</i>&nbsp;                else if (c2 == &#39;*&#39;) {</b>
+<i>429</i>&nbsp;                    // we have a /* */ comment scan for closing */
+<i>430</i>&nbsp;                    scancomment:
+<b class="nc"><i>431</i>&nbsp;                    while (c2 != -1) {</b>
+<b class="nc"><i>432</i>&nbsp;                        c2 = read();</b>
+<i>433</i>&nbsp;
+<b class="nc"><i>434</i>&nbsp;                        if (c2 == &#39;*&#39;) {</b>
+<b class="nc"><i>435</i>&nbsp;                            c2 = read();</b>
+<i>436</i>&nbsp;
+<b class="nc"><i>437</i>&nbsp;                            if (c2 == &#39;/&#39;) {</b>
+<b class="nc"><i>438</i>&nbsp;                                break scancomment;</b>
+<i>439</i>&nbsp;                            }
+<b class="nc"><i>440</i>&nbsp;                            unread(c2); // in case this was the &#39;*&#39; we&#39;re looking for</b>
+<i>441</i>&nbsp;                        }
+<i>442</i>&nbsp;                    }
+<b class="nc"><i>443</i>&nbsp;                    c = read();</b>
+<i>444</i>&nbsp;                }
+<i>445</i>&nbsp;                else {
+<i>446</i>&nbsp;                    // it wasn&#39;t a comment start, throw it back
+<b class="nc"><i>447</i>&nbsp;                    unread(c2);</b>
+<i>448</i>&nbsp;                }
+<i>449</i>&nbsp;            }
+<b class="nc"><i>450</i>&nbsp;            if (/* inContent ||*/ !isWhitespace(c)) {</b>
+<b class="nc"><i>451</i>&nbsp;                break;</b>
+<i>452</i>&nbsp;            }
+<i>453</i>&nbsp;        }
+<b class="nc"><i>454</i>&nbsp;        return c;</b>
+<i>455</i>&nbsp;    }
+<i>456</i>&nbsp;    void unread(int c) throws IOException {
+<b class="nc"><i>457</i>&nbsp;        this.in.unread(c);</b>
+<i>458</i>&nbsp;    }
+<i>459</i>&nbsp;
+<i>460</i>&nbsp;    // TODO clone the body of next(c) here, later , for perf, we
+<i>461</i>&nbsp;    //      don&#39;t really want TWO methods calls per character, or
+<i>462</i>&nbsp;    //      mostly we don&#39;t want an extra one. (and I doubt that
+<i>463</i>&nbsp;    //      Java handles the tail optimization)
+<i>464</i>&nbsp;    public Type next(boolean is_in_expression) throws IOException {
+<b class="nc"><i>465</i>&nbsp;        inQuotedContent = false;</b>
+<b class="nc"><i>466</i>&nbsp;        int c = this.readIgnoreWhitespace();</b>
+<b class="nc"><i>467</i>&nbsp;        return next(c, is_in_expression);</b>
+<i>468</i>&nbsp;    }
+<i>469</i>&nbsp;
+<i>470</i>&nbsp;    private Type next(int c, boolean is_in_expression) throws IOException {
+<i>471</i>&nbsp;        int c2;
+<b class="nc"><i>472</i>&nbsp;        t = Type.none;</b>
+<i>473</i>&nbsp;
+<b class="nc"><i>474</i>&nbsp;        isIncomplete = false;</b>
+<b class="nc"><i>475</i>&nbsp;        switch (c) {</b>
+<i>476</i>&nbsp;        case -1:
+<b class="nc"><i>477</i>&nbsp;            return (t = Type.eof);</b>
+<i>478</i>&nbsp;        case &#39;{&#39;:
+<b class="nc"><i>479</i>&nbsp;            c2 = read();</b>
+<b class="nc"><i>480</i>&nbsp;            if (c2 == &#39;{&#39;) {</b>
+<b class="nc"><i>481</i>&nbsp;                return (t = Type.tOpenDoubleCurly);</b>
+<i>482</i>&nbsp;            }
+<b class="nc"><i>483</i>&nbsp;            unread(c2);</b>
+<b class="nc"><i>484</i>&nbsp;            return (t = Type.tOpenCurly);</b>
+<i>485</i>&nbsp;        case &#39;}&#39;:
+<b class="nc"><i>486</i>&nbsp;            return (t = Type.tCloseCurly);</b>
+<i>487</i>&nbsp;        case &#39;[&#39;:
+<b class="nc"><i>488</i>&nbsp;            return (t = Type.tOpenSquare);</b>
+<i>489</i>&nbsp;        case &#39;]&#39;:
+<b class="nc"><i>490</i>&nbsp;            return (t = Type.tCloseSquare);</b>
+<i>491</i>&nbsp;        case &#39;(&#39;:
+<b class="nc"><i>492</i>&nbsp;            return (t = Type.tOpenParen);</b>
+<i>493</i>&nbsp;        case &#39;)&#39;:
+<b class="nc"><i>494</i>&nbsp;            return (t = Type.tCloseParen);</b>
+<i>495</i>&nbsp;        case &#39;,&#39;:
+<b class="nc"><i>496</i>&nbsp;            return (t = Type.tComma);</b>
+<i>497</i>&nbsp;        case &#39;0&#39;: case &#39;1&#39;: case &#39;2&#39;: case &#39;3&#39;: case &#39;4&#39;:
+<i>498</i>&nbsp;        case &#39;5&#39;: case &#39;6&#39;: case &#39;7&#39;: case &#39;8&#39;: case &#39;9&#39;:
+<b class="nc"><i>499</i>&nbsp;            return readNumber(c);</b>
+<i>500</i>&nbsp;        case &#39;\&quot;&#39;:
+<b class="nc"><i>501</i>&nbsp;            inQuotedContent = true;</b>
+<b class="nc"><i>502</i>&nbsp;            this.keyword = Type.none; // anything in quotes isn&#39;t a keyword</b>
+<b class="nc"><i>503</i>&nbsp;            return scanString(c, _Private_IonConstants.lnIsVarLen - 1);</b>
+<i>504</i>&nbsp;        case &#39;\&#39;&#39;:
+<b class="nc"><i>505</i>&nbsp;            c2 = read();</b>
+<b class="nc"><i>506</i>&nbsp;            if (c2 == &#39;\&#39;&#39;) {</b>
+<b class="nc"><i>507</i>&nbsp;                c2 = read();</b>
+<b class="nc"><i>508</i>&nbsp;                if (c2 == &#39;\&#39;&#39;) {</b>
+<b class="nc"><i>509</i>&nbsp;                    return scanLongString();</b>
+<i>510</i>&nbsp;                }
+<b class="nc"><i>511</i>&nbsp;                this.unread(c2);</b>
+<b class="nc"><i>512</i>&nbsp;                c2 = &#39;\&#39;&#39;; // restore c2 for the next unread</b>
+<i>513</i>&nbsp;            }
+<b class="nc"><i>514</i>&nbsp;            this.unread(c2);</b>
+<b class="nc"><i>515</i>&nbsp;            inQuotedContent = true;</b>
+<b class="nc"><i>516</i>&nbsp;            return scanIdentifier(c);</b>
+<i>517</i>&nbsp;        case &#39;+&#39;:
+<b class="nc"><i>518</i>&nbsp;            c2 = read();</b>
+<b class="nc"><i>519</i>&nbsp;            if (c2 == &#39;i&#39;) {</b>
+<b class="nc"><i>520</i>&nbsp;                c2 = read();</b>
+<b class="nc"><i>521</i>&nbsp;                if (c2 == &#39;n&#39;) {</b>
+<b class="nc"><i>522</i>&nbsp;                    c2 = read();</b>
+<b class="nc"><i>523</i>&nbsp;                    if (c2 == &#39;f&#39;) {</b>
+<b class="nc"><i>524</i>&nbsp;                        return (t = Type.kwPosInf);</b>
+<i>525</i>&nbsp;                    }
+<b class="nc"><i>526</i>&nbsp;                    this.unread(c2);</b>
+<b class="nc"><i>527</i>&nbsp;                    c2 = &#39;n&#39;;</b>
+<i>528</i>&nbsp;                }
+<b class="nc"><i>529</i>&nbsp;                this.unread(c2);</b>
+<b class="nc"><i>530</i>&nbsp;                c2 = &#39;i&#39;;</b>
+<i>531</i>&nbsp;            }
+<b class="nc"><i>532</i>&nbsp;            this.unread(c2);</b>
+<b class="nc"><i>533</i>&nbsp;            if (is_in_expression) {</b>
+<b class="nc"><i>534</i>&nbsp;                return scanOperator(c);</b>
+<i>535</i>&nbsp;            }
+<i>536</i>&nbsp;            break; // break to error
+<i>537</i>&nbsp;        case &#39;-&#39;:
+<b class="nc"><i>538</i>&nbsp;            c2 = read();</b>
+<b class="nc"><i>539</i>&nbsp;            if (c2 &gt;= &#39;0&#39; &amp;&amp; c2 &lt;= &#39;9&#39;) {</b>
+<b class="nc"><i>540</i>&nbsp;                this.unread(c2);</b>
+<b class="nc"><i>541</i>&nbsp;                return readNumber(c);</b>
+<i>542</i>&nbsp;            }
+<b class="nc"><i>543</i>&nbsp;            if (c2 == &#39;i&#39;) {</b>
+<b class="nc"><i>544</i>&nbsp;                c2 = read();</b>
+<b class="nc"><i>545</i>&nbsp;                if (c2 == &#39;n&#39;) {</b>
+<b class="nc"><i>546</i>&nbsp;                    c2 = read();</b>
+<b class="nc"><i>547</i>&nbsp;                    if (c2 == &#39;f&#39;) {</b>
+<b class="nc"><i>548</i>&nbsp;                        return (t = Type.kwNegInf);</b>
+<i>549</i>&nbsp;                    }
+<b class="nc"><i>550</i>&nbsp;                    this.unread(c2);</b>
+<b class="nc"><i>551</i>&nbsp;                    c2 = &#39;n&#39;;</b>
+<i>552</i>&nbsp;                }
+<b class="nc"><i>553</i>&nbsp;                this.unread(c2);</b>
+<b class="nc"><i>554</i>&nbsp;                c2 = &#39;i&#39;;</b>
+<i>555</i>&nbsp;            }
+<b class="nc"><i>556</i>&nbsp;            this.unread(c2);</b>
+<b class="nc"><i>557</i>&nbsp;            if (is_in_expression) {</b>
+<b class="nc"><i>558</i>&nbsp;                return scanOperator(c);</b>
+<i>559</i>&nbsp;            }
+<i>560</i>&nbsp;            break; // break to error
+<i>561</i>&nbsp;        default:
+<b class="nc"><i>562</i>&nbsp;            if (IonTextUtils.isIdentifierStart(c)) {</b>
+<b class="nc"><i>563</i>&nbsp;                return scanIdentifier(c);</b>
+<i>564</i>&nbsp;            }
+<b class="nc"><i>565</i>&nbsp;            if (is_in_expression &amp;&amp; isOperatorPart(c)) {</b>
+<b class="nc"><i>566</i>&nbsp;                return scanOperator(c);</b>
+<i>567</i>&nbsp;            }
+<i>568</i>&nbsp;        }
+<i>569</i>&nbsp;
+<b class="nc"><i>570</i>&nbsp;        String message =</b>
+<b class="nc"><i>571</i>&nbsp;            &quot;Unexpected character &quot; + printCodePointAsString(c) +</b>
+<b class="nc"><i>572</i>&nbsp;            &quot; encountered at line &quot; + this.getLineNumber() +</b>
+<b class="nc"><i>573</i>&nbsp;            &quot; column &quot; + this.getColumn();</b>
+<b class="nc"><i>574</i>&nbsp;        throw new IonException(message);</b>
+<i>575</i>&nbsp;    }
+<i>576</i>&nbsp;
+<i>577</i>&nbsp;
+<i>578</i>&nbsp;    public Type scanIdentifier(int c) throws IOException
+<i>579</i>&nbsp;    {
+<i>580</i>&nbsp;        // reset our local value buffer
+<b class="nc"><i>581</i>&nbsp;        resetValue();</b>
+<i>582</i>&nbsp;
+<i>583</i>&nbsp;        // we don&#39;t have an identifier type any longer, just string
+<b class="nc"><i>584</i>&nbsp;        this.t = Type.constSymbol;</b>
+<i>585</i>&nbsp;
+<i>586</i>&nbsp;        // some strings are keywords, most are not
+<i>587</i>&nbsp;        // mostly we&#39;ll guess that it&#39;s not a keyword
+<b class="nc"><i>588</i>&nbsp;        this.keyword = null;</b>
+<i>589</i>&nbsp;
+<i>590</i>&nbsp;        // first we read the identifier content into our value buffer
+<i>591</i>&nbsp;        // if the value is quoted, use the escape char loop, otherwise
+<i>592</i>&nbsp;        // look for the non-identifier character (and throw it back)
+<i>593</i>&nbsp;
+<b class="nc"><i>594</i>&nbsp;        if (!readIdentifierContents(c)) { // not quoted (true is quoted)</b>
+<i>595</i>&nbsp;            // anything in quotes (even single quotes) is not a keyword
+<i>596</i>&nbsp;            // and here we&#39;re not in quoted content (that is handled above)
+<i>597</i>&nbsp;            // so see if it&#39;s also a keyword
+<b class="nc"><i>598</i>&nbsp;            this.keyword = IonTokenReader.matchKeyword(value, 0, value.length());</b>
+<b class="nc"><i>599</i>&nbsp;            if (this.keyword != null) {</b>
+<b class="nc"><i>600</i>&nbsp;                if (this.keyword == Type.kwNull) {</b>
+<b class="nc"><i>601</i>&nbsp;                    c = this.read();</b>
+<b class="nc"><i>602</i>&nbsp;                    if (c == &#39;.&#39;) {</b>
+<b class="nc"><i>603</i>&nbsp;                        int dot = value.length();</b>
+<b class="nc"><i>604</i>&nbsp;                        value.append((char)c);</b>
+<b class="nc"><i>605</i>&nbsp;                        c = this.read();</b>
+<b class="nc"><i>606</i>&nbsp;                        int added = readIdentifierContents(c, IonTokenConstsX.TN_MAX_NAME_LENGTH + 1); // +1 is &quot;enough roap&quot; so if there are extra letters at the end of the keyword we keep at least 1</b>
+<b class="nc"><i>607</i>&nbsp;                        int kw = IonTokenConstsX.keyword(value, dot+1, dot+added+1);</b>
+<b class="nc"><i>608</i>&nbsp;                        switch (kw) {</b>
+<i>609</i>&nbsp;                        case IonTokenConstsX.KEYWORD_NULL:
+<i>610</i>&nbsp;                        case IonTokenConstsX.KEYWORD_BOOL:
+<i>611</i>&nbsp;                        case IonTokenConstsX.KEYWORD_INT:
+<i>612</i>&nbsp;                        case IonTokenConstsX.KEYWORD_FLOAT:
+<i>613</i>&nbsp;                        case IonTokenConstsX.KEYWORD_DECIMAL:
+<i>614</i>&nbsp;                        case IonTokenConstsX.KEYWORD_TIMESTAMP:
+<i>615</i>&nbsp;                        case IonTokenConstsX.KEYWORD_SYMBOL:
+<i>616</i>&nbsp;                        case IonTokenConstsX.KEYWORD_STRING:
+<i>617</i>&nbsp;                        case IonTokenConstsX.KEYWORD_BLOB:
+<i>618</i>&nbsp;                        case IonTokenConstsX.KEYWORD_CLOB:
+<i>619</i>&nbsp;                        case IonTokenConstsX.KEYWORD_LIST:
+<i>620</i>&nbsp;                        case IonTokenConstsX.KEYWORD_SEXP:
+<i>621</i>&nbsp;                        case IonTokenConstsX.KEYWORD_STRUCT:
+<b class="nc"><i>622</i>&nbsp;                            this.keyword = setNullType(value, dot + 1, value.length() - dot - 1);</b>
+<b class="nc"><i>623</i>&nbsp;                            break;</b>
+<i>624</i>&nbsp;                        default:
+<i>625</i>&nbsp;                            // not a valid type name - so we have to unread back to the dot
+<b class="nc"><i>626</i>&nbsp;                            for (int ii=value.length(); ii&gt;dot; ) {</b>
+<b class="nc"><i>627</i>&nbsp;                                ii--;</b>
+<b class="nc"><i>628</i>&nbsp;                                char uc = value.charAt(ii);</b>
+<b class="nc"><i>629</i>&nbsp;                                unread(uc);</b>
+<b class="nc"><i>630</i>&nbsp;                            }</b>
+<i>631</i>&nbsp;
+<b class="nc"><i>632</i>&nbsp;                            String message =</b>
+<b class="nc"><i>633</i>&nbsp;                                position()</b>
+<i>634</i>&nbsp;                                + &quot;: Expected Ion type after &#39;null.&#39; but found: &quot;
+<i>635</i>&nbsp;                                + value;
+<b class="nc"><i>636</i>&nbsp;                            throw new IonException(message);</b>
+<i>637</i>&nbsp;                        }
+<b class="nc"><i>638</i>&nbsp;                    }</b>
+<i>639</i>&nbsp;                    else {
+<b class="nc"><i>640</i>&nbsp;                        unread(c);</b>
+<i>641</i>&nbsp;                    }
+<i>642</i>&nbsp;                }
+<b class="nc"><i>643</i>&nbsp;                this.t = this.keyword;</b>
+<b class="nc"><i>644</i>&nbsp;                return this.t;</b>
+<i>645</i>&nbsp;            }
+<i>646</i>&nbsp;        }
+<i>647</i>&nbsp;
+<i>648</i>&nbsp;        // see if we&#39;re a user type of a member name
+<b class="nc"><i>649</i>&nbsp;        c = this.readIgnoreWhitespace();</b>
+<b class="nc"><i>650</i>&nbsp;        if (c != &#39;:&#39;) {</b>
+<b class="nc"><i>651</i>&nbsp;            unread(c);</b>
+<i>652</i>&nbsp;        }
+<i>653</i>&nbsp;        else {
+<b class="nc"><i>654</i>&nbsp;            c = read();</b>
+<b class="nc"><i>655</i>&nbsp;            if (c != &#39;:&#39;) {</b>
+<b class="nc"><i>656</i>&nbsp;                unread(c);</b>
+<b class="nc"><i>657</i>&nbsp;                this.t = Type.constMemberName;</b>
+<i>658</i>&nbsp;            }
+<i>659</i>&nbsp;            else {
+<b class="nc"><i>660</i>&nbsp;                this.t = Type.constUserTypeDecl;</b>
+<i>661</i>&nbsp;            }
+<i>662</i>&nbsp;        }
+<b class="nc"><i>663</i>&nbsp;        return this.t;</b>
+<i>664</i>&nbsp;    }
+<i>665</i>&nbsp;
+<i>666</i>&nbsp;    boolean readIdentifierContents(int c) throws IOException {
+<i>667</i>&nbsp;
+<b class="nc"><i>668</i>&nbsp;        int quote = c;</b>
+<b class="nc"><i>669</i>&nbsp;        inQuotedContent = (quote == &#39;\&#39;&#39; || quote == &#39;\&quot;&#39;);</b>
+<i>670</i>&nbsp;
+<b class="nc"><i>671</i>&nbsp;        if ((quotedIdentifier = inQuotedContent) == true) {</b>
+<i>672</i>&nbsp;            for (;;) {
+<b class="nc"><i>673</i>&nbsp;                c = read();</b>
+<b class="nc"><i>674</i>&nbsp;                if (c &lt; 0 || c == quote) break;</b>
+<b class="nc"><i>675</i>&nbsp;                if (c == &#39;\\&#39;) {</b>
+<b class="nc"><i>676</i>&nbsp;                    c = readEscapedCharacter(this.in, false /*not clob*/);</b>
+<i>677</i>&nbsp;                }
+<b class="nc"><i>678</i>&nbsp;                if (c != EMPTY_ESCAPE_SEQUENCE) {</b>
+<b class="nc"><i>679</i>&nbsp;                    value.appendCodePoint(c);</b>
+<i>680</i>&nbsp;                }
+<i>681</i>&nbsp;            }
+<b class="nc"><i>682</i>&nbsp;            if (c == -1) { // TODO throw UnexpectedEofException</b>
+<b class="nc"><i>683</i>&nbsp;                throw new IonException(&quot;end encountered before closing quote &#39;\\&quot; + (char)endquote+ &quot;&#39;&quot;);</b>
+<i>684</i>&nbsp;            }
+<i>685</i>&nbsp;            // c, at this point is a single quote, which we don&#39;t append
+<b class="nc"><i>686</i>&nbsp;            inQuotedContent = false;</b>
+<i>687</i>&nbsp;        }
+<i>688</i>&nbsp;        else {
+<b class="nc"><i>689</i>&nbsp;            value.append((char)c);</b>
+<i>690</i>&nbsp;            for (;;) {
+<b class="nc"><i>691</i>&nbsp;                c = read();</b>
+<b class="nc"><i>692</i>&nbsp;                if (!IonTextUtils.isIdentifierPart(c)) {</b>
+<b class="nc"><i>693</i>&nbsp;                    break;</b>
+<i>694</i>&nbsp;                }
+<b class="nc"><i>695</i>&nbsp;                value.append((char)c);</b>
+<i>696</i>&nbsp;            }
+<b class="nc"><i>697</i>&nbsp;            unread(c);  // we throw back our terminator here</b>
+<i>698</i>&nbsp;        }
+<b class="nc"><i>699</i>&nbsp;        return quotedIdentifier;</b>
+<i>700</i>&nbsp;    }
+<i>701</i>&nbsp;    int readIdentifierContents(int c, int max_length) throws IOException {
+<b class="nc"><i>702</i>&nbsp;        assert(c != &#39;\&#39;&#39; &amp;&amp; c != &#39;\&quot;&#39;);</b>
+<i>703</i>&nbsp;
+<b class="nc"><i>704</i>&nbsp;        value.append((char)c);</b>
+<b class="nc"><i>705</i>&nbsp;        int count = 1;</b>
+<i>706</i>&nbsp;
+<b class="nc"><i>707</i>&nbsp;        while (count &lt; max_length) {</b>
+<b class="nc"><i>708</i>&nbsp;            c = read();</b>
+<b class="nc"><i>709</i>&nbsp;            if (!IonTextUtils.isIdentifierPart(c)) {</b>
+<b class="nc"><i>710</i>&nbsp;                unread(c);  // we throw back our terminator here</b>
+<b class="nc"><i>711</i>&nbsp;                break;</b>
+<i>712</i>&nbsp;            }
+<b class="nc"><i>713</i>&nbsp;            value.append((char)c);</b>
+<b class="nc"><i>714</i>&nbsp;            count++;</b>
+<i>715</i>&nbsp;        }
+<i>716</i>&nbsp;
+<b class="nc"><i>717</i>&nbsp;        return count;</b>
+<i>718</i>&nbsp;    }
+<i>719</i>&nbsp;
+<i>720</i>&nbsp;    static Type matchKeyword(StringBuilder sb, int pos, int valuelen) throws IOException
+<i>721</i>&nbsp;    {
+<b class="nc"><i>722</i>&nbsp;        Type keyword = null;</b>
+<i>723</i>&nbsp;
+<b class="nc"><i>724</i>&nbsp;        switch (sb.charAt(pos++)) { // there has to be at least 1 chacter or we wouldn&#39;t be here</b>
+<i>725</i>&nbsp;        case &#39;f&#39;:
+<b class="nc"><i>726</i>&nbsp;            if (valuelen == 5 //    &quot;f&quot;</b>
+<b class="nc"><i>727</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;a&#39;</b>
+<b class="nc"><i>728</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;l&#39;</b>
+<b class="nc"><i>729</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;s&#39;</b>
+<b class="nc"><i>730</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;e&#39;</b>
+<i>731</i>&nbsp;            ) {
+<b class="nc"><i>732</i>&nbsp;                keyword = Type.kwFalse;</b>
+<i>733</i>&nbsp;            }
+<i>734</i>&nbsp;            break;
+<i>735</i>&nbsp;        case &#39;n&#39;:
+<b class="nc"><i>736</i>&nbsp;            if (valuelen == 4 //    &#39;n&#39;</b>
+<b class="nc"><i>737</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;u&#39;</b>
+<b class="nc"><i>738</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;l&#39;</b>
+<b class="nc"><i>739</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;l&#39;</b>
+<i>740</i>&nbsp;            ) {
+<b class="nc"><i>741</i>&nbsp;                keyword = Type.kwNull;</b>
+<i>742</i>&nbsp;            }
+<b class="nc"><i>743</i>&nbsp;            else if (valuelen == 3 //   &#39;n&#39;</b>
+<b class="nc"><i>744</i>&nbsp;                 &amp;&amp; sb.charAt(pos++) == &#39;a&#39;</b>
+<b class="nc"><i>745</i>&nbsp;                 &amp;&amp; sb.charAt(pos++) == &#39;n&#39;</b>
+<i>746</i>&nbsp;            ) {
+<b class="nc"><i>747</i>&nbsp;                keyword = Type.kwNan;</b>
+<i>748</i>&nbsp;            }
+<i>749</i>&nbsp;            break;
+<i>750</i>&nbsp;        case &#39;t&#39;:
+<b class="nc"><i>751</i>&nbsp;            if (valuelen == 4 //    &quot;t&quot;</b>
+<b class="nc"><i>752</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;r&#39;</b>
+<b class="nc"><i>753</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;u&#39;</b>
+<b class="nc"><i>754</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;e&#39;</b>
+<i>755</i>&nbsp;            ) {
+<b class="nc"><i>756</i>&nbsp;                keyword =  Type.kwTrue;</b>
+<i>757</i>&nbsp;            }
+<i>758</i>&nbsp;            break;
+<i>759</i>&nbsp;        }
+<i>760</i>&nbsp;
+<b class="nc"><i>761</i>&nbsp;        return keyword;</b>
+<i>762</i>&nbsp;    }
+<i>763</i>&nbsp;
+<i>764</i>&nbsp;    public Type setNullType(StringBuilder sb, int pos, int valuelen)
+<i>765</i>&nbsp;    {
+<b class="nc"><i>766</i>&nbsp;        switch (valuelen) {</b>
+<i>767</i>&nbsp;        case 3:
+<i>768</i>&nbsp;            //int
+<b class="nc"><i>769</i>&nbsp;            if (sb.charAt(pos++) == &#39;i&#39;</b>
+<b class="nc"><i>770</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;n&#39;</b>
+<b class="nc"><i>771</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;t&#39;</b>
+<i>772</i>&nbsp;            ) {
+<b class="nc"><i>773</i>&nbsp;                return Type.kwNullInt;</b>
+<i>774</i>&nbsp;            }
+<i>775</i>&nbsp;            break;
+<i>776</i>&nbsp;        case 4:
+<i>777</i>&nbsp;            //bool, blob, list, null, clob, sexp
+<b class="nc"><i>778</i>&nbsp;            switch (sb.charAt(pos++)) {</b>
+<i>779</i>&nbsp;            case &#39;b&#39;:
+<i>780</i>&nbsp;                //bool, blob
+<b class="nc"><i>781</i>&nbsp;                switch (sb.charAt(pos++)) {</b>
+<i>782</i>&nbsp;                    case &#39;o&#39;:
+<i>783</i>&nbsp;                        // bool
+<b class="nc"><i>784</i>&nbsp;                        if (sb.charAt(pos++) == &#39;o&#39;</b>
+<b class="nc"><i>785</i>&nbsp;                         &amp;&amp; sb.charAt(pos++) == &#39;l&#39;</b>
+<i>786</i>&nbsp;                        ) {
+<b class="nc"><i>787</i>&nbsp;                            return Type.kwNullBoolean;</b>
+<i>788</i>&nbsp;                        }
+<i>789</i>&nbsp;                        break;
+<i>790</i>&nbsp;                    case &#39;l&#39;:
+<i>791</i>&nbsp;                        //blob
+<b class="nc"><i>792</i>&nbsp;                        if (sb.charAt(pos++) == &#39;o&#39;</b>
+<b class="nc"><i>793</i>&nbsp;                         &amp;&amp; sb.charAt(pos++) == &#39;b&#39;</b>
+<i>794</i>&nbsp;                        ) {
+<b class="nc"><i>795</i>&nbsp;                            return Type.kwNullBlob;</b>
+<i>796</i>&nbsp;                        }
+<i>797</i>&nbsp;                        break;
+<i>798</i>&nbsp;                }
+<b class="nc"><i>799</i>&nbsp;                break;</b>
+<i>800</i>&nbsp;            case &#39;l&#39;:
+<b class="nc"><i>801</i>&nbsp;                if (sb.charAt(pos++) == &#39;i&#39;</b>
+<b class="nc"><i>802</i>&nbsp;                 &amp;&amp; sb.charAt(pos++) == &#39;s&#39;</b>
+<b class="nc"><i>803</i>&nbsp;                 &amp;&amp; sb.charAt(pos++) == &#39;t&#39;</b>
+<i>804</i>&nbsp;                ) {
+<b class="nc"><i>805</i>&nbsp;                    return Type.kwNullList;</b>
+<i>806</i>&nbsp;                }
+<i>807</i>&nbsp;                break;
+<i>808</i>&nbsp;            case &#39;n&#39;:
+<b class="nc"><i>809</i>&nbsp;                if (sb.charAt(pos++) == &#39;u&#39;</b>
+<b class="nc"><i>810</i>&nbsp;                 &amp;&amp; sb.charAt(pos++) == &#39;l&#39;</b>
+<b class="nc"><i>811</i>&nbsp;                 &amp;&amp; sb.charAt(pos++) == &#39;l&#39;</b>
+<i>812</i>&nbsp;                ) {
+<b class="nc"><i>813</i>&nbsp;                    return Type.kwNullNull;</b>
+<i>814</i>&nbsp;                }
+<i>815</i>&nbsp;                break;
+<i>816</i>&nbsp;            case &#39;c&#39;:
+<i>817</i>&nbsp;                //clob
+<b class="nc"><i>818</i>&nbsp;                if (sb.charAt(pos++) == &#39;l&#39;</b>
+<b class="nc"><i>819</i>&nbsp;                 &amp;&amp; sb.charAt(pos++) == &#39;o&#39;</b>
+<b class="nc"><i>820</i>&nbsp;                 &amp;&amp; sb.charAt(pos++) == &#39;b&#39;</b>
+<i>821</i>&nbsp;                ) {
+<b class="nc"><i>822</i>&nbsp;                    return Type.kwNullClob;</b>
+<i>823</i>&nbsp;                }
+<i>824</i>&nbsp;                break;
+<i>825</i>&nbsp;            case &#39;s&#39;:
+<i>826</i>&nbsp;                //sexp
+<b class="nc"><i>827</i>&nbsp;                if (sb.charAt(pos++) == &#39;e&#39;</b>
+<b class="nc"><i>828</i>&nbsp;                 &amp;&amp; sb.charAt(pos++) == &#39;x&#39;</b>
+<b class="nc"><i>829</i>&nbsp;                 &amp;&amp; sb.charAt(pos++) == &#39;p&#39;</b>
+<i>830</i>&nbsp;                ) {
+<b class="nc"><i>831</i>&nbsp;                    return Type.kwNullSexp;</b>
+<i>832</i>&nbsp;                }
+<i>833</i>&nbsp;                break;
+<i>834</i>&nbsp;            }
+<b class="nc"><i>835</i>&nbsp;            break;</b>
+<i>836</i>&nbsp;        case 5:
+<i>837</i>&nbsp;            //float
+<b class="nc"><i>838</i>&nbsp;            if (sb.charAt(pos++) == &#39;f&#39;</b>
+<b class="nc"><i>839</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;l&#39;</b>
+<b class="nc"><i>840</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;o&#39;</b>
+<b class="nc"><i>841</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;a&#39;</b>
+<b class="nc"><i>842</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;t&#39;</b>
+<i>843</i>&nbsp;            ) {
+<b class="nc"><i>844</i>&nbsp;                return Type.kwNullFloat;</b>
+<i>845</i>&nbsp;            }
+<i>846</i>&nbsp;            break;
+<i>847</i>&nbsp;        case 6:
+<b class="nc"><i>848</i>&nbsp;            switch (sb.charAt(pos++)) {</b>
+<i>849</i>&nbsp;            case &#39;s&#39;:
+<i>850</i>&nbsp;                //string
+<i>851</i>&nbsp;                //struct
+<i>852</i>&nbsp;                //symbol
+<b class="nc"><i>853</i>&nbsp;                switch(sb.charAt(pos++)) {</b>
+<i>854</i>&nbsp;                case &#39;t&#39;:
+<b class="nc"><i>855</i>&nbsp;                    if (sb.charAt(pos++) == &#39;r&#39;) {</b>
+<b class="nc"><i>856</i>&nbsp;                        switch (sb.charAt(pos++)) {</b>
+<i>857</i>&nbsp;                        case &#39;i&#39;:
+<b class="nc"><i>858</i>&nbsp;                            if (sb.charAt(pos++) == &#39;n&#39; &amp;&amp; sb.charAt(pos++) == &#39;g&#39;) {</b>
+<b class="nc"><i>859</i>&nbsp;                                return Type.kwNullString;</b>
+<i>860</i>&nbsp;                            }
+<i>861</i>&nbsp;                            break;
+<i>862</i>&nbsp;                        case &#39;u&#39;:
+<b class="nc"><i>863</i>&nbsp;                            if (sb.charAt(pos++) == &#39;c&#39; &amp;&amp; sb.charAt(pos++) == &#39;t&#39;) {</b>
+<b class="nc"><i>864</i>&nbsp;                                return Type.kwNullStruct;</b>
+<i>865</i>&nbsp;                            }
+<b class="nc"><i>866</i>&nbsp;                            break;</b>
+<i>867</i>&nbsp;                        }
+<i>868</i>&nbsp;                    }
+<i>869</i>&nbsp;                    break;
+<i>870</i>&nbsp;                case &#39;y&#39;:
+<b class="nc"><i>871</i>&nbsp;                    if (sb.charAt(pos++) == &#39;m&#39;</b>
+<b class="nc"><i>872</i>&nbsp;                     &amp;&amp; sb.charAt(pos++) == &#39;b&#39;</b>
+<b class="nc"><i>873</i>&nbsp;                     &amp;&amp; sb.charAt(pos++) == &#39;o&#39;</b>
+<b class="nc"><i>874</i>&nbsp;                     &amp;&amp; sb.charAt(pos++) == &#39;l&#39;</b>
+<i>875</i>&nbsp;                    ) {
+<b class="nc"><i>876</i>&nbsp;                        return Type.kwNullSymbol;</b>
+<i>877</i>&nbsp;                    }
+<i>878</i>&nbsp;                    break;
+<i>879</i>&nbsp;                }
+<i>880</i>&nbsp;            }
+<b class="nc"><i>881</i>&nbsp;            break;</b>
+<i>882</i>&nbsp;        case 7:
+<i>883</i>&nbsp;            //decimal
+<b class="nc"><i>884</i>&nbsp;            if (sb.charAt(pos++) == &#39;d&#39;</b>
+<b class="nc"><i>885</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;e&#39;</b>
+<b class="nc"><i>886</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;c&#39;</b>
+<b class="nc"><i>887</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;i&#39;</b>
+<b class="nc"><i>888</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;m&#39;</b>
+<b class="nc"><i>889</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;a&#39;</b>
+<b class="nc"><i>890</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;l&#39;</b>
+<i>891</i>&nbsp;            ) {
+<b class="nc"><i>892</i>&nbsp;                return Type.kwNullDecimal;</b>
+<i>893</i>&nbsp;            }
+<i>894</i>&nbsp;            break;
+<i>895</i>&nbsp;        case 9:
+<i>896</i>&nbsp;            //timestamp
+<b class="nc"><i>897</i>&nbsp;            if (sb.charAt(pos++) == &#39;t&#39;</b>
+<b class="nc"><i>898</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;i&#39;</b>
+<b class="nc"><i>899</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;m&#39;</b>
+<b class="nc"><i>900</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;e&#39;</b>
+<b class="nc"><i>901</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;s&#39;</b>
+<b class="nc"><i>902</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;t&#39;</b>
+<b class="nc"><i>903</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;a&#39;</b>
+<b class="nc"><i>904</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;m&#39;</b>
+<b class="nc"><i>905</i>&nbsp;             &amp;&amp; sb.charAt(pos++) == &#39;p&#39;</b>
+<i>906</i>&nbsp;            ) {
+<b class="nc"><i>907</i>&nbsp;                return Type.kwNullTimestamp;</b>
+<i>908</i>&nbsp;            }
+<i>909</i>&nbsp;            break;
+<i>910</i>&nbsp;        }
+<b class="nc"><i>911</i>&nbsp;        String nullimage = sb.toString();</b>
+<b class="nc"><i>912</i>&nbsp;        throw new IonException(&quot;invalid null value &#39;&quot;+nullimage+&quot;&#39; at &quot; + this.position());</b>
+<i>913</i>&nbsp;    }
+<i>914</i>&nbsp;
+<i>915</i>&nbsp;    public Type scanOperator(int c) throws IOException
+<i>916</i>&nbsp;    {
+<i>917</i>&nbsp;        // reset our local value buffer
+<b class="nc"><i>918</i>&nbsp;        resetValue();</b>
+<i>919</i>&nbsp;
+<i>920</i>&nbsp;        // we don&#39;t have an identifier type any longer, just string
+<b class="nc"><i>921</i>&nbsp;        this.t = Type.constSymbol;</b>
+<i>922</i>&nbsp;
+<i>923</i>&nbsp;        // some strings are keywords, most are not
+<i>924</i>&nbsp;        // mostly we&#39;ll guess that it&#39;s not a keyword
+<b class="nc"><i>925</i>&nbsp;        this.keyword = null;</b>
+<i>926</i>&nbsp;
+<i>927</i>&nbsp;        // first we read the identifier content into our value buffer
+<i>928</i>&nbsp;        // if the value is quoted, use the escape char loop, otherwise
+<i>929</i>&nbsp;        // look for the non-identifier character (and throw it back)
+<i>930</i>&nbsp;
+<b class="nc"><i>931</i>&nbsp;        value.append((char)c);</b>
+<i>932</i>&nbsp;        for (;;) {
+<b class="nc"><i>933</i>&nbsp;            c = read();</b>
+<b class="nc"><i>934</i>&nbsp;            if (!IonTextUtils.isOperatorPart(c)) {</b>
+<b class="nc"><i>935</i>&nbsp;                break;</b>
+<i>936</i>&nbsp;            }
+<b class="nc"><i>937</i>&nbsp;            value.append((char)c);</b>
+<i>938</i>&nbsp;        }
+<b class="nc"><i>939</i>&nbsp;        unread(c);  // we throw back our terminator here</b>
+<i>940</i>&nbsp;
+<b class="nc"><i>941</i>&nbsp;        return this.t;</b>
+<i>942</i>&nbsp;    }
+<i>943</i>&nbsp;
+<i>944</i>&nbsp;
+<i>945</i>&nbsp;    public Type scanString(int c, int maxlookahead) throws IOException
+<i>946</i>&nbsp;    {
+<i>947</i>&nbsp;        // reset out local value buffer
+<b class="nc"><i>948</i>&nbsp;        resetValue();</b>
+<i>949</i>&nbsp;
+<b class="nc"><i>950</i>&nbsp;        if (c != &#39;\&quot;&#39;) {</b>
+<b class="nc"><i>951</i>&nbsp;            throw new IonException(&quot;Programmer error! Only a quote should get you here.&quot;);</b>
+<i>952</i>&nbsp;        }
+<b class="nc"><i>953</i>&nbsp;        endquote = &#39;\&quot;&#39;;</b>
+<i>954</i>&nbsp;
+<i>955</i>&nbsp;        sizedloop:
+<b class="nc"><i>956</i>&nbsp;        while (maxlookahead-- &gt; 0) {</b>
+<b class="nc"><i>957</i>&nbsp;            switch ((c = this.read())) {</b>
+<b class="nc"><i>958</i>&nbsp;            case -1:   break sizedloop; // TODO deoptimize, throw exception</b>
+<b class="nc"><i>959</i>&nbsp;            case &#39;\&quot;&#39;: break sizedloop;</b>
+<i>960</i>&nbsp;            case &#39;\n&#39;:
+<b class="nc"><i>961</i>&nbsp;                throw new IonException(&quot;unexpected line terminator encountered in quoted string&quot;);</b>
+<i>962</i>&nbsp;            case &#39;\\&#39;:
+<b class="nc"><i>963</i>&nbsp;                c = readEscapedCharacter(this.in, false /*not clob*/);</b>
+<i>964</i>&nbsp;                //    throws UnexpectedEofException on EOF
+<b class="nc"><i>965</i>&nbsp;                if (c != EMPTY_ESCAPE_SEQUENCE) {</b>
+<b class="nc"><i>966</i>&nbsp;                    value.appendCodePoint(c);</b>
+<i>967</i>&nbsp;                }
+<i>968</i>&nbsp;                break;
+<i>969</i>&nbsp;            default:
+<i>970</i>&nbsp;                // c could be part of a surrogate pair so we can&#39;t use
+<i>971</i>&nbsp;                // appendCodePoint()
+<b class="nc"><i>972</i>&nbsp;                value.append((char)c);</b>
+<b class="nc"><i>973</i>&nbsp;                break;</b>
+<i>974</i>&nbsp;            }
+<i>975</i>&nbsp;        }
+<i>976</i>&nbsp;
+<b class="nc"><i>977</i>&nbsp;        if (maxlookahead != -1 &amp;&amp; c == &#39;\&quot;&#39;) {</b>
+<i>978</i>&nbsp;            // this is the normal, non-longline case so we&#39;re just done
+<b class="nc"><i>979</i>&nbsp;            closeString();</b>
+<i>980</i>&nbsp;        }
+<i>981</i>&nbsp;        else {
+<i>982</i>&nbsp;            // we&#39;re not at the closing quote, so this is an incomplete
+<i>983</i>&nbsp;            // string which will have to be read to the end ... later
+<b class="nc"><i>984</i>&nbsp;            leaveOpenString(c, false);</b>
+<i>985</i>&nbsp;        }
+<b class="nc"><i>986</i>&nbsp;        return Type.constString;</b>
+<i>987</i>&nbsp;    }
+<i>988</i>&nbsp;    void leaveOpenString(int c, boolean longstring) {
+<b class="nc"><i>989</i>&nbsp;        if (c == -1) {</b>
+<b class="nc"><i>990</i>&nbsp;            throw new UnexpectedEofException();</b>
+<i>991</i>&nbsp;        }
+<i>992</i>&nbsp;
+<b class="nc"><i>993</i>&nbsp;        this.isIncomplete = true;</b>
+<b class="nc"><i>994</i>&nbsp;        this.inQuotedContent = true;</b>
+<b class="nc"><i>995</i>&nbsp;        this.isLongString = longstring;</b>
+<i>996</i>&nbsp;    }
+<i>997</i>&nbsp;
+<i>998</i>&nbsp;    /**
+<i>999</i>&nbsp;     * Scans the rest of the string through {@link #endquote}.
+<i>1000</i>&nbsp;     * &lt;p&gt;
+<i>1001</i>&nbsp;       XXX  WARNING  XXX
+<i>1002</i>&nbsp;     * Almost identical logic is found in
+<i>1003</i>&nbsp;     * {@link IonBinary#appendToLongValue(int, boolean, boolean, PushbackReader)}
+<i>1004</i>&nbsp;     *
+<i>1005</i>&nbsp;     * @param is_in_expression
+<i>1006</i>&nbsp;     * @throws UnexpectedEofException if we hit EOF before the endquote.
+<i>1007</i>&nbsp;     */
+<i>1008</i>&nbsp;    void finishScanString(boolean is_in_expression) throws IOException
+<i>1009</i>&nbsp;    {
+<b class="nc"><i>1010</i>&nbsp;        assert isIncomplete;</b>
+<b class="nc"><i>1011</i>&nbsp;        assert inQuotedContent;</b>
+<i>1012</i>&nbsp;
+<i>1013</i>&nbsp;        for (;;)
+<i>1014</i>&nbsp;        {
+<b class="nc"><i>1015</i>&nbsp;            int c = this.read();</b>
+<b class="nc"><i>1016</i>&nbsp;            if (c == -1) {</b>
+<b class="nc"><i>1017</i>&nbsp;                throw new UnexpectedEofException();</b>
+<i>1018</i>&nbsp;            }
+<b class="nc"><i>1019</i>&nbsp;            if (c == endquote) break;  // endquote == -1 during long strings</b>
+<b class="nc"><i>1020</i>&nbsp;            if (c == &#39;\\&#39;) {</b>
+<b class="nc"><i>1021</i>&nbsp;                c = readEscapedCharacter(this.in, false /*not clob*/);</b>
+<b class="nc"><i>1022</i>&nbsp;                if (c != EMPTY_ESCAPE_SEQUENCE) {</b>
+<b class="nc"><i>1023</i>&nbsp;                    value.appendCodePoint(c);</b>
+<i>1024</i>&nbsp;                }
+<i>1025</i>&nbsp;            }
+<b class="nc"><i>1026</i>&nbsp;            else if (c == &#39;\&#39;&#39; &amp;&amp; isLongString) {</b>
+<i>1027</i>&nbsp;                // This happens while handling triple-quote field names
+<b class="nc"><i>1028</i>&nbsp;                if (twoMoreSingleQuotes()) {</b>
+<i>1029</i>&nbsp;                    // At the end of a long string.  Look for another one.
+<b class="nc"><i>1030</i>&nbsp;                    inQuotedContent = false;</b>
+<b class="nc"><i>1031</i>&nbsp;                    c = readIgnoreWhitespace();</b>
+<i>1032</i>&nbsp;
+<b class="nc"><i>1033</i>&nbsp;                    if (c == &#39;\&#39;&#39; &amp;&amp; twoMoreSingleQuotes()) {</b>
+<i>1034</i>&nbsp;                        // Yep, another triple-quote.  We&#39;ve consumed all three
+<i>1035</i>&nbsp;                        // so just keep reading.
+<b class="nc"><i>1036</i>&nbsp;                        inQuotedContent = true;</b>
+<i>1037</i>&nbsp;                    }
+<i>1038</i>&nbsp;                    else {
+<i>1039</i>&nbsp;                        // Something else, we are done.
+<b class="nc"><i>1040</i>&nbsp;                        unread(c);</b>
+<b class="nc"><i>1041</i>&nbsp;                        break;</b>
+<i>1042</i>&nbsp;                    }
+<i>1043</i>&nbsp;                }
+<i>1044</i>&nbsp;                else {
+<i>1045</i>&nbsp;                    // Still inside the long string
+<b class="nc"><i>1046</i>&nbsp;                    value.append((char)c);</b>
+<i>1047</i>&nbsp;                }
+<i>1048</i>&nbsp;            }
+<b class="nc"><i>1049</i>&nbsp;            else if (!isLongString &amp;&amp; (c == &#39;\n&#39;)) {</b>
+<b class="nc"><i>1050</i>&nbsp;                throw new IonException(&quot;unexpected line terminator encountered in quoted string&quot;);</b>
+<i>1051</i>&nbsp;            }
+<i>1052</i>&nbsp;            else {
+<b class="nc"><i>1053</i>&nbsp;                value.append((char)c);</b>
+<i>1054</i>&nbsp;            }
+<b class="nc"><i>1055</i>&nbsp;        }</b>
+<i>1056</i>&nbsp;        return;
+<i>1057</i>&nbsp;    }
+<i>1058</i>&nbsp;
+<i>1059</i>&nbsp;    /**
+<i>1060</i>&nbsp;     * If two single quotes are next on the input, consume them and return
+<i>1061</i>&nbsp;     * true.  Otherwise, leave them on the input and return false.
+<i>1062</i>&nbsp;     * @return true when there are two pending single quotes.
+<i>1063</i>&nbsp;     * @throws IOException
+<i>1064</i>&nbsp;     */
+<i>1065</i>&nbsp;    private boolean twoMoreSingleQuotes() throws IOException
+<i>1066</i>&nbsp;    {
+<b class="nc"><i>1067</i>&nbsp;        int c = read();</b>
+<b class="nc"><i>1068</i>&nbsp;        if (c == &#39;\&#39;&#39;) {</b>
+<b class="nc"><i>1069</i>&nbsp;            int c2 = read();</b>
+<b class="nc"><i>1070</i>&nbsp;            if (c2 == &#39;\&#39;&#39;) {</b>
+<b class="nc"><i>1071</i>&nbsp;                return true;</b>
+<i>1072</i>&nbsp;            }
+<b class="nc"><i>1073</i>&nbsp;            unread(c2);</b>
+<i>1074</i>&nbsp;        }
+<b class="nc"><i>1075</i>&nbsp;        unread(c);</b>
+<b class="nc"><i>1076</i>&nbsp;        return false;</b>
+<i>1077</i>&nbsp;    }
+<i>1078</i>&nbsp;
+<i>1079</i>&nbsp;
+<i>1080</i>&nbsp;    void closeString() {
+<b class="nc"><i>1081</i>&nbsp;        this.isIncomplete = false;</b>
+<b class="nc"><i>1082</i>&nbsp;        this.inQuotedContent = false;</b>
+<b class="nc"><i>1083</i>&nbsp;        this.isLongString = false;</b>
+<i>1084</i>&nbsp;    }
+<i>1085</i>&nbsp;
+<i>1086</i>&nbsp;    public Type scanLongString() throws IOException
+<i>1087</i>&nbsp;    {
+<i>1088</i>&nbsp;        // reset out local value buffer
+<b class="nc"><i>1089</i>&nbsp;        resetValue();</b>
+<i>1090</i>&nbsp;
+<b class="nc"><i>1091</i>&nbsp;        endquote = -1;</b>
+<i>1092</i>&nbsp;
+<i>1093</i>&nbsp;        // we&#39;re not at the closing quote, so this is an incomplete
+<i>1094</i>&nbsp;        // string which will have to be read to the end ... later
+<b class="nc"><i>1095</i>&nbsp;        leaveOpenString(EMPTY_ESCAPE_SEQUENCE, true);</b>
+<i>1096</i>&nbsp;
+<b class="nc"><i>1097</i>&nbsp;        return Type.constString;</b>
+<i>1098</i>&nbsp;    }
+<i>1099</i>&nbsp;    /**
+<i>1100</i>&nbsp;     * Closes parsing of a triple-quote string, remembering that there may be
+<i>1101</i>&nbsp;     * more to come.
+<i>1102</i>&nbsp;     */
+<i>1103</i>&nbsp;    void closeLongString() {
+<b class="nc"><i>1104</i>&nbsp;        this.isIncomplete = true;</b>
+<b class="nc"><i>1105</i>&nbsp;        this.inQuotedContent = false;</b>
+<b class="nc"><i>1106</i>&nbsp;        this.isLongString = true;</b>
+<i>1107</i>&nbsp;    }
+<i>1108</i>&nbsp;
+<i>1109</i>&nbsp;
+<i>1110</i>&nbsp;    /**
+<i>1111</i>&nbsp;     * @return the translated escape sequence.  Will not return -1 since EOF is
+<i>1112</i>&nbsp;     * not legal in this context. May return {@link #EMPTY_ESCAPE_SEQUENCE} to
+<i>1113</i>&nbsp;     * indicate a zero-length sequence such as BS-NL.
+<i>1114</i>&nbsp;     * @throws UnexpectedEofException if the EOF is encountered in the middle
+<i>1115</i>&nbsp;     * of the escape sequence.
+<i>1116</i>&nbsp;     * */
+<i>1117</i>&nbsp;    public static int readEscapedCharacter(PushbackReader r, boolean inClob)
+<i>1118</i>&nbsp;        throws IOException, UnexpectedEofException
+<i>1119</i>&nbsp;    {
+<i>1120</i>&nbsp;        //    \\ The backslash character
+<i>1121</i>&nbsp;        //    \0 The character 0 (nul terminator char, for some)
+<i>1122</i>&nbsp;        //    \xhh The character with hexadecimal value 0xhh
+<i>1123</i>&nbsp;        //    \ u hhhh The character with hexadecimal value 0xhhhh
+<i>1124</i>&nbsp;        //    \t The tab character (&#39;\u0009&#39;)
+<i>1125</i>&nbsp;        //    \n The newline (line feed) character (&#39;\ u 000A&#39;)
+<i>1126</i>&nbsp;        //    \v The vertical tab character (&#39;\u000B&#39;)
+<i>1127</i>&nbsp;        //    \r The carriage-return character (&#39;\ u 000D&#39;)
+<i>1128</i>&nbsp;        //    \f The form-feed character (&#39;\ u 000C&#39;)
+<i>1129</i>&nbsp;        //    \a The alert (bell) character (&#39;\ u 0007&#39;)
+<i>1130</i>&nbsp;        //    \&quot; The double quote character
+<i>1131</i>&nbsp;        //    \&#39; The single quote character
+<i>1132</i>&nbsp;        //    \? The question mark character
+<i>1133</i>&nbsp;
+<b class="nc"><i>1134</i>&nbsp;        int c2 = 0, c = r.read();</b>
+<b class="nc"><i>1135</i>&nbsp;        switch (c) {</b>
+<i>1136</i>&nbsp;            case -1:
+<b class="nc"><i>1137</i>&nbsp;                throw new UnexpectedEofException();</b>
+<b class="nc"><i>1138</i>&nbsp;            case &#39;t&#39;:  return &#39;\t&#39;;</b>
+<b class="nc"><i>1139</i>&nbsp;            case &#39;n&#39;:  return &#39;\n&#39;;</b>
+<b class="nc"><i>1140</i>&nbsp;            case &#39;v&#39;:  return &#39;\u000B&#39;;</b>
+<b class="nc"><i>1141</i>&nbsp;            case &#39;r&#39;:  return &#39;\r&#39;;</b>
+<b class="nc"><i>1142</i>&nbsp;            case &#39;f&#39;:  return &#39;\f&#39;;</b>
+<b class="nc"><i>1143</i>&nbsp;            case &#39;b&#39;:  return &#39;\u0008&#39;;</b>
+<b class="nc"><i>1144</i>&nbsp;            case &#39;a&#39;:  return &#39;\u0007&#39;;</b>
+<b class="nc"><i>1145</i>&nbsp;            case &#39;\\&#39;: return &#39;\\&#39;;</b>
+<b class="nc"><i>1146</i>&nbsp;            case &#39;\&quot;&#39;: return &#39;\&quot;&#39;;</b>
+<b class="nc"><i>1147</i>&nbsp;            case &#39;\&#39;&#39;: return &#39;\&#39;&#39;;</b>
+<b class="nc"><i>1148</i>&nbsp;            case &#39;/&#39;:  return &#39;/&#39;;</b>
+<b class="nc"><i>1149</i>&nbsp;            case &#39;?&#39;:  return &#39;?&#39;;</b>
+<i>1150</i>&nbsp;
+<i>1151</i>&nbsp;            case &#39;U&#39;:
+<i>1152</i>&nbsp;                // Expecting 8 hex digits
+<b class="nc"><i>1153</i>&nbsp;                if (inClob) {</b>
+<b class="nc"><i>1154</i>&nbsp;                    throw new IonException(&quot;Unicode escapes \\U not allowed in clob&quot;);</b>
+<i>1155</i>&nbsp;                }
+<b class="nc"><i>1156</i>&nbsp;                c = readDigit(r, 16, true);</b>
+<b class="nc"><i>1157</i>&nbsp;                if (c &lt; 0) break;  // TODO throw UnexpectedEofException</b>
+<b class="nc"><i>1158</i>&nbsp;                c2 = c &lt;&lt; 28;</b>
+<b class="nc"><i>1159</i>&nbsp;                c = readDigit(r, 16, true);</b>
+<b class="nc"><i>1160</i>&nbsp;                if (c &lt; 0) break;</b>
+<b class="nc"><i>1161</i>&nbsp;                c2 += c &lt;&lt; 24;</b>
+<b class="nc"><i>1162</i>&nbsp;                c = readDigit(r, 16, true);</b>
+<b class="nc"><i>1163</i>&nbsp;                if (c &lt; 0) break;</b>
+<b class="nc"><i>1164</i>&nbsp;                c2 += c &lt;&lt; 20;</b>
+<b class="nc"><i>1165</i>&nbsp;                c = readDigit(r, 16, true);</b>
+<b class="nc"><i>1166</i>&nbsp;                if (c &lt; 0) break;</b>
+<b class="nc"><i>1167</i>&nbsp;                c2 += c &lt;&lt; 16;</b>
+<i>1168</i>&nbsp;                // ... fall through...
+<i>1169</i>&nbsp;            case &#39;u&#39;:
+<i>1170</i>&nbsp;                // Expecting 4 hex digits
+<b class="nc"><i>1171</i>&nbsp;                if (inClob) {</b>
+<b class="nc"><i>1172</i>&nbsp;                    throw new IonException(&quot;Unicode escapes \\u not allowed in clob&quot;);</b>
+<i>1173</i>&nbsp;                }
+<b class="nc"><i>1174</i>&nbsp;                c = readDigit(r, 16, true);</b>
+<b class="nc"><i>1175</i>&nbsp;                if (c &lt; 0) break;</b>
+<b class="nc"><i>1176</i>&nbsp;                c2 += c &lt;&lt; 12;</b>
+<b class="nc"><i>1177</i>&nbsp;                c = readDigit(r, 16, true);</b>
+<b class="nc"><i>1178</i>&nbsp;                if (c &lt; 0) break;</b>
+<b class="nc"><i>1179</i>&nbsp;                c2 += c &lt;&lt; 8;</b>
+<i>1180</i>&nbsp;                // ... fall through...
+<i>1181</i>&nbsp;            case &#39;x&#39;:
+<i>1182</i>&nbsp;                // Expecting 2 hex digits
+<b class="nc"><i>1183</i>&nbsp;                c = readDigit(r, 16, true);</b>
+<b class="nc"><i>1184</i>&nbsp;                if (c &lt; 0) break;</b>
+<b class="nc"><i>1185</i>&nbsp;                c2 += c &lt;&lt; 4;</b>
+<b class="nc"><i>1186</i>&nbsp;                c = readDigit(r, 16, true);</b>
+<b class="nc"><i>1187</i>&nbsp;                if (c &lt; 0) break;</b>
+<b class="nc"><i>1188</i>&nbsp;                return c2 + c;</b>
+<i>1189</i>&nbsp;
+<i>1190</i>&nbsp;            case &#39;0&#39;:
+<b class="nc"><i>1191</i>&nbsp;                return 0;</b>
+<i>1192</i>&nbsp;            case &#39;\n&#39;:
+<b class="nc"><i>1193</i>&nbsp;                return EMPTY_ESCAPE_SEQUENCE;</b>
+<i>1194</i>&nbsp;            default:
+<i>1195</i>&nbsp;                break;
+<i>1196</i>&nbsp;        }
+<b class="nc"><i>1197</i>&nbsp;        throw new IonException(&quot;invalid escape sequence \&quot;\\&quot;</b>
+<i>1198</i>&nbsp;                               + (char) c + &quot;\&quot; [&quot; + c + &quot;]&quot;);
+<i>1199</i>&nbsp;    }
+<i>1200</i>&nbsp;
+<i>1201</i>&nbsp;    public static int readDigit(/*EscapedCharacterReader*/PushbackReader r, int radix, boolean isRequired) throws IOException {
+<b class="nc"><i>1202</i>&nbsp;        int c = r.read();</b>
+<b class="nc"><i>1203</i>&nbsp;        if (c &lt; 0) {</b>
+<b class="nc"><i>1204</i>&nbsp;            r.unread(c);</b>
+<b class="nc"><i>1205</i>&nbsp;            return -1;</b>
+<i>1206</i>&nbsp;        }
+<i>1207</i>&nbsp;
+<b class="nc"><i>1208</i>&nbsp;        int c2 =  Character.digit(c, radix);</b>
+<b class="nc"><i>1209</i>&nbsp;        if (c2 &lt; 0) {</b>
+<b class="nc"><i>1210</i>&nbsp;            if (isRequired) {</b>
+<b class="nc"><i>1211</i>&nbsp;                throw new IonException(&quot;bad digit in escaped character &#39;&quot;+((char)c)+&quot;&#39;&quot;);</b>
+<i>1212</i>&nbsp;            }
+<i>1213</i>&nbsp;            // if it&#39;s not a required digit, we just throw it back
+<b class="nc"><i>1214</i>&nbsp;            r.unread(c);</b>
+<b class="nc"><i>1215</i>&nbsp;            return -1;</b>
+<i>1216</i>&nbsp;        }
+<b class="nc"><i>1217</i>&nbsp;        return c2;</b>
+<i>1218</i>&nbsp;    }
+<i>1219</i>&nbsp;
+<i>1220</i>&nbsp;
+<i>1221</i>&nbsp;    private void checkAndUnreadNumericStopper(int c) throws IOException
+<i>1222</i>&nbsp;    {
+<i>1223</i>&nbsp;        // Ignore EOF, so we don&#39;t &quot;unread&quot; it - EOF is a terminator
+<b class="nc"><i>1224</i>&nbsp;        if (c != -1) {</b>
+<b class="nc"><i>1225</i>&nbsp;            if ( ! this.isValueTerminatingCharacter(c) ) {</b>
+<b class="nc"><i>1226</i>&nbsp;                final String message =</b>
+<b class="nc"><i>1227</i>&nbsp;                    position() + &quot;: Numeric value followed by invalid character &quot;</b>
+<b class="nc"><i>1228</i>&nbsp;                    + printCodePointAsString(c);</b>
+<b class="nc"><i>1229</i>&nbsp;                throw new IonException(message);</b>
+<i>1230</i>&nbsp;            }
+<b class="nc"><i>1231</i>&nbsp;            this.unread(c);</b>
+<i>1232</i>&nbsp;        }
+<i>1233</i>&nbsp;    }
+<i>1234</i>&nbsp;
+<i>1235</i>&nbsp;    private final boolean isValueTerminatingCharacter(int c) throws IOException
+<i>1236</i>&nbsp;    {
+<i>1237</i>&nbsp;        boolean isTerminator;
+<i>1238</i>&nbsp;
+<b class="nc"><i>1239</i>&nbsp;        if (c == &#39;/&#39;) {</b>
+<i>1240</i>&nbsp;            // this is terminating only if it starts a comment of some sort
+<b class="nc"><i>1241</i>&nbsp;            c = this.read();</b>
+<b class="nc"><i>1242</i>&nbsp;            this.unread(c);  // we never &quot;keep&quot; this character</b>
+<b class="nc"><i>1243</i>&nbsp;            isTerminator = (c == &#39;/&#39; || c == &#39;*&#39;);</b>
+<i>1244</i>&nbsp;        }
+<i>1245</i>&nbsp;        else {
+<b class="nc"><i>1246</i>&nbsp;            isTerminator = IonTextUtils.isNumericStop(c);</b>
+<i>1247</i>&nbsp;        }
+<i>1248</i>&nbsp;
+<b class="nc"><i>1249</i>&nbsp;        return isTerminator;</b>
+<i>1250</i>&nbsp;    }
+<i>1251</i>&nbsp;
+<i>1252</i>&nbsp;    public Type readNumber(int c) throws IOException {
+<i>1253</i>&nbsp;        // clear out our string buffer
+<b class="nc"><i>1254</i>&nbsp;        resetValue();</b>
+<i>1255</i>&nbsp;
+<i>1256</i>&nbsp;        // process the initial sign character, if its there.
+<b class="nc"><i>1257</i>&nbsp;        boolean explicitPlusSign = false;</b>
+<b class="nc"><i>1258</i>&nbsp;        switch (c) {</b>
+<i>1259</i>&nbsp;        case &#39;-&#39;:
+<b class="nc"><i>1260</i>&nbsp;            value.append((char)c);</b>
+<b class="nc"><i>1261</i>&nbsp;            c = this.read();</b>
+<b class="nc"><i>1262</i>&nbsp;            t = Type.constNegInt;</b>
+<b class="nc"><i>1263</i>&nbsp;            this.numberType = NumberType.NT_NEGINT;</b>
+<b class="nc"><i>1264</i>&nbsp;            this.isNegative = true;</b>
+<b class="nc"><i>1265</i>&nbsp;            break;</b>
+<i>1266</i>&nbsp;        case &#39;+&#39;:
+<i>1267</i>&nbsp;            // we eat the plus sign, but remember we saw one
+<b class="nc"><i>1268</i>&nbsp;            explicitPlusSign = true;</b>
+<b class="nc"><i>1269</i>&nbsp;            c = this.read();</b>
+<b class="nc"><i>1270</i>&nbsp;            t = Type.constPosInt;</b>
+<b class="nc"><i>1271</i>&nbsp;            this.isNegative = false;</b>
+<b class="nc"><i>1272</i>&nbsp;            this.numberType = NumberType.NT_POSINT;</b>
+<b class="nc"><i>1273</i>&nbsp;            break;</b>
+<i>1274</i>&nbsp;        default:
+<b class="nc"><i>1275</i>&nbsp;            t = Type.constPosInt;</b>
+<b class="nc"><i>1276</i>&nbsp;            this.numberType = NumberType.NT_POSINT;</b>
+<b class="nc"><i>1277</i>&nbsp;            this.isNegative = false;</b>
+<i>1278</i>&nbsp;            break;
+<i>1279</i>&nbsp;        }
+<i>1280</i>&nbsp;
+<i>1281</i>&nbsp;        // process the initial digit.  Caller has checked that it&#39;s a digit.
+<b class="nc"><i>1282</i>&nbsp;        assert isDigit(c, 10);</b>
+<b class="nc"><i>1283</i>&nbsp;        value.append((char)c);</b>
+<b class="nc"><i>1284</i>&nbsp;        boolean isZero = (c == &#39;0&#39;);</b>
+<b class="nc"><i>1285</i>&nbsp;        boolean leadingZero = isZero;</b>
+<i>1286</i>&nbsp;
+<i>1287</i>&nbsp;        // process the next character after the initial digit.
+<b class="nc"><i>1288</i>&nbsp;        switch((c = this.read())) {</b>
+<i>1289</i>&nbsp;        case &#39;x&#39;:
+<i>1290</i>&nbsp;        case &#39;X&#39;:
+<b class="nc"><i>1291</i>&nbsp;            if (!isZero) {</b>
+<b class="nc"><i>1292</i>&nbsp;                throw new IonException(&quot;badly formed number encountered at &quot; + position());</b>
+<i>1293</i>&nbsp;            }
+<b class="nc"><i>1294</i>&nbsp;            this.numberType = NumberType.NT_HEX;</b>
+<i>1295</i>&nbsp;            // We don&#39;t need to append the char because we&#39;re going to wipe
+<i>1296</i>&nbsp;            // the value anyway to accumulate just the hex digits.
+<b class="nc"><i>1297</i>&nbsp;            return scanHexNumber();</b>
+<i>1298</i>&nbsp;        case &#39;.&#39;:
+<i>1299</i>&nbsp;        case &#39;d&#39;:
+<i>1300</i>&nbsp;        case &#39;D&#39;:
+<b class="nc"><i>1301</i>&nbsp;            t = Type.constDecimal;</b>
+<b class="nc"><i>1302</i>&nbsp;            this.numberType = NumberType.NT_DECIMAL;</b>
+<b class="nc"><i>1303</i>&nbsp;            value.append((char)c);</b>
+<b class="nc"><i>1304</i>&nbsp;            break;</b>
+<i>1305</i>&nbsp;        case &#39;e&#39;:
+<i>1306</i>&nbsp;        case &#39;E&#39;:
+<b class="nc"><i>1307</i>&nbsp;            t = Type.constFloat;</b>
+<b class="nc"><i>1308</i>&nbsp;            this.numberType = NumberType.NT_FLOAT;</b>
+<b class="nc"><i>1309</i>&nbsp;            value.append((char)c);</b>
+<b class="nc"><i>1310</i>&nbsp;            break;</b>
+<i>1311</i>&nbsp;        default:
+<b class="nc"><i>1312</i>&nbsp;            if (!isDigit(c, 10)) {</b>
+<b class="nc"><i>1313</i>&nbsp;                checkAndUnreadNumericStopper(c);</b>
+<b class="nc"><i>1314</i>&nbsp;                if (isZero &amp;&amp; NumberType.NT_NEGINT.equals(this.numberType)) {</b>
+<b class="nc"><i>1315</i>&nbsp;                    t = Type.constPosInt;</b>
+<b class="nc"><i>1316</i>&nbsp;                    this.numberType = NumberType.NT_POSINT;</b>
+<i>1317</i>&nbsp;                }
+<b class="nc"><i>1318</i>&nbsp;                return t;</b>
+<i>1319</i>&nbsp;            }
+<b class="nc"><i>1320</i>&nbsp;            value.append((char)c);</b>
+<b class="nc"><i>1321</i>&nbsp;            isZero &amp;= (c == &#39;0&#39;);</b>
+<i>1322</i>&nbsp;            break;
+<i>1323</i>&nbsp;        }
+<i>1324</i>&nbsp;
+<i>1325</i>&nbsp;        // see if see can continue find leading digits
+<b class="nc"><i>1326</i>&nbsp;        if (NumberType.NT_NEGINT.equals(numberType)</b>
+<b class="nc"><i>1327</i>&nbsp;         || NumberType.NT_POSINT.equals(numberType)</b>
+<i>1328</i>&nbsp;        ) {
+<i>1329</i>&nbsp;            // We&#39;ve now scanned at least two digits.
+<i>1330</i>&nbsp;            // read in the remaining whole number digits
+<i>1331</i>&nbsp;            for (;;) {
+<b class="nc"><i>1332</i>&nbsp;                c = this.read();</b>
+<b class="nc"><i>1333</i>&nbsp;                if (!isDigit(c, 10)) break;</b>
+<b class="nc"><i>1334</i>&nbsp;                value.append((char)c);</b>
+<b class="nc"><i>1335</i>&nbsp;                isZero &amp;= (c == &#39;0&#39;);</b>
+<i>1336</i>&nbsp;            }
+<i>1337</i>&nbsp;
+<i>1338</i>&nbsp;            // and see what we ran aground on ..
+<b class="nc"><i>1339</i>&nbsp;            switch (c) {</b>
+<i>1340</i>&nbsp;            case &#39;.&#39;:
+<i>1341</i>&nbsp;            case &#39;d&#39;:
+<i>1342</i>&nbsp;            case &#39;D&#39;:
+<b class="nc"><i>1343</i>&nbsp;                if (leadingZero) {</b>
+<b class="nc"><i>1344</i>&nbsp;                    throw new IonException(position() + &quot;: Invalid leading zero on numeric&quot;);</b>
+<i>1345</i>&nbsp;                }
+<b class="nc"><i>1346</i>&nbsp;                t = Type.constDecimal;</b>
+<b class="nc"><i>1347</i>&nbsp;                this.numberType = NumberType.NT_DECIMAL;</b>
+<b class="nc"><i>1348</i>&nbsp;                value.append((char)c);</b>
+<b class="nc"><i>1349</i>&nbsp;                break;</b>
+<i>1350</i>&nbsp;            case &#39;e&#39;:
+<i>1351</i>&nbsp;            case &#39;E&#39;:
+<b class="nc"><i>1352</i>&nbsp;                if (leadingZero) {</b>
+<b class="nc"><i>1353</i>&nbsp;                    throw new IonException(position() + &quot;: Invalid leading zero on numeric&quot;);</b>
+<i>1354</i>&nbsp;                }
+<b class="nc"><i>1355</i>&nbsp;                t = Type.constFloat;</b>
+<b class="nc"><i>1356</i>&nbsp;                this.numberType = NumberType.NT_FLOAT;</b>
+<b class="nc"><i>1357</i>&nbsp;                value.append((char)c);</b>
+<b class="nc"><i>1358</i>&nbsp;                break;</b>
+<i>1359</i>&nbsp;            case &#39;T&#39;:  // same as &#39;-&#39; it&#39;s a timestamp
+<i>1360</i>&nbsp;            case &#39;-&#39;:
+<b class="nc"><i>1361</i>&nbsp;                if (NumberType.NT_POSINT.equals(this.numberType) &amp;&amp; !explicitPlusSign) {</b>
+<b class="nc"><i>1362</i>&nbsp;                    return scanTimestamp(c);</b>
+<i>1363</i>&nbsp;                }
+<i>1364</i>&nbsp;                // otherwise fall through to &quot;all other&quot; processing
+<i>1365</i>&nbsp;            default:
+<i>1366</i>&nbsp;                // Hit the end of our integer.  Make sure its a valid stopper.
+<b class="nc"><i>1367</i>&nbsp;                checkAndUnreadNumericStopper(c);</b>
+<i>1368</i>&nbsp;
+<b class="nc"><i>1369</i>&nbsp;                if (leadingZero &amp;&amp; !isZero) {</b>
+<b class="nc"><i>1370</i>&nbsp;                    throw new IonException(position() + &quot;: Invalid leading zero on numeric&quot;);</b>
+<i>1371</i>&nbsp;                }
+<b class="nc"><i>1372</i>&nbsp;                if (isZero &amp;&amp; NumberType.NT_NEGINT.equals(this.numberType)) {</b>
+<b class="nc"><i>1373</i>&nbsp;                    t = Type.constPosInt;</b>
+<b class="nc"><i>1374</i>&nbsp;                    this.numberType = NumberType.NT_POSINT;</b>
+<i>1375</i>&nbsp;                }
+<b class="nc"><i>1376</i>&nbsp;                return t;</b>
+<i>1377</i>&nbsp;            }
+<i>1378</i>&nbsp;        }
+<i>1379</i>&nbsp;
+<i>1380</i>&nbsp;        // now we must have just decimal or float
+<i>1381</i>&nbsp;        // if it&#39;s decimal we ended on a DOT, so get the trailing
+<i>1382</i>&nbsp;        // (fractional) digits
+<b class="nc"><i>1383</i>&nbsp;        if (NumberType.NT_DECIMAL.equals(this.numberType)) {</b>
+<i>1384</i>&nbsp;            for (;;) {
+<b class="nc"><i>1385</i>&nbsp;                c = this.read();</b>
+<b class="nc"><i>1386</i>&nbsp;                if (!isDigit(c, 10)) break;</b>
+<b class="nc"><i>1387</i>&nbsp;                value.append((char)c);</b>
+<i>1388</i>&nbsp;            }
+<i>1389</i>&nbsp;            // and see what we ran aground on this time..
+<b class="nc"><i>1390</i>&nbsp;            switch (c) {</b>
+<i>1391</i>&nbsp;            case &#39;-&#39;:
+<i>1392</i>&nbsp;            case &#39;+&#39;:
+<i>1393</i>&nbsp;                // We&#39;ll handle exponent below.
+<b class="nc"><i>1394</i>&nbsp;                this.unread(c);</b>
+<b class="nc"><i>1395</i>&nbsp;                break;</b>
+<i>1396</i>&nbsp;            case &#39;e&#39;:
+<i>1397</i>&nbsp;            case &#39;E&#39;:
+<i>1398</i>&nbsp;                // this is the only viable option now
+<b class="nc"><i>1399</i>&nbsp;                t = Type.constFloat;</b>
+<b class="nc"><i>1400</i>&nbsp;                this.numberType = NumberType.NT_FLOAT;</b>
+<b class="nc"><i>1401</i>&nbsp;                value.append((char)c);</b>
+<b class="nc"><i>1402</i>&nbsp;                break;</b>
+<i>1403</i>&nbsp;            case &#39;d&#39;:
+<i>1404</i>&nbsp;            case &#39;D&#39;:
+<i>1405</i>&nbsp;                // this is the only viable option now
+<b class="nc"><i>1406</i>&nbsp;                assert t == Type.constDecimal;</b>
+<b class="nc"><i>1407</i>&nbsp;                assert NumberType.NT_DECIMAL.equals(this.numberType);</b>
+<b class="nc"><i>1408</i>&nbsp;                value.append((char)c);</b>
+<b class="nc"><i>1409</i>&nbsp;                break;</b>
+<i>1410</i>&nbsp;            default:
+<b class="nc"><i>1411</i>&nbsp;                checkAndUnreadNumericStopper(c);</b>
+<b class="nc"><i>1412</i>&nbsp;                return t;</b>
+<i>1413</i>&nbsp;            }
+<i>1414</i>&nbsp;        }
+<i>1415</i>&nbsp;
+<i>1416</i>&nbsp;        // now we have the exponent part to read
+<i>1417</i>&nbsp;        // reading the first character of the exponent, it can be
+<i>1418</i>&nbsp;        // a sign character or a digit (this is the only place
+<i>1419</i>&nbsp;        // the sign is valid) and we&#39;re for sure a float at this point
+<b class="nc"><i>1420</i>&nbsp;        switch ((c = this.read())) {</b>
+<i>1421</i>&nbsp;        case &#39;-&#39;:
+<b class="nc"><i>1422</i>&nbsp;            value.append((char)c);</b>
+<b class="nc"><i>1423</i>&nbsp;            break;</b>
+<i>1424</i>&nbsp;        case &#39;+&#39;:
+<i>1425</i>&nbsp;            // we eat the plus sign
+<b class="nc"><i>1426</i>&nbsp;            break;</b>
+<i>1427</i>&nbsp;        default:
+<b class="nc"><i>1428</i>&nbsp;            if (!isDigit(c, 10)) {</b>
+<i>1429</i>&nbsp;                // this they said &#39;e&#39; then they better put something valid after it!
+<b class="nc"><i>1430</i>&nbsp;                throw new IonException(&quot;badly formed number encountered at &quot; + position());</b>
+<i>1431</i>&nbsp;            }
+<b class="nc"><i>1432</i>&nbsp;            this.unread(c);</b>
+<i>1433</i>&nbsp;            // we&#39;ll re-read this in just a bit, but we had to check
+<i>1434</i>&nbsp;            break;
+<i>1435</i>&nbsp;        }
+<i>1436</i>&nbsp;
+<i>1437</i>&nbsp;        // read in the remaining whole number digits and then quit
+<i>1438</i>&nbsp;        for (;;) {
+<b class="nc"><i>1439</i>&nbsp;            c = this.read();</b>
+<b class="nc"><i>1440</i>&nbsp;            if (!isDigit(c, 10)) break;</b>
+<b class="nc"><i>1441</i>&nbsp;            value.append((char)c);</b>
+<i>1442</i>&nbsp;        }
+<i>1443</i>&nbsp;
+<b class="nc"><i>1444</i>&nbsp;        checkAndUnreadNumericStopper(c);</b>
+<i>1445</i>&nbsp;
+<b class="nc"><i>1446</i>&nbsp;        return t;</b>
+<i>1447</i>&nbsp;    }
+<i>1448</i>&nbsp;
+<i>1449</i>&nbsp;    Type scanHexNumber() throws IOException
+<i>1450</i>&nbsp;    {
+<b class="nc"><i>1451</i>&nbsp;        boolean anydigits = false;</b>
+<i>1452</i>&nbsp;        int c;
+<i>1453</i>&nbsp;
+<b class="nc"><i>1454</i>&nbsp;        boolean isZero = true;</b>
+<i>1455</i>&nbsp;
+<i>1456</i>&nbsp;        // Leave the 0x in the buffer since we&#39;ll need it to parse the content.
+<i>1457</i>&nbsp;        // first get clear out our string buffer, we&#39;re starting over
+<b class="nc"><i>1458</i>&nbsp;        value.setLength(0);  // resetValue() wipes out too much</b>
+<i>1459</i>&nbsp;
+<i>1460</i>&nbsp;        // read in the remaining whole number digits and then quit
+<i>1461</i>&nbsp;        for (;;) {
+<b class="nc"><i>1462</i>&nbsp;            c = this.read();</b>
+<b class="nc"><i>1463</i>&nbsp;            if (!isDigit(c, 16)) break;</b>
+<b class="nc"><i>1464</i>&nbsp;            anydigits = true;</b>
+<b class="nc"><i>1465</i>&nbsp;            isZero &amp;= (c == &#39;0&#39;);</b>
+<b class="nc"><i>1466</i>&nbsp;            value.append((char)c);</b>
+<i>1467</i>&nbsp;        }
+<b class="nc"><i>1468</i>&nbsp;        if (!anydigits) {</b>
+<b class="nc"><i>1469</i>&nbsp;            throw new IonException(&quot;badly formed hexadecimal number encountered at &quot; + position());</b>
+<i>1470</i>&nbsp;        }
+<i>1471</i>&nbsp;
+<b class="nc"><i>1472</i>&nbsp;        checkAndUnreadNumericStopper(c);</b>
+<b class="nc"><i>1473</i>&nbsp;        if (isZero &amp;&amp; t == Type.constNegInt) {</b>
+<b class="nc"><i>1474</i>&nbsp;            t = Type.constPosInt;</b>
+<i>1475</i>&nbsp;        }
+<i>1476</i>&nbsp;
+<i>1477</i>&nbsp;        // as long as we saw any digit, we&#39;re good
+<b class="nc"><i>1478</i>&nbsp;        return t;</b>
+<i>1479</i>&nbsp;    }
+<i>1480</i>&nbsp;
+<i>1481</i>&nbsp;    /**
+<i>1482</i>&nbsp;     * Scans a timestamp after reading &lt;code&gt;yyyy-&lt;/code&gt;.
+<i>1483</i>&nbsp;     *
+<i>1484</i>&nbsp;     * We can be a little lenient here since the result will be reparsed and
+<i>1485</i>&nbsp;     * validated more thoroughly by {@link Timestamp#valueOf(CharSequence)}.
+<i>1486</i>&nbsp;     *
+<i>1487</i>&nbsp;     * @param c the last character scanned; must be &lt;code&gt;&#39;-&#39;&lt;/code&gt;.
+<i>1488</i>&nbsp;     * @return {@link Type#constTime}
+<i>1489</i>&nbsp;     */
+<i>1490</i>&nbsp;    Type scanTimestamp(int c) throws IOException {
+<i>1491</i>&nbsp;
+<i>1492</i>&nbsp;endofdate:
+<i>1493</i>&nbsp;        for (;;) {  // fake for loop to create a label we can jump out of,
+<i>1494</i>&nbsp;                    // because 4 or 5 levels of nested if&#39;s is just ugly
+<i>1495</i>&nbsp;
+<i>1496</i>&nbsp;            // at this point we will have read leading digits and exactly 1 dash
+<i>1497</i>&nbsp;            // in other words, we&#39;ll have read the year
+<b class="nc"><i>1498</i>&nbsp;            if (c == &#39;T&#39;) {</b>
+<i>1499</i>&nbsp;                // yearT is a valid timestamp value
+<b class="nc"><i>1500</i>&nbsp;                value.append((char)c);</b>
+<b class="nc"><i>1501</i>&nbsp;                c = this.read(); // because we&#39;ll unread it before we return</b>
+<b class="nc"><i>1502</i>&nbsp;                break endofdate;</b>
+<i>1503</i>&nbsp;            }
+<b class="nc"><i>1504</i>&nbsp;            if (c != &#39;-&#39;) {</b>
+<i>1505</i>&nbsp;                // not a dash or a T after the year - so this is a bad value
+<b class="nc"><i>1506</i>&nbsp;                throw new IllegalStateException(&quot;invalid timestamp, expecting a dash here at &quot; + this.position());</b>
+<i>1507</i>&nbsp;            }
+<i>1508</i>&nbsp;
+<i>1509</i>&nbsp;            // append the dash and then read the month field
+<b class="nc"><i>1510</i>&nbsp;            value.append((char)c); // so append it, because we haven&#39;t already</b>
+<b class="nc"><i>1511</i>&nbsp;            c = readDigits(2, &quot;month&quot;);</b>
+<b class="nc"><i>1512</i>&nbsp;            if (c == &#39;T&#39;) {</b>
+<i>1513</i>&nbsp;                // year-monthT is a valid timestamp value
+<b class="nc"><i>1514</i>&nbsp;                value.append((char)c);</b>
+<b class="nc"><i>1515</i>&nbsp;                c = this.read(); // because we&#39;ll unread it before we return</b>
+<b class="nc"><i>1516</i>&nbsp;                break endofdate;</b>
+<i>1517</i>&nbsp;            }
+<b class="nc"><i>1518</i>&nbsp;            if (c != &#39;-&#39;) {</b>
+<i>1519</i>&nbsp;                // if the month isn&#39;t followed by a dash or a T it&#39;s an invalid month
+<b class="nc"><i>1520</i>&nbsp;                throw new IonException(&quot;invalid timestamp, expecting month at &quot; + this.position());</b>
+<i>1521</i>&nbsp;            }
+<i>1522</i>&nbsp;
+<i>1523</i>&nbsp;            // append the dash and read the day (or day-of-month) field
+<b class="nc"><i>1524</i>&nbsp;            value.append((char)c);</b>
+<b class="nc"><i>1525</i>&nbsp;            c = readDigits(2, &quot;day of month&quot;);</b>
+<b class="nc"><i>1526</i>&nbsp;            if (c == &#39;T&#39;) {</b>
+<i>1527</i>&nbsp;
+<i>1528</i>&nbsp;check4timezone:
+<i>1529</i>&nbsp;                for (;;) { // another fake label/ for=goto
+<i>1530</i>&nbsp;
+<i>1531</i>&nbsp;                    // attach the &#39;T&#39; to the value we&#39;re collecting
+<b class="nc"><i>1532</i>&nbsp;                    value.append((char)c);</b>
+<i>1533</i>&nbsp;
+<i>1534</i>&nbsp;                    // we&#39;re going to &quot;watch&quot; how many digits we read in the hours
+<i>1535</i>&nbsp;                    // field.  It&#39;s 0 that&#39;s actually ok, since we can end at the
+<i>1536</i>&nbsp;                    // &#39;T&#39; we just read
+<b class="nc"><i>1537</i>&nbsp;                    int length_before_reading_hours = value.length();</b>
+<i>1538</i>&nbsp;                    // so read the hours
+<b class="nc"><i>1539</i>&nbsp;                    c = readDigits(2, &quot;hours&quot;);</b>
+<b class="nc"><i>1540</i>&nbsp;                    if (length_before_reading_hours == value.length()) {</b>
+<i>1541</i>&nbsp;                        // FIXME I don&#39;t think there should be a timezone here
+<b class="nc"><i>1542</i>&nbsp;                        break check4timezone;</b>
+<i>1543</i>&nbsp;                    }
+<b class="nc"><i>1544</i>&nbsp;                    if (c != &#39;:&#39;) {</b>
+<b class="nc"><i>1545</i>&nbsp;                        throw new IonException(&quot;invalid timestamp, expecting hours at &quot; + this.position());</b>
+<i>1546</i>&nbsp;                    }
+<b class="nc"><i>1547</i>&nbsp;                    value.append((char)c);</b>
+<i>1548</i>&nbsp;                    // so read the minutes
+<b class="nc"><i>1549</i>&nbsp;                    c = readDigits(2, &quot;minutes&quot;);</b>
+<b class="nc"><i>1550</i>&nbsp;                    if (c != &#39;:&#39;) {</b>
+<b class="nc"><i>1551</i>&nbsp;                        if (c == &#39;-&#39; || c == &#39;+&#39; || c == &#39;Z&#39;) {</b>
+<b class="nc"><i>1552</i>&nbsp;                            break check4timezone;</b>
+<i>1553</i>&nbsp;                        }
+<i>1554</i>&nbsp;                        break endofdate;
+<i>1555</i>&nbsp;                    }
+<b class="nc"><i>1556</i>&nbsp;                    value.append((char)c);</b>
+<i>1557</i>&nbsp;                    // so read the seconds
+<b class="nc"><i>1558</i>&nbsp;                    c = readDigits(2, &quot;seconds&quot;);</b>
+<b class="nc"><i>1559</i>&nbsp;                    if (c != &#39;.&#39;) {</b>
+<b class="nc"><i>1560</i>&nbsp;                        if (c == &#39;-&#39; || c == &#39;+&#39; || c == &#39;Z&#39;) {</b>
+<b class="nc"><i>1561</i>&nbsp;                            break check4timezone;</b>
+<i>1562</i>&nbsp;                        }
+<i>1563</i>&nbsp;                        break endofdate;
+<i>1564</i>&nbsp;                    }
+<b class="nc"><i>1565</i>&nbsp;                    value.append((char)c);</b>
+<i>1566</i>&nbsp;                    // so read the fractional seconds
+<b class="nc"><i>1567</i>&nbsp;                    c = readDigits(32, &quot;fractional seconds&quot;);</b>
+<b class="nc"><i>1568</i>&nbsp;                    break check4timezone;</b>
+<i>1569</i>&nbsp;                }//check4timezone
+<i>1570</i>&nbsp;
+<i>1571</i>&nbsp;                // now check to see if it&#39;s a timezone offset we&#39;re looking at
+<b class="nc"><i>1572</i>&nbsp;                if (c == &#39;-&#39; || c == &#39;+&#39;) {</b>
+<b class="nc"><i>1573</i>&nbsp;                    value.append((char)c);</b>
+<i>1574</i>&nbsp;                    // so read the timezone offset
+<b class="nc"><i>1575</i>&nbsp;                    c = readDigits(2, &quot;timezone offset&quot;);</b>
+<b class="nc"><i>1576</i>&nbsp;                    if (c != &#39;:&#39;) break endofdate;</b>
+<b class="nc"><i>1577</i>&nbsp;                    value.append((char)c);</b>
+<b class="nc"><i>1578</i>&nbsp;                    c = readDigits(2, &quot;timezone offset&quot;);</b>
+<i>1579</i>&nbsp;                }
+<b class="nc"><i>1580</i>&nbsp;                else if (c == &#39;Z&#39;) {</b>
+<b class="nc"><i>1581</i>&nbsp;                    value.append((char)c);</b>
+<b class="nc"><i>1582</i>&nbsp;                    c = this.read(); // because we&#39;ll unread it before we return</b>
+<i>1583</i>&nbsp;                }
+<i>1584</i>&nbsp;            }
+<i>1585</i>&nbsp;            break endofdate;
+<i>1586</i>&nbsp;        }//endofdate
+<i>1587</i>&nbsp;
+<b class="nc"><i>1588</i>&nbsp;        checkAndUnreadNumericStopper(c);</b>
+<i>1589</i>&nbsp;
+<b class="nc"><i>1590</i>&nbsp;        return Type.constTime;</b>
+<i>1591</i>&nbsp;    }
+<i>1592</i>&nbsp;
+<i>1593</i>&nbsp;    int readDigits(int limit, String field) throws IOException {
+<b class="nc"><i>1594</i>&nbsp;        int c, len = 0;</b>
+<i>1595</i>&nbsp;        // read in the remaining whole number digits and then quit
+<i>1596</i>&nbsp;        for (;;) {
+<b class="nc"><i>1597</i>&nbsp;            c = this.read();</b>
+<b class="nc"><i>1598</i>&nbsp;            if (!isDigit(c, 10)) break;</b>
+<b class="nc"><i>1599</i>&nbsp;            len++;</b>
+<b class="nc"><i>1600</i>&nbsp;            if (len &gt; limit) {</b>
+<b class="nc"><i>1601</i>&nbsp;                throw new IonException(&quot;invalid format &quot; + field + &quot; too long at &quot; + this.position());</b>
+<i>1602</i>&nbsp;            }
+<b class="nc"><i>1603</i>&nbsp;            value.append((char)c);</b>
+<i>1604</i>&nbsp;        }
+<b class="nc"><i>1605</i>&nbsp;        return c;</b>
+<i>1606</i>&nbsp;    }
+<i>1607</i>&nbsp;
+<i>1608</i>&nbsp;    public boolean makeValidNumeric(Type castto) throws IOException {
+<b class="nc"><i>1609</i>&nbsp;        String  s = getValueString(false);</b>
+<i>1610</i>&nbsp;
+<i>1611</i>&nbsp;        try
+<i>1612</i>&nbsp;        {
+<b class="nc"><i>1613</i>&nbsp;            this.t = castto.setNumericValue(this, s);</b>
+<i>1614</i>&nbsp;        }
+<b class="nc"><i>1615</i>&nbsp;        catch (NumberFormatException e)</b>
+<i>1616</i>&nbsp;        {
+<b class="nc"><i>1617</i>&nbsp;            throw new IonException(this.position() + &quot;: invalid numeric value &quot; + s, e);</b>
+<b class="nc"><i>1618</i>&nbsp;        }</b>
+<i>1619</i>&nbsp;
+<b class="nc"><i>1620</i>&nbsp;        return this.t.isNumeric();</b>
+<i>1621</i>&nbsp;    }
+<i>1622</i>&nbsp;
+<i>1623</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

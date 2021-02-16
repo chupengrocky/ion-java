@@ -1,0 +1,2004 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: BlockedBuffer</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: BlockedBuffer (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BlockedBuffer</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (28/ 35)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76.5%
+  </span>
+  <span class="absValue">
+    (342/ 447)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">BlockedBuffer$bbBlock</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (10/ 12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    78.6%
+  </span>
+  <span class="absValue">
+    (22/ 28)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">BlockedBuffer$BlockedBufferException</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 5)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">BlockedBuffer$BlockedByteInputStream</td>
+<td class="coverageStat">
+  <span class="percent">
+    55.6%
+  </span>
+  <span class="absValue">
+    (10/ 18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    45.5%
+  </span>
+  <span class="absValue">
+    (61/ 134)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">BlockedBuffer$BlockedByteOutputStream</td>
+<td class="coverageStat">
+  <span class="percent">
+    57.7%
+  </span>
+  <span class="absValue">
+    (15/ 26)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    54%
+  </span>
+  <span class="absValue">
+    (88/ 163)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">BlockedBuffer$BufferedOutputStream</td>
+<td class="coverageStat">
+  <span class="percent">
+    88.9%
+  </span>
+  <span class="absValue">
+    (8/ 9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84.6%
+  </span>
+  <span class="absValue">
+    (33/ 39)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">BlockedBuffer$CompareMonitor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/ 4)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">BlockedBuffer$Monitor</td>
+  </tr>
+  <tr>
+    <td class="name">BlockedBuffer$PositionMonitor</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (2/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (2/ 4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    68.8%
+  </span>
+  <span class="absValue">
+    (77/ 112)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    67%
+  </span>
+  <span class="absValue">
+    (552/ 824)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;
+<i>2</i>&nbsp;/*
+<i>3</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>4</i>&nbsp; *
+<i>5</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>6</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>7</i>&nbsp; * A copy of the License is located at
+<i>8</i>&nbsp; *
+<i>9</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>10</i>&nbsp; *
+<i>11</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>12</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>13</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>14</i>&nbsp; * permissions and limitations under the License.
+<i>15</i>&nbsp; */
+<i>16</i>&nbsp;
+<i>17</i>&nbsp;package com.amazon.ion.impl;
+<i>18</i>&nbsp;import com.amazon.ion.IonException;
+<i>19</i>&nbsp;import java.io.ByteArrayOutputStream;
+<i>20</i>&nbsp;import java.io.IOException;
+<i>21</i>&nbsp;import java.io.InputStream;
+<i>22</i>&nbsp;import java.io.OutputStream;
+<i>23</i>&nbsp;import java.util.ArrayList;
+<i>24</i>&nbsp;import java.util.Comparator;
+<i>25</i>&nbsp;import java.util.SortedSet;
+<i>26</i>&nbsp;import java.util.TreeSet;
+<i>27</i>&nbsp;/**
+<i>28</i>&nbsp; * This implements a blocked byte buffer and both an input and output stream
+<i>29</i>&nbsp; * that operates over it. It is designed to be able to be randomly accessed.
+<i>30</i>&nbsp; * The output steam supports both inserting data (with &quot;stretching&quot;) in the
+<i>31</i>&nbsp; * middle of the stream and over-write.  The output steam also supports remove
+<i>32</i>&nbsp; * which shrinks the overall data buffer. The underlying buffer is backed by
+<i>33</i>&nbsp; * one or more byte arrays to minimize data movement.
+<i>34</i>&nbsp; * &lt;p&gt;
+<i>35</i>&nbsp; * It is also meant to be reused, so that it does not have to pressure the
+<i>36</i>&nbsp; * GC, if that is desirable.
+<i>37</i>&nbsp; */
+<b class="fc"><i>38</i>&nbsp;final class BlockedBuffer</b>
+<i>39</i>&nbsp;{
+<i>40</i>&nbsp;    ///////////////////////////////////////////////////////////////////////////////
+<i>41</i>&nbsp;    //
+<i>42</i>&nbsp;    // updatable, insertable, and possibly fragmented byte buffer
+<i>43</i>&nbsp;    //
+<i>44</i>&nbsp;    // these manage the set of memory (byte) buffers
+<i>45</i>&nbsp;    ArrayList&lt;bbBlock&gt;  _blocks;
+<i>46</i>&nbsp;    int                 _next_block_position;   // next position in _blocks for active block, may be less than _blocks.size()
+<i>47</i>&nbsp;    int                 _lastCapacity;          // used to allocate new blocks
+<i>48</i>&nbsp;    int                 _buf_limit;             // high water mark of _position
+<i>49</i>&nbsp;    int                 _version;
+<i>50</i>&nbsp;    int                 _mutation_version;
+<i>51</i>&nbsp;    Object              _mutator;
+<i>52</i>&nbsp;// BUGBUG - this is just a test, it shouldn&#39;t be in checked in code
+<i>53</i>&nbsp;static final boolean test_with_no_version_checking = false;
+<i>54</i>&nbsp;    void start_mutate(Object caller, int version) {
+<i>55</i>&nbsp;        if (test_with_no_version_checking) return;
+<b class="fc"><i>56</i>&nbsp;        if (_mutation_version != 0 || _mutator != null)</b>
+<b class="nc"><i>57</i>&nbsp;            throw new BlockedBufferException(&quot;lock conflict&quot;);</b>
+<b class="fc"><i>58</i>&nbsp;        if (version != _version)</b>
+<b class="nc"><i>59</i>&nbsp;            throw new BlockedBufferException(&quot;version conflict on update&quot;);</b>
+<b class="fc"><i>60</i>&nbsp;        _mutator = caller;</b>
+<b class="fc"><i>61</i>&nbsp;        _mutation_version = version;</b>
+<b class="fc"><i>62</i>&nbsp;    }</b>
+<i>63</i>&nbsp;    int end_mutate(Object caller) {
+<i>64</i>&nbsp;        if (test_with_no_version_checking) return _version;
+<b class="fc"><i>65</i>&nbsp;        if (_version != _mutation_version)</b>
+<b class="nc"><i>66</i>&nbsp;            throw new BlockedBufferException(&quot;version mismatch failure&quot;);</b>
+<b class="fc"><i>67</i>&nbsp;        if (caller != _mutator)</b>
+<b class="nc"><i>68</i>&nbsp;            throw new BlockedBufferException(&quot;caller mismatch failure&quot;);</b>
+<b class="fc"><i>69</i>&nbsp;        _version = _mutation_version + 1;</b>
+<b class="fc"><i>70</i>&nbsp;        _mutation_version = 0;</b>
+<b class="fc"><i>71</i>&nbsp;        _mutator = null;</b>
+<b class="fc"><i>72</i>&nbsp;        return _version;</b>
+<i>73</i>&nbsp;    }
+<i>74</i>&nbsp;    boolean mutation_in_progress(Object caller, int version) {
+<i>75</i>&nbsp;        if (test_with_no_version_checking) return false;
+<b class="fc"><i>76</i>&nbsp;        if (_mutation_version != version)</b>
+<b class="nc"><i>77</i>&nbsp;            throw new BlockedBufferException(&quot;unexpected update lock conflict&quot;);</b>
+<b class="fc"><i>78</i>&nbsp;        if (caller != _mutator)</b>
+<b class="nc"><i>79</i>&nbsp;            throw new BlockedBufferException(&quot;caller mismatch failure&quot;);</b>
+<b class="fc"><i>80</i>&nbsp;        return true;</b>
+<i>81</i>&nbsp;    }
+<i>82</i>&nbsp;    int getVersion() {
+<b class="fc"><i>83</i>&nbsp;        return _version;</b>
+<i>84</i>&nbsp;    }
+<b class="fc"><i>85</i>&nbsp;    static boolean debugValidation = false;</b>
+<i>86</i>&nbsp;    static int _defaultBlockSizeMin;
+<i>87</i>&nbsp;    static int _defaultBlockSizeUpperLimit;
+<i>88</i>&nbsp;    static {
+<b class="fc"><i>89</i>&nbsp;        resetParameters();</b>
+<b class="fc"><i>90</i>&nbsp;    }</b>
+<i>91</i>&nbsp;    public static void resetParameters() {
+<b class="fc"><i>92</i>&nbsp;        debugValidation = false;</b>
+<b class="fc"><i>93</i>&nbsp;        _defaultBlockSizeMin = 4096 * 8;</b>
+<b class="fc"><i>94</i>&nbsp;        _defaultBlockSizeUpperLimit = 4096 * 8;</b>
+<b class="fc"><i>95</i>&nbsp;    }</b>
+<b class="fc"><i>96</i>&nbsp;    public int _blockSizeMin = _defaultBlockSizeMin;</b>
+<b class="fc"><i>97</i>&nbsp;    public int _blockSizeUpperLimit = _defaultBlockSizeUpperLimit;</b>
+<i>98</i>&nbsp;    static void setBlockSizeParameters(int min, int max,
+<i>99</i>&nbsp;                                              boolean intenseValidation) {
+<b class="nc"><i>100</i>&nbsp;        debugValidation = intenseValidation;</b>
+<b class="nc"><i>101</i>&nbsp;        setBlockSizeParameters(min, max);</b>
+<b class="nc"><i>102</i>&nbsp;    }</b>
+<i>103</i>&nbsp;    public static void setBlockSizeParameters(int min, int max) {
+<b class="fc"><i>104</i>&nbsp;        if (min &lt; 0 || max &lt; min) {</b>
+<b class="nc"><i>105</i>&nbsp;            throw new IllegalArgumentException();</b>
+<i>106</i>&nbsp;        }
+<b class="fc"><i>107</i>&nbsp;        _defaultBlockSizeMin           = min;</b>
+<b class="fc"><i>108</i>&nbsp;        _defaultBlockSizeUpperLimit    = max;</b>
+<b class="fc"><i>109</i>&nbsp;        return;</b>
+<i>110</i>&nbsp;    }
+<i>111</i>&nbsp;    ///////////////////////////////////////////////////////////////////////////
+<i>112</i>&nbsp;    /**
+<i>113</i>&nbsp;     * Creates a new buffer without preallocating any space.
+<i>114</i>&nbsp;     */
+<b class="fc"><i>115</i>&nbsp;    public BlockedBuffer() {</b>
+<b class="fc"><i>116</i>&nbsp;        start_mutate(this, 0);</b>
+<b class="fc"><i>117</i>&nbsp;        init(0, null);</b>
+<b class="fc"><i>118</i>&nbsp;        end_mutate(this);</b>
+<b class="fc"><i>119</i>&nbsp;    }</b>
+<i>120</i>&nbsp;    /**
+<i>121</i>&nbsp;     * Creates a new buffer, preallocating some initial capacity.
+<i>122</i>&nbsp;     *
+<i>123</i>&nbsp;     * @param initialSize the number of bytes to allocate.
+<i>124</i>&nbsp;     */
+<b class="nc"><i>125</i>&nbsp;    public BlockedBuffer(int initialSize) {</b>
+<b class="nc"><i>126</i>&nbsp;        start_mutate(this, 0);</b>
+<b class="nc"><i>127</i>&nbsp;        init(initialSize, null);</b>
+<b class="nc"><i>128</i>&nbsp;        end_mutate(this);</b>
+<b class="nc"><i>129</i>&nbsp;    }</b>
+<i>130</i>&nbsp;    /**
+<i>131</i>&nbsp;     * Creates a new buffer, assuming ownership of given data.
+<i>132</i>&nbsp;     * &lt;em&gt;This method assumes ownership of the &lt;code&gt;data&lt;/code&gt; array&lt;/em&gt;
+<i>133</i>&nbsp;     * and will modify it at will.
+<i>134</i>&nbsp;     *
+<i>135</i>&nbsp;     * @param data the initial data to be buffered.
+<i>136</i>&nbsp;     *
+<i>137</i>&nbsp;     * @throws NullPointerException if buffer is null.
+<i>138</i>&nbsp;     */
+<b class="nc"><i>139</i>&nbsp;    public BlockedBuffer(byte[] data) {</b>
+<b class="nc"><i>140</i>&nbsp;        start_mutate(this, 0);</b>
+<b class="nc"><i>141</i>&nbsp;        init(0, new bbBlock(data));</b>
+<b class="nc"><i>142</i>&nbsp;        _buf_limit = data.length;</b>
+<b class="nc"><i>143</i>&nbsp;        end_mutate(this);</b>
+<b class="nc"><i>144</i>&nbsp;    }</b>
+<i>145</i>&nbsp;    /**
+<i>146</i>&nbsp;     * Creates a new buffer containing all data remaining on an
+<i>147</i>&nbsp;     * {@link InputStream}.  The stream is closed before returning.
+<i>148</i>&nbsp;     *
+<i>149</i>&nbsp;     * @param data must not be null.
+<i>150</i>&nbsp;     *
+<i>151</i>&nbsp;     * @throws IOException
+<i>152</i>&nbsp;     */
+<i>153</i>&nbsp;    public BlockedBuffer(InputStream data)
+<i>154</i>&nbsp;        throws IOException
+<b class="nc"><i>155</i>&nbsp;    {</b>
+<b class="nc"><i>156</i>&nbsp;        IonBinary.Writer writer = new IonBinary.Writer(this);</b>
+<i>157</i>&nbsp;        try {
+<b class="nc"><i>158</i>&nbsp;            writer.write(data);</b>
+<i>159</i>&nbsp;        }
+<i>160</i>&nbsp;        finally {
+<b class="nc"><i>161</i>&nbsp;            data.close();</b>
+<b class="nc"><i>162</i>&nbsp;        }</b>
+<b class="nc"><i>163</i>&nbsp;    }</b>
+<i>164</i>&nbsp;    /**
+<i>165</i>&nbsp;     * creates a logical copy of the buffer.  This does not preserve
+<i>166</i>&nbsp;     * the position state and is equivalent to constructing a new
+<i>167</i>&nbsp;     * buffer from the old by getting the bytes from the original
+<i>168</i>&nbsp;     * and writing them to a new buffer.
+<i>169</i>&nbsp;     */
+<i>170</i>&nbsp;    @Override
+<i>171</i>&nbsp;    public BlockedBuffer clone()
+<i>172</i>&nbsp;    {
+<b class="nc"><i>173</i>&nbsp;        BlockedBuffer clone = new BlockedBuffer(this._buf_limit);</b>
+<b class="nc"><i>174</i>&nbsp;        int end = this._buf_limit;</b>
+<b class="nc"><i>175</i>&nbsp;        bbBlock dst_block = clone._blocks.get(0);</b>
+<b class="nc"><i>176</i>&nbsp;        int dst_offset = 0;</b>
+<b class="nc"><i>177</i>&nbsp;        int dst_limit = dst_block.blockCapacity();</b>
+<b class="nc"><i>178</i>&nbsp;        for (int ii=0; ii&lt;this._blocks.size(); ii++) {</b>
+<b class="nc"><i>179</i>&nbsp;            bbBlock src_block = this._blocks.get(ii);</b>
+<b class="nc"><i>180</i>&nbsp;            if (src_block._limit &lt; 1) continue; // see if there&#39;s any interesting data in this block</b>
+<b class="nc"><i>181</i>&nbsp;            int src_end = src_block._limit + src_block._offset;</b>
+<b class="nc"><i>182</i>&nbsp;            int to_copy = src_block._limit;</b>
+<b class="nc"><i>183</i>&nbsp;            if (to_copy &gt; dst_limit - dst_offset) {</b>
+<b class="nc"><i>184</i>&nbsp;                to_copy = dst_limit - dst_offset;</b>
+<i>185</i>&nbsp;            }
+<b class="nc"><i>186</i>&nbsp;            System.arraycopy(src_block._buffer, 0, dst_block._buffer, dst_offset, to_copy);</b>
+<b class="nc"><i>187</i>&nbsp;            dst_offset += to_copy;</b>
+<i>188</i>&nbsp;            // the cloned BlockedBuffer should be able to hold all the data
+<i>189</i>&nbsp;            // in it&#39;s single block
+<b class="nc"><i>190</i>&nbsp;            assert dst_offset &lt;= dst_limit;</b>
+<i>191</i>&nbsp;            // see if we&#39;re done (and break out in that case)
+<b class="nc"><i>192</i>&nbsp;            if (src_end &gt;= end) break;</b>
+<i>193</i>&nbsp;        }
+<b class="nc"><i>194</i>&nbsp;        dst_block._limit = dst_offset;</b>
+<b class="nc"><i>195</i>&nbsp;        clone._buf_limit = dst_offset;</b>
+<b class="nc"><i>196</i>&nbsp;        return clone;</b>
+<i>197</i>&nbsp;    }
+<i>198</i>&nbsp;    /**
+<i>199</i>&nbsp;     * Initializes the various members such as the block arraylist
+<i>200</i>&nbsp;     * the initial block and the various values like the block size upper limit.
+<i>201</i>&nbsp;     * @param initialSize or 0
+<i>202</i>&nbsp;     * @param initialBlock or null
+<i>203</i>&nbsp;     * @return bbBlock the initial current block
+<i>204</i>&nbsp;     */
+<i>205</i>&nbsp;    private bbBlock init(int initialSize, bbBlock initialBlock)
+<i>206</i>&nbsp;    {
+<b class="fc"><i>207</i>&nbsp;        this._lastCapacity = BlockedBuffer._defaultBlockSizeMin;</b>
+<b class="fc"><i>208</i>&nbsp;        this._blockSizeUpperLimit = BlockedBuffer._defaultBlockSizeUpperLimit;</b>
+<b class="fc"><i>209</i>&nbsp;        while (this._lastCapacity &lt; initialSize &amp;&amp;</b>
+<i>210</i>&nbsp;               this._lastCapacity &lt; this._blockSizeUpperLimit)
+<i>211</i>&nbsp;        {
+<b class="nc"><i>212</i>&nbsp;            this.nextBlockSize(this, 0);</b>
+<i>213</i>&nbsp;        }
+<b class="fc"><i>214</i>&nbsp;        int count = initialSize / this._lastCapacity;</b>
+<b class="fc"><i>215</i>&nbsp;        if (initialBlock != null) count = 1;</b>
+<b class="fc"><i>216</i>&nbsp;        this._blocks = new ArrayList&lt;bbBlock&gt;(count);</b>
+<b class="fc"><i>217</i>&nbsp;        if (initialBlock == null) {</b>
+<b class="fc"><i>218</i>&nbsp;            initialBlock = new bbBlock(this.nextBlockSize(this, 0));</b>
+<i>219</i>&nbsp;        }
+<b class="fc"><i>220</i>&nbsp;        this._blocks.add(initialBlock);</b>
+<b class="fc"><i>221</i>&nbsp;        this._next_block_position = 1;</b>
+<i>222</i>&nbsp;        // create any preallocated blocks (following _next_block_position)
+<i>223</i>&nbsp;        bbBlock b;
+<b class="fc"><i>224</i>&nbsp;        for (int need = initialSize - initialBlock.blockCapacity()</b>
+<b class="fc"><i>225</i>&nbsp;           ; need &gt; 0</b>
+<b class="nc"><i>226</i>&nbsp;           ; need -= b.blockCapacity()</b>
+<i>227</i>&nbsp;        ) {
+<b class="nc"><i>228</i>&nbsp;            b = new bbBlock(this.nextBlockSize(this, 0));</b>
+<b class="nc"><i>229</i>&nbsp;            b._idx = -1;</b>
+<b class="nc"><i>230</i>&nbsp;            this._blocks.add(b);</b>
+<i>231</i>&nbsp;        }
+<b class="fc"><i>232</i>&nbsp;        return initialBlock;</b>
+<i>233</i>&nbsp;    }
+<i>234</i>&nbsp;    /**
+<i>235</i>&nbsp;     * Gets the number of bytes of content in this buffer.
+<i>236</i>&nbsp;     * This isn&#39;t the same as its capacity.
+<i>237</i>&nbsp;     */
+<i>238</i>&nbsp;    public final int size() {
+<b class="fc"><i>239</i>&nbsp;        return _buf_limit;</b>
+<i>240</i>&nbsp;    }
+<i>241</i>&nbsp;    /**
+<i>242</i>&nbsp;     * empties the entire contents of the buffer
+<i>243</i>&nbsp;     */
+<i>244</i>&nbsp;    private void clear(Object caller, int version) {
+<b class="fc"><i>245</i>&nbsp;        assert mutation_in_progress(caller, version);</b>
+<b class="fc"><i>246</i>&nbsp;        _buf_limit = 0;</b>
+<b class="fc"><i>247</i>&nbsp;        for (int ii=0; ii&lt;_blocks.size(); ii++) {</b>
+<b class="fc"><i>248</i>&nbsp;            _blocks.get(ii).clearBlock();</b>
+<i>249</i>&nbsp;            // _blocks.get(ii)._idx = -1; this is done in clearBlock()
+<i>250</i>&nbsp;        }
+<b class="fc"><i>251</i>&nbsp;        bbBlock first = _blocks.get(0);</b>
+<b class="fc"><i>252</i>&nbsp;        first._idx = 0;                        // cas: 26 dec 2008</b>
+<b class="fc"><i>253</i>&nbsp;        first._offset = 0;</b>
+<b class="fc"><i>254</i>&nbsp;        first._limit = 0;</b>
+<b class="fc"><i>255</i>&nbsp;        _next_block_position = 1;</b>
+<b class="fc"><i>256</i>&nbsp;        return;</b>
+<i>257</i>&nbsp;    }
+<i>258</i>&nbsp;    /**
+<i>259</i>&nbsp;     * treat the limit as the end of file
+<i>260</i>&nbsp;     */
+<i>261</i>&nbsp;    bbBlock truncate(Object caller, int version, int pos) {
+<b class="fc"><i>262</i>&nbsp;        assert mutation_in_progress(caller, version);</b>
+<b class="fc"><i>263</i>&nbsp;        if (0 &gt; pos || pos &gt; this._buf_limit )</b>
+<b class="nc"><i>264</i>&nbsp;            throw new IllegalArgumentException();</b>
+<i>265</i>&nbsp;        // clear out all the blocks in use from the last in use
+<i>266</i>&nbsp;        // to the block where the eof will be located
+<b class="fc"><i>267</i>&nbsp;        bbBlock b = null;</b>
+<b class="fc"><i>268</i>&nbsp;        for (int idx = this._next_block_position - 1; idx &gt;= 0; idx--) {</b>
+<b class="fc"><i>269</i>&nbsp;            b = this._blocks.get(idx);</b>
+<b class="fc"><i>270</i>&nbsp;            if (b._offset &lt;= pos) break;</b>
+<b class="nc"><i>271</i>&nbsp;            b.clearBlock();</b>
+<i>272</i>&nbsp;        }
+<b class="fc"><i>273</i>&nbsp;        if (b == null) {</b>
+<b class="nc"><i>274</i>&nbsp;            throw new IllegalStateException(&quot;block missing at position &quot;+pos);</b>
+<i>275</i>&nbsp;        }
+<i>276</i>&nbsp;        // reset the next block position to account for this.
+<b class="fc"><i>277</i>&nbsp;        this._next_block_position = b._idx + 1;</b>
+<i>278</i>&nbsp;        // on the block where eof is, set it&#39;s limit appropriately
+<b class="fc"><i>279</i>&nbsp;        b._limit = pos - b._offset;</b>
+<i>280</i>&nbsp;        // set the overall buffer limits
+<b class="fc"><i>281</i>&nbsp;        this._buf_limit = pos;</b>
+<b class="fc"><i>282</i>&nbsp;        b = this.findBlockForRead(pos, version, b, pos);</b>
+<b class="fc"><i>283</i>&nbsp;        return b;</b>
+<i>284</i>&nbsp;    }
+<i>285</i>&nbsp;    private bbBlock addBlock(Object caller, int version, int idx, int offset,
+<i>286</i>&nbsp;                             int needed)
+<i>287</i>&nbsp;    {
+<b class="fc"><i>288</i>&nbsp;        assert mutation_in_progress(caller, version);</b>
+<b class="fc"><i>289</i>&nbsp;        bbBlock newblock = null;</b>
+<b class="fc"><i>290</i>&nbsp;        for (int ii=this._next_block_position; ii &lt; this._blocks.size(); ii++)</b>
+<i>291</i>&nbsp;        {
+<b class="fc"><i>292</i>&nbsp;            bbBlock tmpblock = this._blocks.get(this._next_block_position);</b>
+<b class="fc"><i>293</i>&nbsp;            if (tmpblock._buffer.length &gt;= needed) {</b>
+<b class="fc"><i>294</i>&nbsp;                this._blocks.remove(this._next_block_position);</b>
+<b class="fc"><i>295</i>&nbsp;                newblock = tmpblock;</b>
+<b class="fc"><i>296</i>&nbsp;                break;</b>
+<i>297</i>&nbsp;            }
+<i>298</i>&nbsp;        }
+<b class="fc"><i>299</i>&nbsp;        if (newblock == null) {</b>
+<i>300</i>&nbsp;            // if there&#39;s nothing big enough to recycle
+<i>301</i>&nbsp;            // so we have to really make more space
+<b class="fc"><i>302</i>&nbsp;            int bufcapacity = 0;</b>
+<b class="fc"><i>303</i>&nbsp;            if (needed &gt; _blockSizeUpperLimit) {</b>
+<b class="fc"><i>304</i>&nbsp;                bufcapacity = needed;</b>
+<i>305</i>&nbsp;            }
+<i>306</i>&nbsp;            else {
+<b class="fc"><i>307</i>&nbsp;                while (bufcapacity &lt; needed) {</b>
+<b class="fc"><i>308</i>&nbsp;                    bufcapacity = this.nextBlockSize(caller, version);</b>
+<i>309</i>&nbsp;                }
+<i>310</i>&nbsp;            }
+<b class="fc"><i>311</i>&nbsp;            newblock = new bbBlock(bufcapacity);</b>
+<i>312</i>&nbsp;        }
+<i>313</i>&nbsp;        // if the caller didn&#39;t specify an index
+<i>314</i>&nbsp;        // we&#39;ll have to find out where this goes
+<b class="fc"><i>315</i>&nbsp;        if (idx == -1) {</b>
+<b class="nc"><i>316</i>&nbsp;            for (idx = 0; idx &lt; this._next_block_position; idx++) {</b>
+<b class="nc"><i>317</i>&nbsp;                if (this._blocks.get(idx)._offset &lt; 0) {</b>
+<b class="nc"><i>318</i>&nbsp;                    break;</b>
+<i>319</i>&nbsp;                }
+<b class="nc"><i>320</i>&nbsp;                if (offset &gt;= this._blocks.get(idx)._offset) {</b>
+<b class="nc"><i>321</i>&nbsp;                    break;</b>
+<i>322</i>&nbsp;                }
+<i>323</i>&nbsp;            }
+<i>324</i>&nbsp;        }
+<i>325</i>&nbsp;        // initialize the buffer and add it to the list in the right spot
+<b class="fc"><i>326</i>&nbsp;        newblock._idx = idx;</b>
+<b class="fc"><i>327</i>&nbsp;        newblock._offset = offset;</b>
+<b class="fc"><i>328</i>&nbsp;        _blocks.add(idx, newblock);</b>
+<b class="fc"><i>329</i>&nbsp;        _next_block_position++;</b>
+<i>330</i>&nbsp;        // if this isn&#39;t the last buffer, bump the idx of the trailing buffers
+<b class="fc"><i>331</i>&nbsp;        for (int ii = idx + 1; ii &lt; _next_block_position; ii++) {</b>
+<b class="nc"><i>332</i>&nbsp;            this._blocks.get(ii)._idx = ii;</b>
+<i>333</i>&nbsp;        }
+<b class="fc"><i>334</i>&nbsp;        return newblock;</b>
+<i>335</i>&nbsp;    }
+<i>336</i>&nbsp;    private int nextBlockSize(Object caller, int version)
+<i>337</i>&nbsp;    {
+<b class="fc"><i>338</i>&nbsp;        assert mutation_in_progress(caller, version);</b>
+<b class="fc"><i>339</i>&nbsp;        if (_lastCapacity == 0) {</b>
+<b class="nc"><i>340</i>&nbsp;            _lastCapacity = _blockSizeMin;</b>
+<i>341</i>&nbsp;        }
+<b class="fc"><i>342</i>&nbsp;        else if (_lastCapacity &lt; _blockSizeUpperLimit) {</b>
+<b class="fc"><i>343</i>&nbsp;            _lastCapacity *= 2;</b>
+<i>344</i>&nbsp;        }
+<b class="fc"><i>345</i>&nbsp;        return _lastCapacity;</b>
+<i>346</i>&nbsp;    }
+<i>347</i>&nbsp;    // starts with (pos, 0, _next_block_position) so we&#39;re really
+<i>348</i>&nbsp;    // looking in blocks with indices from lo to (hi-1) inclusive
+<i>349</i>&nbsp;    final bbBlock findBlockHelper(int pos, int lo, int hi)
+<i>350</i>&nbsp;    {
+<i>351</i>&nbsp;        bbBlock block;
+<i>352</i>&nbsp;        int     ii;
+<b class="fc"><i>353</i>&nbsp;        if ((hi - lo) &lt;= 3) {</b>
+<b class="fc"><i>354</i>&nbsp;            for (ii=lo; ii&lt;hi; ii++) {</b>
+<b class="fc"><i>355</i>&nbsp;                block = this._blocks.get(ii);</b>
+<b class="fc"><i>356</i>&nbsp;                if (pos &gt; block._offset + block._limit) continue;</b>
+<b class="fc"><i>357</i>&nbsp;                if (block.containsForRead(pos)) {</b>
+<b class="fc"><i>358</i>&nbsp;                    return block;</b>
+<i>359</i>&nbsp;                }
+<b class="fc"><i>360</i>&nbsp;                if (block._offset &gt;= pos) break;</b>
+<i>361</i>&nbsp;            }
+<b class="nc"><i>362</i>&nbsp;            return this._blocks.get(ii - 1);    // this will always be &gt; 0</b>
+<i>363</i>&nbsp;        }
+<b class="fc"><i>364</i>&nbsp;        int mid = (hi + lo) / 2;</b>
+<b class="fc"><i>365</i>&nbsp;        block = this._blocks.get(mid);</b>
+<b class="fc"><i>366</i>&nbsp;        assert block != null;</b>
+<b class="fc"><i>367</i>&nbsp;        if (block._offset &gt; pos) {</b>
+<b class="fc"><i>368</i>&nbsp;            return findBlockHelper(pos, lo, mid);</b>
+<i>369</i>&nbsp;        }
+<b class="fc"><i>370</i>&nbsp;        return findBlockHelper(pos, mid, hi);</b>
+<i>371</i>&nbsp;    }
+<i>372</i>&nbsp;    /**
+<i>373</i>&nbsp;     * find the block where this offset (newPosition) has already
+<i>374</i>&nbsp;     * been written. Typically the caller will set _curr to be the
+<i>375</i>&nbsp;     * returned block.
+<i>376</i>&nbsp;     * @param pos global position to be read from
+<i>377</i>&nbsp;     * @return curr block ready to be read from
+<i>378</i>&nbsp;     */
+<i>379</i>&nbsp;    bbBlock findBlockForRead(Object caller, int version, bbBlock curr, int pos)
+<i>380</i>&nbsp;    {
+<b class="fc"><i>381</i>&nbsp;        assert pos &gt;= 0 &amp;&amp; &quot;buffer positions are never negative&quot;.length() &gt; 0;</b>
+<b class="fc"><i>382</i>&nbsp;        if (pos &gt; this._buf_limit) {</b>
+<b class="nc"><i>383</i>&nbsp;            throw new BlockedBufferException(&quot;invalid position&quot;);</b>
+<i>384</i>&nbsp;        }
+<b class="fc"><i>385</i>&nbsp;        assert _validate();</b>
+<b class="fc"><i>386</i>&nbsp;        if (curr != null) {</b>
+<b class="fc"><i>387</i>&nbsp;            if (curr.containsForRead(pos)) {</b>
+<b class="fc"><i>388</i>&nbsp;                return curr;</b>
+<i>389</i>&nbsp;            }
+<b class="fc"><i>390</i>&nbsp;            if (pos == this._buf_limit &amp;&amp; (pos - curr._offset) == curr._limit) {</b>
+<b class="fc"><i>391</i>&nbsp;                return curr;</b>
+<i>392</i>&nbsp;            }
+<i>393</i>&nbsp;        }
+<b class="fc"><i>394</i>&nbsp;        boolean at_eof = (pos == this._buf_limit);</b>
+<b class="fc"><i>395</i>&nbsp;        if (at_eof) {</b>
+<i>396</i>&nbsp;            // if this is the last block actually in use
+<i>397</i>&nbsp;            // and we&#39;re looking for the eof position then
+<i>398</i>&nbsp;            // we can check for the &quot;last byte not quite
+<i>399</i>&nbsp;            // written yet&quot; case, which is fine
+<b class="fc"><i>400</i>&nbsp;            bbBlock block = this._blocks.get(this._next_block_position - 1);</b>
+<b class="fc"><i>401</i>&nbsp;            if (block.containsForWrite(pos)) return block;</b>
+<b class="nc"><i>402</i>&nbsp;        }</b>
+<i>403</i>&nbsp;        else {
+<b class="fc"><i>404</i>&nbsp;            bbBlock block = this.findBlockHelper(pos, 0, this._next_block_position);</b>
+<b class="fc"><i>405</i>&nbsp;            return block;</b>
+<i>406</i>&nbsp;        }
+<b class="nc"><i>407</i>&nbsp;        throw new BlockedBufferException(&quot;valid position can&#39;t be found!&quot;);</b>
+<i>408</i>&nbsp;    }
+<i>409</i>&nbsp;        /**
+<i>410</i>&nbsp;     * find the block where this offset (newPosition) should be written.
+<i>411</i>&nbsp;     * typicall the caller will set _curr to be the returned block.
+<i>412</i>&nbsp;     * @param pos global position to be written to
+<i>413</i>&nbsp;     * @return curr block ready to be written to
+<i>414</i>&nbsp;     */
+<i>415</i>&nbsp;    bbBlock findBlockForWrite(Object caller, int version, bbBlock curr, int pos)
+<i>416</i>&nbsp;    {
+<b class="fc"><i>417</i>&nbsp;        assert mutation_in_progress(caller, version);</b>
+<b class="fc"><i>418</i>&nbsp;        assert (pos &gt;= 0 &amp;&amp; &quot;invalid position, positions must be &gt;= 0&quot;.length() &gt; 0);</b>
+<b class="fc"><i>419</i>&nbsp;        if (pos &gt; this._buf_limit + 1) {</b>
+<b class="nc"><i>420</i>&nbsp;            throw new BlockedBufferException(&quot;writes must be contiguous&quot;);</b>
+<i>421</i>&nbsp;        }
+<b class="fc"><i>422</i>&nbsp;        assert _validate();</b>
+<b class="fc"><i>423</i>&nbsp;        if (curr != null &amp;&amp; curr.hasRoomToWrite(pos, 1) == true) {</b>
+<b class="fc"><i>424</i>&nbsp;            if (curr._offset + curr._limit == pos &amp;&amp; curr._idx &lt; this._next_block_position) {</b>
+<b class="fc"><i>425</i>&nbsp;                bbBlock b = this._blocks.get(curr._idx + 1);</b>
+<b class="fc"><i>426</i>&nbsp;                if (b.containsForWrite(pos)) {</b>
+<b class="fc"><i>427</i>&nbsp;                    curr = b;</b>
+<i>428</i>&nbsp;                }
+<i>429</i>&nbsp;            }
+<b class="fc"><i>430</i>&nbsp;            return curr;</b>
+<i>431</i>&nbsp;        }
+<i>432</i>&nbsp;        // we&#39;re not going to write into curr, so find out the right block
+<i>433</i>&nbsp;        bbBlock block;
+<b class="fc"><i>434</i>&nbsp;        if (pos == this._buf_limit) {</b>
+<i>435</i>&nbsp;            // if we&#39;re at the limit the only possible (existing) block
+<i>436</i>&nbsp;            // will be the very last block - shortcut to optimize append
+<b class="fc"><i>437</i>&nbsp;            assert this._next_block_position &gt; 0;</b>
+<b class="fc"><i>438</i>&nbsp;            block = this._blocks.get(this._next_block_position - 1);</b>
+<i>439</i>&nbsp;        }
+<b class="fc"><i>440</i>&nbsp;        else if (curr != null &amp;&amp; pos == curr._offset + curr._limit) {</b>
+<i>441</i>&nbsp;            // if our current position is exactly at the end (and we already know
+<i>442</i>&nbsp;            // we can&#39;t write into this block if we can write at all we&#39;ll have
+<i>443</i>&nbsp;            // to write into the next block (inner blocks can&#39;t be 0 bytes long)
+<b class="fc"><i>444</i>&nbsp;            block = this._blocks.get(curr._idx + 1);</b>
+<i>445</i>&nbsp;        }
+<i>446</i>&nbsp;        else {
+<i>447</i>&nbsp;            // since we&#39;re not at the limit and we don&#39;t have a current block
+<i>448</i>&nbsp;            // we&#39;ll go find the block in the list (this is an abnormal case)
+<i>449</i>&nbsp;            // since append if usual for writing
+<b class="nc"><i>450</i>&nbsp;            block = findBlockHelper(pos, 0, this._next_block_position);</b>
+<i>451</i>&nbsp;        }
+<b class="fc"><i>452</i>&nbsp;        assert block != null;</b>
+<b class="fc"><i>453</i>&nbsp;        assert block.containsForWrite(pos);</b>
+<i>454</i>&nbsp;        // chech our candidate block to see if it&#39;s the one we&#39;d write into
+<b class="fc"><i>455</i>&nbsp;        if (block.hasRoomToWrite(pos, 1)) {</b>
+<b class="fc"><i>456</i>&nbsp;            return block;</b>
+<i>457</i>&nbsp;        }
+<i>458</i>&nbsp;        // at this point, we can&#39;t use _curr in any event so we can just
+<i>459</i>&nbsp;        // move on to the next block since findHelper will have returned
+<i>460</i>&nbsp;        // either the right block (which it didn&#39;t) or the one just in
+<i>461</i>&nbsp;        // front of the right block - so let&#39;s see if there is an allocated
+<i>462</i>&nbsp;        // block just following this
+<b class="fc"><i>463</i>&nbsp;        if (block._idx &lt; this._next_block_position - 1) {</b>
+<b class="nc"><i>464</i>&nbsp;            block = this._blocks.get(block._idx + 1);</b>
+<b class="nc"><i>465</i>&nbsp;            return block;</b>
+<i>466</i>&nbsp;        }
+<i>467</i>&nbsp;        // there wasn&#39;t a following block (actually a common case when
+<i>468</i>&nbsp;        // you&#39;re appending) so we have to go ahead an actually add a new block
+<b class="fc"><i>469</i>&nbsp;        int newIdx = block._idx + 1;</b>
+<b class="fc"><i>470</i>&nbsp;        assert newIdx == this._next_block_position;</b>
+<b class="fc"><i>471</i>&nbsp;        bbBlock ret =  this.addBlock(caller</b>
+<i>472</i>&nbsp;                            ,version
+<i>473</i>&nbsp;                            ,newIdx
+<i>474</i>&nbsp;                            ,pos
+<b class="fc"><i>475</i>&nbsp;                            ,this.nextBlockSize(caller, version)</b>
+<i>476</i>&nbsp;               );
+<b class="fc"><i>477</i>&nbsp;        return ret;</b>
+<i>478</i>&nbsp;    }
+<i>479</i>&nbsp;    /**
+<i>480</i>&nbsp;     * dispatcher for the various forms of insert we encounter
+<i>481</i>&nbsp;     * calls one of the four helpers depending on the case
+<i>482</i>&nbsp;     * that is needed to inser here
+<i>483</i>&nbsp;     * @param len number of bytes to make space for
+<i>484</i>&nbsp;     * @return int number of bytes inserted
+<i>485</i>&nbsp;     */
+<i>486</i>&nbsp;    int insert(Object caller, int version, bbBlock curr, int pos, int len)
+<i>487</i>&nbsp;    {
+<b class="fc"><i>488</i>&nbsp;        assert mutation_in_progress(caller, version);</b>
+<i>489</i>&nbsp;        // DEBUG: int amountMoved = 0;
+<i>490</i>&nbsp;        // DEBUG: int before = this._buf_limit;
+<i>491</i>&nbsp;        // DEBUG: assert _validate();
+<i>492</i>&nbsp;        // if there&#39;s room in the current block - just
+<i>493</i>&nbsp;        // move the &quot;trailing&quot; bytes down and we&#39;re done
+<b class="fc"><i>494</i>&nbsp;        int neededSpace = len - curr.unusedBlockCapacity();</b>
+<b class="fc"><i>495</i>&nbsp;        if (neededSpace &lt;= 0) {</b>
+<i>496</i>&nbsp;            // we have all the space we need in the current block
+<i>497</i>&nbsp;            // DEBUG: amountMoved =
+<b class="fc"><i>498</i>&nbsp;            insertInCurrOnly(caller, version, curr, pos, len);</b>
+<i>499</i>&nbsp;        }
+<i>500</i>&nbsp;        else {
+<i>501</i>&nbsp;            // we&#39;ll need at least some additional space beyond the curr
+<i>502</i>&nbsp;            // block, see if there&#39;s room in the
+<i>503</i>&nbsp;            // next one, otherwise we&#39;ll make more (blocks)
+<b class="fc"><i>504</i>&nbsp;            bbBlock next = null;</b>
+<b class="fc"><i>505</i>&nbsp;            if (curr._idx &lt; this._next_block_position - 1) {</b>
+<i>506</i>&nbsp;                // if there is another block
+<b class="fc"><i>507</i>&nbsp;                next = this._blocks.get(curr._idx + 1);</b>
+<i>508</i>&nbsp;            }
+<b class="fc"><i>509</i>&nbsp;            if (next != null &amp;&amp;</b>
+<b class="fc"><i>510</i>&nbsp;                (neededSpace &lt;= next.unusedBlockCapacity())</b>
+<i>511</i>&nbsp;            ) {
+<i>512</i>&nbsp;                // with the addition of the free space in the following block we have enough
+<i>513</i>&nbsp;                // DEBUG: amountMoved =
+<b class="fc"><i>514</i>&nbsp;                insertInCurrAndNext(caller, version, curr, pos, len, next);</b>
+<i>515</i>&nbsp;            }
+<i>516</i>&nbsp;            else {
+<i>517</i>&nbsp;                // we&#39;ll have to make one or more new blocks
+<i>518</i>&nbsp;                // first figure out much will be in the first
+<i>519</i>&nbsp;                // and last blocks (i.e. ignoring the whole
+<i>520</i>&nbsp;                // blocks
+<b class="fc"><i>521</i>&nbsp;                int lenNeededInLastAddedBlock = neededSpace % _blockSizeUpperLimit;</b>
+<b class="fc"><i>522</i>&nbsp;                int tailLen = curr.bytesAvailableToRead(pos);</b>
+<b class="fc"><i>523</i>&nbsp;                if (lenNeededInLastAddedBlock &lt; tailLen) lenNeededInLastAddedBlock = tailLen;</b>
+<b class="fc"><i>524</i>&nbsp;                if (lenNeededInLastAddedBlock &lt; neededSpace</b>
+<i>525</i>&nbsp;                 &amp;&amp; neededSpace &lt; this._blockSizeUpperLimit) {
+<i>526</i>&nbsp;                    // if we need less than the largest block then we should
+<i>527</i>&nbsp;                    // make *one* block with all of the needed space
+<b class="nc"><i>528</i>&nbsp;                    lenNeededInLastAddedBlock = neededSpace;</b>
+<i>529</i>&nbsp;                }
+<b class="fc"><i>530</i>&nbsp;                bbBlock newblock = insertMakeNewTailBlock(caller, version, curr, lenNeededInLastAddedBlock);</b>
+<i>531</i>&nbsp;                // now see if the curr block and this newblock have enough
+<i>532</i>&nbsp;                // available space to do the job, and if there&#39;s some trailing
+<i>533</i>&nbsp;                // data from curr that will end up staying in curr
+<b class="fc"><i>534</i>&nbsp;                if (len &lt;= (curr.unusedBlockCapacity()</b>
+<b class="fc"><i>535</i>&nbsp;                           + newblock.unusedBlockCapacity())</b>
+<i>536</i>&nbsp;                ) {
+<i>537</i>&nbsp;                    // insert this as a zero length block immediately  after _curr
+<i>538</i>&nbsp;                    // insertBlock also adjusts the trailing blocks idx values
+<b class="fc"><i>539</i>&nbsp;                    insertBlock(newblock);</b>
+<i>540</i>&nbsp;                    // now pretend we just have the &quot;push into the next block&quot; case
+<i>541</i>&nbsp;                    // DEBUG: amountMoved =
+<b class="fc"><i>542</i>&nbsp;                    insertInCurrAndNext(caller, version, curr, pos, len, newblock);</b>
+<i>543</i>&nbsp;                }
+<i>544</i>&nbsp;                else {
+<i>545</i>&nbsp;                    // and last we have the case of having to insert more than 1 block
+<i>546</i>&nbsp;                    // which means all of the trailing bytes in _curr move into the last
+<i>547</i>&nbsp;                    // block
+<i>548</i>&nbsp;                    // DEBUG: amountMoved =
+<b class="fc"><i>549</i>&nbsp;                    insertAsManyBlocksAsNeeded(caller, version, curr, pos, len, newblock);</b>
+<i>550</i>&nbsp;                }
+<i>551</i>&nbsp;            }
+<i>552</i>&nbsp;        }
+<i>553</i>&nbsp;        // DEBUG: if (this._buf_limit - before != len
+<i>554</i>&nbsp;        // DEBUG: || amountMoved != len) {
+<i>555</i>&nbsp;        // DEBUG: throw new BlockedBufferException(&quot;insert went wrong #1 !!!&quot;);
+<i>556</i>&nbsp;        // DEBUG: }
+<b class="fc"><i>557</i>&nbsp;        assert _validate();</b>
+<b class="fc"><i>558</i>&nbsp;        return len;</b>
+<i>559</i>&nbsp;    }
+<i>560</i>&nbsp;    /**
+<i>561</i>&nbsp;     *  this handles insert when there&#39;s enough room in the
+<i>562</i>&nbsp;     *  current block
+<i>563</i>&nbsp;     */
+<i>564</i>&nbsp;    private int insertInCurrOnly(Object caller, int version, bbBlock curr, int pos, int len)
+<i>565</i>&nbsp;    {
+<b class="fc"><i>566</i>&nbsp;        assert mutation_in_progress(caller, version);</b>
+<i>567</i>&nbsp;        // the space we need is available right in the block
+<b class="fc"><i>568</i>&nbsp;        assert curr.unusedBlockCapacity() &gt;= len;</b>
+<b class="fc"><i>569</i>&nbsp;        System.arraycopy(curr._buffer, curr.blockOffsetFromAbsolute(pos)</b>
+<b class="fc"><i>570</i>&nbsp;                         ,curr._buffer, curr.blockOffsetFromAbsolute(pos) + len, curr.bytesAvailableToRead(pos));</b>
+<b class="fc"><i>571</i>&nbsp;        curr._limit += len;</b>
+<b class="fc"><i>572</i>&nbsp;        this.adjustOffsets(curr._idx, len, 0);</b>
+<b class="fc"><i>573</i>&nbsp;        notifyInsert(pos, len);</b>
+<b class="fc"><i>574</i>&nbsp;        return len;</b>
+<i>575</i>&nbsp;    }
+<i>576</i>&nbsp;    private int insertInCurrAndNext(Object caller, int version, bbBlock curr, int pos, int len, bbBlock next)
+<i>577</i>&nbsp;    {
+<b class="fc"><i>578</i>&nbsp;        assert mutation_in_progress(caller, version);</b>
+<i>579</i>&nbsp;        // DEBUG: int amountMoved = 0;
+<i>580</i>&nbsp;        // all the space we need (len) fits in these two blocks
+<b class="fc"><i>581</i>&nbsp;        assert curr.unusedBlockCapacity() + next.unusedBlockCapacity() &gt;= len;</b>
+<i>582</i>&nbsp;        // and we need to use space in both of these blocks
+<b class="fc"><i>583</i>&nbsp;        assert curr.unusedBlockCapacity() &lt; len;</b>
+<b class="fc"><i>584</i>&nbsp;        int availableToRead = curr.bytesAvailableToRead(pos);</b>
+<b class="fc"><i>585</i>&nbsp;        int tailInCurr = availableToRead;</b>
+<b class="fc"><i>586</i>&nbsp;        int deltaOfNextData = len - curr.unusedBlockCapacity();</b>
+<b class="fc"><i>587</i>&nbsp;        int tailCopiedToNext = deltaOfNextData;</b>
+<b class="fc"><i>588</i>&nbsp;        if (tailCopiedToNext &gt; availableToRead) {</b>
+<b class="fc"><i>589</i>&nbsp;            tailCopiedToNext = availableToRead;</b>
+<i>590</i>&nbsp;        }
+<i>591</i>&nbsp;        // first we copy the data in the next block down to make room
+<i>592</i>&nbsp;        // for data we&#39;re pushing off the end of the _curr block
+<i>593</i>&nbsp;        // if we need to, there may not be any data in the next block
+<b class="fc"><i>594</i>&nbsp;        if (next._limit &gt; 0) {</b>
+<b class="fc"><i>595</i>&nbsp;            System.arraycopy(next._buffer, 0, next._buffer, deltaOfNextData, next._limit);</b>
+<i>596</i>&nbsp;        }
+<b class="fc"><i>597</i>&nbsp;        next._limit += deltaOfNextData;</b>
+<i>598</i>&nbsp;        // DEBUG: amountMoved += deltaOfNextData;
+<i>599</i>&nbsp;        // next we copy the data from the tail of _curr into the front of next
+<i>600</i>&nbsp;        // since we don&#39;t have room for it any longer in the _curr block
+<i>601</i>&nbsp;        // but it is possible that there is not tail at all (pos == limit)
+<b class="fc"><i>602</i>&nbsp;        if (tailCopiedToNext &gt; 0) {</b>
+<b class="fc"><i>603</i>&nbsp;            System.arraycopy(curr._buffer, curr._limit - tailCopiedToNext</b>
+<i>604</i>&nbsp;                            , next._buffer, deltaOfNextData - tailCopiedToNext, tailCopiedToNext);
+<i>605</i>&nbsp;        }
+<i>606</i>&nbsp;        // finally if there&#39;s any tail left in the _curr block we copy that
+<i>607</i>&nbsp;        // down to the end of the _curr block (if all of the tail moved into
+<i>608</i>&nbsp;        // the next block nothing happens here
+<b class="fc"><i>609</i>&nbsp;        int leftInCurr = tailInCurr - tailCopiedToNext;</b>
+<b class="fc"><i>610</i>&nbsp;        if (leftInCurr &gt; 0) {</b>
+<b class="fc"><i>611</i>&nbsp;            int blockPosition = curr.blockOffsetFromAbsolute(pos);</b>
+<b class="fc"><i>612</i>&nbsp;            System.arraycopy(curr._buffer, blockPosition</b>
+<i>613</i>&nbsp;                            ,curr._buffer, blockPosition + len, leftInCurr);
+<i>614</i>&nbsp;        }
+<i>615</i>&nbsp;        // finally if we reused from space in _curr (between _limit and the unreserved capacity)
+<i>616</i>&nbsp;        // we adjust for that as well as the space adjusted in the newblock
+<b class="fc"><i>617</i>&nbsp;        int addedInCurr = curr.unusedBlockCapacity();</b>
+<b class="fc"><i>618</i>&nbsp;        if (addedInCurr &gt; 0) {</b>
+<b class="fc"><i>619</i>&nbsp;            curr._limit += addedInCurr;</b>
+<i>620</i>&nbsp;            // DEBUG: amountMoved += addedInCurr;
+<b class="fc"><i>621</i>&nbsp;            next._offset += addedInCurr;</b>
+<i>622</i>&nbsp;        }
+<b class="fc"><i>623</i>&nbsp;        assert (curr.blockOffsetFromAbsolute(pos) + tailCopiedToNext + addedInCurr + leftInCurr) == curr._limit;</b>
+<b class="fc"><i>624</i>&nbsp;        this.adjustOffsets(next._idx, len, 0);</b>
+<b class="fc"><i>625</i>&nbsp;        notifyInsert(pos, len);</b>
+<i>626</i>&nbsp;        // DEBUG: if (amountMoved != len) {
+<i>627</i>&nbsp;        // DEBUG: throw new BlockedBufferException(&quot;insert went wrong #4 !!!&quot;);
+<i>628</i>&nbsp;        // DEBUG: }
+<b class="fc"><i>629</i>&nbsp;        return len;</b>
+<i>630</i>&nbsp;    }
+<i>631</i>&nbsp;    private bbBlock insertMakeNewTailBlock(Object caller, int version, bbBlock curr, int minimumBlockSize)
+<i>632</i>&nbsp;    {
+<b class="fc"><i>633</i>&nbsp;        assert mutation_in_progress(caller, version);</b>
+<i>634</i>&nbsp;        // needed is the amount of data we&#39;ll put into the
+<i>635</i>&nbsp;        // final added block (which is actually added first)
+<b class="fc"><i>636</i>&nbsp;        int newblocksize = minimumBlockSize;</b>
+<b class="fc"><i>637</i>&nbsp;        if (newblocksize &lt; _blockSizeUpperLimit) {</b>
+<i>638</i>&nbsp;            // if we don&#39;t need an oversize block then find a block
+<i>639</i>&nbsp;            // size that will be big enough
+<b class="fc"><i>640</i>&nbsp;            while ((newblocksize = this.nextBlockSize(caller, version)) &lt; minimumBlockSize) {</b>
+<i>641</i>&nbsp;                // bump up requested block capacity until we get
+<i>642</i>&nbsp;                // at least enough to hold the request, or we
+<i>643</i>&nbsp;                // hit the max blocksize whichever comes first
+<i>644</i>&nbsp;            }
+<i>645</i>&nbsp;        }
+<i>646</i>&nbsp;        // allocate and initialize a new block that will be the
+<i>647</i>&nbsp;        // tail of our interesting blocks
+<b class="fc"><i>648</i>&nbsp;        bbBlock newblock = new bbBlock(newblocksize);</b>
+<b class="fc"><i>649</i>&nbsp;        newblock._idx = curr._idx + 1;</b>
+<b class="fc"><i>650</i>&nbsp;        newblock._offset = curr._offset + curr._limit; // we&#39;ll adjust this later like any existing block</b>
+<b class="fc"><i>651</i>&nbsp;        return newblock;</b>
+<i>652</i>&nbsp;    }
+<i>653</i>&nbsp;    private int insertAsManyBlocksAsNeeded(Object caller, int version, bbBlock curr, int pos, int len, bbBlock newLastBlock)
+<i>654</i>&nbsp;    {
+<b class="fc"><i>655</i>&nbsp;        assert mutation_in_progress(caller, version);</b>
+<i>656</i>&nbsp;        // DEBUG: int amountAllocated = 0;
+<i>657</i>&nbsp;        // DEBUG: int origPos = this._buf_position;
+<i>658</i>&nbsp;        // this is the case where the old tail is pushed entirely out of the
+<i>659</i>&nbsp;        // old block into a new trailing block and then as many whole new
+<i>660</i>&nbsp;        // blocks as needed (which maybe none) are inserted between these two
+<b class="fc"><i>661</i>&nbsp;        bbBlock oldCurr = curr;</b>
+<b class="fc"><i>662</i>&nbsp;        int   oldPosition = curr.blockOffsetFromAbsolute(pos);</b>
+<b class="fc"><i>663</i>&nbsp;        int   oldBlockTail = curr._limit - oldPosition;</b>
+<b class="fc"><i>664</i>&nbsp;        int   newSpaceInCurr = curr.unusedBlockCapacity();</b>
+<i>665</i>&nbsp;        // adjust the curr blocks limit
+<b class="fc"><i>666</i>&nbsp;        curr._limit += newSpaceInCurr;</b>
+<i>667</i>&nbsp;        // DEBUG: amountAllocated += newSpaceInCurr;
+<b class="fc"><i>668</i>&nbsp;        int   newoffset = curr._offset + curr._limit;</b>
+<b class="fc"><i>669</i>&nbsp;        int   spaceNeededInMiddle = len - newSpaceInCurr - newLastBlock._buffer.length;</b>
+<b class="fc"><i>670</i>&nbsp;        int   addedblocks = 0;</b>
+<b class="fc"><i>671</i>&nbsp;        bbBlock newblock = null;</b>
+<b class="fc"><i>672</i>&nbsp;        assert (spaceNeededInMiddle &gt; 0);  // this is the &quot;as many as needed&quot; case not &quot;this and next&quot;</b>
+<i>673</i>&nbsp;        // add blocks until we&#39;re ready for the last block
+<b class="fc"><i>674</i>&nbsp;        while (spaceNeededInMiddle &gt; 0) {</b>
+<b class="fc"><i>675</i>&nbsp;            addedblocks++;</b>
+<b class="fc"><i>676</i>&nbsp;            newblock = new bbBlock(this.nextBlockSize(caller, version));</b>
+<b class="fc"><i>677</i>&nbsp;            newblock._limit = newblock._buffer.length;</b>
+<b class="fc"><i>678</i>&nbsp;            if (newblock._limit &gt; spaceNeededInMiddle) newblock._limit = spaceNeededInMiddle;</b>
+<i>679</i>&nbsp;            // DEBUG: amountAllocated += newblock._limit;
+<b class="fc"><i>680</i>&nbsp;            newblock._idx = curr._idx + addedblocks;</b>
+<b class="fc"><i>681</i>&nbsp;            newblock._offset = newoffset;</b>
+<b class="fc"><i>682</i>&nbsp;            this._blocks.add(newblock._idx, newblock);</b>
+<b class="fc"><i>683</i>&nbsp;            spaceNeededInMiddle -= newblock._limit;</b>
+<b class="fc"><i>684</i>&nbsp;            newoffset += newblock._limit;</b>
+<i>685</i>&nbsp;        }
+<i>686</i>&nbsp;        // add the last block
+<b class="fc"><i>687</i>&nbsp;        addedblocks++;</b>
+<b class="fc"><i>688</i>&nbsp;        newblock = newLastBlock;</b>
+<b class="fc"><i>689</i>&nbsp;        newblock._limit = newblock._buffer.length;</b>
+<i>690</i>&nbsp;        // DEBUG: amountAllocated += newblock._limit;
+<b class="fc"><i>691</i>&nbsp;        newblock._idx = curr._idx + addedblocks;</b>
+<b class="fc"><i>692</i>&nbsp;        newblock._offset = newoffset;</b>
+<b class="fc"><i>693</i>&nbsp;        this._blocks.add(newblock._idx, newblock);</b>
+<i>694</i>&nbsp;        // DEBUG: assert (amountAllocated == len);
+<i>695</i>&nbsp;        // now adjust the trailing blocks
+<b class="fc"><i>696</i>&nbsp;        adjustOffsets(newblock._idx, len, addedblocks);</b>
+<b class="fc"><i>697</i>&nbsp;        notifyInsert(pos, len);</b>
+<i>698</i>&nbsp;        // now we copy the tail of the _curr block to the end of the space
+<i>699</i>&nbsp;        // note that this only works because the tail is being copied to
+<i>700</i>&nbsp;        // an altogether different block in the buffer, so it can&#39;t overlap
+<b class="fc"><i>701</i>&nbsp;        if (oldBlockTail &gt; 0) {</b>
+<b class="fc"><i>702</i>&nbsp;            System.arraycopy(oldCurr._buffer, oldPosition, newLastBlock._buffer, newLastBlock._limit - oldBlockTail, oldBlockTail);</b>
+<i>703</i>&nbsp;        }
+<i>704</i>&nbsp;        // DEBUG: assert this.position() == origPos;
+<i>705</i>&nbsp;        // DEBUG: assert (amountAllocated == len);
+<b class="fc"><i>706</i>&nbsp;        return len;</b>
+<i>707</i>&nbsp;    }
+<i>708</i>&nbsp;    private void insertBlock(bbBlock newblock) {
+<i>709</i>&nbsp;        // in both cases we need to insert the new block after _curr
+<i>710</i>&nbsp;        // and adjust the idx values to go with that
+<b class="fc"><i>711</i>&nbsp;        this._blocks.add(newblock._idx, newblock);</b>
+<b class="fc"><i>712</i>&nbsp;        _next_block_position++;</b>
+<b class="fc"><i>713</i>&nbsp;        for (int ii=newblock._idx + 1; ii &lt; this._next_block_position; ii++) {</b>
+<b class="fc"><i>714</i>&nbsp;            this._blocks.get(ii)._idx++;</b>
+<i>715</i>&nbsp;        }
+<b class="fc"><i>716</i>&nbsp;    }</b>
+<i>717</i>&nbsp;    private void adjustOffsets(int lastidx, int addedBytes, int addedBlocks) {
+<i>718</i>&nbsp;        bbBlock b;
+<i>719</i>&nbsp;        // now we adjust the trailing offsets
+<b class="fc"><i>720</i>&nbsp;        if (addedBytes != 0 || addedBlocks != 0) {</b>
+<b class="fc"><i>721</i>&nbsp;            this._next_block_position += addedBlocks;</b>
+<b class="fc"><i>722</i>&nbsp;            for (int ii=lastidx + 1; ii &lt; this._next_block_position; ii++) {</b>
+<b class="fc"><i>723</i>&nbsp;                b = this._blocks.get(ii);</b>
+<b class="fc"><i>724</i>&nbsp;                b._offset += addedBytes;</b>
+<b class="fc"><i>725</i>&nbsp;                b._idx += addedBlocks;</b>
+<i>726</i>&nbsp;            }
+<b class="fc"><i>727</i>&nbsp;            this._buf_limit += addedBytes;</b>
+<i>728</i>&nbsp;        }
+<b class="fc"><i>729</i>&nbsp;    }</b>
+<i>730</i>&nbsp;    bbBlock remove(Object caller, int version, bbBlock curr, int pos, int len)
+<i>731</i>&nbsp;    {
+<b class="fc"><i>732</i>&nbsp;        assert mutation_in_progress(caller, version);</b>
+<b class="fc"><i>733</i>&nbsp;        if (len == 0) return curr;</b>
+<b class="fc"><i>734</i>&nbsp;        if (len &lt; 0 || (pos + len) &gt; this._buf_limit) {</b>
+<b class="nc"><i>735</i>&nbsp;            throw new IllegalArgumentException();</b>
+<i>736</i>&nbsp;        }
+<b class="fc"><i>737</i>&nbsp;        int     amountToRemove = len;</b>
+<b class="fc"><i>738</i>&nbsp;        int     removedBlocks = 0;</b>
+<b class="fc"><i>739</i>&nbsp;        int     startingIdx = curr._idx;</b>
+<b class="fc"><i>740</i>&nbsp;        int     currIdx = curr._idx;</b>
+<b class="fc"><i>741</i>&nbsp;        bbBlock currBlock = curr;</b>
+<b class="fc"><i>742</i>&nbsp;        assert (curr._offset &lt;= pos);</b>
+<b class="fc"><i>743</i>&nbsp;        assert (pos - curr._offset &lt;= curr._limit);</b>
+<b class="fc"><i>744</i>&nbsp;        assert _validate();</b>
+<i>745</i>&nbsp;        // this is to simply eliminate a big edge case
+<b class="fc"><i>746</i>&nbsp;        if (pos == 0 &amp;&amp; len == this._buf_limit) {</b>
+<b class="fc"><i>747</i>&nbsp;            this.clear(caller, version);</b>
+<b class="fc"><i>748</i>&nbsp;            notifyRemove(0, len);</b>
+<b class="fc"><i>749</i>&nbsp;            return null;</b>
+<i>750</i>&nbsp;        }
+<i>751</i>&nbsp;        // remove from the initial block
+<b class="fc"><i>752</i>&nbsp;        int currBlockPosition = currBlock.blockOffsetFromAbsolute(pos);</b>
+<b class="fc"><i>753</i>&nbsp;        int removedFromThisBlock = currBlock._limit - currBlockPosition;</b>
+<b class="fc"><i>754</i>&nbsp;        if (removedFromThisBlock &gt; amountToRemove) removedFromThisBlock = amountToRemove;</b>
+<b class="fc"><i>755</i>&nbsp;        if (removedFromThisBlock == currBlock._limit) {</b>
+<i>756</i>&nbsp;            // we&#39;ll be removing the whole block in the whole block loop below
+<b class="fc"><i>757</i>&nbsp;            startingIdx--;  // so we have to back up on to fix the next block that will</b>
+<i>758</i>&nbsp;                            // &quot;fall&quot; down into the soon to be emptied slot here
+<i>759</i>&nbsp;        }
+<i>760</i>&nbsp;        else {
+<i>761</i>&nbsp;            // we always copy into position, and we copy whatever is still
+<i>762</i>&nbsp;            // left in the end of the block
+<b class="fc"><i>763</i>&nbsp;            int moveAmount = currBlock._limit - currBlockPosition - removedFromThisBlock;</b>
+<b class="fc"><i>764</i>&nbsp;            if (moveAmount &gt; 0) {</b>
+<b class="fc"><i>765</i>&nbsp;                System.arraycopy(currBlock._buffer, currBlock._limit - moveAmount</b>
+<i>766</i>&nbsp;                                ,currBlock._buffer, currBlockPosition, moveAmount);
+<i>767</i>&nbsp;            }
+<b class="fc"><i>768</i>&nbsp;            amountToRemove -= removedFromThisBlock;</b>
+<b class="fc"><i>769</i>&nbsp;            currBlock._limit -= removedFromThisBlock;</b>
+<b class="fc"><i>770</i>&nbsp;            if (amountToRemove &gt; 0) {</b>
+<i>771</i>&nbsp;                // when we&#39;re on the last block, there&#39;ll be nothing to remove,
+<i>772</i>&nbsp;                // and no block to get either
+<b class="fc"><i>773</i>&nbsp;                currIdx = currBlock._idx + 1;</b>
+<b class="fc"><i>774</i>&nbsp;                currBlock = this._blocks.get(currIdx);</b>
+<i>775</i>&nbsp;            }
+<i>776</i>&nbsp;        }
+<b class="fc"><i>777</i>&nbsp;        while (amountToRemove &gt; 0 &amp;&amp; amountToRemove &gt;= currBlock._limit) {</b>
+<b class="fc"><i>778</i>&nbsp;            amountToRemove -= currBlock._limit;</b>
+<i>779</i>&nbsp;            // remove the whole block - so first hang onto a reference
+<b class="fc"><i>780</i>&nbsp;            bbBlock temp = currBlock;</b>
+<b class="fc"><i>781</i>&nbsp;            this._blocks.remove(currIdx);</b>
+<b class="fc"><i>782</i>&nbsp;            removedBlocks++;</b>
+<b class="fc"><i>783</i>&nbsp;            temp.clearBlock();</b>
+<b class="fc"><i>784</i>&nbsp;            this._blocks.add(temp); // dump it at the end (marked as not in use)</b>
+<i>785</i>&nbsp;            // and we don&#39;t move currIdx because we bumped it out of the whole array
+<b class="fc"><i>786</i>&nbsp;            if (currIdx &lt; this._next_block_position - removedBlocks) {</b>
+<b class="fc"><i>787</i>&nbsp;                currBlock = this._blocks.get(currIdx);</b>
+<i>788</i>&nbsp;            }
+<b class="nc"><i>789</i>&nbsp;            else if (currIdx &gt; 0) {</b>
+<b class="nc"><i>790</i>&nbsp;                currIdx--;</b>
+<b class="nc"><i>791</i>&nbsp;                currBlock = this._blocks.get(currIdx);</b>
+<i>792</i>&nbsp;            }
+<i>793</i>&nbsp;            else {
+<b class="nc"><i>794</i>&nbsp;                throw new BlockedBufferException(&quot;fatal - no current block!&quot;);</b>
+<i>795</i>&nbsp;            }
+<b class="fc"><i>796</i>&nbsp;        }</b>
+<b class="fc"><i>797</i>&nbsp;        if (amountToRemove &gt; 0) {</b>
+<b class="fc"><i>798</i>&nbsp;            assert amountToRemove &lt; currBlock._limit;</b>
+<b class="fc"><i>799</i>&nbsp;            System.arraycopy(currBlock._buffer, amountToRemove</b>
+<i>800</i>&nbsp;                            ,currBlock._buffer, 0, currBlock._limit - amountToRemove);
+<b class="fc"><i>801</i>&nbsp;            assert amountToRemove &lt; currBlock._limit;</b>
+<b class="fc"><i>802</i>&nbsp;            currBlock._limit -= amountToRemove;</b>
+<b class="fc"><i>803</i>&nbsp;            currBlock._offset += amountToRemove;</b>
+<i>804</i>&nbsp;        }
+<i>805</i>&nbsp;        // we&#39;ll even adjust the offset of the first block (if it&#39;s the last as well)
+<b class="fc"><i>806</i>&nbsp;        adjustOffsets(startingIdx, -len, -removedBlocks);</b>
+<b class="fc"><i>807</i>&nbsp;        notifyRemove(pos, len);</b>
+<i>808</i>&nbsp;        // DEBUG: int shouldBe = 0;
+<i>809</i>&nbsp;        // DEBUG: int is = currBlock._offset;
+<i>810</i>&nbsp;        // DEBUG: if (currBlock._idx &gt; 0) {
+<i>811</i>&nbsp;        // DEBUG:     shouldBe = this._blocks.get(currBlock._idx - 1)._offset + this._blocks.get(currBlock._idx - 1)._limit;
+<i>812</i>&nbsp;        // DEBUG:     if (currIdx != startingIdx) assert (shouldBe == this._buf_position);
+<i>813</i>&nbsp;        // DEBUG: }
+<i>814</i>&nbsp;        // DEBUG: int delta = shouldBe - is;
+<i>815</i>&nbsp;        // DEBUG: assert(delta == 0);
+<b class="fc"><i>816</i>&nbsp;        assert _validate();</b>
+<b class="fc"><i>817</i>&nbsp;        return currBlock;</b>
+<i>818</i>&nbsp;    }
+<i>819</i>&nbsp;    static int _validate_count;
+<i>820</i>&nbsp;    public boolean _validate() {
+<b class="fc"><i>821</i>&nbsp;        int pos = 0;</b>
+<i>822</i>&nbsp;        int idx;
+<b class="fc"><i>823</i>&nbsp;        boolean err = false;</b>
+<b class="fc"><i>824</i>&nbsp;        _validate_count++;</b>
+<b class="fc"><i>825</i>&nbsp;        if ((_validate_count % 128) != 0) return true;</b>
+<i>826</i>&nbsp;        // you can change the 0 below (in from of the -2) to be the validation counter
+<i>827</i>&nbsp;        // which reported the failure and the test will be true when _validate() is
+<i>828</i>&nbsp;        // called on the last GOOD check.
+<b class="fc"><i>829</i>&nbsp;        if (_validate_count == 30 -2) {</b>
+<i>830</i>&nbsp;            // used to set breakpoints on particular calls for validation
+<b class="nc"><i>831</i>&nbsp;            err = (_validate_count &lt; 0);</b>
+<i>832</i>&nbsp;        }
+<b class="fc"><i>833</i>&nbsp;        for (idx=0; idx&lt;this._blocks.size(); idx++) {</b>
+<b class="fc"><i>834</i>&nbsp;            bbBlock b = this._blocks.get(idx);</b>
+<b class="fc"><i>835</i>&nbsp;            if (b._idx == -1) break;</b>
+<b class="fc"><i>836</i>&nbsp;            if (b._idx != idx) {</b>
+<b class="nc"><i>837</i>&nbsp;                System.out.println(&quot;block &quot;+idx+&quot;: index is wrong&quot; +</b>
+<i>838</i>&nbsp;                                   &quot;, it is &quot;+b._idx+
+<i>839</i>&nbsp;                                   &quot; it should be &quot;+idx);
+<b class="nc"><i>840</i>&nbsp;                err = true;</b>
+<i>841</i>&nbsp;            }
+<b class="fc"><i>842</i>&nbsp;            if (b._offset != pos) {</b>
+<b class="nc"><i>843</i>&nbsp;                System.out.println(&quot;block &quot;+idx+&quot;: starting offset is wrong&quot;+</b>
+<i>844</i>&nbsp;                                   &quot;, it is &quot;+b._offset+
+<i>845</i>&nbsp;                                   &quot; should be &quot;+pos);
+<b class="nc"><i>846</i>&nbsp;                err = true;</b>
+<i>847</i>&nbsp;            }
+<i>848</i>&nbsp;            // else because there&#39;s no point in using a bad reserved value to check the limit
+<b class="fc"><i>849</i>&nbsp;            else if (b._limit &lt; 0 || b._limit &gt; b._buffer.length /* - b._reserved */ ) {</b>
+<b class="nc"><i>850</i>&nbsp;                System.out.println(&quot;block &quot;+idx+&quot;: &quot;+</b>
+<i>851</i>&nbsp;                                   &quot;limit is out of range&quot;+
+<i>852</i>&nbsp;                                   &quot;, it is &quot;+b._limit+
+<i>853</i>&nbsp;                                   &quot; should be between 0 and &quot;+ (b._buffer.length /* - b._reserved */));
+<b class="nc"><i>854</i>&nbsp;                err = true;</b>
+<i>855</i>&nbsp;            }
+<b class="fc"><i>856</i>&nbsp;            else if (b._limit == 0) {</b>
+<b class="fc"><i>857</i>&nbsp;                if ( ! (b._idx == (this._next_block_position - 1)</b>
+<i>858</i>&nbsp;                     &amp;&amp; b._offset == this._buf_limit)
+<i>859</i>&nbsp;                ) {
+<b class="nc"><i>860</i>&nbsp;                    System.out.println(&quot;block &quot;+idx+&quot;: &quot;+</b>
+<i>861</i>&nbsp;                                       &quot;has a ZERO limit&quot;);
+<b class="nc"><i>862</i>&nbsp;                    err = true;</b>
+<i>863</i>&nbsp;                }
+<i>864</i>&nbsp;            }
+<b class="fc"><i>865</i>&nbsp;            pos += b._limit;</b>
+<i>866</i>&nbsp;        }
+<b class="fc"><i>867</i>&nbsp;        if (idx != this._next_block_position) {</b>
+<b class="nc"><i>868</i>&nbsp;            System.out.println(&quot;next block position is wrong, is &quot;+this._next_block_position+&quot; should be &quot;+idx);</b>
+<b class="nc"><i>869</i>&nbsp;            err = true;</b>
+<i>870</i>&nbsp;        }
+<b class="fc"><i>871</i>&nbsp;        for (idx++; idx&lt;this._blocks.size(); idx++) {</b>
+<b class="fc"><i>872</i>&nbsp;            bbBlock b = this._blocks.get(idx);</b>
+<b class="fc"><i>873</i>&nbsp;            if (b._offset != -1) {</b>
+<b class="nc"><i>874</i>&nbsp;                System.out.println(&quot;block &quot;+idx+&quot;: (in freed range) has non -1 offset, offset is &quot;+b._offset);</b>
+<b class="nc"><i>875</i>&nbsp;                err = true;</b>
+<i>876</i>&nbsp;            }
+<i>877</i>&nbsp;        }
+<b class="fc"><i>878</i>&nbsp;        if (pos != this._buf_limit) {</b>
+<b class="nc"><i>879</i>&nbsp;            System.out.println(&quot;buffer _buf_limit: &quot;+</b>
+<i>880</i>&nbsp;                               &quot;limit is incorrect&quot;+
+<i>881</i>&nbsp;                               &quot;, it is &quot;+this._buf_limit+
+<i>882</i>&nbsp;                               &quot; should be &quot;+ pos);
+<b class="nc"><i>883</i>&nbsp;            err = true;</b>
+<i>884</i>&nbsp;        }
+<b class="fc"><i>885</i>&nbsp;        if (this._next_block_position &gt; 0) {</b>
+<b class="fc"><i>886</i>&nbsp;            bbBlock last = this._blocks.get(this._next_block_position - 1);</b>
+<b class="fc"><i>887</i>&nbsp;            if (last._offset + last._limit != this._buf_limit){</b>
+<b class="nc"><i>888</i>&nbsp;                System.out.println(&quot;last block &quot;+last._idx+&quot; limit isn&#39;t &quot;+</b>
+<i>889</i>&nbsp;                                   &quot;_buf_limit (&quot;+this._buf_limit+&quot;): &quot;+
+<i>890</i>&nbsp;                                   &quot; calc&#39;d last block limit is &quot;
+<i>891</i>&nbsp;                                   +       last._offset +&quot; + &quot;+ last._limit
+<i>892</i>&nbsp;                                   +&quot; = &quot;+(last._offset + last._limit)
+<i>893</i>&nbsp;                                   );
+<b class="nc"><i>894</i>&nbsp;                err = true;</b>
+<i>895</i>&nbsp;            }
+<i>896</i>&nbsp;        }
+<b class="fc"><i>897</i>&nbsp;        if (this._buf_limit &lt; 0 || (this._buf_limit &gt; 0 &amp;&amp; this._next_block_position &lt; 1)){</b>
+<b class="nc"><i>898</i>&nbsp;            System.out.println(&quot;this._buf_limit &quot;+ this._buf_limit+ &quot; is invalid&quot;);</b>
+<b class="nc"><i>899</i>&nbsp;            err = true;</b>
+<i>900</i>&nbsp;        }
+<b class="fc"><i>901</i>&nbsp;        if (err == true) {</b>
+<b class="nc"><i>902</i>&nbsp;            System.out.println(&quot;failed with validation count = &quot; + _validate_count);</b>
+<i>903</i>&nbsp;        }
+<b class="fc"><i>904</i>&nbsp;        return err == false;  // validate is true if all is ok so that assert _validate(); works as expected</b>
+<i>905</i>&nbsp;    }
+<b class="fc"><i>906</i>&nbsp;    final static class bbBlock {</b>
+<i>907</i>&nbsp;        public int     _idx;
+<i>908</i>&nbsp;        public int     _offset;
+<i>909</i>&nbsp;        public int     _limit;
+<i>910</i>&nbsp;        public byte[]  _buffer;
+<b class="fc"><i>911</i>&nbsp;        public bbBlock(int capacity) {</b>
+<b class="fc"><i>912</i>&nbsp;            _buffer = new byte[capacity];</b>
+<b class="fc"><i>913</i>&nbsp;        }</b>
+<i>914</i>&nbsp;        /**
+<i>915</i>&nbsp;         * Assumes ownership of an array to create a new block.  The data
+<i>916</i>&nbsp;         * within the buffer is maintained.
+<i>917</i>&nbsp;         *
+<i>918</i>&nbsp;         * @param buffer contains the data for the block.
+<i>919</i>&nbsp;         *
+<i>920</i>&nbsp;         * @throws NullPointerException if buffer is null.
+<i>921</i>&nbsp;         */
+<b class="nc"><i>922</i>&nbsp;        bbBlock(byte[] buffer) {</b>
+<b class="nc"><i>923</i>&nbsp;            _buffer = buffer;</b>
+<b class="nc"><i>924</i>&nbsp;            _limit = buffer.length;</b>
+<b class="nc"><i>925</i>&nbsp;        }</b>
+<i>926</i>&nbsp;        public bbBlock clearBlock() {
+<b class="fc"><i>927</i>&nbsp;            _idx = -1;</b>
+<b class="fc"><i>928</i>&nbsp;            _offset = -1;</b>
+<b class="fc"><i>929</i>&nbsp;            _limit = 0;</b>
+<b class="fc"><i>930</i>&nbsp;            return this;</b>
+<i>931</i>&nbsp;        }
+<i>932</i>&nbsp;        /**
+<i>933</i>&nbsp;         * maximimum number of bytes that can be held in this block.
+<i>934</i>&nbsp;         */
+<i>935</i>&nbsp;        final int blockCapacity() {
+<b class="fc"><i>936</i>&nbsp;            assert this._offset &gt;= 0;</b>
+<b class="fc"><i>937</i>&nbsp;            return this._buffer.length ;</b>
+<i>938</i>&nbsp;        }
+<i>939</i>&nbsp;        /**
+<i>940</i>&nbsp;         * maximimum number of bytes that can be appended in this block currently.
+<i>941</i>&nbsp;         */
+<i>942</i>&nbsp;        final int unusedBlockCapacity() {
+<b class="fc"><i>943</i>&nbsp;            assert this._offset &gt;= 0;</b>
+<b class="fc"><i>944</i>&nbsp;            return this._buffer.length - this._limit;</b>
+<i>945</i>&nbsp;        }
+<i>946</i>&nbsp;        /**
+<i>947</i>&nbsp;         * Gets the number of bytes between the current position and the
+<i>948</i>&nbsp;         * writable capacity of this block.
+<i>949</i>&nbsp;         * @param pos absolute position
+<i>950</i>&nbsp;         */
+<i>951</i>&nbsp;        final int bytesAvailableToWrite(int pos) {
+<b class="nc"><i>952</i>&nbsp;            assert this._offset &gt;= 0;</b>
+<b class="nc"><i>953</i>&nbsp;            return this._buffer.length - (pos - _offset);</b>
+<i>954</i>&nbsp;        }
+<i>955</i>&nbsp;        /**
+<i>956</i>&nbsp;         * Gets the number of, as yet, unused bytes in this block.  That&#39;s the number
+<i>957</i>&nbsp;         * of bytes that can be inserted into this block without overflowing, or the
+<i>958</i>&nbsp;         * number of bytes between the current position and the end of the written bytes
+<i>959</i>&nbsp;         * in this block
+<i>960</i>&nbsp;         * @param pos absolute position
+<i>961</i>&nbsp;         */
+<i>962</i>&nbsp;        public final int bytesAvailableToRead(int pos) {
+<b class="fc"><i>963</i>&nbsp;            assert this._offset &gt;= 0;</b>
+<b class="fc"><i>964</i>&nbsp;            return this._limit - (pos - _offset);</b>
+<i>965</i>&nbsp;        }
+<i>966</i>&nbsp;        /**
+<i>967</i>&nbsp;         * is there space between position and capacity?
+<i>968</i>&nbsp;         * @param pos absolute position
+<i>969</i>&nbsp;         * @param needed
+<i>970</i>&nbsp;         * @return boolean
+<i>971</i>&nbsp;         */
+<i>972</i>&nbsp;        final boolean hasRoomToWrite(int pos, int needed) {
+<b class="fc"><i>973</i>&nbsp;            assert this._offset &gt;= 0;</b>
+<b class="fc"><i>974</i>&nbsp;            return (needed &lt;= (this._buffer.length - (pos - _offset)));</b>
+<i>975</i>&nbsp;        }
+<i>976</i>&nbsp;        final boolean containsForRead(int pos) {
+<b class="fc"><i>977</i>&nbsp;            assert this._offset &gt;= 0;</b>
+<b class="fc"><i>978</i>&nbsp;            return (pos &gt;= _offset &amp;&amp; pos &lt; _offset + _limit);</b>
+<i>979</i>&nbsp;        }
+<i>980</i>&nbsp;        final boolean containsForWrite(int pos) {
+<b class="fc"><i>981</i>&nbsp;            assert this._offset &gt;= 0;</b>
+<b class="fc"><i>982</i>&nbsp;            return (pos &gt;= _offset &amp;&amp; pos &lt;= _offset + _limit);</b>
+<i>983</i>&nbsp;        }
+<i>984</i>&nbsp;        final int blockOffsetFromAbsolute(int pos) {
+<b class="fc"><i>985</i>&nbsp;            assert this._offset &gt;= 0;</b>
+<b class="fc"><i>986</i>&nbsp;            return pos - _offset;</b>
+<i>987</i>&nbsp;        }
+<i>988</i>&nbsp;    }
+<i>989</i>&nbsp;    public interface Monitor
+<i>990</i>&nbsp;    {
+<i>991</i>&nbsp;        public boolean notifyInsert(int pos, int len);
+<i>992</i>&nbsp;        public boolean notifyRemove(int pos, int len);
+<i>993</i>&nbsp;        public int     getMemberIdOffset();
+<i>994</i>&nbsp;    }
+<i>995</i>&nbsp;    private final static class PositionMonitor implements Monitor
+<i>996</i>&nbsp;    {
+<i>997</i>&nbsp;        int _pos;
+<b class="fc"><i>998</i>&nbsp;        PositionMonitor(int pos) { _pos = pos; }</b>
+<b class="fc"><i>999</i>&nbsp;        public int getMemberIdOffset() { return _pos; }</b>
+<b class="nc"><i>1000</i>&nbsp;        public boolean notifyInsert(int pos, int len) { return false; }</b>
+<b class="nc"><i>1001</i>&nbsp;        public boolean notifyRemove(int pos, int len) { return false; }</b>
+<i>1002</i>&nbsp;    }
+<i>1003</i>&nbsp;    private final static class CompareMonitor implements Comparator&lt;Monitor&gt; {
+<b class="fc"><i>1004</i>&nbsp;        static CompareMonitor instance = new CompareMonitor();</b>
+<b class="fc"><i>1005</i>&nbsp;        private CompareMonitor() {}</b>
+<i>1006</i>&nbsp;        static CompareMonitor getComparator()
+<i>1007</i>&nbsp;        {
+<b class="fc"><i>1008</i>&nbsp;            return instance;</b>
+<i>1009</i>&nbsp;        }
+<i>1010</i>&nbsp;        public int compare(Monitor arg0, Monitor arg1)
+<i>1011</i>&nbsp;        {
+<b class="fc"><i>1012</i>&nbsp;            return arg0.getMemberIdOffset() - arg1.getMemberIdOffset();</b>
+<i>1013</i>&nbsp;        }
+<i>1014</i>&nbsp;    }
+<b class="fc"><i>1015</i>&nbsp;    TreeSet&lt;Monitor&gt; _updatelist = new TreeSet&lt;Monitor&gt;(CompareMonitor.getComparator());</b>
+<i>1016</i>&nbsp;    public void notifyRegister(Monitor item) {
+<b class="nc"><i>1017</i>&nbsp;        _updatelist.add(item);</b>
+<b class="nc"><i>1018</i>&nbsp;    }</b>
+<i>1019</i>&nbsp;    public void notifyUnregister(Monitor item) {
+<b class="nc"><i>1020</i>&nbsp;        _updatelist.remove(item);</b>
+<b class="nc"><i>1021</i>&nbsp;    }</b>
+<i>1022</i>&nbsp;    public void notifyInsert(int pos, int len) {
+<b class="fc"><i>1023</i>&nbsp;        if (len == 0) return;</b>
+<b class="fc"><i>1024</i>&nbsp;        PositionMonitor pm = new PositionMonitor(pos);</b>
+<b class="fc"><i>1025</i>&nbsp;        SortedSet&lt;Monitor&gt; follows = _updatelist.tailSet(pm);</b>
+<b class="fc"><i>1026</i>&nbsp;        for (Monitor m : follows) {</b>
+<b class="nc"><i>1027</i>&nbsp;            if (m.notifyInsert(pos, len)) {</b>
+<b class="nc"><i>1028</i>&nbsp;                follows.remove(m);</b>
+<i>1029</i>&nbsp;            }
+<b class="nc"><i>1030</i>&nbsp;        }</b>
+<b class="fc"><i>1031</i>&nbsp;    }</b>
+<i>1032</i>&nbsp;    public void notifyRemove(int pos, int len) {
+<b class="fc"><i>1033</i>&nbsp;        if (len == 0) return;</b>
+<b class="fc"><i>1034</i>&nbsp;        PositionMonitor pm = new PositionMonitor(pos);</b>
+<b class="fc"><i>1035</i>&nbsp;        SortedSet&lt;Monitor&gt; follows = _updatelist.tailSet(pm);</b>
+<b class="fc"><i>1036</i>&nbsp;        for (Monitor m : follows) {</b>
+<b class="nc"><i>1037</i>&nbsp;            if (m.notifyRemove(pos, len)) {</b>
+<b class="nc"><i>1038</i>&nbsp;                follows.remove(m);</b>
+<i>1039</i>&nbsp;            }
+<b class="nc"><i>1040</i>&nbsp;        }</b>
+<b class="fc"><i>1041</i>&nbsp;    }</b>
+<i>1042</i>&nbsp;    /**
+<i>1043</i>&nbsp;     * Reads data from a byte buffer, keeps a local position and
+<i>1044</i>&nbsp;     * a current block.  Snaps a buffer length on creation;
+<i>1045</i>&nbsp;     */
+<b class="fc"><i>1046</i>&nbsp;    public static class BlockedByteInputStream extends java.io.InputStream</b>
+<i>1047</i>&nbsp;    {
+<i>1048</i>&nbsp;        BlockedBuffer _buf;
+<i>1049</i>&nbsp;        int           _pos;
+<i>1050</i>&nbsp;        int           _mark;
+<i>1051</i>&nbsp;        bbBlock       _curr;
+<i>1052</i>&nbsp;        int           _blockPosition;
+<i>1053</i>&nbsp;        int           _version;
+<i>1054</i>&nbsp;        /**
+<i>1055</i>&nbsp;         * @param bb blocked buffer to read from
+<i>1056</i>&nbsp;         */
+<i>1057</i>&nbsp;        public BlockedByteInputStream(BlockedBuffer bb)
+<i>1058</i>&nbsp;        {
+<b class="fc"><i>1059</i>&nbsp;            this(0, bb);</b>
+<b class="fc"><i>1060</i>&nbsp;        }</b>
+<i>1061</i>&nbsp;        /**
+<i>1062</i>&nbsp;         * @param bb blocked buffer to read from
+<i>1063</i>&nbsp;         * @param pos initial offset to read
+<i>1064</i>&nbsp;         */
+<i>1065</i>&nbsp;        public BlockedByteInputStream(BlockedBuffer bb, int pos)
+<i>1066</i>&nbsp;        {
+<b class="nc"><i>1067</i>&nbsp;            this(pos, bb);</b>
+<b class="nc"><i>1068</i>&nbsp;        }</b>
+<i>1069</i>&nbsp;        /**
+<i>1070</i>&nbsp;         * @param pos initial offset to read
+<i>1071</i>&nbsp;         * @param end is the local limit, or -1 (_end_unspecified)
+<i>1072</i>&nbsp;         * @param bb blocked buffer to read from
+<i>1073</i>&nbsp;          */
+<i>1074</i>&nbsp;        private BlockedByteInputStream(int pos, BlockedBuffer bb)
+<b class="fc"><i>1075</i>&nbsp;        {</b>
+<b class="fc"><i>1076</i>&nbsp;            if (bb == null) throw new IllegalArgumentException();</b>
+<b class="fc"><i>1077</i>&nbsp;            _version = bb.getVersion();</b>
+<b class="fc"><i>1078</i>&nbsp;            _buf = bb;</b>
+<b class="fc"><i>1079</i>&nbsp;            _set_position(pos);</b>
+<b class="fc"><i>1080</i>&nbsp;            _mark = -1;</b>
+<b class="fc"><i>1081</i>&nbsp;        }</b>
+<i>1082</i>&nbsp;        @Override
+<i>1083</i>&nbsp;        public final void mark(int readlimit) {
+<b class="nc"><i>1084</i>&nbsp;            this._mark = this._pos;</b>
+<b class="nc"><i>1085</i>&nbsp;        }</b>
+<i>1086</i>&nbsp;        @Override
+<i>1087</i>&nbsp;        public final void reset() throws IOException {
+<b class="nc"><i>1088</i>&nbsp;            if (this._mark == -1) throw new IOException(&quot;mark not set&quot;);</b>
+<b class="nc"><i>1089</i>&nbsp;            _set_position(this._mark);</b>
+<b class="nc"><i>1090</i>&nbsp;        }</b>
+<i>1091</i>&nbsp;        /**
+<i>1092</i>&nbsp;         * the current offset in the buffer
+<i>1093</i>&nbsp;         */
+<i>1094</i>&nbsp;        public final int position() {
+<b class="nc"><i>1095</i>&nbsp;            return this._pos;</b>
+<i>1096</i>&nbsp;        }
+<i>1097</i>&nbsp;        /**
+<i>1098</i>&nbsp;         * this forces a version sync with the underlying blocked buffer.
+<i>1099</i>&nbsp;         * The current position is lost during this call.
+<i>1100</i>&nbsp;         *
+<i>1101</i>&nbsp;         */
+<i>1102</i>&nbsp;        public final void sync() throws IOException
+<i>1103</i>&nbsp;        {
+<b class="fc"><i>1104</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="fc"><i>1105</i>&nbsp;            _version = _buf.getVersion();</b>
+<b class="fc"><i>1106</i>&nbsp;            _curr = null;</b>
+<b class="fc"><i>1107</i>&nbsp;            _pos = 0;</b>
+<b class="fc"><i>1108</i>&nbsp;        }</b>
+<i>1109</i>&nbsp;        /**
+<i>1110</i>&nbsp;         * debug api to force check for internal validity of the
+<i>1111</i>&nbsp;         * underlying buffer
+<i>1112</i>&nbsp;         */
+<i>1113</i>&nbsp;        public final boolean _validate() {
+<b class="fc"><i>1114</i>&nbsp;            return this._buf._validate();</b>
+<i>1115</i>&nbsp;        }
+<i>1116</i>&nbsp;        /**
+<i>1117</i>&nbsp;         * sets the position of the stream to be pos. The next operation
+<i>1118</i>&nbsp;         * (such as read) will return the byte at that offset.
+<i>1119</i>&nbsp;         * @param pos new offset to read from
+<i>1120</i>&nbsp;         * @return this stream
+<i>1121</i>&nbsp;         */
+<i>1122</i>&nbsp;        public final BlockedByteInputStream setPosition(int pos) throws IOException
+<i>1123</i>&nbsp;        {
+<b class="fc"><i>1124</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="fc"><i>1125</i>&nbsp;            fail_on_version_change();</b>
+<b class="fc"><i>1126</i>&nbsp;            if (pos &lt; 0 || pos &gt; _buf.size()) {</b>
+<b class="nc"><i>1127</i>&nbsp;                throw new IllegalArgumentException();</b>
+<i>1128</i>&nbsp;            }
+<i>1129</i>&nbsp;            // call our unfailing private method to do the real work
+<b class="fc"><i>1130</i>&nbsp;            _set_position(pos);</b>
+<b class="fc"><i>1131</i>&nbsp;            fail_on_version_change();</b>
+<b class="fc"><i>1132</i>&nbsp;            return this;</b>
+<i>1133</i>&nbsp;        }
+<i>1134</i>&nbsp;        private final void _set_position(int pos)
+<i>1135</i>&nbsp;        {
+<b class="fc"><i>1136</i>&nbsp;            _pos = pos;</b>
+<b class="fc"><i>1137</i>&nbsp;            _curr = _buf.findBlockForRead(this, _version, _curr, pos);</b>
+<b class="fc"><i>1138</i>&nbsp;            _blockPosition = _pos - _curr._offset;</b>
+<b class="fc"><i>1139</i>&nbsp;        }</b>
+<i>1140</i>&nbsp;        /**
+<i>1141</i>&nbsp;         * closes the steam and clears its reference to the
+<i>1142</i>&nbsp;         * byte buffer.  Once closed it cannot be used.
+<i>1143</i>&nbsp;         */
+<i>1144</i>&nbsp;        @Override
+<i>1145</i>&nbsp;        public final void close() throws IOException
+<i>1146</i>&nbsp;        {
+<b class="nc"><i>1147</i>&nbsp;            this._buf = null;</b>
+<b class="nc"><i>1148</i>&nbsp;            this._pos = -1;</b>
+<b class="nc"><i>1149</i>&nbsp;        }</b>
+<i>1150</i>&nbsp;        public final int writeTo(OutputStream out, int len) throws IOException
+<i>1151</i>&nbsp;        {
+<b class="fc"><i>1152</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="fc"><i>1153</i>&nbsp;            fail_on_version_change();</b>
+<b class="fc"><i>1154</i>&nbsp;            if (_pos &gt; _buf.size()) throw new IllegalArgumentException();</b>
+<i>1155</i>&nbsp;
+<b class="fc"><i>1156</i>&nbsp;            int startingPos = _pos;</b>
+<b class="fc"><i>1157</i>&nbsp;            int localEnd = _pos + len;</b>
+<b class="fc"><i>1158</i>&nbsp;            if (localEnd &gt; _buf.size()) localEnd = _buf.size();</b>
+<b class="fc"><i>1159</i>&nbsp;            assert(_curr.blockOffsetFromAbsolute(_pos) == _blockPosition);</b>
+<i>1160</i>&nbsp;
+<b class="fc"><i>1161</i>&nbsp;            while (_pos &lt; localEnd) {</b>
+<b class="fc"><i>1162</i>&nbsp;                int available = _curr._limit - _blockPosition;</b>
+<b class="fc"><i>1163</i>&nbsp;                boolean partial_read = available &gt; localEnd - _pos;</b>
+<b class="fc"><i>1164</i>&nbsp;                if (partial_read) {</b>
+<b class="fc"><i>1165</i>&nbsp;                    available = localEnd - _pos;</b>
+<i>1166</i>&nbsp;                }
+<i>1167</i>&nbsp;
+<b class="fc"><i>1168</i>&nbsp;                out.write(_curr._buffer, _blockPosition, available);</b>
+<b class="fc"><i>1169</i>&nbsp;                _pos += available;</b>
+<b class="fc"><i>1170</i>&nbsp;                if (partial_read) {</b>
+<b class="fc"><i>1171</i>&nbsp;                    _blockPosition += available;</b>
+<b class="fc"><i>1172</i>&nbsp;                    break;</b>
+<i>1173</i>&nbsp;                }
+<b class="fc"><i>1174</i>&nbsp;                _curr = _buf.findBlockForRead(this, _version, _curr, _pos);</b>
+<b class="fc"><i>1175</i>&nbsp;                _blockPosition =_curr.blockOffsetFromAbsolute(_pos);</b>
+<b class="fc"><i>1176</i>&nbsp;            }</b>
+<i>1177</i>&nbsp;
+<b class="fc"><i>1178</i>&nbsp;            fail_on_version_change();</b>
+<b class="fc"><i>1179</i>&nbsp;            return _pos - startingPos;</b>
+<i>1180</i>&nbsp;        }
+<i>1181</i>&nbsp;
+<i>1182</i>&nbsp;        public final int writeTo(ByteWriter out, int len) throws IOException
+<i>1183</i>&nbsp;        {
+<b class="nc"><i>1184</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="nc"><i>1185</i>&nbsp;            fail_on_version_change();</b>
+<b class="nc"><i>1186</i>&nbsp;            if (_pos &gt; _buf.size()) throw new IllegalArgumentException();</b>
+<i>1187</i>&nbsp;
+<b class="nc"><i>1188</i>&nbsp;            int startingPos = _pos;</b>
+<b class="nc"><i>1189</i>&nbsp;            int localEnd = _pos + len;</b>
+<b class="nc"><i>1190</i>&nbsp;            if (localEnd &gt; _buf.size()) localEnd = _buf.size();</b>
+<b class="nc"><i>1191</i>&nbsp;            assert(_curr.blockOffsetFromAbsolute(_pos) == _blockPosition);</b>
+<i>1192</i>&nbsp;
+<b class="nc"><i>1193</i>&nbsp;            while (_pos &lt; localEnd) {</b>
+<b class="nc"><i>1194</i>&nbsp;                int available = _curr._limit - _blockPosition;</b>
+<b class="nc"><i>1195</i>&nbsp;                boolean partial_read = available &gt; localEnd - _pos;</b>
+<b class="nc"><i>1196</i>&nbsp;                if (partial_read) {</b>
+<b class="nc"><i>1197</i>&nbsp;                    available = localEnd - _pos;</b>
+<i>1198</i>&nbsp;                }
+<b class="nc"><i>1199</i>&nbsp;                out.write(_curr._buffer, _blockPosition, available);</b>
+<b class="nc"><i>1200</i>&nbsp;                _pos += available;</b>
+<b class="nc"><i>1201</i>&nbsp;                if (partial_read) {</b>
+<b class="nc"><i>1202</i>&nbsp;                    _blockPosition += available;</b>
+<b class="nc"><i>1203</i>&nbsp;                    break;</b>
+<i>1204</i>&nbsp;                }
+<b class="nc"><i>1205</i>&nbsp;                _curr = _buf.findBlockForRead(this, _version, _curr, _pos);</b>
+<b class="nc"><i>1206</i>&nbsp;                _blockPosition =_curr.blockOffsetFromAbsolute(_pos);</b>
+<b class="nc"><i>1207</i>&nbsp;            }</b>
+<i>1208</i>&nbsp;
+<b class="nc"><i>1209</i>&nbsp;            fail_on_version_change();</b>
+<b class="nc"><i>1210</i>&nbsp;            return _pos - startingPos;</b>
+<i>1211</i>&nbsp;        }
+<i>1212</i>&nbsp;
+<i>1213</i>&nbsp;        /**
+<i>1214</i>&nbsp;         * reads (up to) {@code len} bytes from the buffer and copies them into
+<i>1215</i>&nbsp;         * the user supplied byte array (bytes) starting at offset
+<i>1216</i>&nbsp;         * off in the users array.  This returns the number of bytes
+<i>1217</i>&nbsp;         * read, which may be less than the number requested if
+<i>1218</i>&nbsp;         * there is not enough data available in the buffer.
+<i>1219</i>&nbsp;         *
+<i>1220</i>&nbsp;         * @throws IndexOutOfBoundsException
+<i>1221</i>&nbsp;         *   if {@code (dst.length - offset) &lt; len}
+<i>1222</i>&nbsp;         */
+<i>1223</i>&nbsp;        @Override
+<i>1224</i>&nbsp;        public final int read(byte[] bytes, int offset, int len) throws IOException
+<i>1225</i>&nbsp;        {
+<b class="nc"><i>1226</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="nc"><i>1227</i>&nbsp;            fail_on_version_change();</b>
+<b class="nc"><i>1228</i>&nbsp;            if (_pos &gt; _buf.size()) throw new IllegalArgumentException();</b>
+<b class="nc"><i>1229</i>&nbsp;            int startingPos = _pos;</b>
+<b class="nc"><i>1230</i>&nbsp;            int localEnd = _pos + len;</b>
+<b class="nc"><i>1231</i>&nbsp;            if (localEnd &gt; _buf.size()) localEnd = _buf.size();</b>
+<b class="nc"><i>1232</i>&nbsp;            while (_pos &lt; localEnd) {</b>
+<b class="nc"><i>1233</i>&nbsp;                bbBlock block = _curr;</b>
+<b class="nc"><i>1234</i>&nbsp;                int block_offset = _blockPosition;</b>
+<b class="nc"><i>1235</i>&nbsp;                int available = block._limit - _blockPosition;</b>
+<b class="nc"><i>1236</i>&nbsp;                if (available &gt; localEnd - _pos) {</b>
+<i>1237</i>&nbsp;                    // we aren&#39;t emptying this block so adjust our location
+<b class="nc"><i>1238</i>&nbsp;                    available = localEnd - _pos;</b>
+<b class="nc"><i>1239</i>&nbsp;                    _blockPosition += available;</b>
+<i>1240</i>&nbsp;                }
+<i>1241</i>&nbsp;                else {
+<i>1242</i>&nbsp;                    // TODO can&#39;t we just move to the next block?
+<b class="nc"><i>1243</i>&nbsp;                    _curr = _buf.findBlockForRead(this, _version, _curr, _pos + available);</b>
+<b class="nc"><i>1244</i>&nbsp;                    _blockPosition = 0;</b>
+<i>1245</i>&nbsp;                }
+<b class="nc"><i>1246</i>&nbsp;                System.arraycopy(block._buffer, block_offset, bytes, offset, available);</b>
+<b class="nc"><i>1247</i>&nbsp;                _pos += available;</b>
+<b class="nc"><i>1248</i>&nbsp;                offset += available;</b>
+<b class="nc"><i>1249</i>&nbsp;            }</b>
+<b class="nc"><i>1250</i>&nbsp;            fail_on_version_change();</b>
+<b class="nc"><i>1251</i>&nbsp;            return _pos - startingPos;</b>
+<i>1252</i>&nbsp;        }
+<i>1253</i>&nbsp;        /**
+<i>1254</i>&nbsp;         * reads the next byte in the buffer.  This returns -1
+<i>1255</i>&nbsp;         * if there is no data available to be read.
+<i>1256</i>&nbsp;         */
+<i>1257</i>&nbsp;        @Override
+<i>1258</i>&nbsp;        public final int read() throws IOException
+<i>1259</i>&nbsp;        {
+<b class="fc"><i>1260</i>&nbsp;            if (_buf == null) {</b>
+<b class="nc"><i>1261</i>&nbsp;                throw new IOException(&quot;input stream is closed&quot;);</b>
+<i>1262</i>&nbsp;            }
+<b class="fc"><i>1263</i>&nbsp;            fail_on_version_change();</b>
+<b class="fc"><i>1264</i>&nbsp;            if (_pos &gt;= _buf.size()) return -1;</b>
+<b class="fc"><i>1265</i>&nbsp;            if (_blockPosition &gt;= _curr._limit) {</b>
+<b class="fc"><i>1266</i>&nbsp;                _curr = this._buf.findBlockForRead(this, _version, _curr, _pos);</b>
+<b class="fc"><i>1267</i>&nbsp;                _blockPosition = 0;</b>
+<i>1268</i>&nbsp;            }
+<b class="fc"><i>1269</i>&nbsp;            int nextByte = (0xff &amp; _curr._buffer[_blockPosition]);</b>
+<b class="fc"><i>1270</i>&nbsp;            _blockPosition++;</b>
+<b class="fc"><i>1271</i>&nbsp;            _pos++;</b>
+<b class="fc"><i>1272</i>&nbsp;            fail_on_version_change();</b>
+<b class="fc"><i>1273</i>&nbsp;            return nextByte;</b>
+<i>1274</i>&nbsp;        }
+<i>1275</i>&nbsp;        private final void fail_on_version_change() throws IOException
+<i>1276</i>&nbsp;        {
+<b class="fc"><i>1277</i>&nbsp;            if (_buf.getVersion() != _version) {</b>
+<b class="nc"><i>1278</i>&nbsp;                this.close();</b>
+<b class="nc"><i>1279</i>&nbsp;                throw new BlockedBufferException(&quot;buffer has been changed!&quot;);</b>
+<i>1280</i>&nbsp;            }
+<b class="fc"><i>1281</i>&nbsp;        }</b>
+<i>1282</i>&nbsp;        @Override
+<i>1283</i>&nbsp;        public final long skip(long n) throws IOException
+<i>1284</i>&nbsp;        {
+<b class="nc"><i>1285</i>&nbsp;            if (n &lt; 0 || n &gt; Integer.MAX_VALUE) throw new IllegalArgumentException(&quot;we only handle buffer less than &quot;+Integer.MAX_VALUE+&quot; bytes in length&quot;);</b>
+<b class="nc"><i>1286</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="nc"><i>1287</i>&nbsp;            fail_on_version_change();</b>
+<b class="nc"><i>1288</i>&nbsp;            if (_pos &gt;= _buf.size()) return -1;</b>
+<b class="nc"><i>1289</i>&nbsp;            int len = (int)n;</b>
+<b class="nc"><i>1290</i>&nbsp;            if (len == 0) return 0;</b>
+<b class="nc"><i>1291</i>&nbsp;            int startingPos = _pos;</b>
+<b class="nc"><i>1292</i>&nbsp;            int localEnd = _pos + len;</b>
+<b class="nc"><i>1293</i>&nbsp;            if (localEnd &gt; _buf.size()) localEnd = _buf.size();</b>
+<i>1294</i>&nbsp;            // if we run off the end of this block, we need to update
+<i>1295</i>&nbsp;            // our current block ( _curr ) we&#39;ll update the block position
+<i>1296</i>&nbsp;            // in any event (once we know the right block, of course)
+<b class="nc"><i>1297</i>&nbsp;            if (localEnd &gt; _blockPosition + _curr._offset) {</b>
+<b class="nc"><i>1298</i>&nbsp;                _curr = _buf.findBlockForRead(this, _version, _curr, localEnd);</b>
+<i>1299</i>&nbsp;            }
+<b class="nc"><i>1300</i>&nbsp;            _blockPosition = localEnd - _curr._offset;</b>
+<b class="nc"><i>1301</i>&nbsp;            _pos = localEnd;</b>
+<b class="nc"><i>1302</i>&nbsp;            fail_on_version_change();</b>
+<b class="nc"><i>1303</i>&nbsp;            return _pos - startingPos;</b>
+<i>1304</i>&nbsp;        }
+<i>1305</i>&nbsp;    }
+<i>1306</i>&nbsp;    /**
+<i>1307</i>&nbsp;     * Reads data from a byte buffer, keeps a local position and
+<i>1308</i>&nbsp;     * a current block.  Snaps a buffer length on creation;
+<i>1309</i>&nbsp;     */
+<b class="fc"><i>1310</i>&nbsp;    public static class BlockedByteOutputStream extends java.io.OutputStream</b>
+<i>1311</i>&nbsp;    {
+<i>1312</i>&nbsp;        BlockedBuffer _buf;
+<i>1313</i>&nbsp;        int           _pos;
+<i>1314</i>&nbsp;        bbBlock       _curr;
+<i>1315</i>&nbsp;        int           _blockPosition;
+<i>1316</i>&nbsp;        int           _version;
+<i>1317</i>&nbsp;        /**
+<i>1318</i>&nbsp;         * creates writable stream (OutputStream) that writes
+<i>1319</i>&nbsp;         * to a fresh blocked buffer.  The stream is initially
+<i>1320</i>&nbsp;         * position at offset 0.
+<i>1321</i>&nbsp;         */
+<b class="nc"><i>1322</i>&nbsp;        public BlockedByteOutputStream() {</b>
+<b class="nc"><i>1323</i>&nbsp;            _buf = new BlockedBuffer();</b>
+<b class="nc"><i>1324</i>&nbsp;            _version = _buf.getVersion();</b>
+<b class="nc"><i>1325</i>&nbsp;            _set_position(0);</b>
+<b class="nc"><i>1326</i>&nbsp;        }</b>
+<i>1327</i>&nbsp;        /**
+<i>1328</i>&nbsp;         * creates writable stream (OutputStream) that writes
+<i>1329</i>&nbsp;         * to the supplied byte buffer.  The stream is initially
+<i>1330</i>&nbsp;         * position at offset 0.
+<i>1331</i>&nbsp;         * @param bb blocked buffer to write to
+<i>1332</i>&nbsp;         */
+<b class="fc"><i>1333</i>&nbsp;        public BlockedByteOutputStream(BlockedBuffer bb) {</b>
+<b class="fc"><i>1334</i>&nbsp;            _buf = bb;</b>
+<b class="fc"><i>1335</i>&nbsp;            _version = _buf.getVersion();</b>
+<b class="fc"><i>1336</i>&nbsp;            _set_position(0);</b>
+<b class="fc"><i>1337</i>&nbsp;        }</b>
+<i>1338</i>&nbsp;        /**
+<i>1339</i>&nbsp;         * creates writable stream (OutputStream) that can write
+<i>1340</i>&nbsp;         * to the supplied byte buffer.  The stream is initially
+<i>1341</i>&nbsp;         * position at offset off.
+<i>1342</i>&nbsp;         * @param bb blocked buffer to write to
+<i>1343</i>&nbsp;         * @param off initial offset to write to
+<i>1344</i>&nbsp;         */
+<b class="nc"><i>1345</i>&nbsp;        public BlockedByteOutputStream(BlockedBuffer bb, int off) {</b>
+<b class="nc"><i>1346</i>&nbsp;            if (bb == null || off &lt; 0 || off &gt; bb.size() ) {</b>
+<b class="nc"><i>1347</i>&nbsp;                throw new IllegalArgumentException();</b>
+<i>1348</i>&nbsp;            }
+<b class="nc"><i>1349</i>&nbsp;            _buf = bb;</b>
+<b class="nc"><i>1350</i>&nbsp;            _version = _buf.getVersion();</b>
+<b class="nc"><i>1351</i>&nbsp;            _set_position(0);</b>
+<b class="nc"><i>1352</i>&nbsp;        }</b>
+<i>1353</i>&nbsp;        /**
+<i>1354</i>&nbsp;         * the current offset in the buffer
+<i>1355</i>&nbsp;         */
+<i>1356</i>&nbsp;        public final int position() {
+<b class="fc"><i>1357</i>&nbsp;            return this._pos;</b>
+<i>1358</i>&nbsp;        }
+<i>1359</i>&nbsp;        /**
+<i>1360</i>&nbsp;         * this forces a version sync with the underlying blocked buffer.
+<i>1361</i>&nbsp;         * The current position is lost during this call.
+<i>1362</i>&nbsp;         *
+<i>1363</i>&nbsp;         */
+<i>1364</i>&nbsp;        public final void sync() throws IOException
+<i>1365</i>&nbsp;        {
+<b class="nc"><i>1366</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="nc"><i>1367</i>&nbsp;            _version = _buf.getVersion();</b>
+<b class="nc"><i>1368</i>&nbsp;            _pos = 0;</b>
+<b class="nc"><i>1369</i>&nbsp;            _curr = null;</b>
+<b class="nc"><i>1370</i>&nbsp;        }</b>
+<i>1371</i>&nbsp;        /**
+<i>1372</i>&nbsp;         * debug api to force check for internal validity of the
+<i>1373</i>&nbsp;         * underlying buffer
+<i>1374</i>&nbsp;         */
+<i>1375</i>&nbsp;        public final boolean _validate() {
+<b class="nc"><i>1376</i>&nbsp;            return this._buf._validate();</b>
+<i>1377</i>&nbsp;        }
+<i>1378</i>&nbsp;        /**
+<i>1379</i>&nbsp;         * repositions this stream in the buffer.  The next
+<i>1380</i>&nbsp;         * read, write, or insert operation will take place
+<i>1381</i>&nbsp;         * at the specified position.  The position must
+<i>1382</i>&nbsp;         * be within the contiguous range of written bytes,
+<i>1383</i>&nbsp;         * including the pseudo end of file character just
+<i>1384</i>&nbsp;         * past the end, which can be written on and returns
+<i>1385</i>&nbsp;         * -1 if read.
+<i>1386</i>&nbsp;         */
+<i>1387</i>&nbsp;        public final BlockedByteOutputStream setPosition(int pos) throws IOException
+<i>1388</i>&nbsp;        {
+<b class="fc"><i>1389</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="fc"><i>1390</i>&nbsp;            fail_on_version_change();</b>
+<b class="fc"><i>1391</i>&nbsp;            if (pos &lt; 0 || pos &gt; _buf.size()) {</b>
+<b class="nc"><i>1392</i>&nbsp;                throw new IllegalArgumentException();</b>
+<i>1393</i>&nbsp;            }
+<b class="fc"><i>1394</i>&nbsp;            this._set_position(pos);</b>
+<b class="fc"><i>1395</i>&nbsp;            fail_on_version_change();</b>
+<b class="fc"><i>1396</i>&nbsp;            return this;</b>
+<i>1397</i>&nbsp;        }
+<i>1398</i>&nbsp;        private final void _set_position(int pos)
+<i>1399</i>&nbsp;        {
+<b class="fc"><i>1400</i>&nbsp;            _pos = pos;</b>
+<b class="fc"><i>1401</i>&nbsp;            _curr = _buf.findBlockForRead(this, _version, _curr, pos);</b>
+<b class="fc"><i>1402</i>&nbsp;            _blockPosition = _pos - _curr._offset;</b>
+<b class="fc"><i>1403</i>&nbsp;            return;</b>
+<i>1404</i>&nbsp;        }
+<i>1405</i>&nbsp;        /**
+<i>1406</i>&nbsp;         * closes the steam and clears its reference to the
+<i>1407</i>&nbsp;         * byte buffer.  Once closed it cannot be used.
+<i>1408</i>&nbsp;         */
+<i>1409</i>&nbsp;        @Override
+<i>1410</i>&nbsp;        public final void close() throws IOException
+<i>1411</i>&nbsp;        {
+<b class="nc"><i>1412</i>&nbsp;            this._buf = null;</b>
+<b class="nc"><i>1413</i>&nbsp;            this._pos = -1;</b>
+<b class="nc"><i>1414</i>&nbsp;            return;</b>
+<i>1415</i>&nbsp;        }
+<i>1416</i>&nbsp;        /**
+<i>1417</i>&nbsp;         * Inserts space and writes 1 byte to the current
+<i>1418</i>&nbsp;         * position in this output stream.  Only the low
+<i>1419</i>&nbsp;         * order byte of the passed in int is written the
+<i>1420</i>&nbsp;         * high order bits are ignored.
+<i>1421</i>&nbsp;         */
+<i>1422</i>&nbsp;        @Override
+<i>1423</i>&nbsp;        public final void write(int b) throws IOException
+<i>1424</i>&nbsp;        {
+<b class="fc"><i>1425</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="fc"><i>1426</i>&nbsp;            _buf.start_mutate(this, _version);</b>
+<b class="fc"><i>1427</i>&nbsp;            _write(b);</b>
+<b class="fc"><i>1428</i>&nbsp;            _version = _buf.end_mutate(this);</b>
+<b class="fc"><i>1429</i>&nbsp;            return;</b>
+<i>1430</i>&nbsp;        }
+<i>1431</i>&nbsp;        final void start_write() {
+<b class="nc"><i>1432</i>&nbsp;            _buf.start_mutate(this, _version);</b>
+<b class="nc"><i>1433</i>&nbsp;        }</b>
+<i>1434</i>&nbsp;        final void end_write() {
+<b class="nc"><i>1435</i>&nbsp;            _version = _buf.end_mutate(this);</b>
+<b class="nc"><i>1436</i>&nbsp;        }</b>
+<i>1437</i>&nbsp;        final void _write(int b) throws IOException
+<i>1438</i>&nbsp;        {
+<b class="fc"><i>1439</i>&nbsp;            if (bytesAvailableToWriteInCurr(_pos) &lt; 1) {</b>
+<b class="nc"><i>1440</i>&nbsp;                _curr = _buf.findBlockForWrite(this, _version, _curr, _pos);</b>
+<b class="nc"><i>1441</i>&nbsp;                assert _curr._offset == _pos;</b>
+<b class="nc"><i>1442</i>&nbsp;                _blockPosition = 0;</b>
+<i>1443</i>&nbsp;            }
+<b class="fc"><i>1444</i>&nbsp;            _curr._buffer[_blockPosition++] = (byte)(b &amp; 0xff);</b>
+<b class="fc"><i>1445</i>&nbsp;            _pos++;</b>
+<b class="fc"><i>1446</i>&nbsp;            if (_blockPosition &gt; _curr._limit) {</b>
+<b class="fc"><i>1447</i>&nbsp;                _curr._limit = _blockPosition;</b>
+<b class="fc"><i>1448</i>&nbsp;                if (_pos &gt; _buf._buf_limit ) _buf._buf_limit = _pos;</b>
+<i>1449</i>&nbsp;            }
+<b class="fc"><i>1450</i>&nbsp;        }</b>
+<i>1451</i>&nbsp;        private final int bytesAvailableToWriteInCurr(int pos) {
+<b class="fc"><i>1452</i>&nbsp;            assert _curr != null;</b>
+<b class="fc"><i>1453</i>&nbsp;            assert _curr._offset &lt;= pos;</b>
+<b class="fc"><i>1454</i>&nbsp;            assert _curr._offset + _curr._limit &gt;= pos;</b>
+<b class="fc"><i>1455</i>&nbsp;            if (_curr._idx &lt; this._buf._next_block_position - 1) {</b>
+<b class="fc"><i>1456</i>&nbsp;                return _curr.bytesAvailableToRead(pos);</b>
+<i>1457</i>&nbsp;            }
+<b class="fc"><i>1458</i>&nbsp;            int ret = _curr._buffer.length - (pos - _curr._offset);</b>
+<b class="fc"><i>1459</i>&nbsp;            return ret; // _curr.bytesAvailableToWrite(pos);</b>
+<i>1460</i>&nbsp;        }
+<i>1461</i>&nbsp;        /**
+<i>1462</i>&nbsp;         * Writes len bytes from the specified byte array starting
+<i>1463</i>&nbsp;         * at in the user array at offset off to the current position
+<i>1464</i>&nbsp;         * in this output stream.
+<i>1465</i>&nbsp;         */
+<i>1466</i>&nbsp;        @Override
+<i>1467</i>&nbsp;        public final void write(byte[] b, int off, int len) throws IOException
+<i>1468</i>&nbsp;        {
+<b class="fc"><i>1469</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="fc"><i>1470</i>&nbsp;            _buf.start_mutate(this, _version);</b>
+<b class="fc"><i>1471</i>&nbsp;            _write(b, off, len);</b>
+<b class="fc"><i>1472</i>&nbsp;            _version = _buf.end_mutate(this);</b>
+<b class="fc"><i>1473</i>&nbsp;        }</b>
+<i>1474</i>&nbsp;        private final void _write(byte[] b, int off, int len)
+<i>1475</i>&nbsp;        {
+<b class="fc"><i>1476</i>&nbsp;            int end_b = off + len;</b>
+<b class="fc"><i>1477</i>&nbsp;            while (off &lt; end_b)</b>
+<i>1478</i>&nbsp;            {
+<b class="fc"><i>1479</i>&nbsp;                int writeInThisBlock = bytesAvailableToWriteInCurr(_pos);</b>
+<b class="fc"><i>1480</i>&nbsp;                if (writeInThisBlock &gt; end_b - off) {</b>
+<b class="fc"><i>1481</i>&nbsp;                    writeInThisBlock = end_b - off;</b>
+<i>1482</i>&nbsp;                }
+<b class="fc"><i>1483</i>&nbsp;                assert writeInThisBlock &gt;= 0;</b>
+<b class="fc"><i>1484</i>&nbsp;                if (writeInThisBlock &gt; 0) {</b>
+<b class="fc"><i>1485</i>&nbsp;                    System.arraycopy(b, off, _curr._buffer, _blockPosition, writeInThisBlock);</b>
+<b class="fc"><i>1486</i>&nbsp;                    off += writeInThisBlock;</b>
+<b class="fc"><i>1487</i>&nbsp;                    _pos += writeInThisBlock;</b>
+<b class="fc"><i>1488</i>&nbsp;                    _blockPosition += writeInThisBlock;</b>
+<b class="fc"><i>1489</i>&nbsp;                    if (_blockPosition &gt; _curr._limit) {</b>
+<b class="fc"><i>1490</i>&nbsp;                        _curr._limit = _blockPosition;</b>
+<b class="fc"><i>1491</i>&nbsp;                        if (_pos &gt; _buf._buf_limit) _buf._buf_limit = _pos;</b>
+<i>1492</i>&nbsp;                    }
+<i>1493</i>&nbsp;                    else {
+<b class="fc"><i>1494</i>&nbsp;                        assert _pos &lt;= _buf._buf_limit;</b>
+<i>1495</i>&nbsp;                    }
+<i>1496</i>&nbsp;                }
+<b class="fc"><i>1497</i>&nbsp;                if (off &gt;= end_b) break;</b>
+<i>1498</i>&nbsp;
+<b class="fc"><i>1499</i>&nbsp;                _curr = _buf.findBlockForWrite(this, _version, _curr, _pos);</b>
+<b class="fc"><i>1500</i>&nbsp;                _blockPosition = _curr.blockOffsetFromAbsolute(_pos);</b>
+<b class="fc"><i>1501</i>&nbsp;                assert _curr._offset == _pos || off &gt;= end_b;</b>
+<b class="fc"><i>1502</i>&nbsp;            }</b>
+<b class="fc"><i>1503</i>&nbsp;        }</b>
+<i>1504</i>&nbsp;        /**
+<i>1505</i>&nbsp;         * Writes bytes from the specified byte stream from its current
+<i>1506</i>&nbsp;         * stream position to the end of the stream.  Writing the bytes
+<i>1507</i>&nbsp;         * to the current position in this output stream.
+<i>1508</i>&nbsp;         * @throws IOException
+<i>1509</i>&nbsp;         */
+<i>1510</i>&nbsp;        public final void write(InputStream bytestream) throws IOException
+<i>1511</i>&nbsp;        {
+<b class="nc"><i>1512</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="nc"><i>1513</i>&nbsp;            _buf.start_mutate(this, _version);</b>
+<b class="nc"><i>1514</i>&nbsp;            _write(bytestream, -1);</b>
+<b class="nc"><i>1515</i>&nbsp;            _version = _buf.end_mutate(this);</b>
+<b class="nc"><i>1516</i>&nbsp;        }</b>
+<i>1517</i>&nbsp;        /**
+<i>1518</i>&nbsp;         * Writes bytes from the specified byte stream from its current
+<i>1519</i>&nbsp;         * stream position up to length bytes from the stream.  Writing the
+<i>1520</i>&nbsp;         * bytes to the current position in this output stream.
+<i>1521</i>&nbsp;         * @throws IOException
+<i>1522</i>&nbsp;         */
+<i>1523</i>&nbsp;        public final void write(InputStream bytestream, int len) throws IOException
+<i>1524</i>&nbsp;        {
+<b class="nc"><i>1525</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="nc"><i>1526</i>&nbsp;            _buf.start_mutate(this, _version);</b>
+<b class="nc"><i>1527</i>&nbsp;            _write(bytestream, len);</b>
+<b class="nc"><i>1528</i>&nbsp;            _version = _buf.end_mutate(this);</b>
+<b class="nc"><i>1529</i>&nbsp;        }</b>
+<i>1530</i>&nbsp;        /**
+<i>1531</i>&nbsp;         * helper to write data.  This does not check input arguments.
+<i>1532</i>&nbsp;         * @param bytestream source of the data
+<i>1533</i>&nbsp;         * @param len number of bytes to read from the input stream, -1 for all
+<i>1534</i>&nbsp;         * @throws IOException
+<i>1535</i>&nbsp;         */
+<i>1536</i>&nbsp;        private final void _write(InputStream bytestream, int len) throws IOException
+<i>1537</i>&nbsp;        {
+<b class="nc"><i>1538</i>&nbsp;            if (len == 0) return;</b>
+<i>1539</i>&nbsp;
+<b class="nc"><i>1540</i>&nbsp;            int written = 0;</b>
+<b class="nc"><i>1541</i>&nbsp;            boolean read_all = (len == -1);</b>
+<i>1542</i>&nbsp;
+<i>1543</i>&nbsp;            for (;;)
+<i>1544</i>&nbsp;            {
+<b class="nc"><i>1545</i>&nbsp;                int writeInThisBlock = bytesAvailableToWriteInCurr(_pos);</b>
+<b class="nc"><i>1546</i>&nbsp;                assert writeInThisBlock &gt;= 0;</b>
+<i>1547</i>&nbsp;
+<b class="nc"><i>1548</i>&nbsp;                int to_read = read_all ? writeInThisBlock : len;</b>
+<b class="nc"><i>1549</i>&nbsp;                if (to_read &gt; writeInThisBlock) {</b>
+<b class="nc"><i>1550</i>&nbsp;                    to_read = writeInThisBlock;</b>
+<i>1551</i>&nbsp;                }
+<b class="nc"><i>1552</i>&nbsp;                int len_read = bytestream.read(_curr._buffer, _blockPosition, to_read);</b>
+<b class="nc"><i>1553</i>&nbsp;                if (len_read == -1) break;</b>
+<b class="nc"><i>1554</i>&nbsp;                if (len_read &gt; 0) {</b>
+<b class="nc"><i>1555</i>&nbsp;                    _pos += len_read;</b>
+<b class="nc"><i>1556</i>&nbsp;                    _blockPosition += len_read;</b>
+<b class="nc"><i>1557</i>&nbsp;                    if (_blockPosition &gt; _curr._limit) {</b>
+<b class="nc"><i>1558</i>&nbsp;                        _curr._limit = _blockPosition;</b>
+<b class="nc"><i>1559</i>&nbsp;                        if (_pos &gt; _buf._buf_limit) _buf._buf_limit = _pos;</b>
+<i>1560</i>&nbsp;                    }
+<i>1561</i>&nbsp;                    else {
+<b class="nc"><i>1562</i>&nbsp;                        assert _pos &lt;= _buf._buf_limit;</b>
+<i>1563</i>&nbsp;                    }
+<i>1564</i>&nbsp;                }
+<i>1565</i>&nbsp;
+<b class="nc"><i>1566</i>&nbsp;                if (len_read == writeInThisBlock) {</b>
+<b class="nc"><i>1567</i>&nbsp;                    _curr = _buf.findBlockForWrite(this, _version, _curr, _pos);</b>
+<b class="nc"><i>1568</i>&nbsp;                    _blockPosition = _curr.blockOffsetFromAbsolute(_pos);</b>
+<b class="nc"><i>1569</i>&nbsp;                    assert _curr._offset == _pos || written &lt; len_read;</b>
+<i>1570</i>&nbsp;                }
+<i>1571</i>&nbsp;                else {
+<b class="nc"><i>1572</i>&nbsp;                    assert len_read &lt; writeInThisBlock;</b>
+<i>1573</i>&nbsp;                }
+<b class="nc"><i>1574</i>&nbsp;                if (!read_all) {</b>
+<b class="nc"><i>1575</i>&nbsp;                    len -= len_read;</b>
+<b class="nc"><i>1576</i>&nbsp;                    if (len &lt; 1) break;</b>
+<i>1577</i>&nbsp;                }
+<b class="nc"><i>1578</i>&nbsp;            }</b>
+<b class="nc"><i>1579</i>&nbsp;        }</b>
+<i>1580</i>&nbsp;        /**
+<i>1581</i>&nbsp;         * Inserts the amount space requested at the current
+<i>1582</i>&nbsp;         * position in this output stream.  No data is written
+<i>1583</i>&nbsp;         * into the output stream.
+<i>1584</i>&nbsp;         */
+<i>1585</i>&nbsp;        public final void insert(int len) throws IOException
+<i>1586</i>&nbsp;        {
+<b class="fc"><i>1587</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="fc"><i>1588</i>&nbsp;            if (len &lt; 0) {</b>
+<b class="nc"><i>1589</i>&nbsp;                throw new IllegalArgumentException();</b>
+<i>1590</i>&nbsp;            }
+<b class="fc"><i>1591</i>&nbsp;            if (len &gt; 0) {</b>
+<b class="fc"><i>1592</i>&nbsp;                _buf.start_mutate(this, _version);</b>
+<b class="fc"><i>1593</i>&nbsp;                _buf.insert(this, _version, _curr, _pos, len);</b>
+<b class="fc"><i>1594</i>&nbsp;                _version = _buf.end_mutate(this);</b>
+<i>1595</i>&nbsp;            }
+<b class="fc"><i>1596</i>&nbsp;            return;</b>
+<i>1597</i>&nbsp;        }
+<i>1598</i>&nbsp;        /**
+<i>1599</i>&nbsp;         * Inserts space and writes 1 byte to the current
+<i>1600</i>&nbsp;         * position in this output stream.  Only the low
+<i>1601</i>&nbsp;         * order byte of the passed in int is written the
+<i>1602</i>&nbsp;         * high order bits are ignored.
+<i>1603</i>&nbsp;         */
+<i>1604</i>&nbsp;        public final void insert(byte b) throws IOException
+<i>1605</i>&nbsp;        {
+<b class="nc"><i>1606</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="nc"><i>1607</i>&nbsp;            _buf.start_mutate(this, _version);</b>
+<b class="nc"><i>1608</i>&nbsp;            _buf.insert(this, _version, _curr, _pos, 1);</b>
+<b class="nc"><i>1609</i>&nbsp;            _write(b);</b>
+<b class="nc"><i>1610</i>&nbsp;            _version = _buf.end_mutate(this);</b>
+<b class="nc"><i>1611</i>&nbsp;        }</b>
+<i>1612</i>&nbsp;        /**
+<i>1613</i>&nbsp;         * Inserts space and writes len bytes from the specified
+<i>1614</i>&nbsp;         * byte array starting at in the user array at offset off
+<i>1615</i>&nbsp;         * to the current position in this output stream.
+<i>1616</i>&nbsp;         */
+<i>1617</i>&nbsp;        public final void insert(byte[] b, int off, int len) throws IOException
+<i>1618</i>&nbsp;        {
+<b class="fc"><i>1619</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="fc"><i>1620</i>&nbsp;            _buf.start_mutate(this, _version);</b>
+<b class="fc"><i>1621</i>&nbsp;            _buf.insert(this, _version, _curr, _pos, len);</b>
+<b class="fc"><i>1622</i>&nbsp;            _write(b, off, len);</b>
+<b class="fc"><i>1623</i>&nbsp;            _version = _buf.end_mutate(this);</b>
+<b class="fc"><i>1624</i>&nbsp;        }</b>
+<i>1625</i>&nbsp;        /**
+<i>1626</i>&nbsp;         * Inserts space and writes len bytes from the specified
+<i>1627</i>&nbsp;         * byte array starting at in the user array at offset off
+<i>1628</i>&nbsp;         * to the current position in this output stream.
+<i>1629</i>&nbsp;         */
+<i>1630</i>&nbsp;        public final void remove(int len) throws IOException
+<i>1631</i>&nbsp;        {
+<b class="fc"><i>1632</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="fc"><i>1633</i>&nbsp;            _buf.start_mutate(this, _version);</b>
+<b class="fc"><i>1634</i>&nbsp;            _curr = _buf.remove(this, _version, _curr, _pos, len);</b>
+<b class="fc"><i>1635</i>&nbsp;            _version = _buf.end_mutate(this);</b>
+<b class="fc"><i>1636</i>&nbsp;        }</b>
+<i>1637</i>&nbsp;        /**
+<i>1638</i>&nbsp;         * trucates the buffer at the current location after this
+<i>1639</i>&nbsp;         * call the last previously written or read byte will be
+<i>1640</i>&nbsp;         * the end of the buffer.
+<i>1641</i>&nbsp;         */
+<i>1642</i>&nbsp;        public final void truncate() throws IOException
+<i>1643</i>&nbsp;        {
+<b class="fc"><i>1644</i>&nbsp;            if (_buf == null) throw new IOException(&quot;stream is closed&quot;);</b>
+<b class="fc"><i>1645</i>&nbsp;            if (this._buf._buf_limit == _pos) return;</b>
+<b class="fc"><i>1646</i>&nbsp;            _buf.start_mutate(this, _version);</b>
+<b class="fc"><i>1647</i>&nbsp;            _curr = _buf.truncate(this, _version, _pos);</b>
+<b class="fc"><i>1648</i>&nbsp;            _version = _buf.end_mutate(this);</b>
+<b class="fc"><i>1649</i>&nbsp;        }</b>
+<i>1650</i>&nbsp;        private final void fail_on_version_change() throws IOException
+<i>1651</i>&nbsp;        {
+<b class="fc"><i>1652</i>&nbsp;            if (_buf.getVersion() != _version) {</b>
+<b class="nc"><i>1653</i>&nbsp;                this.close();</b>
+<b class="nc"><i>1654</i>&nbsp;                throw new BlockedBufferException(&quot;buffer has been changed!&quot;);</b>
+<i>1655</i>&nbsp;            }
+<b class="fc"><i>1656</i>&nbsp;        }</b>
+<i>1657</i>&nbsp;    }
+<i>1658</i>&nbsp;    public static class BlockedBufferException extends IonException
+<i>1659</i>&nbsp;    {
+<i>1660</i>&nbsp;        private static final long serialVersionUID = 1582507845614969389L;
+<b class="nc"><i>1661</i>&nbsp;        public BlockedBufferException() { super(); }</b>
+<b class="nc"><i>1662</i>&nbsp;        public BlockedBufferException(String message) { super(message); }</b>
+<i>1663</i>&nbsp;        public BlockedBufferException(String message, Throwable cause) {
+<b class="nc"><i>1664</i>&nbsp;            super(message, cause);</b>
+<b class="nc"><i>1665</i>&nbsp;        }</b>
+<b class="nc"><i>1666</i>&nbsp;        public BlockedBufferException(Throwable cause) { super(cause); }</b>
+<i>1667</i>&nbsp;    }
+<i>1668</i>&nbsp;    public static class BufferedOutputStream
+<i>1669</i>&nbsp;        extends OutputStream
+<i>1670</i>&nbsp;    {
+<i>1671</i>&nbsp;        BlockedBuffer           _buffer;
+<i>1672</i>&nbsp;        BlockedByteOutputStream _writer;
+<i>1673</i>&nbsp;        public BufferedOutputStream() {
+<b class="fc"><i>1674</i>&nbsp;            this(new BlockedBuffer());</b>
+<b class="fc"><i>1675</i>&nbsp;        }</b>
+<b class="fc"><i>1676</i>&nbsp;        public BufferedOutputStream(BlockedBuffer buffer) {</b>
+<b class="fc"><i>1677</i>&nbsp;            _buffer = buffer;</b>
+<b class="fc"><i>1678</i>&nbsp;            _writer = new BlockedByteOutputStream(_buffer);</b>
+<b class="fc"><i>1679</i>&nbsp;        }</b>
+<i>1680</i>&nbsp;        /**
+<i>1681</i>&nbsp;         * Gets the size in bytes of this binary data.
+<i>1682</i>&nbsp;         * This is generally needed before calling {@link #getBytes()} or
+<i>1683</i>&nbsp;         * {@link #getBytes(byte[], int, int)}.
+<i>1684</i>&nbsp;         *
+<i>1685</i>&nbsp;         * @return the size in bytes.
+<i>1686</i>&nbsp;         */
+<i>1687</i>&nbsp;        public int byteSize()
+<i>1688</i>&nbsp;        {
+<b class="fc"><i>1689</i>&nbsp;            return _buffer.size();</b>
+<i>1690</i>&nbsp;        }
+<i>1691</i>&nbsp;        /**
+<i>1692</i>&nbsp;         * Copies the current contents of this writer as a new byte array holding
+<i>1693</i>&nbsp;         * Ion binary-encoded data.
+<i>1694</i>&nbsp;         * This allocates an array of the size needed to exactly
+<i>1695</i>&nbsp;         * hold the output and copies the entire value to it.
+<i>1696</i>&nbsp;         *
+<i>1697</i>&nbsp;         * @return the byte array with the writers output
+<i>1698</i>&nbsp;         * @throws IOException
+<i>1699</i>&nbsp;         */
+<i>1700</i>&nbsp;        public byte[] getBytes()
+<i>1701</i>&nbsp;            throws IOException
+<i>1702</i>&nbsp;        {
+<b class="fc"><i>1703</i>&nbsp;            int size = byteSize();</b>
+<b class="fc"><i>1704</i>&nbsp;            ByteArrayOutputStream byteStream = new ByteArrayOutputStream(size);</b>
+<b class="fc"><i>1705</i>&nbsp;            writeBytes(byteStream);</b>
+<b class="fc"><i>1706</i>&nbsp;            byte[] bytes = byteStream.toByteArray();</b>
+<b class="fc"><i>1707</i>&nbsp;            return bytes;</b>
+<i>1708</i>&nbsp;        }
+<i>1709</i>&nbsp;        /**
+<i>1710</i>&nbsp;         * Copies the current contents of the writer to a given byte array
+<i>1711</i>&nbsp;         * array.  This starts writing to the array at offset and writes
+<i>1712</i>&nbsp;         * up to len bytes.
+<i>1713</i>&nbsp;         * If this writer is not able to stop in the middle of its
+<i>1714</i>&nbsp;         * work this may overwrite the array and later throw and exception.
+<i>1715</i>&nbsp;         *
+<i>1716</i>&nbsp;         * @param bytes users byte array to write into
+<i>1717</i>&nbsp;         * @param offset initial offset in the array to write into
+<i>1718</i>&nbsp;         * @param len maximum number of bytes to write from offset on
+<i>1719</i>&nbsp;         * @return number of bytes written
+<i>1720</i>&nbsp;         * @throws IOException
+<i>1721</i>&nbsp;         */
+<i>1722</i>&nbsp;        public int getBytes(byte[] bytes, int offset, int len)
+<i>1723</i>&nbsp;            throws IOException
+<i>1724</i>&nbsp;        {
+<b class="nc"><i>1725</i>&nbsp;            SimpleByteBuffer outbuf = new SimpleByteBuffer(bytes, offset, len);</b>
+<b class="nc"><i>1726</i>&nbsp;            OutputStream     writer = (OutputStream)outbuf.getWriter();</b>
+<b class="nc"><i>1727</i>&nbsp;            int              written = writeBytes(writer);</b>
+<b class="nc"><i>1728</i>&nbsp;            return written;</b>
+<i>1729</i>&nbsp;        }
+<i>1730</i>&nbsp;        /**
+<i>1731</i>&nbsp;         * Writes the current contents of the writer to the output
+<i>1732</i>&nbsp;         * stream.  This is only valid if the writer is not in the
+<i>1733</i>&nbsp;         * middle of writing a container.
+<i>1734</i>&nbsp;         *
+<i>1735</i>&nbsp;         * @param userstream OutputStream to write the bytes to
+<i>1736</i>&nbsp;         * @return int length of bytes written
+<i>1737</i>&nbsp;         * @throws IOException
+<i>1738</i>&nbsp;         */
+<i>1739</i>&nbsp;        public int writeBytes(OutputStream userstream)
+<i>1740</i>&nbsp;            throws IOException
+<i>1741</i>&nbsp;        {
+<b class="fc"><i>1742</i>&nbsp;            int limit = _buffer.size();</b>
+<b class="fc"><i>1743</i>&nbsp;            int pos = 0;</b>
+<b class="fc"><i>1744</i>&nbsp;            int version = _buffer.getVersion();</b>
+<b class="fc"><i>1745</i>&nbsp;            bbBlock curr = null;</b>
+<b class="fc"><i>1746</i>&nbsp;            _buffer.start_mutate(this, version);</b>
+<b class="fc"><i>1747</i>&nbsp;            while (pos &lt; limit) {</b>
+<b class="fc"><i>1748</i>&nbsp;                curr = _buffer.findBlockForRead(this, version, curr, pos);</b>
+<b class="fc"><i>1749</i>&nbsp;                if (curr == null) {</b>
+<b class="nc"><i>1750</i>&nbsp;                    throw new IOException(&quot;buffer missing expected bytes&quot;);</b>
+<i>1751</i>&nbsp;                }
+<b class="fc"><i>1752</i>&nbsp;                int len = curr.bytesAvailableToRead(pos);</b>
+<b class="fc"><i>1753</i>&nbsp;                if (len &lt;= 0) {</b>
+<b class="nc"><i>1754</i>&nbsp;                    throw new IOException(&quot;buffer missing expected bytes&quot;);</b>
+<i>1755</i>&nbsp;                }
+<b class="fc"><i>1756</i>&nbsp;                userstream.write(curr._buffer, 0, len);</b>
+<b class="fc"><i>1757</i>&nbsp;                pos += len;</b>
+<b class="fc"><i>1758</i>&nbsp;            }</b>
+<b class="fc"><i>1759</i>&nbsp;            _buffer.end_mutate(this);</b>
+<b class="fc"><i>1760</i>&nbsp;            return pos;</b>
+<i>1761</i>&nbsp;        }
+<i>1762</i>&nbsp;        @Override
+<i>1763</i>&nbsp;        public void write(int b) throws IOException
+<i>1764</i>&nbsp;        {
+<b class="fc"><i>1765</i>&nbsp;            _writer.write(b);</b>
+<b class="fc"><i>1766</i>&nbsp;        }</b>
+<i>1767</i>&nbsp;        @Override
+<i>1768</i>&nbsp;        public void write(byte[] bytes) throws IOException
+<i>1769</i>&nbsp;        {
+<b class="fc"><i>1770</i>&nbsp;            write(bytes, 0, bytes.length);</b>
+<b class="fc"><i>1771</i>&nbsp;        }</b>
+<i>1772</i>&nbsp;        @Override
+<i>1773</i>&nbsp;        public void write(byte[] bytes, int off, int len) throws IOException
+<i>1774</i>&nbsp;        {
+<b class="fc"><i>1775</i>&nbsp;            _writer.write(bytes, off, len);</b>
+<b class="fc"><i>1776</i>&nbsp;        }</b>
+<i>1777</i>&nbsp;    }
+<i>1778</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

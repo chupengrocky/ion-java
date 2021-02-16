@@ -1,0 +1,282 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: OutputStreamFastAppendable</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: OutputStreamFastAppendable (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">OutputStreamFastAppendable</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/ 12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.9%
+  </span>
+  <span class="absValue">
+    (70/ 77)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.impl._Private_IonConstants.makeUnicodeScalar;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;import com.amazon.ion.util._Private_FastAppendable;
+<i>21</i>&nbsp;import java.io.Closeable;
+<i>22</i>&nbsp;import java.io.Flushable;
+<i>23</i>&nbsp;import java.io.IOException;
+<i>24</i>&nbsp;import java.io.OutputStream;
+<i>25</i>&nbsp;
+<i>26</i>&nbsp;/**
+<i>27</i>&nbsp; * Adapts an {@link OutputStream} to implement {@link _Private_FastAppendable}.
+<i>28</i>&nbsp; * &lt;b&gt;This always outputs UTF-8!&lt;/b&gt;
+<i>29</i>&nbsp; */
+<b class="fc"><i>30</i>&nbsp;final class OutputStreamFastAppendable</b>
+<i>31</i>&nbsp;    implements _Private_FastAppendable, Closeable, Flushable
+<i>32</i>&nbsp;{
+<i>33</i>&nbsp;    private static final int MAX_BYTES_LEN = 4096;
+<i>34</i>&nbsp;
+<i>35</i>&nbsp;    private final OutputStream _out;
+<i>36</i>&nbsp;
+<i>37</i>&nbsp;    /** Aggregates bytes so we can write to {@link #_out} in large batches. */
+<i>38</i>&nbsp;    private final byte[] _byteBuffer;
+<i>39</i>&nbsp;
+<i>40</i>&nbsp;    /** Position in {@link #_byteBuffer} where we&#39;ll write the next byte. */
+<i>41</i>&nbsp;    private int _pos;
+<i>42</i>&nbsp;
+<i>43</i>&nbsp;    OutputStreamFastAppendable(OutputStream out)
+<b class="fc"><i>44</i>&nbsp;    {</b>
+<b class="fc"><i>45</i>&nbsp;        out.getClass(); // Efficient null check</b>
+<i>46</i>&nbsp;
+<b class="fc"><i>47</i>&nbsp;        _out = out;</b>
+<b class="fc"><i>48</i>&nbsp;        _pos = 0;</b>
+<b class="fc"><i>49</i>&nbsp;        _byteBuffer = new byte[MAX_BYTES_LEN];</b>
+<b class="fc"><i>50</i>&nbsp;    }</b>
+<i>51</i>&nbsp;
+<i>52</i>&nbsp;    // ------------------- FastAppendable Appendable Methods -------------------
+<i>53</i>&nbsp;    public Appendable append(char c)
+<i>54</i>&nbsp;        throws IOException
+<i>55</i>&nbsp;    {
+<i>56</i>&nbsp;        // Choose what method to use depending on type of character.
+<b class="fc"><i>57</i>&nbsp;        if (c &lt; 0x80) {</b>
+<b class="fc"><i>58</i>&nbsp;            appendAscii(c);</b>
+<i>59</i>&nbsp;        } else {
+<b class="nc"><i>60</i>&nbsp;            appendUtf16(c);</b>
+<i>61</i>&nbsp;        }
+<b class="fc"><i>62</i>&nbsp;        return this;</b>
+<i>63</i>&nbsp;    }
+<i>64</i>&nbsp;
+<i>65</i>&nbsp;    public Appendable append(CharSequence csq)
+<i>66</i>&nbsp;        throws IOException
+<i>67</i>&nbsp;    {
+<b class="fc"><i>68</i>&nbsp;        append(csq, 0, csq.length());</b>
+<b class="fc"><i>69</i>&nbsp;        return this;</b>
+<i>70</i>&nbsp;    }
+<i>71</i>&nbsp;
+<i>72</i>&nbsp;    public Appendable append(CharSequence csq, int start, int end)
+<i>73</i>&nbsp;        throws IOException
+<i>74</i>&nbsp;    {
+<b class="fc"><i>75</i>&nbsp;        for (int ii = start; ii &lt; end; ++ii) {</b>
+<b class="fc"><i>76</i>&nbsp;            append(csq.charAt(ii));</b>
+<i>77</i>&nbsp;        }
+<b class="fc"><i>78</i>&nbsp;        return this;</b>
+<i>79</i>&nbsp;    }
+<i>80</i>&nbsp;
+<i>81</i>&nbsp;    public final void appendAscii(char c)
+<i>82</i>&nbsp;        throws IOException
+<i>83</i>&nbsp;    {
+<b class="fc"><i>84</i>&nbsp;        if (_pos == _byteBuffer.length) {</b>
+<b class="fc"><i>85</i>&nbsp;            _out.write(_byteBuffer, 0, _pos);</b>
+<b class="fc"><i>86</i>&nbsp;            _pos = 0;</b>
+<i>87</i>&nbsp;        }
+<b class="fc"><i>88</i>&nbsp;        assert c &lt; 0x80;</b>
+<b class="fc"><i>89</i>&nbsp;        _byteBuffer[_pos++] = (byte)c;</b>
+<b class="fc"><i>90</i>&nbsp;    }</b>
+<i>91</i>&nbsp;
+<i>92</i>&nbsp;    public final void appendAscii(CharSequence csq)
+<i>93</i>&nbsp;        throws IOException
+<i>94</i>&nbsp;    {
+<b class="fc"><i>95</i>&nbsp;        appendAscii(csq, 0, csq.length());</b>
+<b class="fc"><i>96</i>&nbsp;    }</b>
+<i>97</i>&nbsp;
+<i>98</i>&nbsp;    @SuppressWarnings(&quot;deprecation&quot;)
+<i>99</i>&nbsp;    public final void appendAscii(CharSequence csq, int start, int end)
+<i>100</i>&nbsp;        throws IOException
+<i>101</i>&nbsp;    {
+<b class="fc"><i>102</i>&nbsp;        if (csq instanceof String) {</b>
+<i>103</i>&nbsp;            // Using deprecated String.getBytes intentionally, since it is
+<i>104</i>&nbsp;            // correct behavior in this case, and much faster.
+<b class="fc"><i>105</i>&nbsp;            String str = (String)csq;</b>
+<b class="fc"><i>106</i>&nbsp;            int len = end - start;</b>
+<b class="fc"><i>107</i>&nbsp;            if (_pos + len &lt; _byteBuffer.length) {</b>
+<i>108</i>&nbsp;                // put String bytes directly into buffer
+<b class="fc"><i>109</i>&nbsp;                str.getBytes(start, end, _byteBuffer, _pos);</b>
+<b class="fc"><i>110</i>&nbsp;                _pos += len;</b>
+<i>111</i>&nbsp;            } else {
+<i>112</i>&nbsp;                do {
+<i>113</i>&nbsp;                    // flush the buffer on every loop
+<b class="fc"><i>114</i>&nbsp;                    _out.write(_byteBuffer, 0, _pos);</b>
+<i>115</i>&nbsp;                    // check if we still need to split into chunks
+<b class="fc"><i>116</i>&nbsp;                    _pos = (end - start &gt; _byteBuffer.length</b>
+<b class="fc"><i>117</i>&nbsp;                                ? _byteBuffer.length</b>
+<b class="fc"><i>118</i>&nbsp;                                : end - start);</b>
+<b class="fc"><i>119</i>&nbsp;                    str.getBytes(start, start + _pos, _byteBuffer, 0);</b>
+<b class="fc"><i>120</i>&nbsp;                    start += _pos;</b>
+<b class="fc"><i>121</i>&nbsp;                } while (start &lt; end);</b>
+<i>122</i>&nbsp;            }
+<b class="fc"><i>123</i>&nbsp;        } else {</b>
+<b class="fc"><i>124</i>&nbsp;            for (int ii=start; ii &lt; end; ii++) {</b>
+<b class="fc"><i>125</i>&nbsp;                if (_pos == _byteBuffer.length) {</b>
+<b class="nc"><i>126</i>&nbsp;                    _out.write(_byteBuffer, 0, _pos);</b>
+<b class="nc"><i>127</i>&nbsp;                    _pos = 0;</b>
+<i>128</i>&nbsp;                }
+<b class="fc"><i>129</i>&nbsp;                char c = csq.charAt(ii);</b>
+<b class="fc"><i>130</i>&nbsp;                assert c &lt; 0x80;</b>
+<b class="fc"><i>131</i>&nbsp;                _byteBuffer[_pos++] = (byte)c;</b>
+<i>132</i>&nbsp;            }
+<i>133</i>&nbsp;        }
+<b class="fc"><i>134</i>&nbsp;    }</b>
+<i>135</i>&nbsp;
+<i>136</i>&nbsp;    public final void appendUtf16(char c)
+<i>137</i>&nbsp;        throws IOException
+<i>138</i>&nbsp;    {
+<b class="fc"><i>139</i>&nbsp;        assert c &gt;= 0x80;</b>
+<i>140</i>&nbsp;
+<b class="fc"><i>141</i>&nbsp;        if (_pos &gt; _byteBuffer.length - 3) {</b>
+<b class="nc"><i>142</i>&nbsp;            _out.write(_byteBuffer, 0, _pos);</b>
+<b class="nc"><i>143</i>&nbsp;            _pos = 0;</b>
+<i>144</i>&nbsp;        }
+<i>145</i>&nbsp;
+<b class="fc"><i>146</i>&nbsp;        if (c &lt; 0x800) {</b>
+<b class="fc"><i>147</i>&nbsp;            _byteBuffer[_pos++] = (byte)( 0xff &amp; (0xC0 | ( c &gt;&gt; 6        )) );</b>
+<b class="fc"><i>148</i>&nbsp;            _byteBuffer[_pos++] = (byte)( 0xff &amp; (0x80 | ( c       &amp; 0x3F)) );</b>
+<b class="fc"><i>149</i>&nbsp;        } else if (c &lt; 0x10000) {</b>
+<b class="fc"><i>150</i>&nbsp;            _byteBuffer[_pos++] = (byte)( 0xff &amp; (0xE0 | ( c &gt;&gt; 12       )) );</b>
+<b class="fc"><i>151</i>&nbsp;            _byteBuffer[_pos++] = (byte)( 0xff &amp; (0x80 | ((c &gt;&gt; 6) &amp; 0x3F)) );</b>
+<b class="fc"><i>152</i>&nbsp;            _byteBuffer[_pos++] = (byte)( 0xff &amp; (0x80 | ( c       &amp; 0x3F)) );</b>
+<i>153</i>&nbsp;        }
+<b class="fc"><i>154</i>&nbsp;    }</b>
+<i>155</i>&nbsp;
+<i>156</i>&nbsp;    public final void appendUtf16Surrogate(char leadSurrogate,
+<i>157</i>&nbsp;                                           char trailSurrogate)
+<i>158</i>&nbsp;        throws IOException
+<i>159</i>&nbsp;    {
+<i>160</i>&nbsp;        // Here we must convert a UTF-16 surrogate pair to UTF-8 bytes.
+<i>161</i>&nbsp;
+<b class="fc"><i>162</i>&nbsp;        int c = makeUnicodeScalar(leadSurrogate, trailSurrogate);</b>
+<b class="fc"><i>163</i>&nbsp;        assert c &gt;= 0x10000;</b>
+<i>164</i>&nbsp;
+<b class="fc"><i>165</i>&nbsp;        if (_pos &gt; _byteBuffer.length - 4) {</b>
+<b class="nc"><i>166</i>&nbsp;            _out.write(_byteBuffer, 0, _pos);</b>
+<b class="nc"><i>167</i>&nbsp;            _pos = 0;</b>
+<i>168</i>&nbsp;        }
+<i>169</i>&nbsp;
+<b class="fc"><i>170</i>&nbsp;        _byteBuffer[_pos++] = (byte)( 0xff &amp; (0xF0 | ( c &gt;&gt; 18        )) );</b>
+<b class="fc"><i>171</i>&nbsp;        _byteBuffer[_pos++] = (byte)( 0xff &amp; (0x80 | ((c &gt;&gt; 12) &amp; 0x3F)) );</b>
+<b class="fc"><i>172</i>&nbsp;        _byteBuffer[_pos++] = (byte)( 0xff &amp; (0x80 | ((c &gt;&gt; 6)  &amp; 0x3F)) );</b>
+<b class="fc"><i>173</i>&nbsp;        _byteBuffer[_pos++] = (byte)( 0xff &amp; (0x80 | ( c        &amp; 0x3F)) );</b>
+<b class="fc"><i>174</i>&nbsp;    }</b>
+<i>175</i>&nbsp;
+<i>176</i>&nbsp;
+<i>177</i>&nbsp;    public final void flush()
+<i>178</i>&nbsp;        throws IOException
+<i>179</i>&nbsp;    {
+<b class="fc"><i>180</i>&nbsp;        if (_pos &gt; 0) {</b>
+<b class="fc"><i>181</i>&nbsp;            _out.write(_byteBuffer, 0, _pos);</b>
+<b class="fc"><i>182</i>&nbsp;            _pos = 0;</b>
+<i>183</i>&nbsp;        }
+<b class="fc"><i>184</i>&nbsp;        _out.flush();</b>
+<b class="fc"><i>185</i>&nbsp;    }</b>
+<i>186</i>&nbsp;
+<i>187</i>&nbsp;    public final void close()
+<i>188</i>&nbsp;        throws IOException
+<i>189</i>&nbsp;    {
+<i>190</i>&nbsp;        try
+<i>191</i>&nbsp;        {
+<b class="fc"><i>192</i>&nbsp;            flush();</b>
+<i>193</i>&nbsp;        }
+<i>194</i>&nbsp;        finally
+<i>195</i>&nbsp;        {
+<b class="fc"><i>196</i>&nbsp;            _out.close();</b>
+<b class="fc"><i>197</i>&nbsp;        }</b>
+<b class="fc"><i>198</i>&nbsp;    }</b>
+<i>199</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

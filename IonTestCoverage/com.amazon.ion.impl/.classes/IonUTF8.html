@@ -1,0 +1,700 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonUTF8</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonUTF8 (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IonUTF8</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (38/ 38)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.8%
+  </span>
+  <span class="absValue">
+    (152/ 157)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">IonUTF8$InvalidUnicodeCodePoint</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 8)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonUTF8$UTF8ToChar</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 63)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    73.1%
+  </span>
+  <span class="absValue">
+    (38/ 52)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (152/ 228)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import com.amazon.ion.IonException;
+<i>19</i>&nbsp;import java.io.Closeable;
+<i>20</i>&nbsp;import java.io.IOException;
+<i>21</i>&nbsp;import java.io.OutputStream;
+<i>22</i>&nbsp;
+<i>23</i>&nbsp;/**
+<i>24</i>&nbsp; * this class holds the various constants and helper functions Ion uses
+<i>25</i>&nbsp; * to &quot;understand&quot; UTF-8 encoded input.  This may duplicate values that
+<i>26</i>&nbsp; * are available in Java&#39;s Character class, but the goal is to fully
+<i>27</i>&nbsp; * control and isolate the UTF-8 conversion here.
+<i>28</i>&nbsp; *
+<i>29</i>&nbsp; * The helper functions are intended to avoid the various bit twiddling
+<i>30</i>&nbsp; * errors that can easily occur when working with bits.  As these functions
+<i>31</i>&nbsp; * are all static final methods, and very short, the Java compilers should
+<i>32</i>&nbsp; * find them very easy to in-line.  (in previous testing I have observed
+<i>33</i>&nbsp; * that the Sun JVM heavily in-lines such methods).
+<i>34</i>&nbsp; */
+<b class="fc"><i>35</i>&nbsp;class IonUTF8 {</b>
+<i>36</i>&nbsp;    private final static int UNICODE_MAX_ONE_BYTE_SCALAR       = 0x0000007F; // 7 bits     =  7 / 1 = 7    bits per byte
+<i>37</i>&nbsp;    private final static int UNICODE_MAX_TWO_BYTE_SCALAR       = 0x000007FF; // 5 + 6 bits = 11 / 2 = 5.50 bits per byte
+<i>38</i>&nbsp;    private final static int UNICODE_MAX_THREE_BYTE_SCALAR     = 0x0000FFFF; // 4 + 6+6    = 16 / 3 = 5.33 bits per byte
+<i>39</i>&nbsp;    private final static int UNICODE_MAX_FOUR_BYTE_SCALAR      = 0x0010FFFF; // 3 + 6+6+6  = 21 / 4 = 5.25 bits per byte
+<i>40</i>&nbsp;    private final static int UNICODE_THREE_BYTES_OR_FEWER_MASK = 0xFFFF0000; // if any bits under the f&#39;s are set the scalar is either 4 bytes long, or invalid (negative or too large)
+<i>41</i>&nbsp;    private final static int UNICODE_TWO_BYTE_HEADER           = 0xC0;       // 8 + 4 = 12 = 0xC0
+<i>42</i>&nbsp;    private final static int UNICODE_THREE_BYTE_HEADER         = 0xE0;       // 8+4+2 = 14 = 0xE0
+<i>43</i>&nbsp;    private final static int UNICODE_FOUR_BYTE_HEADER          = 0xF0;       // 8+4+2+1 = 15 = 0xF0
+<i>44</i>&nbsp;    private final static int UNICODE_CONTINUATION_BYTE_HEADER  = 0x80;
+<i>45</i>&nbsp;    private final static int UNICODE_TWO_BYTE_MASK             = 0x1F;       // 8-3 = 5 bits
+<i>46</i>&nbsp;    private final static int UNICODE_THREE_BYTE_MASK           = 0x0F;       // 4 bits
+<i>47</i>&nbsp;    private final static int UNICODE_FOUR_BYTE_MASK            = 0x07;       // 3 bits
+<i>48</i>&nbsp;    private final static int UNICODE_CONTINUATION_BYTE_MASK    = 0x3F;       // 6 bits in each continuation char
+<i>49</i>&nbsp;
+<i>50</i>&nbsp;    private final static int MAXIMUM_UTF16_1_CHAR_CODE_POINT   = 0x0000FFFF;
+<i>51</i>&nbsp;    private final static int SURROGATE_OFFSET                  = 0x00010000;
+<i>52</i>&nbsp;    private final static int SURROGATE_MASK                    = 0xFFFFFC00;  // 0b 1111 1100 0000 0000
+<i>53</i>&nbsp;    private final static int HIGH_SURROGATE                    = 0x0000D800;  // 0b 1101 1000 0000 0000
+<i>54</i>&nbsp;    private final static int LOW_SURROGATE                     = 0x0000DC00;  // 0b 1101 1100 0000 0000
+<i>55</i>&nbsp;
+<i>56</i>&nbsp;    public final static boolean isHighSurrogate(int b) {
+<b class="fc"><i>57</i>&nbsp;        return ((b &amp; SURROGATE_MASK) == HIGH_SURROGATE);</b>
+<i>58</i>&nbsp;    }
+<i>59</i>&nbsp;    public final static boolean isLowSurrogate(int b) {
+<b class="fc"><i>60</i>&nbsp;        return ((b &amp; SURROGATE_MASK) == LOW_SURROGATE);</b>
+<i>61</i>&nbsp;    }
+<i>62</i>&nbsp;    public final static boolean isSurrogate(int b) {
+<b class="fc"><i>63</i>&nbsp;        return (b &gt;= 0xD800 &amp;&amp; b &lt;= 0xDFFF);  // 55296 to 57343 or 2048 chars in all</b>
+<i>64</i>&nbsp;    }
+<i>65</i>&nbsp;
+<i>66</i>&nbsp;    public final static boolean isOneByteUTF8(int b) {
+<b class="fc"><i>67</i>&nbsp;        return ((b &amp; 0x80) == 0);</b>
+<i>68</i>&nbsp;    }
+<i>69</i>&nbsp;    public final static boolean isTwoByteUTF8(int b) {
+<b class="fc"><i>70</i>&nbsp;        return ((b &amp; ~UNICODE_TWO_BYTE_MASK) == UNICODE_TWO_BYTE_HEADER);</b>
+<i>71</i>&nbsp;    }
+<i>72</i>&nbsp;    public final static boolean isThreeByteUTF8(int b) {
+<b class="fc"><i>73</i>&nbsp;        return ((b &amp; ~UNICODE_THREE_BYTE_MASK) == UNICODE_THREE_BYTE_HEADER);</b>
+<i>74</i>&nbsp;    }
+<i>75</i>&nbsp;    public final static boolean isFourByteUTF8(int b) {
+<b class="fc"><i>76</i>&nbsp;        return ((b &amp; ~UNICODE_FOUR_BYTE_MASK) == UNICODE_FOUR_BYTE_HEADER);</b>
+<i>77</i>&nbsp;    }
+<i>78</i>&nbsp;    public final static boolean isContinueByteUTF8(int b) {
+<b class="fc"><i>79</i>&nbsp;        return ((b &amp; ~UNICODE_CONTINUATION_BYTE_MASK) == UNICODE_CONTINUATION_BYTE_HEADER);</b>
+<i>80</i>&nbsp;    }
+<i>81</i>&nbsp;    public final static boolean isStartByte(int b) {
+<b class="fc"><i>82</i>&nbsp;        return isOneByteUTF8(b) || !isContinueByteUTF8(b);</b>
+<i>83</i>&nbsp;    }
+<i>84</i>&nbsp;
+<i>85</i>&nbsp;    public final static char twoByteScalar(int b1, int b2) {
+<b class="fc"><i>86</i>&nbsp;        int c = ((b1 &amp; UNICODE_TWO_BYTE_MASK) &lt;&lt; 6) | (b2 &amp; UNICODE_CONTINUATION_BYTE_MASK);</b>
+<b class="fc"><i>87</i>&nbsp;        return (char)c;</b>
+<i>88</i>&nbsp;    }
+<i>89</i>&nbsp;    public final static int threeByteScalar(int b1, int b2, int b3) {
+<b class="fc"><i>90</i>&nbsp;        int c = ((b1 &amp; UNICODE_THREE_BYTE_MASK) &lt;&lt; 12) | ((b2 &amp; UNICODE_CONTINUATION_BYTE_MASK) &lt;&lt; 6) | (b3 &amp; UNICODE_CONTINUATION_BYTE_MASK);</b>
+<b class="fc"><i>91</i>&nbsp;        return c;</b>
+<i>92</i>&nbsp;    }
+<i>93</i>&nbsp;    public final static int fourByteScalar(int b1, int b2, int b3, int b4) {
+<b class="fc"><i>94</i>&nbsp;        int c = ((b1 &amp; UNICODE_FOUR_BYTE_MASK) &lt;&lt; 18) | ((b2 &amp; UNICODE_CONTINUATION_BYTE_MASK) &lt;&lt; 12) | ((b3 &amp; UNICODE_CONTINUATION_BYTE_MASK) &lt;&lt; 6) | (b4 &amp; UNICODE_CONTINUATION_BYTE_MASK);</b>
+<b class="fc"><i>95</i>&nbsp;        return c;</b>
+<i>96</i>&nbsp;    }
+<i>97</i>&nbsp;
+<i>98</i>&nbsp;    public final static boolean isOneByteScalar(int unicodeScalar) {
+<b class="fc"><i>99</i>&nbsp;        return (unicodeScalar &lt;= UNICODE_MAX_ONE_BYTE_SCALAR);</b>
+<i>100</i>&nbsp;    }
+<i>101</i>&nbsp;    public final static boolean isTwoByteScalar(int unicodeScalar) {
+<b class="fc"><i>102</i>&nbsp;        return (unicodeScalar &lt;= UNICODE_MAX_TWO_BYTE_SCALAR);</b>
+<i>103</i>&nbsp;    }
+<i>104</i>&nbsp;    public final static boolean isThreeByteScalar(int unicodeScalar) {
+<b class="fc"><i>105</i>&nbsp;        return (unicodeScalar &lt;= UNICODE_MAX_THREE_BYTE_SCALAR);</b>
+<i>106</i>&nbsp;    }
+<i>107</i>&nbsp;    public final static boolean isFourByteScalar(int unicodeScalar) {
+<b class="fc"><i>108</i>&nbsp;        return (unicodeScalar &lt;= UNICODE_MAX_FOUR_BYTE_SCALAR);</b>
+<i>109</i>&nbsp;    }
+<i>110</i>&nbsp;    public final static int getUTF8ByteCount(int unicodeScalar) {
+<b class="fc"><i>111</i>&nbsp;        if ((unicodeScalar &amp; UNICODE_THREE_BYTES_OR_FEWER_MASK) != 0) {</b>
+<b class="fc"><i>112</i>&nbsp;            if (unicodeScalar &gt;= 0 &amp;&amp; unicodeScalar &lt;= UNICODE_MAX_FOUR_BYTE_SCALAR)  return 4;</b>
+<b class="nc"><i>113</i>&nbsp;            throw new InvalidUnicodeCodePoint();</b>
+<i>114</i>&nbsp;        }
+<b class="fc"><i>115</i>&nbsp;        if (unicodeScalar &lt;= UNICODE_MAX_ONE_BYTE_SCALAR)   return 1;</b>
+<b class="fc"><i>116</i>&nbsp;        if (unicodeScalar &lt;= UNICODE_MAX_TWO_BYTE_SCALAR)   return 2;</b>
+<b class="fc"><i>117</i>&nbsp;        return 3;</b>
+<i>118</i>&nbsp;    }
+<i>119</i>&nbsp;    public final static int getUTF8LengthFromFirstByte(int firstByte) {
+<b class="fc"><i>120</i>&nbsp;        firstByte &amp;= 0xff;</b>
+<b class="fc"><i>121</i>&nbsp;        if (isOneByteUTF8(firstByte))   return 1;</b>
+<b class="fc"><i>122</i>&nbsp;        if (isTwoByteUTF8(firstByte))   return 2;</b>
+<b class="fc"><i>123</i>&nbsp;        if (isThreeByteUTF8(firstByte)) return 3;</b>
+<b class="fc"><i>124</i>&nbsp;        if (isFourByteUTF8(firstByte))  return 4;</b>
+<b class="fc"><i>125</i>&nbsp;        return -1;</b>
+<i>126</i>&nbsp;    }
+<i>127</i>&nbsp;
+<i>128</i>&nbsp;    public final static byte getByte1Of2(int unicodeScalar) {
+<b class="fc"><i>129</i>&nbsp;        int b1 = (UNICODE_TWO_BYTE_HEADER         | ((unicodeScalar &gt;&gt; 6)  &amp; UNICODE_TWO_BYTE_MASK));</b>
+<b class="fc"><i>130</i>&nbsp;        return (byte)b1;</b>
+<i>131</i>&nbsp;    }
+<i>132</i>&nbsp;    public final static byte getByte2Of2(int unicodeScalar) {
+<b class="fc"><i>133</i>&nbsp;        int b2 = (UNICODE_CONTINUATION_BYTE_HEADER | ( unicodeScalar        &amp; UNICODE_CONTINUATION_BYTE_MASK));</b>
+<b class="fc"><i>134</i>&nbsp;        return (byte)b2;</b>
+<i>135</i>&nbsp;    }
+<i>136</i>&nbsp;    public final static byte getByte1Of3(int unicodeScalar) {
+<b class="fc"><i>137</i>&nbsp;        int b1 = (UNICODE_THREE_BYTE_HEADER        | ((unicodeScalar &gt;&gt; 12) &amp; UNICODE_THREE_BYTE_MASK));</b>
+<b class="fc"><i>138</i>&nbsp;        return (byte)b1;</b>
+<i>139</i>&nbsp;    }
+<i>140</i>&nbsp;    public final static byte getByte2Of3(int unicodeScalar) {
+<b class="fc"><i>141</i>&nbsp;        int b2 = (UNICODE_CONTINUATION_BYTE_HEADER | ((unicodeScalar &gt;&gt; 6)  &amp; UNICODE_CONTINUATION_BYTE_MASK));</b>
+<b class="fc"><i>142</i>&nbsp;        return (byte)b2;</b>
+<i>143</i>&nbsp;    }
+<i>144</i>&nbsp;    public final static byte getByte3Of3(int unicodeScalar) {
+<b class="fc"><i>145</i>&nbsp;        int b3 = (UNICODE_CONTINUATION_BYTE_HEADER | ( unicodeScalar        &amp; UNICODE_CONTINUATION_BYTE_MASK));</b>
+<b class="fc"><i>146</i>&nbsp;        return (byte)b3;</b>
+<i>147</i>&nbsp;    }
+<i>148</i>&nbsp;    public final static byte getByte1Of4(int unicodeScalar) {
+<b class="fc"><i>149</i>&nbsp;        int b1 = (UNICODE_FOUR_BYTE_HEADER         | ((unicodeScalar &gt;&gt; 18) &amp; UNICODE_FOUR_BYTE_MASK));</b>
+<b class="fc"><i>150</i>&nbsp;        return (byte)b1;</b>
+<i>151</i>&nbsp;    }
+<i>152</i>&nbsp;    public final static byte getByte2Of4(int unicodeScalar) {
+<b class="fc"><i>153</i>&nbsp;        int b2 = (UNICODE_CONTINUATION_BYTE_HEADER | ((unicodeScalar &gt;&gt; 12) &amp; UNICODE_CONTINUATION_BYTE_MASK));</b>
+<b class="fc"><i>154</i>&nbsp;        return (byte)b2;</b>
+<i>155</i>&nbsp;    }
+<i>156</i>&nbsp;    public final static byte getByte3Of4(int unicodeScalar) {
+<b class="fc"><i>157</i>&nbsp;        int b3 = (UNICODE_CONTINUATION_BYTE_HEADER | ((unicodeScalar &gt;&gt; 6)  &amp; UNICODE_CONTINUATION_BYTE_MASK));</b>
+<b class="fc"><i>158</i>&nbsp;        return (byte)b3;</b>
+<i>159</i>&nbsp;    }
+<i>160</i>&nbsp;    public final static byte getByte4Of4(int unicodeScalar) {
+<b class="fc"><i>161</i>&nbsp;        int b4 = (UNICODE_CONTINUATION_BYTE_HEADER | ( unicodeScalar        &amp; UNICODE_CONTINUATION_BYTE_MASK));</b>
+<b class="fc"><i>162</i>&nbsp;        return (byte)b4;</b>
+<i>163</i>&nbsp;    }
+<i>164</i>&nbsp;    public final static int getAs4BytesReversed(int unicodeScalar) {
+<i>165</i>&nbsp;        int four_bytes;
+<i>166</i>&nbsp;
+<i>167</i>&nbsp;        //loop to write these bytes out:
+<i>168</i>&nbsp;        //bytes = getAs4Bytes(us)
+<i>169</i>&nbsp;        //do {
+<i>170</i>&nbsp;        //    write(bytes &amp; 0xff);
+<i>171</i>&nbsp;        //    bytes = (bytes &gt;&gt;&gt; 8);  // don&#39;t sign extend
+<i>172</i>&nbsp;        //} until (bytes == 0);
+<i>173</i>&nbsp;
+<b class="fc"><i>174</i>&nbsp;        switch (getUTF8ByteCount(unicodeScalar)) {</b>
+<i>175</i>&nbsp;        case 1:
+<b class="fc"><i>176</i>&nbsp;            return unicodeScalar;</b>
+<i>177</i>&nbsp;        case 2:
+<b class="fc"><i>178</i>&nbsp;            four_bytes  = getByte1Of2(unicodeScalar);</b>
+<b class="fc"><i>179</i>&nbsp;            four_bytes |= getByte2Of2(unicodeScalar) &lt;&lt; 8;</b>
+<b class="fc"><i>180</i>&nbsp;            return four_bytes;</b>
+<i>181</i>&nbsp;        case 3:
+<b class="fc"><i>182</i>&nbsp;            four_bytes  = getByte1Of3(unicodeScalar);</b>
+<b class="fc"><i>183</i>&nbsp;            four_bytes |= getByte2Of3(unicodeScalar) &lt;&lt; 8;</b>
+<b class="fc"><i>184</i>&nbsp;            four_bytes |= getByte3Of3(unicodeScalar) &lt;&lt; 16;</b>
+<b class="fc"><i>185</i>&nbsp;            return four_bytes;</b>
+<i>186</i>&nbsp;        case 4:
+<b class="fc"><i>187</i>&nbsp;            four_bytes  = getByte1Of4(unicodeScalar);</b>
+<b class="fc"><i>188</i>&nbsp;            four_bytes |= getByte2Of4(unicodeScalar) &lt;&lt; 8;</b>
+<b class="fc"><i>189</i>&nbsp;            four_bytes |= getByte3Of4(unicodeScalar) &lt;&lt; 16;</b>
+<b class="fc"><i>190</i>&nbsp;            four_bytes |= getByte4Of4(unicodeScalar) &lt;&lt; 24;</b>
+<b class="fc"><i>191</i>&nbsp;            return four_bytes;</b>
+<i>192</i>&nbsp;        }
+<b class="nc"><i>193</i>&nbsp;        throw new InvalidUnicodeCodePoint();</b>
+<i>194</i>&nbsp;    }
+<i>195</i>&nbsp;    /**
+<i>196</i>&nbsp;     * this helper converts the unicodeScalar to a sequence of utf8 bytes
+<i>197</i>&nbsp;     * and copies those bytes into the supplied outputBytes array.  If there
+<i>198</i>&nbsp;     * is insufficient room in the array to hold the generated bytes it will
+<i>199</i>&nbsp;     * throw an ArrayIndexOutOfBoundsException.  It does not check for the
+<i>200</i>&nbsp;     * validity of the passed in unicodeScalar thoroughly, however it will
+<i>201</i>&nbsp;     * throw an InvalidUnicodeCodePoint if the value is less than negative
+<i>202</i>&nbsp;     * or the UTF8 encoding would exceed 4 bytes.
+<i>203</i>&nbsp;     * @param unicodeScalar scalar to convert
+<i>204</i>&nbsp;     * @param outputBytes user output array to fill with UTF8 bytes
+<i>205</i>&nbsp;     * @param offset first array element to fill
+<i>206</i>&nbsp;     * @param maxLength maximum number of array elements to fill
+<i>207</i>&nbsp;     * @return number of bytes written to the output array
+<i>208</i>&nbsp;     */
+<i>209</i>&nbsp;    public final static int convertToUTF8Bytes(int unicodeScalar, byte[] outputBytes, int offset, int maxLength)
+<i>210</i>&nbsp;    {
+<b class="fc"><i>211</i>&nbsp;        int dst = offset;</b>
+<b class="fc"><i>212</i>&nbsp;        int end = offset + maxLength;</b>
+<i>213</i>&nbsp;
+<b class="fc"><i>214</i>&nbsp;        switch (getUTF8ByteCount(unicodeScalar)) {</b>
+<i>215</i>&nbsp;        case 1:
+<b class="fc"><i>216</i>&nbsp;            if (dst &gt;= end) throw new ArrayIndexOutOfBoundsException();</b>
+<b class="fc"><i>217</i>&nbsp;            outputBytes[dst++] = (byte)(unicodeScalar &amp; 0xff);</b>
+<b class="fc"><i>218</i>&nbsp;            break;</b>
+<i>219</i>&nbsp;        case 2:
+<b class="fc"><i>220</i>&nbsp;            if (dst+1 &gt;= end) throw new ArrayIndexOutOfBoundsException();</b>
+<b class="fc"><i>221</i>&nbsp;            outputBytes[dst++] = getByte1Of2(unicodeScalar);</b>
+<b class="fc"><i>222</i>&nbsp;            outputBytes[dst++] = getByte2Of2(unicodeScalar);</b>
+<b class="fc"><i>223</i>&nbsp;            break;</b>
+<i>224</i>&nbsp;        case 3:
+<b class="fc"><i>225</i>&nbsp;            if (dst+2 &gt;= end) throw new ArrayIndexOutOfBoundsException();</b>
+<b class="fc"><i>226</i>&nbsp;            outputBytes[dst++] = getByte1Of3(unicodeScalar);</b>
+<b class="fc"><i>227</i>&nbsp;            outputBytes[dst++] = getByte2Of3(unicodeScalar);</b>
+<b class="fc"><i>228</i>&nbsp;            outputBytes[dst++] = getByte3Of3(unicodeScalar);</b>
+<b class="fc"><i>229</i>&nbsp;            break;</b>
+<i>230</i>&nbsp;        case 4:
+<b class="fc"><i>231</i>&nbsp;            if (dst+3 &gt;= end) throw new ArrayIndexOutOfBoundsException();</b>
+<b class="fc"><i>232</i>&nbsp;            outputBytes[dst++] = getByte1Of4(unicodeScalar);</b>
+<b class="fc"><i>233</i>&nbsp;            outputBytes[dst++] = getByte2Of4(unicodeScalar);</b>
+<b class="fc"><i>234</i>&nbsp;            outputBytes[dst++] = getByte3Of4(unicodeScalar);</b>
+<b class="fc"><i>235</i>&nbsp;            outputBytes[dst++] = getByte4Of4(unicodeScalar);</b>
+<i>236</i>&nbsp;            break;
+<i>237</i>&nbsp;        }
+<b class="fc"><i>238</i>&nbsp;        return dst - offset;</b>
+<i>239</i>&nbsp;    }
+<i>240</i>&nbsp;    /**
+<i>241</i>&nbsp;     * converts a unicode code point to a 0-3 bytes of UTF8
+<i>242</i>&nbsp;     * encoded data and a length - note this doesn&#39;t pack
+<i>243</i>&nbsp;     * a 1 byte character and it returns the start character.
+<i>244</i>&nbsp;     * this is the unpacking routine
+<i>245</i>&nbsp;     *  while (_utf8_pretch_byte_count &gt; 0 &amp;&amp; offset &lt; limit) {
+<i>246</i>&nbsp;     *    _utf8_pretch_byte_count--;
+<i>247</i>&nbsp;     *    buffer[offset++] = (byte)((_utf8_pretch_bytes &gt;&gt; (_utf8_pretch_byte_count*8)) &amp; 0xff);
+<i>248</i>&nbsp;     *  }
+<i>249</i>&nbsp;     */
+<i>250</i>&nbsp;    public final static int packBytesAfter1(int unicodeScalar, int utf8Len)
+<i>251</i>&nbsp;    {
+<i>252</i>&nbsp;        int packed_chars;
+<i>253</i>&nbsp;
+<b class="fc"><i>254</i>&nbsp;        switch (utf8Len) {</b>
+<i>255</i>&nbsp;        default:
+<b class="nc"><i>256</i>&nbsp;            throw new IllegalArgumentException(&quot;pack requires len &gt; 1&quot;);</b>
+<i>257</i>&nbsp;        case 2:
+<b class="fc"><i>258</i>&nbsp;            packed_chars = getByte2Of2(unicodeScalar);</b>
+<b class="fc"><i>259</i>&nbsp;            break;</b>
+<i>260</i>&nbsp;        case 3:
+<b class="fc"><i>261</i>&nbsp;            packed_chars  = getByte2Of3(unicodeScalar);</b>
+<b class="fc"><i>262</i>&nbsp;            packed_chars |= getByte3Of3(unicodeScalar) &lt;&lt; 8;</b>
+<b class="fc"><i>263</i>&nbsp;            break;</b>
+<i>264</i>&nbsp;        case 4:
+<b class="fc"><i>265</i>&nbsp;            packed_chars = getByte2Of4(unicodeScalar);</b>
+<b class="fc"><i>266</i>&nbsp;            packed_chars |= getByte3Of4(unicodeScalar) &lt;&lt; 8;</b>
+<b class="fc"><i>267</i>&nbsp;            packed_chars |= getByte4Of4(unicodeScalar) &lt;&lt; 16;</b>
+<i>268</i>&nbsp;            break;
+<i>269</i>&nbsp;        }
+<b class="fc"><i>270</i>&nbsp;        return packed_chars;</b>
+<i>271</i>&nbsp;
+<i>272</i>&nbsp;    }
+<i>273</i>&nbsp;
+<i>274</i>&nbsp;    public final static int getScalarFrom4BytesReversed(int utf8BytesReversed)
+<i>275</i>&nbsp;    {
+<i>276</i>&nbsp;        //loop to read these bytes out:
+<i>277</i>&nbsp;        // int b4r = read();
+<i>278</i>&nbsp;        // switch (getUTF8LengthFromFirstByte(b)) {
+<i>279</i>&nbsp;        // case 4: b4r |= (read() &lt;&lt; 24);  // fall through
+<i>280</i>&nbsp;        // case 3: b4r |= (read() &lt;&lt; 16);
+<i>281</i>&nbsp;        // case 2: b4r |= (read() &lt;&lt;  8);
+<i>282</i>&nbsp;        // case 1: // nothing to do
+<i>283</i>&nbsp;        // }
+<b class="fc"><i>284</i>&nbsp;        int c = utf8BytesReversed &amp; 0xff;</b>
+<b class="fc"><i>285</i>&nbsp;        switch (getUTF8LengthFromFirstByte(c)) {</b>
+<i>286</i>&nbsp;        case 1:
+<b class="fc"><i>287</i>&nbsp;            return c;</b>
+<i>288</i>&nbsp;        case 2:
+<b class="fc"><i>289</i>&nbsp;            c  = ((c &amp; UNICODE_TWO_BYTE_MASK) &lt;&lt; 6);</b>
+<b class="fc"><i>290</i>&nbsp;            c |= ((utf8BytesReversed &gt;&gt; 8) &amp; UNICODE_CONTINUATION_BYTE_MASK);</b>
+<b class="fc"><i>291</i>&nbsp;            return c;</b>
+<i>292</i>&nbsp;        case 3:
+<b class="fc"><i>293</i>&nbsp;            c  = ((c &amp; UNICODE_THREE_BYTE_MASK) &lt;&lt; 12);</b>
+<b class="fc"><i>294</i>&nbsp;            c |= ((utf8BytesReversed &gt;&gt; 2) &amp; (UNICODE_CONTINUATION_BYTE_MASK) &lt;&lt; 6);</b>
+<b class="fc"><i>295</i>&nbsp;            c |= ((utf8BytesReversed &gt;&gt; 16) &amp; UNICODE_CONTINUATION_BYTE_MASK);</b>
+<b class="fc"><i>296</i>&nbsp;            return c;</b>
+<i>297</i>&nbsp;        case 4:
+<b class="fc"><i>298</i>&nbsp;            c  = ((c &amp; UNICODE_FOUR_BYTE_MASK) &lt;&lt; 18);</b>
+<b class="fc"><i>299</i>&nbsp;            c |= (((utf8BytesReversed &lt;&lt; 4) &amp; (UNICODE_CONTINUATION_BYTE_MASK) &lt;&lt; 12));</b>
+<b class="fc"><i>300</i>&nbsp;            c |= (((utf8BytesReversed &gt;&gt; 2) &amp; (UNICODE_CONTINUATION_BYTE_MASK) &lt;&lt; 6));</b>
+<b class="fc"><i>301</i>&nbsp;            c |= ((utf8BytesReversed &gt;&gt; 24) &amp; UNICODE_CONTINUATION_BYTE_MASK);</b>
+<b class="fc"><i>302</i>&nbsp;            return c;</b>
+<i>303</i>&nbsp;        }
+<b class="nc"><i>304</i>&nbsp;        throw new InvalidUnicodeCodePoint();</b>
+<i>305</i>&nbsp;    }
+<i>306</i>&nbsp;    /**
+<i>307</i>&nbsp;     * this helper calculates the number of bytes it will consume from the
+<i>308</i>&nbsp;     * supplied byte array (bytes) if getScalarFromBytes is called with
+<i>309</i>&nbsp;     * the same parameters.  This is in place of having getScalarFromBytes
+<i>310</i>&nbsp;     * return an object with the bytes consumed and the resultant scalar.
+<i>311</i>&nbsp;     * This will throw ArrayIndexOutOfBoundsException if there are fewer
+<i>312</i>&nbsp;     * bytes remaining (maxLength) than needed for a valid UTF8 sequence
+<i>313</i>&nbsp;     * starting at offset.
+<i>314</i>&nbsp;     * @param bytes UTF8 bytes in user supplied array
+<i>315</i>&nbsp;     * @param offset first array element to read from
+<i>316</i>&nbsp;     * @param maxLength maximum number of bytes to read from the array
+<i>317</i>&nbsp;     * @return number of bytes needed to decode the next scalar
+<i>318</i>&nbsp;     */
+<i>319</i>&nbsp;    public final static int getScalarReadLengthFromBytes(byte[] bytes, int offset, int maxLength)
+<i>320</i>&nbsp;    {
+<b class="fc"><i>321</i>&nbsp;        int src = offset;</b>
+<b class="fc"><i>322</i>&nbsp;        int end = offset + maxLength;</b>
+<i>323</i>&nbsp;
+<b class="fc"><i>324</i>&nbsp;        if (src &gt;= end) throw new ArrayIndexOutOfBoundsException();</b>
+<b class="fc"><i>325</i>&nbsp;        int c = bytes[src++] &amp; 0xff;</b>
+<b class="fc"><i>326</i>&nbsp;        int utf8length = getUTF8LengthFromFirstByte(c);</b>
+<b class="fc"><i>327</i>&nbsp;        if (src + utf8length &gt; end) throw new ArrayIndexOutOfBoundsException();</b>
+<i>328</i>&nbsp;
+<b class="fc"><i>329</i>&nbsp;        return utf8length;</b>
+<i>330</i>&nbsp;    }
+<i>331</i>&nbsp;    /**
+<i>332</i>&nbsp;     * this helper converts the bytes starting at offset from UTF8 to a
+<i>333</i>&nbsp;     * Unicode scalar.  This does not check for valid Unicode scalar ranges
+<i>334</i>&nbsp;     * but simply handle the UTF8 decoding.  getScalarReadLengthFromBytes
+<i>335</i>&nbsp;     * can be used to determine how many bytes would be converted (consumed) in
+<i>336</i>&nbsp;     * this process if the same parameters are passed in.  This will throw
+<i>337</i>&nbsp;     * ArrayIndexOutOfBoundsException if the array has too few bytes to
+<i>338</i>&nbsp;     * fully decode the scalar. It will throw InvalidUnicodeCodePoint if
+<i>339</i>&nbsp;     * the first byte isn&#39;t a valid UTF8 initial byte with a length of
+<i>340</i>&nbsp;     * 4 or less.
+<i>341</i>&nbsp;     * @param bytes UTF8 bytes in an array
+<i>342</i>&nbsp;     * @param offset initial array element to decode from
+<i>343</i>&nbsp;     * @param maxLength maximum number of bytes to consume from the array
+<i>344</i>&nbsp;     * @return Unicode scalar
+<i>345</i>&nbsp;     */
+<i>346</i>&nbsp;    public final static int getScalarFromBytes(byte[] bytes, int offset, int maxLength)
+<i>347</i>&nbsp;    {
+<b class="fc"><i>348</i>&nbsp;        int src = offset;</b>
+<b class="fc"><i>349</i>&nbsp;        int end = offset + maxLength;</b>
+<i>350</i>&nbsp;
+<b class="fc"><i>351</i>&nbsp;        if (src &gt;= end) throw new ArrayIndexOutOfBoundsException();</b>
+<b class="fc"><i>352</i>&nbsp;        int c = bytes[src++] &amp; 0xff;</b>
+<b class="fc"><i>353</i>&nbsp;        int utf8length = getUTF8LengthFromFirstByte(c);</b>
+<b class="fc"><i>354</i>&nbsp;        if (src + utf8length &gt; end) throw new ArrayIndexOutOfBoundsException();</b>
+<i>355</i>&nbsp;
+<b class="fc"><i>356</i>&nbsp;        switch (utf8length) {</b>
+<i>357</i>&nbsp;        case 1:
+<b class="fc"><i>358</i>&nbsp;            break;</b>
+<i>359</i>&nbsp;        case 2:
+<b class="fc"><i>360</i>&nbsp;            c  = (c &amp; UNICODE_TWO_BYTE_MASK);</b>
+<b class="fc"><i>361</i>&nbsp;            c |= ((bytes[src++] &amp; 0xff) &amp; UNICODE_CONTINUATION_BYTE_MASK);</b>
+<b class="fc"><i>362</i>&nbsp;            break;</b>
+<i>363</i>&nbsp;        case 3:
+<b class="fc"><i>364</i>&nbsp;            c  = (c &amp; UNICODE_THREE_BYTE_MASK);</b>
+<b class="fc"><i>365</i>&nbsp;            c |= ((bytes[src++] &amp; 0xff) &amp; UNICODE_CONTINUATION_BYTE_MASK);</b>
+<b class="fc"><i>366</i>&nbsp;            c |= ((bytes[src++] &amp; 0xff) &amp; UNICODE_CONTINUATION_BYTE_MASK);</b>
+<b class="fc"><i>367</i>&nbsp;            break;</b>
+<i>368</i>&nbsp;        case 4:
+<b class="fc"><i>369</i>&nbsp;            c  = (c &amp; UNICODE_FOUR_BYTE_MASK);</b>
+<b class="fc"><i>370</i>&nbsp;            c |= ((bytes[src++] &amp; 0xff) &amp; UNICODE_CONTINUATION_BYTE_MASK);</b>
+<b class="fc"><i>371</i>&nbsp;            c |= ((bytes[src++] &amp; 0xff) &amp; UNICODE_CONTINUATION_BYTE_MASK);</b>
+<b class="fc"><i>372</i>&nbsp;            c |= ((bytes[src++] &amp; 0xff) &amp; UNICODE_CONTINUATION_BYTE_MASK);</b>
+<b class="fc"><i>373</i>&nbsp;            break;</b>
+<i>374</i>&nbsp;        default:
+<b class="nc"><i>375</i>&nbsp;            throw new InvalidUnicodeCodePoint(&quot;code point is invalid: &quot;+utf8length);</b>
+<i>376</i>&nbsp;        }
+<b class="fc"><i>377</i>&nbsp;        return c;</b>
+<i>378</i>&nbsp;    }
+<i>379</i>&nbsp;
+<i>380</i>&nbsp;    public final static boolean needsSurrogateEncoding(int unicodeScalar) {
+<b class="fc"><i>381</i>&nbsp;        return (unicodeScalar &gt; MAXIMUM_UTF16_1_CHAR_CODE_POINT);</b>
+<i>382</i>&nbsp;    }
+<i>383</i>&nbsp;    public final static char highSurrogate(int unicodeScalar) {
+<b class="fc"><i>384</i>&nbsp;        assert(unicodeScalar &gt; MAXIMUM_UTF16_1_CHAR_CODE_POINT);</b>
+<b class="fc"><i>385</i>&nbsp;        assert(unicodeScalar &lt;= Character.MAX_CODE_POINT);</b>
+<b class="fc"><i>386</i>&nbsp;        int c = ((unicodeScalar - SURROGATE_OFFSET) &gt;&gt; 10);</b>
+<b class="fc"><i>387</i>&nbsp;        return (char)((c | HIGH_SURROGATE) &amp; 0xffff);</b>
+<i>388</i>&nbsp;    }
+<i>389</i>&nbsp;    public final static char lowSurrogate(int unicodeScalar) {
+<b class="fc"><i>390</i>&nbsp;        assert(unicodeScalar &gt; MAXIMUM_UTF16_1_CHAR_CODE_POINT);</b>
+<b class="fc"><i>391</i>&nbsp;        assert(unicodeScalar &lt;= Character.MAX_CODE_POINT);</b>
+<b class="fc"><i>392</i>&nbsp;        int c = ((unicodeScalar - SURROGATE_OFFSET) &amp; 0x3ff);</b>
+<b class="fc"><i>393</i>&nbsp;        return (char)((c | LOW_SURROGATE) &amp; 0xffff);</b>
+<i>394</i>&nbsp;    }
+<i>395</i>&nbsp;    public final static int getUnicodeScalarFromSurrogates(int highSurrogate, int lowSurrogate)
+<i>396</i>&nbsp;    {
+<b class="fc"><i>397</i>&nbsp;        assert(IonUTF8.isHighSurrogate(highSurrogate));</b>
+<b class="fc"><i>398</i>&nbsp;        assert(IonUTF8.isLowSurrogate(lowSurrogate));</b>
+<i>399</i>&nbsp;        int scalar;
+<b class="fc"><i>400</i>&nbsp;        scalar = lowSurrogate &amp; 0x3ff;</b>
+<b class="fc"><i>401</i>&nbsp;        scalar += (highSurrogate &amp; 0x3ff) &lt;&lt; 10;</b>
+<b class="fc"><i>402</i>&nbsp;        scalar += SURROGATE_OFFSET;</b>
+<b class="fc"><i>403</i>&nbsp;        return scalar;</b>
+<i>404</i>&nbsp;    }
+<i>405</i>&nbsp;
+<i>406</i>&nbsp;    public static class InvalidUnicodeCodePoint extends IonException
+<i>407</i>&nbsp;    {
+<i>408</i>&nbsp;        private static final long serialVersionUID = -3200811216940328945L;
+<i>409</i>&nbsp;
+<i>410</i>&nbsp;        public InvalidUnicodeCodePoint() {
+<b class="nc"><i>411</i>&nbsp;            super(&quot;invalid UTF8&quot;);</b>
+<b class="nc"><i>412</i>&nbsp;        }</b>
+<i>413</i>&nbsp;        public InvalidUnicodeCodePoint(String msg) {
+<b class="nc"><i>414</i>&nbsp;            super(msg);</b>
+<b class="nc"><i>415</i>&nbsp;        }</b>
+<i>416</i>&nbsp;        public InvalidUnicodeCodePoint(Exception e) {
+<b class="nc"><i>417</i>&nbsp;            super(e);</b>
+<b class="nc"><i>418</i>&nbsp;        }</b>
+<i>419</i>&nbsp;        public InvalidUnicodeCodePoint(String msg, Exception e) {
+<b class="nc"><i>420</i>&nbsp;            super(msg, e);</b>
+<b class="nc"><i>421</i>&nbsp;        }</b>
+<i>422</i>&nbsp;    }
+<i>423</i>&nbsp;
+<i>424</i>&nbsp;
+<i>425</i>&nbsp;    public static final class UTF8ToChar extends OutputStream implements Closeable
+<i>426</i>&nbsp;    {
+<i>427</i>&nbsp;        final private Appendable   _char_stream;
+<i>428</i>&nbsp;        // the pending bytes are being handled like this
+<i>429</i>&nbsp;        // instead of in a byte array as previous timing
+<i>430</i>&nbsp;        // of array dereferencing (circa 2009) shows it
+<i>431</i>&nbsp;        // to be remarkably slow.
+<b class="nc"><i>432</i>&nbsp;              private int          _expected_count = 0;</b>
+<b class="nc"><i>433</i>&nbsp;              private int          _pending_count = 0;</b>
+<i>434</i>&nbsp;              private int          _pending_c1;
+<i>435</i>&nbsp;              private int          _pending_c2;
+<i>436</i>&nbsp;              private int          _pending_c3;
+<i>437</i>&nbsp;
+<b class="nc"><i>438</i>&nbsp;        public UTF8ToChar(Appendable charStream) {</b>
+<b class="nc"><i>439</i>&nbsp;            _char_stream = charStream;</b>
+<i>440</i>&nbsp;        }
+<i>441</i>&nbsp;        public final Appendable getAppendable() {
+<b class="nc"><i>442</i>&nbsp;            return _char_stream;</b>
+<i>443</i>&nbsp;        }
+<i>444</i>&nbsp;
+<i>445</i>&nbsp;        @Override
+<i>446</i>&nbsp;        public final void close() throws IOException
+<i>447</i>&nbsp;        {
+<b class="nc"><i>448</i>&nbsp;            if (_pending_count &gt; 0) {</b>
+<b class="nc"><i>449</i>&nbsp;                throw new IOException(&quot;unfinished utf8 sequence still open&quot;);</b>
+<i>450</i>&nbsp;            }
+<i>451</i>&nbsp;        }
+<i>452</i>&nbsp;
+<i>453</i>&nbsp;        @Override
+<i>454</i>&nbsp;        public final void write(int b) throws IOException
+<i>455</i>&nbsp;        {
+<b class="nc"><i>456</i>&nbsp;            b = b &amp; 0xff;</b>
+<b class="nc"><i>457</i>&nbsp;            if (_expected_count &gt; 0) {</b>
+<b class="nc"><i>458</i>&nbsp;                write_helper_continue(b);</b>
+<i>459</i>&nbsp;            }
+<b class="nc"><i>460</i>&nbsp;            else if (b &gt; 127) {</b>
+<b class="nc"><i>461</i>&nbsp;                if (!IonUTF8.isStartByte(b)) {</b>
+<b class="nc"><i>462</i>&nbsp;                    throw new IOException(&quot;invalid UTF8 sequence: byte &gt; 127 is not a UTF8 leading byte&quot;);</b>
+<i>463</i>&nbsp;                }
+<b class="nc"><i>464</i>&nbsp;                write_helper_start_sequence(b);</b>
+<i>465</i>&nbsp;            }
+<i>466</i>&nbsp;            else {
+<b class="nc"><i>467</i>&nbsp;                _char_stream.append((char)b);</b>
+<i>468</i>&nbsp;            }
+<i>469</i>&nbsp;        }
+<i>470</i>&nbsp;
+<i>471</i>&nbsp;        @Override
+<i>472</i>&nbsp;        public final void write(byte[] bytes) throws IOException
+<i>473</i>&nbsp;        {
+<b class="nc"><i>474</i>&nbsp;            write(bytes, 0, bytes.length);</b>
+<i>475</i>&nbsp;        }
+<i>476</i>&nbsp;
+<i>477</i>&nbsp;        @Override
+<i>478</i>&nbsp;        public final void write(byte[] bytes, int off, int len) throws IOException
+<i>479</i>&nbsp;        {
+<b class="nc"><i>480</i>&nbsp;            for (int ii=off; ii&lt;off+len; ii++) {</b>
+<b class="nc"><i>481</i>&nbsp;                int b = bytes[ii] &amp; 0xff;</b>
+<b class="nc"><i>482</i>&nbsp;                if (_pending_count == 0 &amp;&amp; b &lt; 128) {</b>
+<b class="nc"><i>483</i>&nbsp;                    _char_stream.append((char)b);</b>
+<i>484</i>&nbsp;                }
+<i>485</i>&nbsp;                else {
+<b class="nc"><i>486</i>&nbsp;                    write(b);</b>
+<i>487</i>&nbsp;                }
+<i>488</i>&nbsp;            }
+<i>489</i>&nbsp;        }
+<i>490</i>&nbsp;
+<i>491</i>&nbsp;        private final void write_helper_start_sequence(int b) throws IOException
+<i>492</i>&nbsp;        {
+<b class="nc"><i>493</i>&nbsp;            _expected_count = IonUTF8.getUTF8LengthFromFirstByte(b);</b>
+<b class="nc"><i>494</i>&nbsp;            _pending_count = 1;</b>
+<b class="nc"><i>495</i>&nbsp;            _pending_c1 = b;</b>
+<i>496</i>&nbsp;        }
+<i>497</i>&nbsp;        private final void write_helper_continue(int b) throws IOException
+<i>498</i>&nbsp;        {
+<b class="nc"><i>499</i>&nbsp;            _pending_count++;</b>
+<b class="nc"><i>500</i>&nbsp;            if (_expected_count == _pending_count) {</b>
+<b class="nc"><i>501</i>&nbsp;                write_helper_write_char(b);</b>
+<i>502</i>&nbsp;            }
+<i>503</i>&nbsp;            else {
+<b class="nc"><i>504</i>&nbsp;                switch(_pending_count) {</b>
+<i>505</i>&nbsp;                case 2:
+<b class="nc"><i>506</i>&nbsp;                    _pending_c2 = b;</b>
+<b class="nc"><i>507</i>&nbsp;                    break;</b>
+<i>508</i>&nbsp;                case 3:
+<b class="nc"><i>509</i>&nbsp;                    _pending_c3 = b;</b>
+<b class="nc"><i>510</i>&nbsp;                    break;</b>
+<i>511</i>&nbsp;                default:
+<b class="nc"><i>512</i>&nbsp;                    throw new IOException(&quot;invalid state for pending vs expected UTF8 bytes&quot;);</b>
+<i>513</i>&nbsp;                }
+<i>514</i>&nbsp;            }
+<i>515</i>&nbsp;        }
+<i>516</i>&nbsp;        private final void write_helper_write_char(int b) throws IOException
+<i>517</i>&nbsp;        {
+<i>518</i>&nbsp;            char c;
+<i>519</i>&nbsp;            int  s;
+<b class="nc"><i>520</i>&nbsp;            switch(_pending_count) {</b>
+<i>521</i>&nbsp;            case 2:
+<b class="nc"><i>522</i>&nbsp;                if (!IonUTF8.isContinueByteUTF8(b)) {</b>
+<b class="nc"><i>523</i>&nbsp;                    throwBadContinuationByte();</b>
+<i>524</i>&nbsp;                }
+<b class="nc"><i>525</i>&nbsp;                c = IonUTF8.twoByteScalar(_pending_c1, b);</b>
+<b class="nc"><i>526</i>&nbsp;                _char_stream.append(c);</b>
+<b class="nc"><i>527</i>&nbsp;                break;</b>
+<i>528</i>&nbsp;            case 3:
+<b class="nc"><i>529</i>&nbsp;                if (!IonUTF8.isContinueByteUTF8(b)) {</b>
+<b class="nc"><i>530</i>&nbsp;                    throwBadContinuationByte();</b>
+<i>531</i>&nbsp;                }
+<b class="nc"><i>532</i>&nbsp;                if (!IonUTF8.isContinueByteUTF8(_pending_c2)) {</b>
+<b class="nc"><i>533</i>&nbsp;                    throwBadContinuationByte();</b>
+<i>534</i>&nbsp;                }
+<b class="nc"><i>535</i>&nbsp;                s = IonUTF8.threeByteScalar(_pending_c1, _pending_c2, b);</b>
+<b class="nc"><i>536</i>&nbsp;                if (IonUTF8.needsSurrogateEncoding(s)) {</b>
+<b class="nc"><i>537</i>&nbsp;                    _char_stream.append(IonUTF8.lowSurrogate(s));</b>
+<b class="nc"><i>538</i>&nbsp;                    _char_stream.append(IonUTF8.highSurrogate(s));</b>
+<i>539</i>&nbsp;                }
+<i>540</i>&nbsp;                else {
+<b class="nc"><i>541</i>&nbsp;                    _char_stream.append((char)s);</b>
+<i>542</i>&nbsp;                }
+<b class="nc"><i>543</i>&nbsp;                break;</b>
+<i>544</i>&nbsp;            case 4:
+<b class="nc"><i>545</i>&nbsp;                if (!IonUTF8.isContinueByteUTF8(b)) {</b>
+<b class="nc"><i>546</i>&nbsp;                    throwBadContinuationByte();</b>
+<i>547</i>&nbsp;                }
+<b class="nc"><i>548</i>&nbsp;                if (!IonUTF8.isContinueByteUTF8(_pending_c2)) {</b>
+<b class="nc"><i>549</i>&nbsp;                    throwBadContinuationByte();</b>
+<i>550</i>&nbsp;                }
+<b class="nc"><i>551</i>&nbsp;                if (!IonUTF8.isContinueByteUTF8(_pending_c3)) {</b>
+<b class="nc"><i>552</i>&nbsp;                    throwBadContinuationByte();</b>
+<i>553</i>&nbsp;                }
+<b class="nc"><i>554</i>&nbsp;                s = IonUTF8.fourByteScalar(_pending_c1, _pending_c2, _pending_c3, b);</b>
+<b class="nc"><i>555</i>&nbsp;                if (IonUTF8.needsSurrogateEncoding(s)) {</b>
+<b class="nc"><i>556</i>&nbsp;                    _char_stream.append(IonUTF8.lowSurrogate(s));</b>
+<b class="nc"><i>557</i>&nbsp;                    _char_stream.append(IonUTF8.highSurrogate(s));</b>
+<i>558</i>&nbsp;                }
+<i>559</i>&nbsp;                else {
+<b class="nc"><i>560</i>&nbsp;                    _char_stream.append((char)s);</b>
+<i>561</i>&nbsp;                }
+<b class="nc"><i>562</i>&nbsp;                break;</b>
+<i>563</i>&nbsp;            default:
+<b class="nc"><i>564</i>&nbsp;                throw new IOException(&quot;invalid state for UTF8 sequence length &quot;+_pending_count);</b>
+<i>565</i>&nbsp;            }
+<i>566</i>&nbsp;        }
+<i>567</i>&nbsp;        private void throwBadContinuationByte() throws IOException
+<i>568</i>&nbsp;        {
+<b class="nc"><i>569</i>&nbsp;            throw new IOException(&quot;continuation byte expected&quot;);</b>
+<i>570</i>&nbsp;        }
+<i>571</i>&nbsp;    }
+<i>572</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

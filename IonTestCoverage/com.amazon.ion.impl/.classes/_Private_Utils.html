@@ -1,0 +1,1311 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: _Private_Utils</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: _Private_Utils (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">_Private_Utils</td>
+<td class="coverageStat">
+  <span class="percent">
+    70.4%
+  </span>
+  <span class="absValue">
+    (38/ 54)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    65.8%
+  </span>
+  <span class="absValue">
+    (179/ 272)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">_Private_Utils$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (6/ 10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60%
+  </span>
+  <span class="absValue">
+    (6/ 10)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">_Private_Utils$IntIterator</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 10)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">_Private_Utils$StringIterator</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87.5%
+  </span>
+  <span class="absValue">
+    (7/ 8)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    64.4%
+  </span>
+  <span class="absValue">
+    (47/ 73)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    64%
+  </span>
+  <span class="absValue">
+    (192/ 300)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.SymbolTable.UNKNOWN_SYMBOL_ID;
+<i>19</i>&nbsp;import static com.amazon.ion.SystemSymbols.IMPORTS;
+<i>20</i>&nbsp;import static com.amazon.ion.SystemSymbols.IMPORTS_SID;
+<i>21</i>&nbsp;import static com.amazon.ion.SystemSymbols.ION_SYMBOL_TABLE;
+<i>22</i>&nbsp;import static com.amazon.ion.SystemSymbols.MAX_ID;
+<i>23</i>&nbsp;import static com.amazon.ion.SystemSymbols.MAX_ID_SID;
+<i>24</i>&nbsp;import static com.amazon.ion.SystemSymbols.NAME;
+<i>25</i>&nbsp;import static com.amazon.ion.SystemSymbols.NAME_SID;
+<i>26</i>&nbsp;import static com.amazon.ion.SystemSymbols.SYMBOLS;
+<i>27</i>&nbsp;import static com.amazon.ion.SystemSymbols.SYMBOLS_SID;
+<i>28</i>&nbsp;import static com.amazon.ion.SystemSymbols.VERSION;
+<i>29</i>&nbsp;import static com.amazon.ion.SystemSymbols.VERSION_SID;
+<i>30</i>&nbsp;import static com.amazon.ion.util.IonStreamUtils.isIonBinary;
+<i>31</i>&nbsp;
+<i>32</i>&nbsp;import com.amazon.ion.IonException;
+<i>33</i>&nbsp;import com.amazon.ion.IonReader;
+<i>34</i>&nbsp;import com.amazon.ion.IonStruct;
+<i>35</i>&nbsp;import com.amazon.ion.IonSystem;
+<i>36</i>&nbsp;import com.amazon.ion.IonType;
+<i>37</i>&nbsp;import com.amazon.ion.IonValue;
+<i>38</i>&nbsp;import com.amazon.ion.SubstituteSymbolTableException;
+<i>39</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>40</i>&nbsp;import com.amazon.ion.SymbolToken;
+<i>41</i>&nbsp;import com.amazon.ion.UnknownSymbolException;
+<i>42</i>&nbsp;import com.amazon.ion.ValueFactory;
+<i>43</i>&nbsp;import com.amazon.ion.impl.IonBinary.BufferManager;
+<i>44</i>&nbsp;import com.amazon.ion.impl.IonBinary.Reader;
+<i>45</i>&nbsp;import java.io.File;
+<i>46</i>&nbsp;import java.io.FileInputStream;
+<i>47</i>&nbsp;import java.io.IOException;
+<i>48</i>&nbsp;import java.io.InputStream;
+<i>49</i>&nbsp;import java.io.PushbackInputStream;
+<i>50</i>&nbsp;import java.nio.ByteBuffer;
+<i>51</i>&nbsp;import java.nio.CharBuffer;
+<i>52</i>&nbsp;import java.nio.charset.CharacterCodingException;
+<i>53</i>&nbsp;import java.nio.charset.Charset;
+<i>54</i>&nbsp;import java.nio.charset.CharsetDecoder;
+<i>55</i>&nbsp;import java.nio.charset.CharsetEncoder;
+<i>56</i>&nbsp;import java.util.Arrays;
+<i>57</i>&nbsp;import java.util.Collection;
+<i>58</i>&nbsp;import java.util.Iterator;
+<i>59</i>&nbsp;import java.util.ListIterator;
+<i>60</i>&nbsp;import java.util.NoSuchElementException;
+<i>61</i>&nbsp;import java.util.TimeZone;
+<i>62</i>&nbsp;
+<i>63</i>&nbsp;/**
+<i>64</i>&nbsp; * NOT FOR APPLICATION USE!
+<i>65</i>&nbsp; */
+<b class="fc"><i>66</i>&nbsp;public final class _Private_Utils</b>
+<i>67</i>&nbsp;{
+<i>68</i>&nbsp;    /**
+<i>69</i>&nbsp;     * Marker for code points relevant to removal of IonReader.hasNext().
+<i>70</i>&nbsp;     */
+<i>71</i>&nbsp;    public static final boolean READER_HASNEXT_REMOVED = false;
+<i>72</i>&nbsp;
+<i>73</i>&nbsp;
+<i>74</i>&nbsp;    /** Just a zero-length byte array, used to avoid allocation. */
+<b class="fc"><i>75</i>&nbsp;    public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];</b>
+<i>76</i>&nbsp;
+<i>77</i>&nbsp;    /** Just a zero-length String array, used to avoid allocation. */
+<b class="fc"><i>78</i>&nbsp;    public final static String[] EMPTY_STRING_ARRAY = new String[0];</b>
+<i>79</i>&nbsp;
+<i>80</i>&nbsp;    /** Just a zero-length int array, used to avoid allocation. */
+<b class="fc"><i>81</i>&nbsp;    public final static int[] EMPTY_INT_ARRAY = new int[0];</b>
+<i>82</i>&nbsp;
+<i>83</i>&nbsp;    /**
+<i>84</i>&nbsp;     * (null.timestamp) requires 11 ASCII chars to distinguish from
+<i>85</i>&nbsp;     * (null.timestamps) aka (null &#39;.&#39; &#39;timestamps&#39;)
+<i>86</i>&nbsp;     *
+<i>87</i>&nbsp;     * @see IonCharacterReader#DEFAULT_BUFFER_SIZE
+<i>88</i>&nbsp;     * @see IonCharacterReader#BUFFER_PADDING
+<i>89</i>&nbsp;     */
+<i>90</i>&nbsp;    public static final int MAX_LOOKAHEAD_UTF16 = 11;
+<i>91</i>&nbsp;
+<i>92</i>&nbsp;
+<i>93</i>&nbsp;
+<i>94</i>&nbsp;    public static final String ASCII_CHARSET_NAME = &quot;US-ASCII&quot;;
+<i>95</i>&nbsp;
+<b class="fc"><i>96</i>&nbsp;    public static final Charset ASCII_CHARSET =</b>
+<b class="fc"><i>97</i>&nbsp;        Charset.forName(ASCII_CHARSET_NAME);</b>
+<i>98</i>&nbsp;
+<i>99</i>&nbsp;    /** The string {@code &quot;UTF-8&quot;}. */
+<i>100</i>&nbsp;    public static final String UTF8_CHARSET_NAME = &quot;UTF-8&quot;;
+<i>101</i>&nbsp;
+<b class="fc"><i>102</i>&nbsp;    public static final Charset UTF8_CHARSET =</b>
+<b class="fc"><i>103</i>&nbsp;        Charset.forName(UTF8_CHARSET_NAME);</b>
+<i>104</i>&nbsp;
+<i>105</i>&nbsp;
+<i>106</i>&nbsp;    /**
+<i>107</i>&nbsp;     * The UTC {@link TimeZone}.
+<i>108</i>&nbsp;     *
+<i>109</i>&nbsp;     * TODO determine if this is well-defined.
+<i>110</i>&nbsp;     */
+<b class="fc"><i>111</i>&nbsp;    public static final TimeZone UTC = TimeZone.getTimeZone(&quot;UTC&quot;);</b>
+<i>112</i>&nbsp;
+<i>113</i>&nbsp;
+<i>114</i>&nbsp;
+<b class="fc"><i>115</i>&nbsp;    public static final ListIterator&lt;?&gt; EMPTY_ITERATOR = new ListIterator() {</b>
+<b class="fc"><i>116</i>&nbsp;        public boolean hasNext()     { return false; }</b>
+<b class="fc"><i>117</i>&nbsp;        public boolean hasPrevious() { return false; }</b>
+<i>118</i>&nbsp;
+<b class="fc"><i>119</i>&nbsp;        public Object  next()     { throw new NoSuchElementException(); }</b>
+<b class="nc"><i>120</i>&nbsp;        public Object  previous() { throw new NoSuchElementException(); }</b>
+<b class="nc"><i>121</i>&nbsp;        public void    remove()   { throw new IllegalStateException(); }</b>
+<i>122</i>&nbsp;
+<b class="fc"><i>123</i>&nbsp;        public int nextIndex()     { return  0; }</b>
+<b class="fc"><i>124</i>&nbsp;        public int previousIndex() { return -1; }</b>
+<i>125</i>&nbsp;
+<b class="nc"><i>126</i>&nbsp;        public void add(Object o) { throw new UnsupportedOperationException(); }</b>
+<b class="nc"><i>127</i>&nbsp;        public void set(Object o) { throw new UnsupportedOperationException(); }</b>
+<i>128</i>&nbsp;    };
+<i>129</i>&nbsp;
+<i>130</i>&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+<i>131</i>&nbsp;    public static final &lt;T&gt; ListIterator&lt;T&gt; emptyIterator()
+<i>132</i>&nbsp;    {
+<b class="fc"><i>133</i>&nbsp;        return (ListIterator&lt;T&gt;) EMPTY_ITERATOR;</b>
+<i>134</i>&nbsp;    }
+<i>135</i>&nbsp;
+<i>136</i>&nbsp;    public static boolean safeEquals(Object a, Object b)
+<i>137</i>&nbsp;    {
+<i>138</i>&nbsp;        // Written for the common case where they are not the same instance
+<b class="fc"><i>139</i>&nbsp;        return (a != null ? a.equals(b) : b == null);</b>
+<i>140</i>&nbsp;    }
+<i>141</i>&nbsp;
+<i>142</i>&nbsp;    /**
+<i>143</i>&nbsp;     * Replacement for Java6 {@link Arrays#copyOf(byte[], int)}.
+<i>144</i>&nbsp;     */
+<i>145</i>&nbsp;    public static byte[] copyOf(byte[] original, int newLength)
+<i>146</i>&nbsp;    {
+<b class="fc"><i>147</i>&nbsp;        byte[] result = new byte[newLength];</b>
+<b class="fc"><i>148</i>&nbsp;        System.arraycopy(original, 0, result, 0,</b>
+<b class="fc"><i>149</i>&nbsp;                         Math.min(newLength, original.length));</b>
+<b class="fc"><i>150</i>&nbsp;        return result;</b>
+<i>151</i>&nbsp;    }
+<i>152</i>&nbsp;
+<i>153</i>&nbsp;    public static String[] copyOf(String[] original, int newLength)
+<i>154</i>&nbsp;    {
+<b class="fc"><i>155</i>&nbsp;        String[] result = new String[newLength];</b>
+<b class="fc"><i>156</i>&nbsp;        System.arraycopy(original, 0, result, 0,</b>
+<b class="fc"><i>157</i>&nbsp;                         Math.min(newLength, original.length));</b>
+<b class="fc"><i>158</i>&nbsp;        return result;</b>
+<i>159</i>&nbsp;    }
+<i>160</i>&nbsp;
+<i>161</i>&nbsp;    public static &lt;T&gt; void addAll(Collection&lt;T&gt; dest, Iterator&lt;T&gt; src)
+<i>162</i>&nbsp;    {
+<b class="nc"><i>163</i>&nbsp;        if (src != null)</b>
+<i>164</i>&nbsp;        {
+<b class="nc"><i>165</i>&nbsp;            while (src.hasNext())</b>
+<i>166</i>&nbsp;            {
+<b class="nc"><i>167</i>&nbsp;                T value = src.next();</b>
+<b class="nc"><i>168</i>&nbsp;                dest.add(value);</b>
+<b class="nc"><i>169</i>&nbsp;            }</b>
+<i>170</i>&nbsp;        }
+<b class="nc"><i>171</i>&nbsp;    }</b>
+<i>172</i>&nbsp;
+<i>173</i>&nbsp;    public static &lt;T&gt; void addAllNonNull(Collection&lt;T&gt; dest, Iterator&lt;T&gt; src)
+<i>174</i>&nbsp;    {
+<b class="fc"><i>175</i>&nbsp;        if (src != null)</b>
+<i>176</i>&nbsp;        {
+<b class="fc"><i>177</i>&nbsp;            while (src.hasNext())</b>
+<i>178</i>&nbsp;            {
+<b class="fc"><i>179</i>&nbsp;                T value = src.next();</b>
+<b class="fc"><i>180</i>&nbsp;                if (value != null)</b>
+<i>181</i>&nbsp;                {
+<b class="fc"><i>182</i>&nbsp;                    dest.add(value);</b>
+<i>183</i>&nbsp;                }
+<b class="fc"><i>184</i>&nbsp;            }</b>
+<i>185</i>&nbsp;        }
+<b class="fc"><i>186</i>&nbsp;    }</b>
+<i>187</i>&nbsp;
+<i>188</i>&nbsp;    /**
+<i>189</i>&nbsp;     * @return not null
+<i>190</i>&nbsp;     */
+<i>191</i>&nbsp;    public static SymbolTokenImpl newSymbolToken(String text, int sid)
+<i>192</i>&nbsp;    {
+<b class="fc"><i>193</i>&nbsp;        return new SymbolTokenImpl(text, sid);</b>
+<i>194</i>&nbsp;    }
+<i>195</i>&nbsp;
+<i>196</i>&nbsp;    /**
+<i>197</i>&nbsp;     * @return not null
+<i>198</i>&nbsp;     */
+<i>199</i>&nbsp;    public static SymbolTokenImpl newSymbolToken(int sid)
+<i>200</i>&nbsp;    {
+<b class="fc"><i>201</i>&nbsp;        return new SymbolTokenImpl(sid);</b>
+<i>202</i>&nbsp;    }
+<i>203</i>&nbsp;
+<i>204</i>&nbsp;    /**
+<i>205</i>&nbsp;     * Checks symbol content.
+<i>206</i>&nbsp;     * @return not null
+<i>207</i>&nbsp;     */
+<i>208</i>&nbsp;    public static SymbolToken newSymbolToken(SymbolTable symtab,
+<i>209</i>&nbsp;                                             String text)
+<i>210</i>&nbsp;    {
+<i>211</i>&nbsp;        // TODO amzn/ion-java/issues/21 symtab should not be null
+<b class="fc"><i>212</i>&nbsp;        text.getClass(); // quick null check</b>
+<i>213</i>&nbsp;
+<b class="fc"><i>214</i>&nbsp;        SymbolToken tok = (symtab == null ? null : symtab.find(text));</b>
+<b class="fc"><i>215</i>&nbsp;        if (tok == null)</b>
+<i>216</i>&nbsp;        {
+<b class="fc"><i>217</i>&nbsp;            tok = new SymbolTokenImpl(text, UNKNOWN_SYMBOL_ID);</b>
+<i>218</i>&nbsp;        }
+<b class="fc"><i>219</i>&nbsp;        return tok;</b>
+<i>220</i>&nbsp;    }
+<i>221</i>&nbsp;
+<i>222</i>&nbsp;    /**
+<i>223</i>&nbsp;     * @return not null
+<i>224</i>&nbsp;     */
+<i>225</i>&nbsp;    public static SymbolToken newSymbolToken(SymbolTable symtab,
+<i>226</i>&nbsp;                                             int sid)
+<i>227</i>&nbsp;    {
+<b class="nc"><i>228</i>&nbsp;        if (sid &lt; 1) throw new IllegalArgumentException();</b>
+<i>229</i>&nbsp;
+<i>230</i>&nbsp;        // TODO amzn/ion-java/issues/21 symtab should not be null
+<b class="nc"><i>231</i>&nbsp;        String text = (symtab == null ? null : symtab.findKnownSymbol(sid));</b>
+<b class="nc"><i>232</i>&nbsp;        return new SymbolTokenImpl(text, sid);</b>
+<i>233</i>&nbsp;    }
+<i>234</i>&nbsp;
+<i>235</i>&nbsp;    /**
+<i>236</i>&nbsp;     * Validates each text element.
+<i>237</i>&nbsp;     * @param text may be null or empty.
+<i>238</i>&nbsp;     * @return not null.
+<i>239</i>&nbsp;     */
+<i>240</i>&nbsp;    public static SymbolToken[] newSymbolTokens(SymbolTable symtab,
+<i>241</i>&nbsp;                                                String... text)
+<i>242</i>&nbsp;    {
+<b class="fc"><i>243</i>&nbsp;        if (text != null)</b>
+<i>244</i>&nbsp;        {
+<b class="fc"><i>245</i>&nbsp;            int count = text.length;</b>
+<b class="fc"><i>246</i>&nbsp;            if (count != 0)</b>
+<i>247</i>&nbsp;            {
+<b class="fc"><i>248</i>&nbsp;                SymbolToken[] result = new SymbolToken[count];</b>
+<b class="fc"><i>249</i>&nbsp;                for (int i = 0; i &lt; count; i++)</b>
+<i>250</i>&nbsp;                {
+<b class="fc"><i>251</i>&nbsp;                    String s = text[i];</b>
+<b class="fc"><i>252</i>&nbsp;                    result[i] = newSymbolToken(symtab, s);</b>
+<i>253</i>&nbsp;                }
+<b class="fc"><i>254</i>&nbsp;                return result;</b>
+<i>255</i>&nbsp;            }
+<i>256</i>&nbsp;        }
+<b class="fc"><i>257</i>&nbsp;        return SymbolToken.EMPTY_ARRAY;</b>
+<i>258</i>&nbsp;    }
+<i>259</i>&nbsp;
+<i>260</i>&nbsp;    /**
+<i>261</i>&nbsp;     * @param syms may be null or empty.
+<i>262</i>&nbsp;     * @return not null.
+<i>263</i>&nbsp;     */
+<i>264</i>&nbsp;    public static SymbolToken[] newSymbolTokens(SymbolTable symtab,
+<i>265</i>&nbsp;                                                int... syms)
+<i>266</i>&nbsp;    {
+<b class="nc"><i>267</i>&nbsp;        if (syms != null)</b>
+<i>268</i>&nbsp;        {
+<b class="nc"><i>269</i>&nbsp;            int count = syms.length;</b>
+<b class="nc"><i>270</i>&nbsp;            if (syms.length != 0)</b>
+<i>271</i>&nbsp;            {
+<b class="nc"><i>272</i>&nbsp;                SymbolToken[] result = new SymbolToken[count];</b>
+<b class="nc"><i>273</i>&nbsp;                for (int i = 0; i &lt; count; i++)</b>
+<i>274</i>&nbsp;                {
+<b class="nc"><i>275</i>&nbsp;                    int s = syms[i];</b>
+<b class="nc"><i>276</i>&nbsp;                    result[i] = newSymbolToken(symtab, s);</b>
+<i>277</i>&nbsp;                }
+<b class="nc"><i>278</i>&nbsp;                return result;</b>
+<i>279</i>&nbsp;            }
+<i>280</i>&nbsp;        }
+<b class="nc"><i>281</i>&nbsp;        return SymbolToken.EMPTY_ARRAY;</b>
+<i>282</i>&nbsp;    }
+<i>283</i>&nbsp;
+<i>284</i>&nbsp;
+<i>285</i>&nbsp;    public static SymbolToken localize(SymbolTable symtab,
+<i>286</i>&nbsp;                                       SymbolToken sym)
+<i>287</i>&nbsp;    {
+<b class="fc"><i>288</i>&nbsp;        String text = sym.getText();</b>
+<b class="fc"><i>289</i>&nbsp;        int sid = sym.getSid();</b>
+<i>290</i>&nbsp;
+<b class="fc"><i>291</i>&nbsp;        if (symtab != null)  // TODO amzn/ion-java/issues/21 require symtab</b>
+<i>292</i>&nbsp;        {
+<b class="fc"><i>293</i>&nbsp;            if (text == null)</b>
+<i>294</i>&nbsp;            {
+<b class="fc"><i>295</i>&nbsp;                text = symtab.findKnownSymbol(sid);</b>
+<b class="fc"><i>296</i>&nbsp;                if (text != null)</b>
+<i>297</i>&nbsp;                {
+<b class="fc"><i>298</i>&nbsp;                    sym = new SymbolTokenImpl(text, sid);</b>
+<i>299</i>&nbsp;                }
+<i>300</i>&nbsp;            }
+<i>301</i>&nbsp;            else
+<i>302</i>&nbsp;            {
+<b class="fc"><i>303</i>&nbsp;                SymbolToken newSym = symtab.find(text);</b>
+<b class="fc"><i>304</i>&nbsp;                if (newSym != null)</b>
+<i>305</i>&nbsp;                {
+<b class="fc"><i>306</i>&nbsp;                    sym = newSym;</b>
+<i>307</i>&nbsp;                }
+<b class="fc"><i>308</i>&nbsp;                else if (sid &gt;= 0)</b>
+<i>309</i>&nbsp;                {
+<i>310</i>&nbsp;                    // We can&#39;t trust the sid, discard it.
+<b class="fc"><i>311</i>&nbsp;                    sym = new SymbolTokenImpl(text, UNKNOWN_SYMBOL_ID);</b>
+<i>312</i>&nbsp;                }
+<b class="fc"><i>313</i>&nbsp;            }</b>
+<i>314</i>&nbsp;        }
+<b class="nc"><i>315</i>&nbsp;        else if (text != null &amp;&amp; sid &gt;= 0)</b>
+<i>316</i>&nbsp;        {
+<i>317</i>&nbsp;            // We can&#39;t trust the sid, discard it.
+<b class="nc"><i>318</i>&nbsp;            sym = new SymbolTokenImpl(text, UNKNOWN_SYMBOL_ID);</b>
+<i>319</i>&nbsp;        }
+<b class="fc"><i>320</i>&nbsp;        return sym;</b>
+<i>321</i>&nbsp;    }
+<i>322</i>&nbsp;
+<i>323</i>&nbsp;
+<i>324</i>&nbsp;    /**
+<i>325</i>&nbsp;    *
+<i>326</i>&nbsp;    * @param syms may be mutated, replacing entries with localized updates!
+<i>327</i>&nbsp;    */
+<i>328</i>&nbsp;    public static void localize(SymbolTable symtab,
+<i>329</i>&nbsp;                                SymbolToken[] syms,
+<i>330</i>&nbsp;                                int count)
+<i>331</i>&nbsp;    {
+<b class="nc"><i>332</i>&nbsp;        for (int i = 0; i &lt; count; i++)</b>
+<i>333</i>&nbsp;        {
+<b class="nc"><i>334</i>&nbsp;            SymbolToken sym = syms[i];</b>
+<b class="nc"><i>335</i>&nbsp;            SymbolToken updated = localize(symtab, sym);</b>
+<b class="nc"><i>336</i>&nbsp;            if (updated != sym) syms[i] = updated;</b>
+<i>337</i>&nbsp;        }
+<b class="nc"><i>338</i>&nbsp;    }</b>
+<i>339</i>&nbsp;
+<i>340</i>&nbsp;    /**
+<i>341</i>&nbsp;     *
+<i>342</i>&nbsp;     * @param syms may be mutated, replacing entries with localized updates!
+<i>343</i>&nbsp;     */
+<i>344</i>&nbsp;    public static void localize(SymbolTable symtab,
+<i>345</i>&nbsp;                                SymbolToken[] syms)
+<i>346</i>&nbsp;    {
+<b class="nc"><i>347</i>&nbsp;        localize(symtab, syms, syms.length);</b>
+<b class="nc"><i>348</i>&nbsp;    }</b>
+<i>349</i>&nbsp;
+<i>350</i>&nbsp;
+<i>351</i>&nbsp;    /**
+<i>352</i>&nbsp;     * Extracts the non-null text from a list of symbol tokens.
+<i>353</i>&nbsp;     *
+<i>354</i>&nbsp;     * @return not null.
+<i>355</i>&nbsp;     *
+<i>356</i>&nbsp;     * @throws UnknownSymbolException if any token is missing text.
+<i>357</i>&nbsp;     */
+<i>358</i>&nbsp;    public static String[] toStrings(SymbolToken[] symbols, int count)
+<i>359</i>&nbsp;    {
+<b class="fc"><i>360</i>&nbsp;        if (count == 0) return _Private_Utils.EMPTY_STRING_ARRAY;</b>
+<i>361</i>&nbsp;
+<b class="fc"><i>362</i>&nbsp;        String[] annotations = new String[count];</b>
+<b class="fc"><i>363</i>&nbsp;        for (int i = 0; i &lt; count; i++)</b>
+<i>364</i>&nbsp;        {
+<b class="fc"><i>365</i>&nbsp;            SymbolToken tok = symbols[i];</b>
+<b class="fc"><i>366</i>&nbsp;            String text = tok.getText();</b>
+<b class="fc"><i>367</i>&nbsp;            if (text == null)</b>
+<i>368</i>&nbsp;            {
+<b class="fc"><i>369</i>&nbsp;                throw new UnknownSymbolException(tok.getSid());</b>
+<i>370</i>&nbsp;            }
+<b class="fc"><i>371</i>&nbsp;            annotations[i] = text;</b>
+<i>372</i>&nbsp;        }
+<b class="fc"><i>373</i>&nbsp;        return annotations;</b>
+<i>374</i>&nbsp;    }
+<i>375</i>&nbsp;
+<i>376</i>&nbsp;    public static int[] toSids(SymbolToken[] symbols, int count)
+<i>377</i>&nbsp;    {
+<b class="nc"><i>378</i>&nbsp;        if (count == 0) return _Private_Utils.EMPTY_INT_ARRAY;</b>
+<i>379</i>&nbsp;
+<b class="nc"><i>380</i>&nbsp;        int[] sids = new int[count];</b>
+<b class="nc"><i>381</i>&nbsp;        for (int i = 0; i &lt; count; i++)</b>
+<i>382</i>&nbsp;        {
+<b class="nc"><i>383</i>&nbsp;            sids[i] = symbols[i].getSid();</b>
+<i>384</i>&nbsp;        }
+<b class="nc"><i>385</i>&nbsp;        return sids;</b>
+<i>386</i>&nbsp;    }
+<i>387</i>&nbsp;
+<i>388</i>&nbsp;    //========================================================================
+<i>389</i>&nbsp;
+<i>390</i>&nbsp;    /**
+<i>391</i>&nbsp;     * Encodes a String into bytes of a given encoding.
+<i>392</i>&nbsp;     * &lt;p&gt;
+<i>393</i>&nbsp;     * This method is preferred to {@link Charset#encode(String)} and
+<i>394</i>&nbsp;     * {@link String#getBytes(String)} (&lt;em&gt;etc.&lt;/em&gt;)
+<i>395</i>&nbsp;     * since those methods will replace or ignore bad input, and here we throw
+<i>396</i>&nbsp;     * an exception.
+<i>397</i>&nbsp;     *
+<i>398</i>&nbsp;     * @param s the string to encode.
+<i>399</i>&nbsp;     *
+<i>400</i>&nbsp;     * @return the encoded string, not null.
+<i>401</i>&nbsp;     *
+<i>402</i>&nbsp;     * @throws IonException if there&#39;s a {@link CharacterCodingException}.
+<i>403</i>&nbsp;     */
+<i>404</i>&nbsp;    public static byte[] encode(String s, Charset charset)
+<i>405</i>&nbsp;    {
+<b class="fc"><i>406</i>&nbsp;        CharsetEncoder encoder = charset.newEncoder();</b>
+<i>407</i>&nbsp;        try
+<i>408</i>&nbsp;        {
+<b class="fc"><i>409</i>&nbsp;            ByteBuffer buffer = encoder.encode(CharBuffer.wrap(s));</b>
+<b class="fc"><i>410</i>&nbsp;            byte[] bytes = buffer.array();</b>
+<i>411</i>&nbsp;
+<i>412</i>&nbsp;            // Make another copy iff there&#39;s garbage after the limit.
+<b class="fc"><i>413</i>&nbsp;            int limit = buffer.limit();</b>
+<b class="fc"><i>414</i>&nbsp;            if (limit &lt; bytes.length)</b>
+<i>415</i>&nbsp;            {
+<b class="fc"><i>416</i>&nbsp;                bytes = copyOf(bytes, limit);</b>
+<i>417</i>&nbsp;            }
+<i>418</i>&nbsp;
+<b class="fc"><i>419</i>&nbsp;            return bytes;</b>
+<i>420</i>&nbsp;        }
+<b class="nc"><i>421</i>&nbsp;        catch (CharacterCodingException e)</b>
+<i>422</i>&nbsp;        {
+<b class="nc"><i>423</i>&nbsp;            throw new IonException(&quot;Invalid string data&quot;, e);</b>
+<i>424</i>&nbsp;        }
+<i>425</i>&nbsp;    }
+<i>426</i>&nbsp;
+<i>427</i>&nbsp;
+<i>428</i>&nbsp;    /**
+<i>429</i>&nbsp;     * Decodes a byte sequence into a string, given a {@link Charset}.
+<i>430</i>&nbsp;     * &lt;p&gt;
+<i>431</i>&nbsp;     * This method is preferred to {@link Charset#decode(ByteBuffer)} and
+<i>432</i>&nbsp;     * {@link String#String(byte[], Charset)} (&lt;em&gt;etc.&lt;/em&gt;)
+<i>433</i>&nbsp;     * since those methods will replace or ignore bad input, and here we throw
+<i>434</i>&nbsp;     * an exception.
+<i>435</i>&nbsp;     *
+<i>436</i>&nbsp;     * @param bytes the data to decode.
+<i>437</i>&nbsp;     *
+<i>438</i>&nbsp;     * @return the decoded string, not null.
+<i>439</i>&nbsp;     *
+<i>440</i>&nbsp;     * @throws IonException if there&#39;s a {@link CharacterCodingException}.
+<i>441</i>&nbsp;     */
+<i>442</i>&nbsp;    public static String decode(byte[] bytes, Charset charset)
+<i>443</i>&nbsp;    {
+<b class="fc"><i>444</i>&nbsp;        CharsetDecoder decoder = charset.newDecoder();</b>
+<i>445</i>&nbsp;        try
+<i>446</i>&nbsp;        {
+<b class="fc"><i>447</i>&nbsp;            CharBuffer buffer = decoder.decode(ByteBuffer.wrap(bytes));</b>
+<b class="fc"><i>448</i>&nbsp;            return buffer.toString();</b>
+<i>449</i>&nbsp;        }
+<b class="fc"><i>450</i>&nbsp;        catch (CharacterCodingException e)</b>
+<i>451</i>&nbsp;        {
+<b class="fc"><i>452</i>&nbsp;            String message =</b>
+<b class="fc"><i>453</i>&nbsp;                &quot;Input is not valid &quot; + charset.displayName() + &quot; data&quot;;</b>
+<b class="fc"><i>454</i>&nbsp;            throw new IonException(message, e);</b>
+<i>455</i>&nbsp;        }
+<i>456</i>&nbsp;    }
+<i>457</i>&nbsp;
+<i>458</i>&nbsp;
+<i>459</i>&nbsp;    /**
+<i>460</i>&nbsp;     * Encodes a String into UTF-8 bytes.
+<i>461</i>&nbsp;     * &lt;p&gt;
+<i>462</i>&nbsp;     * This method is preferred to {@link Charset#encode(String)} and
+<i>463</i>&nbsp;     * {@link String#getBytes(String)} (&lt;em&gt;etc.&lt;/em&gt;)
+<i>464</i>&nbsp;     * since those methods will replace or ignore bad input, and here we throw
+<i>465</i>&nbsp;     * an exception.
+<i>466</i>&nbsp;     *
+<i>467</i>&nbsp;     * @param s the string to encode.
+<i>468</i>&nbsp;     *
+<i>469</i>&nbsp;     * @return the encoded UTF-8 bytes, not null.
+<i>470</i>&nbsp;     *
+<i>471</i>&nbsp;     * @throws IonException if there&#39;s a {@link CharacterCodingException}.
+<i>472</i>&nbsp;     */
+<i>473</i>&nbsp;    public static byte[] utf8(String s)
+<i>474</i>&nbsp;    {
+<b class="fc"><i>475</i>&nbsp;        return encode(s, UTF8_CHARSET);</b>
+<i>476</i>&nbsp;    }
+<i>477</i>&nbsp;
+<i>478</i>&nbsp;    /**
+<i>479</i>&nbsp;     * Decodes a UTF-8 byte sequence to a String.
+<i>480</i>&nbsp;     * &lt;p&gt;
+<i>481</i>&nbsp;     * This method is preferred to {@link Charset#decode(ByteBuffer)} and
+<i>482</i>&nbsp;     * {@link String#String(byte[], Charset)} (&lt;em&gt;etc.&lt;/em&gt;)
+<i>483</i>&nbsp;     * since those methods will replace or ignore bad input, and here we throw
+<i>484</i>&nbsp;     * an exception.
+<i>485</i>&nbsp;     *
+<i>486</i>&nbsp;     * @param bytes the data to decode.
+<i>487</i>&nbsp;     *
+<i>488</i>&nbsp;     * @return the decoded string, not null.
+<i>489</i>&nbsp;     *
+<i>490</i>&nbsp;     * @throws IonException if there&#39;s a {@link CharacterCodingException}.
+<i>491</i>&nbsp;     */
+<i>492</i>&nbsp;    public static String utf8(byte[] bytes)
+<i>493</i>&nbsp;    {
+<b class="fc"><i>494</i>&nbsp;        return decode(bytes, UTF8_CHARSET);</b>
+<i>495</i>&nbsp;    }
+<i>496</i>&nbsp;
+<i>497</i>&nbsp;
+<i>498</i>&nbsp;    /**
+<i>499</i>&nbsp;     * This differs from {@link #utf8(String)} by using our custem encoder.
+<i>500</i>&nbsp;     * Not sure which is better.
+<i>501</i>&nbsp;     * TODO benchmark the two approaches
+<i>502</i>&nbsp;     */
+<i>503</i>&nbsp;    public static byte[] convertUtf16UnitsToUtf8(String text)
+<i>504</i>&nbsp;    {
+<b class="fc"><i>505</i>&nbsp;        byte[] data = new byte[4*text.length()];</b>
+<b class="fc"><i>506</i>&nbsp;        int limit = 0;</b>
+<b class="fc"><i>507</i>&nbsp;        for (int i = 0; i &lt; text.length(); i++)</b>
+<i>508</i>&nbsp;        {
+<b class="fc"><i>509</i>&nbsp;            char c = text.charAt(i);</b>
+<b class="fc"><i>510</i>&nbsp;            limit += IonUTF8.convertToUTF8Bytes(c, data, limit,</b>
+<i>511</i>&nbsp;                                                data.length - limit);
+<i>512</i>&nbsp;        }
+<i>513</i>&nbsp;
+<b class="fc"><i>514</i>&nbsp;        byte[] result = new byte[limit];</b>
+<b class="fc"><i>515</i>&nbsp;        System.arraycopy(data, 0, result, 0, limit);</b>
+<b class="fc"><i>516</i>&nbsp;        return result;</b>
+<i>517</i>&nbsp;    }
+<i>518</i>&nbsp;
+<i>519</i>&nbsp;
+<i>520</i>&nbsp;    //========================================================================
+<i>521</i>&nbsp;
+<i>522</i>&nbsp;    /**
+<i>523</i>&nbsp;     * Calls {@link InputStream#read(byte[], int, int)} until the buffer is
+<i>524</i>&nbsp;     * filled or EOF is encountered.
+<i>525</i>&nbsp;     * This method will block until the request is satisfied.
+<i>526</i>&nbsp;     *
+<i>527</i>&nbsp;     * @param in        The stream to read from.
+<i>528</i>&nbsp;     * @param buf       The buffer to read to.
+<i>529</i>&nbsp;     *
+<i>530</i>&nbsp;     * @return the number of bytes read from the stream.  May be less than
+<i>531</i>&nbsp;     *  {@code buf.length} if EOF is encountered before reading that far.
+<i>532</i>&nbsp;     *
+<i>533</i>&nbsp;     * @see #readFully(InputStream, byte[], int, int)
+<i>534</i>&nbsp;     */
+<i>535</i>&nbsp;    public static int readFully(InputStream in, byte[] buf)
+<i>536</i>&nbsp;    throws IOException
+<i>537</i>&nbsp;    {
+<b class="nc"><i>538</i>&nbsp;        return readFully(in, buf, 0, buf.length);</b>
+<i>539</i>&nbsp;    }
+<i>540</i>&nbsp;
+<i>541</i>&nbsp;
+<i>542</i>&nbsp;    /**
+<i>543</i>&nbsp;     * Calls {@link InputStream#read(byte[], int, int)} until the requested
+<i>544</i>&nbsp;     * length is read or EOF is encountered.
+<i>545</i>&nbsp;     * This method will block until the request is satisfied.
+<i>546</i>&nbsp;     *
+<i>547</i>&nbsp;     * @param in        The stream to read from.
+<i>548</i>&nbsp;     * @param buf       The buffer to read to.
+<i>549</i>&nbsp;     * @param offset    The offset of the buffer to read from.
+<i>550</i>&nbsp;     * @param length    The length of the data to read.
+<i>551</i>&nbsp;     *
+<i>552</i>&nbsp;     * @return the number of bytes read from the stream.  May be less than
+<i>553</i>&nbsp;     *  {@code length} if EOF is encountered before reading that far.
+<i>554</i>&nbsp;     *
+<i>555</i>&nbsp;     * @see #readFully(InputStream, byte[])
+<i>556</i>&nbsp;     */
+<i>557</i>&nbsp;    public static int readFully(InputStream in, byte[] buf,
+<i>558</i>&nbsp;                                int offset, int length)
+<i>559</i>&nbsp;    throws IOException
+<i>560</i>&nbsp;    {
+<b class="fc"><i>561</i>&nbsp;        int readBytes = 0;</b>
+<b class="fc"><i>562</i>&nbsp;        while (readBytes &lt; length)</b>
+<i>563</i>&nbsp;        {
+<b class="fc"><i>564</i>&nbsp;            int amount = in.read(buf, offset, length - readBytes);</b>
+<b class="fc"><i>565</i>&nbsp;            if (amount &lt; 0)</b>
+<i>566</i>&nbsp;            {
+<i>567</i>&nbsp;                // EOF
+<b class="nc"><i>568</i>&nbsp;                return readBytes;</b>
+<i>569</i>&nbsp;            }
+<b class="fc"><i>570</i>&nbsp;            readBytes += amount;</b>
+<b class="fc"><i>571</i>&nbsp;            offset += amount;</b>
+<b class="fc"><i>572</i>&nbsp;        }</b>
+<b class="fc"><i>573</i>&nbsp;        return readBytes;</b>
+<i>574</i>&nbsp;    }
+<i>575</i>&nbsp;
+<i>576</i>&nbsp;
+<i>577</i>&nbsp;    public static byte[] loadFileBytes(File file)
+<i>578</i>&nbsp;        throws IOException
+<i>579</i>&nbsp;    {
+<b class="fc"><i>580</i>&nbsp;        long len = file.length();</b>
+<b class="fc"><i>581</i>&nbsp;        if (len &lt; 0 || len &gt; Integer.MAX_VALUE) {</b>
+<b class="nc"><i>582</i>&nbsp;            throw new IllegalArgumentException(&quot;File too long: &quot; + file);</b>
+<i>583</i>&nbsp;        }
+<i>584</i>&nbsp;
+<b class="fc"><i>585</i>&nbsp;        byte[] buf = new byte[(int) len];</b>
+<i>586</i>&nbsp;
+<b class="fc"><i>587</i>&nbsp;        FileInputStream in = new FileInputStream(file);</b>
+<i>588</i>&nbsp;        try {
+<b class="fc"><i>589</i>&nbsp;            int readBytesCount = in.read(buf);</b>
+<b class="fc"><i>590</i>&nbsp;            if (readBytesCount != len || in.read() != -1)</b>
+<i>591</i>&nbsp;            {
+<b class="nc"><i>592</i>&nbsp;                throw new IOException(&quot;Read the wrong number of bytes from &quot;</b>
+<i>593</i>&nbsp;                                       + file);
+<i>594</i>&nbsp;            }
+<i>595</i>&nbsp;        }
+<i>596</i>&nbsp;        finally {
+<b class="fc"><i>597</i>&nbsp;            in.close();</b>
+<b class="fc"><i>598</i>&nbsp;        }</b>
+<i>599</i>&nbsp;
+<b class="fc"><i>600</i>&nbsp;        return buf;</b>
+<i>601</i>&nbsp;    }
+<i>602</i>&nbsp;
+<i>603</i>&nbsp;    public static String utf8FileToString(File file)
+<i>604</i>&nbsp;        throws IonException, IOException
+<i>605</i>&nbsp;    {
+<b class="fc"><i>606</i>&nbsp;        byte[] utf8Bytes = _Private_Utils.loadFileBytes(file);</b>
+<b class="fc"><i>607</i>&nbsp;        String s = utf8(utf8Bytes);</b>
+<b class="fc"><i>608</i>&nbsp;        return s;</b>
+<i>609</i>&nbsp;    }
+<i>610</i>&nbsp;
+<i>611</i>&nbsp;    public static byte[] loadStreamBytes(InputStream in)
+<i>612</i>&nbsp;        throws IOException
+<i>613</i>&nbsp;    {
+<b class="nc"><i>614</i>&nbsp;        BufferManager buffer = new BufferManager(in);</b>
+<b class="nc"><i>615</i>&nbsp;        Reader bufReader = buffer.reader();</b>
+<b class="nc"><i>616</i>&nbsp;        bufReader.sync();</b>
+<b class="nc"><i>617</i>&nbsp;        bufReader.setPosition(0);</b>
+<b class="nc"><i>618</i>&nbsp;        byte[] bytes = bufReader.getBytes();</b>
+<b class="nc"><i>619</i>&nbsp;        return bytes;</b>
+<i>620</i>&nbsp;    }
+<i>621</i>&nbsp;
+<i>622</i>&nbsp;
+<i>623</i>&nbsp;    public static String loadReader(java.io.Reader in)
+<i>624</i>&nbsp;        throws IOException
+<i>625</i>&nbsp;    {
+<b class="nc"><i>626</i>&nbsp;        StringBuilder buf = new StringBuilder(2048);</b>
+<i>627</i>&nbsp;
+<b class="nc"><i>628</i>&nbsp;        char[] chars = new char[2048];</b>
+<i>629</i>&nbsp;
+<i>630</i>&nbsp;        int len;
+<b class="nc"><i>631</i>&nbsp;        while ((len = in.read(chars)) != -1)</b>
+<i>632</i>&nbsp;        {
+<b class="nc"><i>633</i>&nbsp;            buf.append(chars, 0, len);</b>
+<i>634</i>&nbsp;        }
+<i>635</i>&nbsp;
+<b class="nc"><i>636</i>&nbsp;        return buf.toString();</b>
+<i>637</i>&nbsp;    }
+<i>638</i>&nbsp;
+<i>639</i>&nbsp;
+<i>640</i>&nbsp;    public static boolean streamIsIonBinary(PushbackInputStream pushback)
+<i>641</i>&nbsp;        throws IonException, IOException
+<i>642</i>&nbsp;    {
+<b class="nc"><i>643</i>&nbsp;        boolean isBinary = false;</b>
+<b class="nc"><i>644</i>&nbsp;        byte[] cookie = new byte[_Private_IonConstants.BINARY_VERSION_MARKER_SIZE];</b>
+<i>645</i>&nbsp;
+<b class="nc"><i>646</i>&nbsp;        int len = readFully(pushback, cookie);</b>
+<b class="nc"><i>647</i>&nbsp;        if (len == _Private_IonConstants.BINARY_VERSION_MARKER_SIZE) {</b>
+<b class="nc"><i>648</i>&nbsp;            isBinary = isIonBinary(cookie);</b>
+<i>649</i>&nbsp;        }
+<b class="nc"><i>650</i>&nbsp;        if (len &gt; 0) {</b>
+<b class="nc"><i>651</i>&nbsp;            pushback.unread(cookie, 0, len);</b>
+<i>652</i>&nbsp;        }
+<b class="nc"><i>653</i>&nbsp;        return isBinary;</b>
+<i>654</i>&nbsp;    }
+<i>655</i>&nbsp;
+<i>656</i>&nbsp;
+<i>657</i>&nbsp;    /**
+<i>658</i>&nbsp;     * Create a value iterator from a reader.
+<i>659</i>&nbsp;     * Primarily a trampoline for access permission.
+<i>660</i>&nbsp;     */
+<i>661</i>&nbsp;    public static Iterator&lt;IonValue&gt; iterate(ValueFactory valueFactory,
+<i>662</i>&nbsp;                                             IonReader input)
+<i>663</i>&nbsp;     {
+<b class="fc"><i>664</i>&nbsp;        return new IonIteratorImpl(valueFactory, input);</b>
+<i>665</i>&nbsp;     }
+<i>666</i>&nbsp;
+<i>667</i>&nbsp;    //========================================================================
+<i>668</i>&nbsp;    // Symbol Table helpers
+<i>669</i>&nbsp;
+<i>670</i>&nbsp;    /**
+<i>671</i>&nbsp;     * Checks the passed in value and returns whether or not
+<i>672</i>&nbsp;     * the value could be a local symbol table.  It does this
+<i>673</i>&nbsp;     * by checking the type and annotations.
+<i>674</i>&nbsp;     *
+<i>675</i>&nbsp;     * @return boolean true if v can be a local symbol table otherwise false
+<i>676</i>&nbsp;     */
+<i>677</i>&nbsp;    public static boolean valueIsLocalSymbolTable(_Private_IonValue v)
+<i>678</i>&nbsp;    {
+<b class="fc"><i>679</i>&nbsp;        return (v instanceof IonStruct</b>
+<b class="fc"><i>680</i>&nbsp;                &amp;&amp; v.findTypeAnnotation(ION_SYMBOL_TABLE) == 0);</b>
+<i>681</i>&nbsp;    }
+<i>682</i>&nbsp;
+<i>683</i>&nbsp;
+<i>684</i>&nbsp;    /** Indicates whether a table is shared but not a system table. */
+<i>685</i>&nbsp;    public static final boolean symtabIsSharedNotSystem(SymbolTable symtab)
+<i>686</i>&nbsp;    {
+<b class="fc"><i>687</i>&nbsp;        return (symtab != null</b>
+<b class="fc"><i>688</i>&nbsp;                &amp;&amp; symtab.isSharedTable()</b>
+<b class="fc"><i>689</i>&nbsp;                &amp;&amp; ! symtab.isSystemTable());</b>
+<i>690</i>&nbsp;    }
+<i>691</i>&nbsp;
+<i>692</i>&nbsp;
+<i>693</i>&nbsp;    public static boolean symtabIsLocalAndNonTrivial(SymbolTable symtab)
+<i>694</i>&nbsp;    {
+<b class="nc"><i>695</i>&nbsp;        if (symtab == null) return false;</b>
+<b class="nc"><i>696</i>&nbsp;        if (!symtab.isLocalTable()) return false;</b>
+<i>697</i>&nbsp;
+<i>698</i>&nbsp;        // If symtab has imports we must retain it.
+<i>699</i>&nbsp;        // Note that I chose to retain imports even in the degenerate case
+<i>700</i>&nbsp;        // where the imports have no symbols.
+<b class="nc"><i>701</i>&nbsp;        if (symtab.getImportedTables().length &gt; 0) {</b>
+<b class="nc"><i>702</i>&nbsp;            return true;</b>
+<i>703</i>&nbsp;        }
+<i>704</i>&nbsp;
+<b class="nc"><i>705</i>&nbsp;        if (symtab.getImportedMaxId() &lt; symtab.getMaxId()) {</b>
+<b class="nc"><i>706</i>&nbsp;            return true;</b>
+<i>707</i>&nbsp;        }
+<i>708</i>&nbsp;
+<b class="nc"><i>709</i>&nbsp;        return false;</b>
+<i>710</i>&nbsp;    }
+<i>711</i>&nbsp;
+<i>712</i>&nbsp;
+<i>713</i>&nbsp;    /**
+<i>714</i>&nbsp;     * Is the table null, system, or local without imported symbols?
+<i>715</i>&nbsp;     */
+<i>716</i>&nbsp;    public static boolean isTrivialTable(SymbolTable table)
+<i>717</i>&nbsp;    {
+<b class="nc"><i>718</i>&nbsp;        if (table == null)         return true;</b>
+<b class="nc"><i>719</i>&nbsp;        if (table.isSystemTable()) return true;</b>
+<b class="nc"><i>720</i>&nbsp;        if (table.isLocalTable()) {</b>
+<i>721</i>&nbsp;            // this is only true when there are no local
+<i>722</i>&nbsp;            // symbols defined
+<i>723</i>&nbsp;            // and there are no imports with any symbols
+<b class="nc"><i>724</i>&nbsp;            if (table.getMaxId() == table.getSystemSymbolTable().getMaxId()) {</b>
+<b class="nc"><i>725</i>&nbsp;                return true;</b>
+<i>726</i>&nbsp;            }
+<i>727</i>&nbsp;        }
+<b class="nc"><i>728</i>&nbsp;        return false;</b>
+<i>729</i>&nbsp;    }
+<i>730</i>&nbsp;
+<i>731</i>&nbsp;
+<i>732</i>&nbsp;    public static SymbolTable systemSymtab(int version)
+<i>733</i>&nbsp;    {
+<b class="fc"><i>734</i>&nbsp;        return SharedSymbolTable.getSystemSymbolTable(version);</b>
+<i>735</i>&nbsp;    }
+<i>736</i>&nbsp;
+<i>737</i>&nbsp;
+<i>738</i>&nbsp;    public static SymbolTable newSharedSymtab(IonStruct ionRep)
+<i>739</i>&nbsp;    {
+<b class="fc"><i>740</i>&nbsp;        return SharedSymbolTable.newSharedSymbolTable(ionRep);</b>
+<i>741</i>&nbsp;    }
+<i>742</i>&nbsp;
+<i>743</i>&nbsp;
+<i>744</i>&nbsp;    public static SymbolTable newSharedSymtab(IonReader reader,
+<i>745</i>&nbsp;                                              boolean alreadyInStruct)
+<i>746</i>&nbsp;    {
+<b class="fc"><i>747</i>&nbsp;        return SharedSymbolTable.newSharedSymbolTable(reader, alreadyInStruct);</b>
+<i>748</i>&nbsp;    }
+<i>749</i>&nbsp;
+<i>750</i>&nbsp;
+<i>751</i>&nbsp;    /**
+<i>752</i>&nbsp;     * As per {@link IonSystem#newSharedSymbolTable(String, int, Iterator, SymbolTable...)},
+<i>753</i>&nbsp;     * any duplicate or null symbol texts are skipped.
+<i>754</i>&nbsp;     * Therefore, &lt;b&gt;THIS METHOD IS NOT SUITABLE WHEN READING SERIALIZED
+<i>755</i>&nbsp;     * SHARED SYMBOL TABLES&lt;/b&gt; since that scenario must preserve all sids.
+<i>756</i>&nbsp;     *
+<i>757</i>&nbsp;     * @param priorSymtab may be null.
+<i>758</i>&nbsp;     */
+<i>759</i>&nbsp;    public static SymbolTable newSharedSymtab(String name,
+<i>760</i>&nbsp;                                              int version,
+<i>761</i>&nbsp;                                              SymbolTable priorSymtab,
+<i>762</i>&nbsp;                                              Iterator&lt;String&gt; symbols)
+<i>763</i>&nbsp;    {
+<b class="fc"><i>764</i>&nbsp;        return SharedSymbolTable.newSharedSymbolTable(name,</b>
+<i>765</i>&nbsp;                                                      version,
+<i>766</i>&nbsp;                                                      priorSymtab,
+<i>767</i>&nbsp;                                                      symbols);
+<i>768</i>&nbsp;    }
+<i>769</i>&nbsp;
+<i>770</i>&nbsp;
+<i>771</i>&nbsp;    /**
+<i>772</i>&nbsp;     * Creates a mutable copy of this local symbol table. The cloned table
+<i>773</i>&nbsp;     * will be created in the context of the same {@link ValueFactory}.
+<i>774</i>&nbsp;     * &lt;p&gt;
+<i>775</i>&nbsp;     * Note that the resulting symbol table holds a distinct, deep copy of the
+<i>776</i>&nbsp;     * given table, adding symbols on either instances will not modify the
+<i>777</i>&nbsp;     * other.
+<i>778</i>&nbsp;     *
+<i>779</i>&nbsp;     * @param symtab
+<i>780</i>&nbsp;     *
+<i>781</i>&nbsp;     * @return a new mutable {@link SymbolTable} instance; not null
+<i>782</i>&nbsp;     *
+<i>783</i>&nbsp;     * @throws IllegalArgumentException
+<i>784</i>&nbsp;     *          if the given table is not a local symbol table
+<i>785</i>&nbsp;     * @throws SubstituteSymbolTableException
+<i>786</i>&nbsp;     *          if any imported table by the given local symbol table is a
+<i>787</i>&nbsp;     *          substituted table (whereby no exact match was found in its
+<i>788</i>&nbsp;     *          catalog)
+<i>789</i>&nbsp;     */
+<i>790</i>&nbsp;    // TODO We need to think about providing a suitable recovery process
+<i>791</i>&nbsp;    //      or configuration for users to properly handle the case when the
+<i>792</i>&nbsp;    //      local symtab has substituted symtabs for imports.
+<i>793</i>&nbsp;    public static SymbolTable copyLocalSymbolTable(SymbolTable symtab)
+<i>794</i>&nbsp;        throws SubstituteSymbolTableException
+<i>795</i>&nbsp;    {
+<b class="fc"><i>796</i>&nbsp;        if (! symtab.isLocalTable())</b>
+<i>797</i>&nbsp;        {
+<b class="fc"><i>798</i>&nbsp;            String message = &quot;symtab should be a local symtab&quot;;</b>
+<b class="fc"><i>799</i>&nbsp;            throw new IllegalArgumentException(message);</b>
+<i>800</i>&nbsp;        }
+<i>801</i>&nbsp;
+<b class="fc"><i>802</i>&nbsp;        SymbolTable[] imports =</b>
+<b class="fc"><i>803</i>&nbsp;            ((LocalSymbolTable) symtab).getImportedTablesNoCopy();</b>
+<i>804</i>&nbsp;
+<i>805</i>&nbsp;        // Iterate over each import, we assume that the list of imports
+<i>806</i>&nbsp;        // rarely exceeds 5.
+<b class="fc"><i>807</i>&nbsp;        for (int i = 0; i &lt; imports.length; i++)</b>
+<i>808</i>&nbsp;        {
+<b class="fc"><i>809</i>&nbsp;            if (imports[i].isSubstitute())</b>
+<i>810</i>&nbsp;            {
+<b class="fc"><i>811</i>&nbsp;                String message =</b>
+<i>812</i>&nbsp;                    &quot;local symtabs with substituted symtabs for imports &quot; +
+<i>813</i>&nbsp;                    &quot;(indicating no exact match within the catalog) cannot &quot; +
+<i>814</i>&nbsp;                    &quot;be copied&quot;;
+<b class="fc"><i>815</i>&nbsp;                throw new SubstituteSymbolTableException(message);</b>
+<i>816</i>&nbsp;            }
+<i>817</i>&nbsp;        }
+<i>818</i>&nbsp;
+<b class="fc"><i>819</i>&nbsp;        return ((LocalSymbolTable) symtab).makeCopy();</b>
+<i>820</i>&nbsp;    }
+<i>821</i>&nbsp;
+<i>822</i>&nbsp;    /**
+<i>823</i>&nbsp;     * Trampoline to {@link LocalSymbolTableAsStruct.Factory#Factory(ValueFactory)}
+<i>824</i>&nbsp;     * @param imageFactory
+<i>825</i>&nbsp;     *          the ValueFactory from which to construct the IonStruct representation of the LST
+<i>826</i>&nbsp;     * @return a new {@link LocalSymbolTableAsStruct.Factory}
+<i>827</i>&nbsp;     * @deprecated due to DOM entanglement. Streaming applications should use
+<i>828</i>&nbsp;     *             {@value LocalSymbolTable#DEFAULT_LST_FACTORY}.
+<i>829</i>&nbsp;     */
+<i>830</i>&nbsp;    @Deprecated
+<i>831</i>&nbsp;    public static _Private_LocalSymbolTableFactory newLocalSymbolTableAsStructFactory(ValueFactory imageFactory)
+<i>832</i>&nbsp;    {
+<b class="fc"><i>833</i>&nbsp;        return new LocalSymbolTableAsStruct.Factory(imageFactory);</b>
+<i>834</i>&nbsp;    }
+<i>835</i>&nbsp;
+<i>836</i>&nbsp;    /**
+<i>837</i>&nbsp;     * Returns a minimal symtab that, either system or local depending on the
+<i>838</i>&nbsp;     * given values, that supports representation as an IonStruct. If the
+<i>839</i>&nbsp;     * imports are empty, the default system symtab is returned.
+<i>840</i>&nbsp;     *
+<i>841</i>&nbsp;     * @param lstFactory
+<i>842</i>&nbsp;     *          the factory to use to build the local symbol table, never null
+<i>843</i>&nbsp;     * @param defaultSystemSymtab
+<i>844</i>&nbsp;     *          the default system symtab, which will be used if the first
+<i>845</i>&nbsp;     *          import in {@code imports} isn&#39;t a system symtab, never null
+<i>846</i>&nbsp;     * @param imports
+<i>847</i>&nbsp;     * the set of shared symbol tables to import; may be null or empty.
+<i>848</i>&nbsp;     * The first (and only the first) may be a system table, in which case the
+<i>849</i>&nbsp;     * {@code defaultSystemSymtab} is ignored.
+<i>850</i>&nbsp;     */
+<i>851</i>&nbsp;    public static SymbolTable initialSymtab(_Private_LocalSymbolTableFactory lstFactory,
+<i>852</i>&nbsp;                                            SymbolTable defaultSystemSymtab,
+<i>853</i>&nbsp;                                            SymbolTable... imports)
+<i>854</i>&nbsp;    {
+<b class="fc"><i>855</i>&nbsp;        if (imports == null || imports.length == 0)</b>
+<i>856</i>&nbsp;        {
+<b class="fc"><i>857</i>&nbsp;            return defaultSystemSymtab;</b>
+<i>858</i>&nbsp;        }
+<i>859</i>&nbsp;
+<b class="fc"><i>860</i>&nbsp;        if (imports.length == 1 &amp;&amp; imports[0].isSystemTable())</b>
+<i>861</i>&nbsp;        {
+<b class="nc"><i>862</i>&nbsp;            return imports[0];</b>
+<i>863</i>&nbsp;        }
+<i>864</i>&nbsp;
+<b class="fc"><i>865</i>&nbsp;        return lstFactory.newLocalSymtab(defaultSystemSymtab, imports);</b>
+<i>866</i>&nbsp;    }
+<i>867</i>&nbsp;
+<i>868</i>&nbsp;
+<i>869</i>&nbsp;    @SuppressWarnings(&quot;deprecation&quot;)
+<i>870</i>&nbsp;    /**
+<i>871</i>&nbsp;     * Trampoline to
+<i>872</i>&nbsp;     * {@link LocalSymbolTableAsStruct#getIonRepresentation()};
+<i>873</i>&nbsp;     */
+<i>874</i>&nbsp;    public static IonStruct symtabTree(SymbolTable symtab)
+<i>875</i>&nbsp;    {
+<b class="fc"><i>876</i>&nbsp;        return ((LocalSymbolTableAsStruct)symtab).getIonRepresentation();</b>
+<i>877</i>&nbsp;    }
+<i>878</i>&nbsp;
+<i>879</i>&nbsp;    /**
+<i>880</i>&nbsp;     * Determines, for two local symbol tables, whether the passed-in {@code superset} symtab is an extension
+<i>881</i>&nbsp;     * of {@code subset}.  This works independent of implementation details--particularly in cases
+<i>882</i>&nbsp;     * where {@link LocalSymbolTable#symtabExtends(SymbolTable)} cannot be used.
+<i>883</i>&nbsp;     *
+<i>884</i>&nbsp;     * @see #symtabExtends(SymbolTable, SymbolTable)
+<i>885</i>&nbsp;     */
+<i>886</i>&nbsp;    private static boolean localSymtabExtends(SymbolTable superset, SymbolTable subset)
+<i>887</i>&nbsp;    {
+<b class="fc"><i>888</i>&nbsp;        if (subset.getMaxId() &gt; superset.getMaxId())</b>
+<i>889</i>&nbsp;        {
+<i>890</i>&nbsp;            // the subset has more symbols
+<b class="fc"><i>891</i>&nbsp;            return false;</b>
+<i>892</i>&nbsp;        }
+<i>893</i>&nbsp;
+<i>894</i>&nbsp;        // NB this API almost certainly requires cloning--symbol table&#39;s API doesn&#39;t give us a way to polymorphically
+<i>895</i>&nbsp;        //    get this without materializing an array
+<b class="fc"><i>896</i>&nbsp;        final SymbolTable[] supersetImports     = superset.getImportedTables();</b>
+<b class="fc"><i>897</i>&nbsp;        final SymbolTable[] subsetImports       = subset.getImportedTables();</b>
+<i>898</i>&nbsp;
+<i>899</i>&nbsp;        // TODO this is over-strict, but not as strict as LocalSymbolTable.symtabExtends()
+<b class="fc"><i>900</i>&nbsp;        if (supersetImports.length != subsetImports.length)</b>
+<i>901</i>&nbsp;        {
+<b class="nc"><i>902</i>&nbsp;            return false;</b>
+<i>903</i>&nbsp;        }
+<i>904</i>&nbsp;        // NB we cannot trust Arrays.equals--we don&#39;t know how an implementation will implement it...
+<b class="fc"><i>905</i>&nbsp;        for (int i = 0; i &lt; supersetImports.length; i++)</b>
+<i>906</i>&nbsp;        {
+<b class="fc"><i>907</i>&nbsp;            final SymbolTable supersetImport = supersetImports[i];</b>
+<b class="fc"><i>908</i>&nbsp;            final SymbolTable subsetImport = subsetImports[i];</b>
+<b class="fc"><i>909</i>&nbsp;            if (!supersetImport.getName().equals(subsetImport.getName())</b>
+<b class="fc"><i>910</i>&nbsp;                 || supersetImport.getVersion() != subsetImport.getVersion())</b>
+<i>911</i>&nbsp;            {
+<i>912</i>&nbsp;                // bad match on import
+<b class="fc"><i>913</i>&nbsp;                return false;</b>
+<i>914</i>&nbsp;            }
+<i>915</i>&nbsp;        }
+<i>916</i>&nbsp;
+<i>917</i>&nbsp;        // all the imports lined up, lets make sure the locals line up too
+<b class="fc"><i>918</i>&nbsp;        final Iterator&lt;String&gt; supersetIter     = superset.iterateDeclaredSymbolNames();</b>
+<b class="fc"><i>919</i>&nbsp;        final Iterator&lt;String&gt; subsetIter       = subset.iterateDeclaredSymbolNames();</b>
+<b class="fc"><i>920</i>&nbsp;        while (subsetIter.hasNext())</b>
+<i>921</i>&nbsp;        {
+<b class="fc"><i>922</i>&nbsp;            final String nextSubsetSymbol       = subsetIter.next();</b>
+<b class="fc"><i>923</i>&nbsp;            final String nextSupersetSymbol     = supersetIter.next();</b>
+<b class="fc"><i>924</i>&nbsp;            if (!nextSubsetSymbol.equals(nextSupersetSymbol))</b>
+<i>925</i>&nbsp;            {
+<i>926</i>&nbsp;                // local symbol mismatch
+<b class="fc"><i>927</i>&nbsp;                return false;</b>
+<i>928</i>&nbsp;            }
+<b class="fc"><i>929</i>&nbsp;        }</b>
+<i>930</i>&nbsp;
+<i>931</i>&nbsp;        // we made it this far--superset is really a superset of subset
+<b class="fc"><i>932</i>&nbsp;        return true;</b>
+<i>933</i>&nbsp;    }
+<i>934</i>&nbsp;
+<i>935</i>&nbsp;    /**
+<i>936</i>&nbsp;     * Determines whether the passed-in {@code superset} symtab is an extension
+<i>937</i>&nbsp;     * of {@code subset}.
+<i>938</i>&nbsp;     * &lt;p&gt;
+<i>939</i>&nbsp;     * If both are LSTs, their imported tables and locally declared symbols are
+<i>940</i>&nbsp;     * exhaustively checked, which can be expensive. Callers of this method
+<i>941</i>&nbsp;     * should cache the results of these comparisons.
+<i>942</i>&nbsp;     *
+<i>943</i>&nbsp;     * @param superset
+<i>944</i>&nbsp;     *                  either a system or local symbol table
+<i>945</i>&nbsp;     * @param subset
+<i>946</i>&nbsp;     *                  either a system or local symbol table
+<i>947</i>&nbsp;     *
+<i>948</i>&nbsp;     * @return true if {@code superset} extends {@code subset}, false if not
+<i>949</i>&nbsp;     */
+<i>950</i>&nbsp;    public static boolean symtabExtends(SymbolTable superset, SymbolTable subset)
+<i>951</i>&nbsp;    {
+<b class="fc"><i>952</i>&nbsp;        assert superset.isSystemTable() || superset.isLocalTable();</b>
+<b class="fc"><i>953</i>&nbsp;        assert subset.isSystemTable() || subset.isLocalTable();</b>
+<i>954</i>&nbsp;
+<i>955</i>&nbsp;        // NB: system symtab 1.0 is a singleton, hence if both symtabs
+<i>956</i>&nbsp;        //     are one this will be true.
+<b class="fc"><i>957</i>&nbsp;        if (superset == subset) return true;</b>
+<i>958</i>&nbsp;
+<i>959</i>&nbsp;        // If the subset&#39;s symtab is a system symtab, the superset&#39;s is always
+<i>960</i>&nbsp;        // an extension of the subset&#39;s as system symtab-ness is irrelevant to
+<i>961</i>&nbsp;        // the conditions for copy opt. to be safe.
+<i>962</i>&nbsp;        // TODO amzn/ion-java/issues/24 System symtab-ness ARE relevant if there&#39;s multiple
+<i>963</i>&nbsp;        //      versions.
+<b class="fc"><i>964</i>&nbsp;        if (subset.isSystemTable()) return true;</b>
+<i>965</i>&nbsp;
+<i>966</i>&nbsp;        // From here on, subset is a LST because isSystemTable() is false.
+<i>967</i>&nbsp;
+<b class="fc"><i>968</i>&nbsp;        if (superset.isLocalTable())</b>
+<i>969</i>&nbsp;        {
+<b class="fc"><i>970</i>&nbsp;            if (superset instanceof LocalSymbolTable &amp;&amp; subset instanceof LocalSymbolTable)</b>
+<i>971</i>&nbsp;            {
+<i>972</i>&nbsp;                // use the internal comparison
+<b class="nc"><i>973</i>&nbsp;                return ((LocalSymbolTable) superset).symtabExtends(subset);</b>
+<i>974</i>&nbsp;            }
+<i>975</i>&nbsp;            // TODO reason about symbol tables that don&#39;t extend LocalSymbolTable but are still local
+<b class="fc"><i>976</i>&nbsp;            return localSymtabExtends(superset, subset);</b>
+<i>977</i>&nbsp;        }
+<i>978</i>&nbsp;
+<i>979</i>&nbsp;        // From here on, superset is a system symtab.
+<i>980</i>&nbsp;
+<i>981</i>&nbsp;        // If LST subset has no local symbols or imports, and it&#39;s system
+<i>982</i>&nbsp;        // symbols are same as those of system symtab superset&#39;s, then
+<i>983</i>&nbsp;        // superset extends subset
+<b class="fc"><i>984</i>&nbsp;        return subset.getMaxId() == superset.getMaxId();</b>
+<i>985</i>&nbsp;    }
+<i>986</i>&nbsp;
+<i>987</i>&nbsp;
+<i>988</i>&nbsp;    /**
+<i>989</i>&nbsp;     * Determines whether the passed-in data type is a scalar and not a symbol.
+<i>990</i>&nbsp;     */
+<i>991</i>&nbsp;    public static boolean isNonSymbolScalar(IonType type)
+<i>992</i>&nbsp;    {
+<b class="fc"><i>993</i>&nbsp;        return ! IonType.isContainer(type) &amp;&amp; ! type.equals(IonType.SYMBOL);</b>
+<i>994</i>&nbsp;    }
+<i>995</i>&nbsp;
+<i>996</i>&nbsp;
+<i>997</i>&nbsp;    /**
+<i>998</i>&nbsp;     * Returns the symbol ID matching a system symbol text of a
+<i>999</i>&nbsp;     * local or shared symtab field.
+<i>1000</i>&nbsp;     */
+<i>1001</i>&nbsp;    public static final int getSidForSymbolTableField(String text)
+<i>1002</i>&nbsp;    {
+<b class="fc"><i>1003</i>&nbsp;        final int shortestFieldNameLength = 4; // &#39;name&#39;</b>
+<i>1004</i>&nbsp;
+<b class="fc"><i>1005</i>&nbsp;        if (text != null &amp;&amp; text.length() &gt;= shortestFieldNameLength)</b>
+<i>1006</i>&nbsp;        {
+<b class="fc"><i>1007</i>&nbsp;            int c = text.charAt(0);</b>
+<b class="fc"><i>1008</i>&nbsp;            switch (c)</b>
+<i>1009</i>&nbsp;            {
+<i>1010</i>&nbsp;                case &#39;v&#39;:
+<b class="nc"><i>1011</i>&nbsp;                    if (VERSION.equals(text))</b>
+<i>1012</i>&nbsp;                    {
+<b class="nc"><i>1013</i>&nbsp;                        return VERSION_SID;</b>
+<i>1014</i>&nbsp;                    }
+<i>1015</i>&nbsp;                    break;
+<i>1016</i>&nbsp;                case &#39;n&#39;:
+<b class="nc"><i>1017</i>&nbsp;                    if (NAME.equals(text))</b>
+<i>1018</i>&nbsp;                    {
+<b class="nc"><i>1019</i>&nbsp;                        return NAME_SID;</b>
+<i>1020</i>&nbsp;                    }
+<i>1021</i>&nbsp;                    break;
+<i>1022</i>&nbsp;                case &#39;s&#39;:
+<b class="nc"><i>1023</i>&nbsp;                    if (SYMBOLS.equals(text))</b>
+<i>1024</i>&nbsp;                    {
+<b class="nc"><i>1025</i>&nbsp;                        return  SYMBOLS_SID;</b>
+<i>1026</i>&nbsp;                    }
+<i>1027</i>&nbsp;                    break;
+<i>1028</i>&nbsp;
+<i>1029</i>&nbsp;                case &#39;i&#39;:
+<b class="nc"><i>1030</i>&nbsp;                    if (IMPORTS.equals(text))</b>
+<i>1031</i>&nbsp;                    {
+<b class="nc"><i>1032</i>&nbsp;                        return IMPORTS_SID;</b>
+<i>1033</i>&nbsp;                    }
+<i>1034</i>&nbsp;                    break;
+<i>1035</i>&nbsp;                case &#39;m&#39;:
+<b class="nc"><i>1036</i>&nbsp;                    if (MAX_ID.equals(text))</b>
+<i>1037</i>&nbsp;                    {
+<b class="nc"><i>1038</i>&nbsp;                        return MAX_ID_SID;</b>
+<i>1039</i>&nbsp;                    }
+<i>1040</i>&nbsp;                    break;
+<i>1041</i>&nbsp;                default:
+<i>1042</i>&nbsp;                    break;
+<i>1043</i>&nbsp;            }
+<i>1044</i>&nbsp;        }
+<b class="fc"><i>1045</i>&nbsp;        return UNKNOWN_SYMBOL_ID;</b>
+<i>1046</i>&nbsp;    }
+<i>1047</i>&nbsp;
+<i>1048</i>&nbsp;
+<i>1049</i>&nbsp;    //========================================================================
+<i>1050</i>&nbsp;
+<i>1051</i>&nbsp;
+<i>1052</i>&nbsp;    /**
+<i>1053</i>&nbsp;     * Private to route clients through the static methods, which can
+<i>1054</i>&nbsp;     * optimize the empty-list case.
+<i>1055</i>&nbsp;     */
+<i>1056</i>&nbsp;    private static final class StringIterator implements Iterator&lt;String&gt;
+<i>1057</i>&nbsp;    {
+<i>1058</i>&nbsp;        private final String[] _values;
+<i>1059</i>&nbsp;        private int            _pos;
+<i>1060</i>&nbsp;        private final int      _len;
+<i>1061</i>&nbsp;
+<b class="fc"><i>1062</i>&nbsp;        StringIterator(String[] values, int len) {</b>
+<b class="fc"><i>1063</i>&nbsp;            _values = values;</b>
+<b class="fc"><i>1064</i>&nbsp;            _len = len;</b>
+<b class="fc"><i>1065</i>&nbsp;        }</b>
+<i>1066</i>&nbsp;        public boolean hasNext() {
+<b class="fc"><i>1067</i>&nbsp;            return (_pos &lt; _len);</b>
+<i>1068</i>&nbsp;        }
+<i>1069</i>&nbsp;        public String next() {
+<b class="fc"><i>1070</i>&nbsp;            if (!hasNext()) throw new NoSuchElementException();</b>
+<b class="fc"><i>1071</i>&nbsp;            return _values[_pos++];</b>
+<i>1072</i>&nbsp;        }
+<i>1073</i>&nbsp;        public void remove() {
+<b class="nc"><i>1074</i>&nbsp;            throw new UnsupportedOperationException();</b>
+<i>1075</i>&nbsp;        }
+<i>1076</i>&nbsp;    }
+<i>1077</i>&nbsp;
+<i>1078</i>&nbsp;    public static final Iterator&lt;String&gt; stringIterator(String... values)
+<i>1079</i>&nbsp;    {
+<b class="fc"><i>1080</i>&nbsp;        if (values == null || values.length == 0)</b>
+<i>1081</i>&nbsp;        {
+<b class="fc"><i>1082</i>&nbsp;            return _Private_Utils.&lt;String&gt;emptyIterator();</b>
+<i>1083</i>&nbsp;        }
+<b class="fc"><i>1084</i>&nbsp;        return new StringIterator(values, values.length);</b>
+<i>1085</i>&nbsp;    }
+<i>1086</i>&nbsp;
+<i>1087</i>&nbsp;    public static final Iterator&lt;String&gt; stringIterator(String[] values, int len)
+<i>1088</i>&nbsp;    {
+<b class="nc"><i>1089</i>&nbsp;        if (values == null || values.length == 0 || len == 0)</b>
+<i>1090</i>&nbsp;        {
+<b class="nc"><i>1091</i>&nbsp;            return _Private_Utils.&lt;String&gt;emptyIterator();</b>
+<i>1092</i>&nbsp;        }
+<b class="nc"><i>1093</i>&nbsp;        return new StringIterator(values, len);</b>
+<i>1094</i>&nbsp;    }
+<i>1095</i>&nbsp;
+<i>1096</i>&nbsp;    /**
+<i>1097</i>&nbsp;     * Private to route clients through the static methods, which can
+<i>1098</i>&nbsp;     * optimize the empty-list case.
+<i>1099</i>&nbsp;     */
+<i>1100</i>&nbsp;    private static final class IntIterator implements Iterator&lt;Integer&gt;
+<i>1101</i>&nbsp;    {
+<i>1102</i>&nbsp;        private final int []  _values;
+<i>1103</i>&nbsp;        private int           _pos;
+<i>1104</i>&nbsp;        private final int     _len;
+<i>1105</i>&nbsp;
+<i>1106</i>&nbsp;        IntIterator(int[] values) {
+<b class="nc"><i>1107</i>&nbsp;            this(values, 0, values.length);</b>
+<i>1108</i>&nbsp;        }
+<b class="nc"><i>1109</i>&nbsp;        IntIterator(int[] values, int off, int len) {</b>
+<b class="nc"><i>1110</i>&nbsp;            _values = values;</b>
+<b class="nc"><i>1111</i>&nbsp;            _len = len;</b>
+<b class="nc"><i>1112</i>&nbsp;            _pos = off;</b>
+<i>1113</i>&nbsp;        }
+<i>1114</i>&nbsp;        public boolean hasNext() {
+<b class="nc"><i>1115</i>&nbsp;            return (_pos &lt; _len);</b>
+<i>1116</i>&nbsp;        }
+<i>1117</i>&nbsp;        public Integer next() {
+<b class="nc"><i>1118</i>&nbsp;            if (!hasNext()) throw new NoSuchElementException();</b>
+<b class="nc"><i>1119</i>&nbsp;            int value = _values[_pos++];</b>
+<b class="nc"><i>1120</i>&nbsp;            return value;</b>
+<i>1121</i>&nbsp;        }
+<i>1122</i>&nbsp;        public void remove() {
+<b class="nc"><i>1123</i>&nbsp;            throw new UnsupportedOperationException();</b>
+<i>1124</i>&nbsp;        }
+<i>1125</i>&nbsp;    }
+<i>1126</i>&nbsp;
+<i>1127</i>&nbsp;    public static final Iterator&lt;Integer&gt; intIterator(int... values)
+<i>1128</i>&nbsp;    {
+<b class="nc"><i>1129</i>&nbsp;        if (values == null || values.length == 0)</b>
+<i>1130</i>&nbsp;        {
+<b class="nc"><i>1131</i>&nbsp;            return _Private_Utils.&lt;Integer&gt;emptyIterator();</b>
+<i>1132</i>&nbsp;        }
+<b class="nc"><i>1133</i>&nbsp;        return new IntIterator(values);</b>
+<i>1134</i>&nbsp;    }
+<i>1135</i>&nbsp;
+<i>1136</i>&nbsp;    public static final Iterator&lt;Integer&gt; intIterator(int[] values, int len)
+<i>1137</i>&nbsp;    {
+<b class="nc"><i>1138</i>&nbsp;        if (values == null || values.length == 0 || len == 0)</b>
+<i>1139</i>&nbsp;        {
+<b class="nc"><i>1140</i>&nbsp;            return _Private_Utils.&lt;Integer&gt;emptyIterator();</b>
+<i>1141</i>&nbsp;        }
+<b class="nc"><i>1142</i>&nbsp;        return new IntIterator(values, 0, len);</b>
+<i>1143</i>&nbsp;    }
+<i>1144</i>&nbsp;
+<i>1145</i>&nbsp;    public static void writeAsBase64(InputStream byteStream, Appendable out)
+<i>1146</i>&nbsp;        throws IOException
+<i>1147</i>&nbsp;    {
+<b class="fc"><i>1148</i>&nbsp;        Base64Encoder.TextStream ts = new Base64Encoder.TextStream(byteStream);</b>
+<i>1149</i>&nbsp;
+<i>1150</i>&nbsp;        for (;;) {
+<b class="fc"><i>1151</i>&nbsp;            int c = ts.read();</b>
+<b class="fc"><i>1152</i>&nbsp;            if (c == -1) break;</b>
+<b class="fc"><i>1153</i>&nbsp;            out.append((char) c);</b>
+<b class="fc"><i>1154</i>&nbsp;        }</b>
+<b class="fc"><i>1155</i>&nbsp;    }</b>
+<i>1156</i>&nbsp;
+<i>1157</i>&nbsp;    public static SymbolTable newSubstituteSymtab(SymbolTable original,
+<i>1158</i>&nbsp;                                                  int version,
+<i>1159</i>&nbsp;                                                  int maxId)
+<i>1160</i>&nbsp;    {
+<b class="nc"><i>1161</i>&nbsp;        return new SubstituteSymbolTable(original, version, maxId);</b>
+<i>1162</i>&nbsp;    }
+<i>1163</i>&nbsp;
+<i>1164</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

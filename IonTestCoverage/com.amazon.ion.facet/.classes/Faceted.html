@@ -1,0 +1,103 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: Faceted</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.facet</a> ]
+</div>
+
+<h1>Coverage Summary for Class: Faceted (com.amazon.ion.facet)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">Faceted</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.facet;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;/**
+<i>19</i>&nbsp; * Provides access to optional extension interfaces of a subject instance.
+<i>20</i>&nbsp; * Users can request a facet of the subject by passing the desired type token
+<i>21</i>&nbsp; * to {@link #asFacet(Class)}. Different implementations, or even different
+<i>22</i>&nbsp; * instances, of a subject may support different facets.
+<i>23</i>&nbsp; * Consult the subject&#39;s documentation to determine which facets are available
+<i>24</i>&nbsp; * in each circumstance.
+<i>25</i>&nbsp; *
+<i>26</i>&nbsp; * &lt;h2&gt;Design Notes&lt;/h2&gt;
+<i>27</i>&nbsp; *
+<i>28</i>&nbsp; * Given a concrete {@link Faceted} class, it may be that some instances
+<i>29</i>&nbsp; * support a particular facet while others do not, depending on the state of
+<i>30</i>&nbsp; * the subject or the way it was constructed. In such cases
+<i>31</i>&nbsp; * {@link #asFacet(Class) asFacet} should choose whether to return the facet
+<i>32</i>&nbsp; * based on the subject&#39;s state.
+<i>33</i>&nbsp; * Such classes should &lt;em&gt;not&lt;/em&gt; extend the facet
+<i>34</i>&nbsp; * interface (directly or indirectly), since that allows clients to bypass
+<i>35</i>&nbsp; * {@link #asFacet(Class) asFacet} and simply downcast the subject to the facet,
+<i>36</i>&nbsp; * causing problems for instances that can&#39;t support the facet.
+<i>37</i>&nbsp; *
+<i>38</i>&nbsp; * @see Facets
+<i>39</i>&nbsp; *
+<i>40</i>&nbsp; */
+<i>41</i>&nbsp;public interface Faceted
+<i>42</i>&nbsp;{
+<i>43</i>&nbsp;    /**
+<i>44</i>&nbsp;     * Returns a facet of this subject if supported.
+<i>45</i>&nbsp;     *
+<i>46</i>&nbsp;     * @param &lt;T&gt;       The requested facet type.
+<i>47</i>&nbsp;     * @param facetType The type token of the requested facet type.
+<i>48</i>&nbsp;     *
+<i>49</i>&nbsp;     * @return  An instance of T representing the facet of the subject, or
+<i>50</i>&nbsp;     *          null if the facet is not supported by the subject.
+<i>51</i>&nbsp;     *
+<i>52</i>&nbsp;     * @see Facets#asFacet(Class, Faceted)
+<i>53</i>&nbsp;     * @see Facets#assumeFacet(Class, Faceted)
+<i>54</i>&nbsp;     */
+<i>55</i>&nbsp;    public &lt;T&gt; T asFacet(Class&lt;T&gt; facetType);
+<i>56</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonSymbol</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonSymbol (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonSymbol</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;/**
+<i>19</i>&nbsp; * An Ion &lt;code&gt;symbol&lt;/code&gt; value.
+<i>20</i>&nbsp; * &lt;p&gt;
+<i>21</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>22</i>&nbsp; * code outside of this library.
+<i>23</i>&nbsp; */
+<i>24</i>&nbsp;public interface IonSymbol
+<i>25</i>&nbsp;    extends IonText
+<i>26</i>&nbsp;{
+<i>27</i>&nbsp;    /**
+<i>28</i>&nbsp;     * Gets the text content of this symbol.
+<i>29</i>&nbsp;     *
+<i>30</i>&nbsp;     * @return the text of the symbol, or &lt;code&gt;null&lt;/code&gt; if this is
+<i>31</i>&nbsp;     * &lt;code&gt;null.symbol&lt;/code&gt;.
+<i>32</i>&nbsp;     *
+<i>33</i>&nbsp;     * @throws UnknownSymbolException if this symbol has unknown text.
+<i>34</i>&nbsp;     */
+<i>35</i>&nbsp;    public String stringValue()
+<i>36</i>&nbsp;        throws UnknownSymbolException;
+<i>37</i>&nbsp;
+<i>38</i>&nbsp;
+<i>39</i>&nbsp;    /**
+<i>40</i>&nbsp;     * Gets the integer symbol id used in the binary encoding of this symbol.
+<i>41</i>&nbsp;     *
+<i>42</i>&nbsp;     * @return an integer greater than zero, if this value has an associated
+<i>43</i>&nbsp;     * symbol table.  Otherwise, return {@link SymbolTable#UNKNOWN_SYMBOL_ID}.
+<i>44</i>&nbsp;     *
+<i>45</i>&nbsp;     * @throws NullValueException if this is &lt;code&gt;null.symbol&lt;/code&gt;.
+<i>46</i>&nbsp;     *
+<i>47</i>&nbsp;     * @deprecated Use {@link #symbolValue()} instead.
+<i>48</i>&nbsp;     */
+<i>49</i>&nbsp;    @Deprecated
+<i>50</i>&nbsp;    public int getSymbolId()
+<i>51</i>&nbsp;        throws NullValueException;
+<i>52</i>&nbsp;
+<i>53</i>&nbsp;
+<i>54</i>&nbsp;    /**
+<i>55</i>&nbsp;     * Returns this value as a symbol token (text + ID).
+<i>56</i>&nbsp;     *
+<i>57</i>&nbsp;     * @return null if {@link #isNullValue()}
+<i>58</i>&nbsp;     *
+<i>59</i>&nbsp;     */
+<i>60</i>&nbsp;    public SymbolToken symbolValue();
+<i>61</i>&nbsp;
+<i>62</i>&nbsp;
+<i>63</i>&nbsp;    /**
+<i>64</i>&nbsp;     * Changes the value of this element.
+<i>65</i>&nbsp;     *
+<i>66</i>&nbsp;     * @param value the new value of this symbol;
+<i>67</i>&nbsp;     * may be &lt;code&gt;null&lt;/code&gt; to make this &lt;code&gt;null.symbol&lt;/code&gt;.
+<i>68</i>&nbsp;     *
+<i>69</i>&nbsp;     */
+<i>70</i>&nbsp;    public void setValue(String value);
+<i>71</i>&nbsp;
+<i>72</i>&nbsp;    public IonSymbol clone()
+<i>73</i>&nbsp;        throws UnknownSymbolException;
+<i>74</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

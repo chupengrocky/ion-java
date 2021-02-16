@@ -1,0 +1,210 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonException</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonException (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IonException</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85.7%
+  </span>
+  <span class="absValue">
+    (6/ 7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86.4%
+  </span>
+  <span class="absValue">
+    (19/ 22)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import java.io.IOException;
+<i>19</i>&nbsp;import java.util.IdentityHashMap;
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;/**
+<i>22</i>&nbsp; * Base class for exceptions thrown throughout this library.  In most cases,
+<i>23</i>&nbsp; * external exceptions (a common example being {@link IOException}) are not
+<i>24</i>&nbsp; * propagated directly but are instead wrapped in one or more
+<i>25</i>&nbsp; * {@link IonException}s.
+<i>26</i>&nbsp; * &lt;p&gt;
+<i>27</i>&nbsp; * This library does not promise that such an &quot;external cause&quot; will be the
+<i>28</i>&nbsp; * direct {@link IonException#getCause() cause} of the thrown exception: there
+<i>29</i>&nbsp; * there may be a chain of multiple {@link IonException} before getting to the
+<i>30</i>&nbsp; * external cause.  Here&#39;s an example of how to deal with this in a situation
+<i>31</i>&nbsp; * where the caller wants to propagate {@link IOException}s:
+<i>32</i>&nbsp; *&lt;pre&gt;
+<i>33</i>&nbsp; *    try {
+<i>34</i>&nbsp; *        // Call some API
+<i>35</i>&nbsp; *    }
+<i>36</i>&nbsp; *    catch (IonException e) {
+<i>37</i>&nbsp; *        IOException io = e.causeOfType(IOException.class);
+<i>38</i>&nbsp; *        if (io != null) throw io;
+<i>39</i>&nbsp; *        throw e;
+<i>40</i>&nbsp; *    }
+<i>41</i>&nbsp; *&lt;/pre&gt;
+<i>42</i>&nbsp; */
+<i>43</i>&nbsp;public class IonException extends RuntimeException
+<i>44</i>&nbsp;{
+<i>45</i>&nbsp;    private static final long serialVersionUID = 5769577011706279252L;
+<i>46</i>&nbsp;
+<b class="fc"><i>47</i>&nbsp;    public IonException() { super(); }</b>
+<b class="fc"><i>48</i>&nbsp;    public IonException(String message) { super(message); }</b>
+<i>49</i>&nbsp;    public IonException(String message, Throwable cause) {
+<b class="fc"><i>50</i>&nbsp;        super(message, cause);</b>
+<b class="fc"><i>51</i>&nbsp;    }</b>
+<i>52</i>&nbsp;
+<i>53</i>&nbsp;    /**
+<i>54</i>&nbsp;     * Constructs a new exception with the given cause, copying the message
+<i>55</i>&nbsp;     * from the cause into this instance.
+<i>56</i>&nbsp;     * @param cause
+<i>57</i>&nbsp;     *     the root cause of the exception; must not be null.
+<i>58</i>&nbsp;     */
+<b class="fc"><i>59</i>&nbsp;    public IonException(Throwable cause) { super(cause.getMessage(), cause); }</b>
+<i>60</i>&nbsp;
+<i>61</i>&nbsp;
+<i>62</i>&nbsp;    /**
+<i>63</i>&nbsp;     * Finds the first exception in the {@link #getCause()} chain that&#39;s not
+<i>64</i>&nbsp;     * an {@link IonException}.
+<i>65</i>&nbsp;     *
+<i>66</i>&nbsp;     * @return null if there&#39;s no cause that&#39;s not an {@link IonException}.
+<i>67</i>&nbsp;     */
+<i>68</i>&nbsp;    Throwable externalCause()
+<i>69</i>&nbsp;    {
+<b class="fc"><i>70</i>&nbsp;        IdentityHashMap&lt;Throwable, Throwable&gt; seen =</b>
+<i>71</i>&nbsp;            new IdentityHashMap&lt;Throwable, Throwable&gt;();
+<i>72</i>&nbsp;
+<b class="fc"><i>73</i>&nbsp;        Throwable cause = getCause();</b>
+<b class="fc"><i>74</i>&nbsp;        while (cause instanceof IonException)</b>
+<i>75</i>&nbsp;        {
+<b class="fc"><i>76</i>&nbsp;            if (seen.put(cause, cause) != null)  // cycle check</b>
+<i>77</i>&nbsp;            {
+<b class="fc"><i>78</i>&nbsp;                return null;</b>
+<i>79</i>&nbsp;            }
+<b class="fc"><i>80</i>&nbsp;            cause = cause.getCause();</b>
+<i>81</i>&nbsp;        }
+<b class="fc"><i>82</i>&nbsp;        return cause;</b>
+<i>83</i>&nbsp;    }
+<i>84</i>&nbsp;
+<i>85</i>&nbsp;
+<i>86</i>&nbsp;    /**
+<i>87</i>&nbsp;     * Finds the first exception in the {@link #getCause()} chain that is
+<i>88</i>&nbsp;     * an instance of the given type.
+<i>89</i>&nbsp;     *
+<i>90</i>&nbsp;     * @return null if there&#39;s no cause of the given type.
+<i>91</i>&nbsp;     */
+<i>92</i>&nbsp;    @SuppressWarnings(&quot;unchecked&quot;)
+<i>93</i>&nbsp;    public &lt;T extends Throwable&gt; T causeOfType(Class&lt;T&gt; type)
+<i>94</i>&nbsp;    {
+<b class="fc"><i>95</i>&nbsp;        IdentityHashMap&lt;Throwable, Throwable&gt; seen =</b>
+<i>96</i>&nbsp;            new IdentityHashMap&lt;Throwable, Throwable&gt;();
+<i>97</i>&nbsp;
+<b class="fc"><i>98</i>&nbsp;        Throwable cause = getCause();</b>
+<b class="fc"><i>99</i>&nbsp;        while (cause != null &amp;&amp; ! type.isInstance(cause))</b>
+<i>100</i>&nbsp;        {
+<b class="fc"><i>101</i>&nbsp;            if (seen.put(cause, cause) != null)  // cycle check</b>
+<i>102</i>&nbsp;            {
+<b class="fc"><i>103</i>&nbsp;                return null;</b>
+<i>104</i>&nbsp;            }
+<b class="fc"><i>105</i>&nbsp;            cause = cause.getCause();</b>
+<i>106</i>&nbsp;        }
+<b class="fc"><i>107</i>&nbsp;        return (T) cause;</b>
+<i>108</i>&nbsp;    }
+<i>109</i>&nbsp;
+<i>110</i>&nbsp;    /**
+<i>111</i>&nbsp;     * Rethrows the first exception in the {@link #getCause()} chain that is
+<i>112</i>&nbsp;     * an instance of the given type.  If no such cause is found, returns
+<i>113</i>&nbsp;     * normally.
+<i>114</i>&nbsp;     *
+<i>115</i>&nbsp;     * FIXME Doesn&#39;t work under Java 5
+<i>116</i>&nbsp;     */
+<i>117</i>&nbsp;    @SuppressWarnings(&quot;unused&quot;)
+<i>118</i>&nbsp;    private // until I can get this to work
+<i>119</i>&nbsp;    &lt;T extends Throwable&gt; void rethrowCauseOfType(Class&lt;T&gt; type)
+<i>120</i>&nbsp;        throws Throwable // this should be throws T
+<i>121</i>&nbsp;    {
+<b class="nc"><i>122</i>&nbsp;        T cause = causeOfType(type);</b>
+<i>123</i>&nbsp;
+<i>124</i>&nbsp;        // rethrow acts as if its always throwing Throwable, not the subclass.
+<b class="nc"><i>125</i>&nbsp;        if (cause != null) throw cause;</b>
+<b class="nc"><i>126</i>&nbsp;    }</b>
+<i>127</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

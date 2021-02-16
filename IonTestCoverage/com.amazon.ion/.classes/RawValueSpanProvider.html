@@ -1,0 +1,106 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: RawValueSpanProvider</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: RawValueSpanProvider (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">RawValueSpanProvider</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;/**
+<i>19</i>&nbsp; * Provide the ability to retrieve {@link Span}s (abstract value positions)
+<i>20</i>&nbsp; * of raw Ion values, excluding type and length octets.
+<i>21</i>&nbsp; * &lt;p&gt;
+<i>22</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>23</i>&nbsp; * code outside of this library.
+<i>24</i>&nbsp; * &lt;p&gt;
+<i>25</i>&nbsp; * This functionality may be accessed as a facet of binary {@link IonReader}s.
+<i>26</i>&nbsp; *
+<i>27</i>&nbsp; * @deprecated This is a private API subject to change without notice.
+<i>28</i>&nbsp; */
+<i>29</i>&nbsp;@Deprecated
+<i>30</i>&nbsp;public interface RawValueSpanProvider
+<i>31</i>&nbsp;{
+<i>32</i>&nbsp;
+<i>33</i>&nbsp;    /**
+<i>34</i>&nbsp;     * Constructs a Span, which may be faceted as an {@link OffsetSpan}, that
+<i>35</i>&nbsp;     * provides the start and end byte positions of the current value.
+<i>36</i>&nbsp;     * &lt;p&gt;
+<i>37</i>&nbsp;     * NOTE: for Ion {@code int} values, users should not use these byte positions to
+<i>38</i>&nbsp;     * determine which primitive (if any) the value can fit into, because the
+<i>39</i>&nbsp;     * sign of Ion {@code int} values is encoded into the type ID byte, which is
+<i>40</i>&nbsp;     * not included in this span.
+<i>41</i>&nbsp;     * &lt;p&gt;
+<i>42</i>&nbsp;     * &lt;b&gt;WARNING:&lt;/b&gt; Spans provided by this method are not compatible with the
+<i>43</i>&nbsp;     * {@link SeekableReader} facet, because they lack the type ID and length
+<i>44</i>&nbsp;     * bytes that are important when reconstructing the context on seek. For
+<i>45</i>&nbsp;     * {@link SpanProvider#currentSpan()} should be used to retrieve seekable
+<i>46</i>&nbsp;     * Spans.
+<i>47</i>&nbsp;     * @return the constructed Span
+<i>48</i>&nbsp;     */
+<i>49</i>&nbsp;    public Span valueSpan();
+<i>50</i>&nbsp;
+<i>51</i>&nbsp;    /**
+<i>52</i>&nbsp;     * @return the byte[] that backs this span. This span&#39;s start and end positions
+<i>53</i>&nbsp;     * may be used as indices into the returned buffer. NOTE: does NOT perform
+<i>54</i>&nbsp;     * a copy of the buffer; care must be taken not to mutate and corrupt the
+<i>55</i>&nbsp;     * data.
+<i>56</i>&nbsp;     */
+<i>57</i>&nbsp;    public byte[] buffer();
+<i>58</i>&nbsp;
+<i>59</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

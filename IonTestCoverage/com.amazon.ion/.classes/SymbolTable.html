@@ -1,0 +1,346 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: SymbolTable</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: SymbolTable (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">SymbolTable</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import java.io.IOException;
+<i>19</i>&nbsp;import java.util.Iterator;
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;/**
+<i>22</i>&nbsp; * A symbol table maps symbols between their textual form and an integer ID
+<i>23</i>&nbsp; * used in the binary encoding.
+<i>24</i>&nbsp; * &lt;p&gt;
+<i>25</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>26</i>&nbsp; * code outside of this library.
+<i>27</i>&nbsp; * &lt;p&gt;
+<i>28</i>&nbsp; * There are two kinds of symbol tables: &lt;em&gt;shared&lt;/em&gt; and &lt;em&gt;local&lt;/em&gt;.
+<i>29</i>&nbsp; * With that, there are two further distinctions of shared symbol tables:
+<i>30</i>&nbsp; * &lt;em&gt;system&lt;/em&gt; and &lt;em&gt;substitute&lt;/em&gt;.
+<i>31</i>&nbsp; *
+<i>32</i>&nbsp; * &lt;h2&gt;Notes about Substitute symbol tables&lt;/h2&gt;
+<i>33</i>&nbsp; * Substitute tables are used when the relevant catalog cannot find an exact
+<i>34</i>&nbsp; * match, that is, the catalog cannot find an imported shared symtab with the
+<i>35</i>&nbsp; * same name, version and max_id.
+<i>36</i>&nbsp; * &lt;p&gt;
+<i>37</i>&nbsp; * In order to ensure that we retain the correct import declarations,
+<i>38</i>&nbsp; * a substitute table is created, &lt;em&gt;substituting&lt;/em&gt; the originally matched
+<i>39</i>&nbsp; * shared symtab from the catalog. The substitute table in turns exposes the
+<i>40</i>&nbsp; * correct name, version and max_id for any callers that require it, and
+<i>41</i>&nbsp; * becomes a delegate of the substituted symtab&#39;s interface.
+<i>42</i>&nbsp; * &lt;p&gt;
+<i>43</i>&nbsp; * &lt;b&gt;Implementations of this interface are safe for use by multiple
+<i>44</i>&nbsp; * threads.&lt;/b&gt;
+<i>45</i>&nbsp; *
+<i>46</i>&nbsp; * @see &lt;a href=&quot;http://amzn.github.io/ion-docs/docs/symbols.html&quot;&gt;Ion Symbols page&lt;/a&gt;
+<i>47</i>&nbsp; */
+<i>48</i>&nbsp;public interface SymbolTable
+<i>49</i>&nbsp;{
+<i>50</i>&nbsp;    /**
+<i>51</i>&nbsp;     * Indicates that a symbol&#39;s integer ID could not be determined.  That&#39;s
+<i>52</i>&nbsp;     * generally the case when constructing value instances that are not yet
+<i>53</i>&nbsp;     * contained by a datagram.
+<i>54</i>&nbsp;     */
+<i>55</i>&nbsp;    public final static int UNKNOWN_SYMBOL_ID = -1;
+<i>56</i>&nbsp;
+<i>57</i>&nbsp;
+<i>58</i>&nbsp;    /**
+<i>59</i>&nbsp;     * Gets the unique name of this symbol table.
+<i>60</i>&nbsp;     *
+<i>61</i>&nbsp;     * @return the unique name, or {@code null} if {@link #isLocalTable()}.
+<i>62</i>&nbsp;     */
+<i>63</i>&nbsp;    public String getName();
+<i>64</i>&nbsp;
+<i>65</i>&nbsp;
+<i>66</i>&nbsp;    /**
+<i>67</i>&nbsp;     * Gets the version of this symbol table.
+<i>68</i>&nbsp;     *
+<i>69</i>&nbsp;     * @return at least one, or zero if {@link #isLocalTable()}.
+<i>70</i>&nbsp;     */
+<i>71</i>&nbsp;    public int getVersion();
+<i>72</i>&nbsp;
+<i>73</i>&nbsp;
+<i>74</i>&nbsp;    /**
+<i>75</i>&nbsp;     * Determines whether this symbol table is local, and therefore unnamed
+<i>76</i>&nbsp;     * and unversioned.
+<i>77</i>&nbsp;     * &lt;p&gt;
+<i>78</i>&nbsp;     * If this method returns {@code true}, then both {@link #isSharedTable()}
+<i>79</i>&nbsp;     * and {@link #isSystemTable()} will return {@code false}.
+<i>80</i>&nbsp;     */
+<i>81</i>&nbsp;    public boolean isLocalTable();
+<i>82</i>&nbsp;
+<i>83</i>&nbsp;    /**
+<i>84</i>&nbsp;     * Determines whether this symbol table is shared, and therefore named,
+<i>85</i>&nbsp;     * versioned, and {@linkplain #isReadOnly() read-only}.
+<i>86</i>&nbsp;     * &lt;p&gt;
+<i>87</i>&nbsp;     * If this method returns {@code true}, then {@link #isLocalTable()}
+<i>88</i>&nbsp;     * will return {@code false}.
+<i>89</i>&nbsp;     */
+<i>90</i>&nbsp;    public boolean isSharedTable();
+<i>91</i>&nbsp;
+<i>92</i>&nbsp;    /**
+<i>93</i>&nbsp;     * Determines whether this instance is substituting for an imported
+<i>94</i>&nbsp;     * shared table for which no exact match was found in the catalog.
+<i>95</i>&nbsp;     * Such tables are not authoritative and may not even have any symbol text
+<i>96</i>&nbsp;     * at all (as is the case when no version of an imported table is found).
+<i>97</i>&nbsp;     * &lt;p&gt;
+<i>98</i>&nbsp;     * Substitute tables are always shared, non-system tables.
+<i>99</i>&nbsp;     *
+<i>100</i>&nbsp;     */
+<i>101</i>&nbsp;    public boolean isSubstitute();
+<i>102</i>&nbsp;
+<i>103</i>&nbsp;    /**
+<i>104</i>&nbsp;     * Determines whether this symbol table is a system symbol table, and
+<i>105</i>&nbsp;     * therefore shared, named, versioned, and
+<i>106</i>&nbsp;     * {@linkplain #isReadOnly() read-only}.
+<i>107</i>&nbsp;     * &lt;p&gt;
+<i>108</i>&nbsp;     * If this method returns {@code true}, then {@link #isLocalTable()}
+<i>109</i>&nbsp;     * will return {@code false} and {@link #isSharedTable()} will return
+<i>110</i>&nbsp;     * {@code true}.
+<i>111</i>&nbsp;     */
+<i>112</i>&nbsp;    public boolean isSystemTable();
+<i>113</i>&nbsp;
+<i>114</i>&nbsp;
+<i>115</i>&nbsp;    /**
+<i>116</i>&nbsp;     * Determines whether this symbol table can have symbols added to it.
+<i>117</i>&nbsp;     * Shared symtabs are always read-only.
+<i>118</i>&nbsp;     * Local symtabs can also be {@linkplain #makeReadOnly() made read-only}
+<i>119</i>&nbsp;     * on demand, which enables some optimizations when writing data but will
+<i>120</i>&nbsp;     * cause failures if new symbols are encountered.
+<i>121</i>&nbsp;     *
+<i>122</i>&nbsp;     * @return true if this table is read-only, false if symbols may
+<i>123</i>&nbsp;     *  be added.
+<i>124</i>&nbsp;     *
+<i>125</i>&nbsp;     * @see #makeReadOnly()
+<i>126</i>&nbsp;     *
+<i>127</i>&nbsp;
+<i>128</i>&nbsp;     */
+<i>129</i>&nbsp;    public boolean isReadOnly();
+<i>130</i>&nbsp;
+<i>131</i>&nbsp;
+<i>132</i>&nbsp;    /**
+<i>133</i>&nbsp;     * Prevents this symbol table from accepting any more new symbols.
+<i>134</i>&nbsp;     * Shared symtabs are always read-only.
+<i>135</i>&nbsp;     * Making a local symtab read-only enables some optimizations when writing
+<i>136</i>&nbsp;     * data, but will cause failures if new symbols are encountered.
+<i>137</i>&nbsp;     *
+<i>138</i>&nbsp;     * @see #isReadOnly()
+<i>139</i>&nbsp;     *
+<i>140</i>&nbsp;
+<i>141</i>&nbsp;     */
+<i>142</i>&nbsp;    public void makeReadOnly();
+<i>143</i>&nbsp;
+<i>144</i>&nbsp;
+<i>145</i>&nbsp;    /**
+<i>146</i>&nbsp;     * Gets the system symbol table being used by this local table.
+<i>147</i>&nbsp;     * &lt;p&gt;
+<i>148</i>&nbsp;     * If {@link #isSystemTable()} then this method returns {@code this}.
+<i>149</i>&nbsp;     * Otherwise, if {@link #isSharedTable()} then this method returns
+<i>150</i>&nbsp;     * {@code null}.
+<i>151</i>&nbsp;     *
+<i>152</i>&nbsp;     * @return not &lt;code&gt;null&lt;/code&gt;, except for non-system shared tables.
+<i>153</i>&nbsp;     */
+<i>154</i>&nbsp;    public SymbolTable getSystemSymbolTable();
+<i>155</i>&nbsp;
+<i>156</i>&nbsp;
+<i>157</i>&nbsp;    /**
+<i>158</i>&nbsp;     * Gets the identifier for the Ion version (and thus the system symbol
+<i>159</i>&nbsp;     * table) used by this table.
+<i>160</i>&nbsp;     * The version identifier is a string of the form {@code &quot;$ion_X_Y&quot;}.
+<i>161</i>&nbsp;     *
+<i>162</i>&nbsp;     * @return the version identifier; or {@code null} for non-system shared
+<i>163</i>&nbsp;     *  tables.
+<i>164</i>&nbsp;     */
+<i>165</i>&nbsp;    public String getIonVersionId();
+<i>166</i>&nbsp;
+<i>167</i>&nbsp;
+<i>168</i>&nbsp;    /**
+<i>169</i>&nbsp;     * Gets the sequence of shared symbol tables imported by this (local)
+<i>170</i>&nbsp;     * symbol table. The result does not include a system table.
+<i>171</i>&nbsp;     * &lt;p&gt;
+<i>172</i>&nbsp;     * If this local table imported a shared table for which the relevant
+<i>173</i>&nbsp;     * {@link IonCatalog} has the same name but different version and/or max_id,
+<i>174</i>&nbsp;     * then that entry will be a substitute table with the
+<i>175</i>&nbsp;     * correct version and max_id, wrapping the original shared symbol table
+<i>176</i>&nbsp;     * that was found.
+<i>177</i>&nbsp;     * &lt;p&gt;
+<i>178</i>&nbsp;     * If this local table imported a shared table for which the relevant
+<i>179</i>&nbsp;     * {@link IonCatalog} has no entry with the same name, but the import
+<i>180</i>&nbsp;     * declaration has a max_id available, then that entry will
+<i>181</i>&nbsp;     * be a substitute table with max_id undefined symbols.
+<i>182</i>&nbsp;     *
+<i>183</i>&nbsp;     * @return {@code null} if this is a shared or system table, otherwise a
+<i>184</i>&nbsp;     * non-null but potentially zero-length array of shared tables (but no
+<i>185</i>&nbsp;     * system table).
+<i>186</i>&nbsp;     */
+<i>187</i>&nbsp;    public SymbolTable[] getImportedTables();
+<i>188</i>&nbsp;
+<i>189</i>&nbsp;
+<i>190</i>&nbsp;    /**
+<i>191</i>&nbsp;     * Gets the highest symbol id reserved by this table&#39;s imports (including
+<i>192</i>&nbsp;     * system symbols). Any id higher than this value is a local symbol
+<i>193</i>&nbsp;     * declared by this table. This value is zero for shared symbol tables,
+<i>194</i>&nbsp;     * since they do not utilize imports.
+<i>195</i>&nbsp;     */
+<i>196</i>&nbsp;    public int getImportedMaxId();
+<i>197</i>&nbsp;
+<i>198</i>&nbsp;
+<i>199</i>&nbsp;    /**
+<i>200</i>&nbsp;     * Gets the highest symbol id reserved by this table.
+<i>201</i>&nbsp;     *
+<i>202</i>&nbsp;     * @return the largest integer such that {@link #findKnownSymbol(int)} could
+<i>203</i>&nbsp;     * return a non-&lt;code&gt;null&lt;/code&gt; result.  Note that there is no promise
+<i>204</i>&nbsp;     * that it &lt;em&gt;will&lt;/em&gt; return a name, only that any larger id will not
+<i>205</i>&nbsp;     * have a name defined.
+<i>206</i>&nbsp;     */
+<i>207</i>&nbsp;    public int getMaxId();
+<i>208</i>&nbsp;
+<i>209</i>&nbsp;
+<i>210</i>&nbsp;    /**
+<i>211</i>&nbsp;     * Adds a new symbol to this table, or finds an existing definition of it.
+<i>212</i>&nbsp;     * &lt;p&gt;
+<i>213</i>&nbsp;     * The resulting {@link SymbolToken} has the same String instance that
+<i>214</i>&nbsp;     * was first interned. In order to reduce memory
+<i>215</i>&nbsp;     * footprint, callers should generally replace their copy of the text with
+<i>216</i>&nbsp;     * the string in the result.
+<i>217</i>&nbsp;     * &lt;p&gt;
+<i>218</i>&nbsp;     * This method will not necessarily return the same instance given the
+<i>219</i>&nbsp;     * same input.
+<i>220</i>&nbsp;     *
+<i>221</i>&nbsp;     * @param text the symbol text to intern.
+<i>222</i>&nbsp;     *
+<i>223</i>&nbsp;     * @return the interned symbol, with both text and SID defined; not null.
+<i>224</i>&nbsp;     *
+<i>225</i>&nbsp;     * @throws IonException if this symtab {@link #isReadOnly()} and
+<i>226</i>&nbsp;     * the text isn&#39;t already interned.
+<i>227</i>&nbsp;     *
+<i>228</i>&nbsp;     * @see #find(String)
+<i>229</i>&nbsp;     *
+<i>230</i>&nbsp;
+<i>231</i>&nbsp;     */
+<i>232</i>&nbsp;    public SymbolToken intern(String text);
+<i>233</i>&nbsp;
+<i>234</i>&nbsp;
+<i>235</i>&nbsp;    /**
+<i>236</i>&nbsp;     * Finds a symbol already interned by this table.
+<i>237</i>&nbsp;     * &lt;p&gt;
+<i>238</i>&nbsp;     * This method will not necessarily return the same instance given the
+<i>239</i>&nbsp;     * same input.
+<i>240</i>&nbsp;     *
+<i>241</i>&nbsp;     * @param text the symbol text to find.
+<i>242</i>&nbsp;     *
+<i>243</i>&nbsp;     * @return the interned symbol, with both text and SID defined;
+<i>244</i>&nbsp;     *  or {@code null} if it&#39;s not already interned.
+<i>245</i>&nbsp;     *
+<i>246</i>&nbsp;     * @see #intern(String)
+<i>247</i>&nbsp;     *
+<i>248</i>&nbsp;
+<i>249</i>&nbsp;     */
+<i>250</i>&nbsp;    public SymbolToken find(String text);
+<i>251</i>&nbsp;
+<i>252</i>&nbsp;
+<i>253</i>&nbsp;    /**
+<i>254</i>&nbsp;     * Gets the symbol ID associated with a given symbol name.
+<i>255</i>&nbsp;     *
+<i>256</i>&nbsp;     * @param name must not be null or empty.
+<i>257</i>&nbsp;     * @return the id of the requested symbol, or
+<i>258</i>&nbsp;     * {@link #UNKNOWN_SYMBOL_ID} if it&#39;s not defined.
+<i>259</i>&nbsp;     *
+<i>260</i>&nbsp;     * @throws NullPointerException if {@code name} is null.
+<i>261</i>&nbsp;     */
+<i>262</i>&nbsp;    public int findSymbol(String name);
+<i>263</i>&nbsp;
+<i>264</i>&nbsp;
+<i>265</i>&nbsp;    /**
+<i>266</i>&nbsp;     * Gets the interned text for a symbol ID.
+<i>267</i>&nbsp;     *
+<i>268</i>&nbsp;     * @param id the requested symbol ID.
+<i>269</i>&nbsp;     * @return the interned text associated with the symbol ID,
+<i>270</i>&nbsp;     *  or {@code null} if the text is not known.
+<i>271</i>&nbsp;     *
+<i>272</i>&nbsp;     * @throws IllegalArgumentException if {@code id &lt; 1}.
+<i>273</i>&nbsp;     */
+<i>274</i>&nbsp;    public String findKnownSymbol(int id);
+<i>275</i>&nbsp;
+<i>276</i>&nbsp;
+<i>277</i>&nbsp;    /**
+<i>278</i>&nbsp;     * Creates an iterator that will return all non-imported symbol names, in
+<i>279</i>&nbsp;     * order of their symbol IDs. The iterator will return {@code null} where
+<i>280</i>&nbsp;     * there is an undefined sid.
+<i>281</i>&nbsp;     * &lt;p&gt;
+<i>282</i>&nbsp;     * The first string returned by the iterator has a symbol ID that is one
+<i>283</i>&nbsp;     * more than {@link #getImportedMaxId()}, and the last string has symbol
+<i>284</i>&nbsp;     * ID equals to {@link #getMaxId()}.
+<i>285</i>&nbsp;     *
+<i>286</i>&nbsp;     * @return a new iterator.
+<i>287</i>&nbsp;     */
+<i>288</i>&nbsp;    public Iterator&lt;String&gt; iterateDeclaredSymbolNames();
+<i>289</i>&nbsp;
+<i>290</i>&nbsp;
+<i>291</i>&nbsp;    /**
+<i>292</i>&nbsp;     * Writes an Ion representation of this symbol table.
+<i>293</i>&nbsp;     *
+<i>294</i>&nbsp;     * @param writer must not be null.
+<i>295</i>&nbsp;     * @throws IOException if thrown by the writer.
+<i>296</i>&nbsp;     */
+<i>297</i>&nbsp;    public void writeTo(IonWriter writer)
+<i>298</i>&nbsp;        throws IOException;
+<i>299</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

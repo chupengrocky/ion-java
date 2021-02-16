@@ -1,0 +1,234 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: PooledBlockAllocatorProvider</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl.bin</a> ]
+</div>
+
+<h1>Coverage Summary for Class: PooledBlockAllocatorProvider (com.amazon.ion.impl.bin)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PooledBlockAllocatorProvider</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (10/ 12)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PooledBlockAllocatorProvider$PooledBlockAllocator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/ 5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/ 12)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">PooledBlockAllocatorProvider$PooledBlockAllocator$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/ 5)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/ 9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.1%
+  </span>
+  <span class="absValue">
+    (27/ 29)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl.bin;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import java.util.concurrent.ConcurrentHashMap;
+<i>19</i>&nbsp;import java.util.concurrent.ConcurrentLinkedQueue;
+<i>20</i>&nbsp;import java.util.concurrent.ConcurrentMap;
+<i>21</i>&nbsp;
+<i>22</i>&nbsp;/**
+<i>23</i>&nbsp; * A simple pooling implementation of {@link BlockAllocatorProvider} with a global thread-safe free block list
+<i>24</i>&nbsp; * for each block size.
+<i>25</i>&nbsp; * &lt;p&gt;
+<i>26</i>&nbsp; * This implementation is thread-safe.
+<i>27</i>&nbsp; */
+<i>28</i>&nbsp;/*package*/ final class PooledBlockAllocatorProvider extends BlockAllocatorProvider
+<i>29</i>&nbsp;{
+<i>30</i>&nbsp;    /**
+<i>31</i>&nbsp;     * A {@link BlockAllocator} of for a particular size that has a single thread-safe free list.
+<i>32</i>&nbsp;     * &lt;p&gt;
+<i>33</i>&nbsp;     * This implementation is thread-safe.
+<i>34</i>&nbsp;     */
+<b class="fc"><i>35</i>&nbsp;    private final class PooledBlockAllocator extends BlockAllocator</b>
+<i>36</i>&nbsp;    {
+<i>37</i>&nbsp;        private final int blockSize, blockLimit;
+<i>38</i>&nbsp;        private final ConcurrentLinkedQueue&lt;Block&gt; freeBlocks;
+<i>39</i>&nbsp;        static final int FREE_CAPACITY = 1024 * 1024 * 64; // 64MB
+<i>40</i>&nbsp;
+<i>41</i>&nbsp;        public PooledBlockAllocator(final int blockSize)
+<b class="fc"><i>42</i>&nbsp;        {</b>
+<b class="fc"><i>43</i>&nbsp;            this.blockSize = blockSize;</b>
+<b class="fc"><i>44</i>&nbsp;            this.freeBlocks = new ConcurrentLinkedQueue&lt;Block&gt;();</b>
+<b class="fc"><i>45</i>&nbsp;            this.blockLimit = FREE_CAPACITY / blockSize;</b>
+<b class="fc"><i>46</i>&nbsp;        }</b>
+<i>47</i>&nbsp;
+<i>48</i>&nbsp;        @Override
+<i>49</i>&nbsp;        public Block allocateBlock()
+<i>50</i>&nbsp;        {
+<b class="fc"><i>51</i>&nbsp;            Block block = freeBlocks.poll();</b>
+<b class="fc"><i>52</i>&nbsp;            if (block == null)</b>
+<i>53</i>&nbsp;            {
+<b class="fc"><i>54</i>&nbsp;                block = new Block(new byte[blockSize])</b>
+<b class="fc"><i>55</i>&nbsp;                {</b>
+<i>56</i>&nbsp;                    @Override
+<i>57</i>&nbsp;                    public void close()
+<i>58</i>&nbsp;                    {
+<b class="fc"><i>59</i>&nbsp;                        if (freeBlocks.size() &lt; blockLimit) {</b>
+<b class="fc"><i>60</i>&nbsp;                            reset();</b>
+<b class="fc"><i>61</i>&nbsp;                            freeBlocks.add(this);</b>
+<i>62</i>&nbsp;                        }
+<b class="fc"><i>63</i>&nbsp;                    }</b>
+<i>64</i>&nbsp;                };
+<i>65</i>&nbsp;            }
+<b class="fc"><i>66</i>&nbsp;            return block;</b>
+<i>67</i>&nbsp;        }
+<i>68</i>&nbsp;
+<i>69</i>&nbsp;        @Override
+<i>70</i>&nbsp;        public int getBlockSize()
+<i>71</i>&nbsp;        {
+<b class="fc"><i>72</i>&nbsp;            return blockSize;</b>
+<i>73</i>&nbsp;        }
+<i>74</i>&nbsp;
+<i>75</i>&nbsp;        @Override
+<b class="fc"><i>76</i>&nbsp;        public void close() {}</b>
+<i>77</i>&nbsp;    }
+<i>78</i>&nbsp;
+<i>79</i>&nbsp;    private final ConcurrentMap&lt;Integer, BlockAllocator&gt; allocators;
+<i>80</i>&nbsp;
+<i>81</i>&nbsp;    public PooledBlockAllocatorProvider()
+<b class="fc"><i>82</i>&nbsp;    {</b>
+<b class="fc"><i>83</i>&nbsp;        allocators = new ConcurrentHashMap&lt;Integer, BlockAllocator&gt;();</b>
+<b class="fc"><i>84</i>&nbsp;    }</b>
+<i>85</i>&nbsp;
+<i>86</i>&nbsp;    @Override
+<i>87</i>&nbsp;    public BlockAllocator vendAllocator(final int blockSize)
+<i>88</i>&nbsp;    {
+<b class="fc"><i>89</i>&nbsp;        if (blockSize &lt;= 0)</b>
+<i>90</i>&nbsp;        {
+<b class="nc"><i>91</i>&nbsp;            throw new IllegalArgumentException(&quot;Invalid block size: &quot; + blockSize);</b>
+<i>92</i>&nbsp;        }
+<i>93</i>&nbsp;
+<b class="fc"><i>94</i>&nbsp;        BlockAllocator allocator = allocators.get(blockSize);</b>
+<b class="fc"><i>95</i>&nbsp;        if (allocator == null)</b>
+<i>96</i>&nbsp;        {
+<b class="fc"><i>97</i>&nbsp;            allocator = new PooledBlockAllocator(blockSize);</b>
+<b class="fc"><i>98</i>&nbsp;            final BlockAllocator existingAllocator = allocators.putIfAbsent(blockSize, allocator);</b>
+<b class="fc"><i>99</i>&nbsp;            if (existingAllocator != null)</b>
+<i>100</i>&nbsp;            {
+<b class="nc"><i>101</i>&nbsp;                allocator = existingAllocator;</b>
+<i>102</i>&nbsp;            }
+<i>103</i>&nbsp;        }
+<b class="fc"><i>104</i>&nbsp;        return allocator;</b>
+<i>105</i>&nbsp;    }
+<i>106</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

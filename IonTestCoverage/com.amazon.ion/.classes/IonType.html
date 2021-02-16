@@ -1,0 +1,171 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonType</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonType (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IonType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (4/ 5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94.4%
+  </span>
+  <span class="absValue">
+    (17/ 18)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;
+<i>19</i>&nbsp;/**
+<i>20</i>&nbsp; * Enumeration identifying the core Ion data types.
+<i>21</i>&nbsp; * &lt;p&gt;
+<i>22</i>&nbsp; * Note that {@link #DATAGRAM} is a pseudo-type used only by
+<i>23</i>&nbsp; * {@link IonDatagram}, and it is not a legal value in most places where
+<i>24</i>&nbsp; * {@code IonType} is used.
+<i>25</i>&nbsp; */
+<b class="fc"><i>26</i>&nbsp;public enum IonType</b>
+<i>27</i>&nbsp;{
+<b class="fc"><i>28</i>&nbsp;    NULL,</b>
+<b class="fc"><i>29</i>&nbsp;    BOOL,</b>
+<b class="fc"><i>30</i>&nbsp;    INT,</b>
+<b class="fc"><i>31</i>&nbsp;    FLOAT,</b>
+<b class="fc"><i>32</i>&nbsp;    DECIMAL,</b>
+<b class="fc"><i>33</i>&nbsp;    TIMESTAMP,</b>
+<b class="fc"><i>34</i>&nbsp;    SYMBOL,</b>
+<b class="fc"><i>35</i>&nbsp;    STRING,</b>
+<b class="fc"><i>36</i>&nbsp;    CLOB,</b>
+<b class="fc"><i>37</i>&nbsp;    BLOB,</b>
+<b class="fc"><i>38</i>&nbsp;    LIST,</b>
+<b class="fc"><i>39</i>&nbsp;    SEXP,</b>
+<b class="fc"><i>40</i>&nbsp;    STRUCT,</b>
+<b class="fc"><i>41</i>&nbsp;    DATAGRAM;</b>
+<i>42</i>&nbsp;
+<i>43</i>&nbsp;
+<i>44</i>&nbsp;    /**
+<i>45</i>&nbsp;     * Determines whether a type represents an Ion container.
+<i>46</i>&nbsp;     * This includes {@link #DATAGRAM}.
+<i>47</i>&nbsp;     *
+<i>48</i>&nbsp;     * @param t may be null.
+<i>49</i>&nbsp;     *
+<i>50</i>&nbsp;     * @return true when {@code t} is {@link #LIST}, {@link #SEXP},
+<i>51</i>&nbsp;     * {@link #STRUCT}, or {@link #DATAGRAM}.
+<i>52</i>&nbsp;     *
+<i>53</i>&nbsp;     */
+<i>54</i>&nbsp;    public static boolean isContainer(IonType t)
+<i>55</i>&nbsp;    {
+<b class="fc"><i>56</i>&nbsp;        return (t != null &amp;&amp; (t.ordinal() &gt;= LIST.ordinal()));</b>
+<i>57</i>&nbsp;    }
+<i>58</i>&nbsp;
+<i>59</i>&nbsp;    /**
+<i>60</i>&nbsp;     * Determines whether a type represents an Ion text scalar, namely
+<i>61</i>&nbsp;     * {@link #STRING} or {@link #SYMBOL} (but not {@link #CLOB}).
+<i>62</i>&nbsp;     *
+<i>63</i>&nbsp;     * @param t may be null.
+<i>64</i>&nbsp;     *
+<i>65</i>&nbsp;     * @return true when {@code t} is {@link #STRING} or {@link #SYMBOL}.
+<i>66</i>&nbsp;     *
+<i>67</i>&nbsp;
+<i>68</i>&nbsp;     */
+<i>69</i>&nbsp;    public static boolean isText(IonType t)
+<i>70</i>&nbsp;    {
+<b class="fc"><i>71</i>&nbsp;        return (t == STRING) || (t == SYMBOL);</b>
+<i>72</i>&nbsp;    }
+<i>73</i>&nbsp;
+<i>74</i>&nbsp;    /**
+<i>75</i>&nbsp;     * Determines whether a type represents an Ion LOB scalar, namely
+<i>76</i>&nbsp;     * {@link #BLOB} or {@link #CLOB}.
+<i>77</i>&nbsp;     *
+<i>78</i>&nbsp;     * @param t may be null.
+<i>79</i>&nbsp;     *
+<i>80</i>&nbsp;     * @return true when {@code t} is {@link #BLOB} or {@link #CLOB}.
+<i>81</i>&nbsp;     *
+<i>82</i>&nbsp;
+<i>83</i>&nbsp;     */
+<i>84</i>&nbsp;    public static boolean isLob(IonType t)
+<i>85</i>&nbsp;    {
+<b class="nc"><i>86</i>&nbsp;        return (t == BLOB) || (t == CLOB);</b>
+<i>87</i>&nbsp;    }
+<i>88</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

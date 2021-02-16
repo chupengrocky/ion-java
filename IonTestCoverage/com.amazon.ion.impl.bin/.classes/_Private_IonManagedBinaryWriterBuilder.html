@@ -1,0 +1,461 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: _Private_IonManagedBinaryWriterBuilder</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl.bin</a> ]
+</div>
+
+<h1>Coverage Summary for Class: _Private_IonManagedBinaryWriterBuilder (com.amazon.ion.impl.bin)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">_Private_IonManagedBinaryWriterBuilder</td>
+<td class="coverageStat">
+  <span class="percent">
+    77.3%
+  </span>
+  <span class="absValue">
+    (17/ 22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76%
+  </span>
+  <span class="absValue">
+    (57/ 75)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">_Private_IonManagedBinaryWriterBuilder$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 2)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">_Private_IonManagedBinaryWriterBuilder$AllocatorMode</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/ 3)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">_Private_IonManagedBinaryWriterBuilder$AllocatorMode$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">_Private_IonManagedBinaryWriterBuilder$AllocatorMode$2</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/ 2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    73.3%
+  </span>
+  <span class="absValue">
+    (22/ 30)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (63/ 84)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl.bin;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.impl.bin.IonManagedBinaryWriter.ONLY_SYSTEM_IMPORTS;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;import com.amazon.ion.IonBinaryWriter;
+<i>21</i>&nbsp;import com.amazon.ion.IonCatalog;
+<i>22</i>&nbsp;import com.amazon.ion.IonException;
+<i>23</i>&nbsp;import com.amazon.ion.IonWriter;
+<i>24</i>&nbsp;import com.amazon.ion.SubstituteSymbolTableException;
+<i>25</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>26</i>&nbsp;import com.amazon.ion.SystemSymbols;
+<i>27</i>&nbsp;import com.amazon.ion.impl.bin.AbstractIonWriter.WriteValueOptimization;
+<i>28</i>&nbsp;import com.amazon.ion.impl.bin.IonBinaryWriterAdapter.Factory;
+<i>29</i>&nbsp;import com.amazon.ion.impl.bin.IonManagedBinaryWriter.ImportedSymbolContext;
+<i>30</i>&nbsp;import com.amazon.ion.impl.bin.IonManagedBinaryWriter.ImportedSymbolResolverMode;
+<i>31</i>&nbsp;import com.amazon.ion.impl.bin.IonRawBinaryWriter.PreallocationMode;
+<i>32</i>&nbsp;import com.amazon.ion.system.SimpleCatalog;
+<i>33</i>&nbsp;import java.io.IOException;
+<i>34</i>&nbsp;import java.io.OutputStream;
+<i>35</i>&nbsp;import java.util.Arrays;
+<i>36</i>&nbsp;import java.util.List;
+<i>37</i>&nbsp;
+<i>38</i>&nbsp;// TODO unify this with the IonWriter builder APIs
+<i>39</i>&nbsp;
+<i>40</i>&nbsp;/**
+<i>41</i>&nbsp; * Constructs instances of binary {@link IonWriter}.
+<i>42</i>&nbsp; * &lt;p&gt;
+<i>43</i>&nbsp; * This class is thread-safe.
+<i>44</i>&nbsp; */
+<i>45</i>&nbsp;@SuppressWarnings(&quot;deprecation&quot;)
+<i>46</i>&nbsp;public final class _Private_IonManagedBinaryWriterBuilder
+<i>47</i>&nbsp;{
+<b class="fc"><i>48</i>&nbsp;    public enum AllocatorMode</b>
+<i>49</i>&nbsp;    {
+<b class="fc"><i>50</i>&nbsp;        POOLED</b>
+<i>51</i>&nbsp;        {
+<i>52</i>&nbsp;            @Override
+<i>53</i>&nbsp;            BlockAllocatorProvider createAllocatorProvider()
+<i>54</i>&nbsp;            {
+<b class="fc"><i>55</i>&nbsp;                return new PooledBlockAllocatorProvider();</b>
+<i>56</i>&nbsp;            }
+<i>57</i>&nbsp;        },
+<b class="fc"><i>58</i>&nbsp;        BASIC</b>
+<i>59</i>&nbsp;        {
+<i>60</i>&nbsp;            @Override
+<i>61</i>&nbsp;            BlockAllocatorProvider createAllocatorProvider()
+<i>62</i>&nbsp;            {
+<b class="nc"><i>63</i>&nbsp;                return BlockAllocatorProviders.basicProvider();</b>
+<i>64</i>&nbsp;            }
+<i>65</i>&nbsp;        };
+<i>66</i>&nbsp;
+<i>67</i>&nbsp;        /*package*/ abstract BlockAllocatorProvider createAllocatorProvider();
+<i>68</i>&nbsp;    }
+<i>69</i>&nbsp;
+<i>70</i>&nbsp;    public static final int DEFAULT_BLOCK_SIZE = 32768;
+<i>71</i>&nbsp;
+<i>72</i>&nbsp;    /*package*/ final    BlockAllocatorProvider provider;
+<i>73</i>&nbsp;    /*package*/ volatile int                    symbolsBlockSize;
+<i>74</i>&nbsp;    /*package*/ volatile int                    userBlockSize;
+<i>75</i>&nbsp;    /*package*/ volatile PreallocationMode      preallocationMode;
+<i>76</i>&nbsp;    /*package*/ volatile ImportedSymbolContext  imports;
+<i>77</i>&nbsp;    /*package*/ volatile IonCatalog             catalog;
+<i>78</i>&nbsp;    /*package*/ volatile WriteValueOptimization optimization;
+<i>79</i>&nbsp;    /*package*/ volatile SymbolTable            initialSymbolTable;
+<i>80</i>&nbsp;    /*package*/ volatile boolean                isLocalSymbolTableAppendEnabled;
+<i>81</i>&nbsp;    /*package*/ volatile boolean                isFloatBinary32Enabled;
+<i>82</i>&nbsp;
+<i>83</i>&nbsp;    private _Private_IonManagedBinaryWriterBuilder(final BlockAllocatorProvider provider)
+<b class="fc"><i>84</i>&nbsp;    {</b>
+<b class="fc"><i>85</i>&nbsp;        this.provider = provider;</b>
+<b class="fc"><i>86</i>&nbsp;        this.symbolsBlockSize = DEFAULT_BLOCK_SIZE;</b>
+<b class="fc"><i>87</i>&nbsp;        this.userBlockSize = DEFAULT_BLOCK_SIZE;</b>
+<b class="fc"><i>88</i>&nbsp;        this.imports = ONLY_SYSTEM_IMPORTS;</b>
+<b class="fc"><i>89</i>&nbsp;        this.preallocationMode = PreallocationMode.PREALLOCATE_2;</b>
+<b class="fc"><i>90</i>&nbsp;        this.catalog = new SimpleCatalog();</b>
+<b class="fc"><i>91</i>&nbsp;        this.optimization = WriteValueOptimization.NONE;</b>
+<b class="fc"><i>92</i>&nbsp;        this.isLocalSymbolTableAppendEnabled = false;</b>
+<b class="fc"><i>93</i>&nbsp;        this.isFloatBinary32Enabled = false;</b>
+<b class="fc"><i>94</i>&nbsp;    }</b>
+<i>95</i>&nbsp;
+<i>96</i>&nbsp;    private _Private_IonManagedBinaryWriterBuilder(final _Private_IonManagedBinaryWriterBuilder other)
+<b class="fc"><i>97</i>&nbsp;    {</b>
+<b class="fc"><i>98</i>&nbsp;        this.provider           = other.provider;</b>
+<b class="fc"><i>99</i>&nbsp;        this.symbolsBlockSize   = other.symbolsBlockSize;</b>
+<b class="fc"><i>100</i>&nbsp;        this.userBlockSize      = other.userBlockSize;</b>
+<b class="fc"><i>101</i>&nbsp;        this.preallocationMode  = other.preallocationMode;</b>
+<b class="fc"><i>102</i>&nbsp;        this.imports            = other.imports;</b>
+<b class="fc"><i>103</i>&nbsp;        this.catalog            = other.catalog;</b>
+<b class="fc"><i>104</i>&nbsp;        this.optimization       = other.optimization;</b>
+<b class="fc"><i>105</i>&nbsp;        this.initialSymbolTable = other.initialSymbolTable;</b>
+<b class="fc"><i>106</i>&nbsp;        this.isLocalSymbolTableAppendEnabled = other.isLocalSymbolTableAppendEnabled;</b>
+<b class="fc"><i>107</i>&nbsp;        this.isFloatBinary32Enabled = other.isFloatBinary32Enabled;</b>
+<b class="fc"><i>108</i>&nbsp;    }</b>
+<i>109</i>&nbsp;
+<i>110</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder copy()
+<i>111</i>&nbsp;    {
+<b class="fc"><i>112</i>&nbsp;        return new _Private_IonManagedBinaryWriterBuilder(this);</b>
+<i>113</i>&nbsp;    }
+<i>114</i>&nbsp;
+<i>115</i>&nbsp;    // Parameter Setting Methods
+<i>116</i>&nbsp;
+<i>117</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withSymbolsBlockSize(final int blockSize)
+<i>118</i>&nbsp;    {
+<b class="nc"><i>119</i>&nbsp;        if (blockSize &lt; 1)</b>
+<i>120</i>&nbsp;        {
+<b class="nc"><i>121</i>&nbsp;            throw new IllegalArgumentException(&quot;Block size cannot be less than 1: &quot; + blockSize);</b>
+<i>122</i>&nbsp;        }
+<b class="nc"><i>123</i>&nbsp;        symbolsBlockSize = blockSize;</b>
+<b class="nc"><i>124</i>&nbsp;        return this;</b>
+<i>125</i>&nbsp;    }
+<i>126</i>&nbsp;
+<i>127</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withUserBlockSize(final int blockSize)
+<i>128</i>&nbsp;    {
+<b class="nc"><i>129</i>&nbsp;        if (blockSize &lt; 1)</b>
+<i>130</i>&nbsp;        {
+<b class="nc"><i>131</i>&nbsp;            throw new IllegalArgumentException(&quot;Block size cannot be less than 1: &quot; + blockSize);</b>
+<i>132</i>&nbsp;        }
+<b class="nc"><i>133</i>&nbsp;        userBlockSize = blockSize;</b>
+<b class="nc"><i>134</i>&nbsp;        return this;</b>
+<i>135</i>&nbsp;    }
+<i>136</i>&nbsp;
+<i>137</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withImports(final SymbolTable... tables)
+<i>138</i>&nbsp;    {
+<b class="fc"><i>139</i>&nbsp;        if (tables != null)</b>
+<i>140</i>&nbsp;        {
+<b class="fc"><i>141</i>&nbsp;            return withImports(Arrays.asList(tables));</b>
+<i>142</i>&nbsp;        }
+<b class="fc"><i>143</i>&nbsp;        return this;</b>
+<i>144</i>&nbsp;    }
+<i>145</i>&nbsp;
+<i>146</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withImports(final List&lt;SymbolTable&gt; tables)
+<i>147</i>&nbsp;    {
+<b class="fc"><i>148</i>&nbsp;        return withImports(ImportedSymbolResolverMode.DELEGATE, tables);</b>
+<i>149</i>&nbsp;    }
+<i>150</i>&nbsp;
+<i>151</i>&nbsp;    /**
+<i>152</i>&nbsp;     * Adds imports, flattening them to make lookup more efficient.  This is particularly useful
+<i>153</i>&nbsp;     * when a builder instance is long lived.
+<i>154</i>&nbsp;     */
+<i>155</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withFlatImports(final SymbolTable... tables)
+<i>156</i>&nbsp;    {
+<b class="nc"><i>157</i>&nbsp;        if (tables != null)</b>
+<i>158</i>&nbsp;        {
+<b class="nc"><i>159</i>&nbsp;            return withFlatImports(Arrays.asList(tables));</b>
+<i>160</i>&nbsp;        }
+<b class="nc"><i>161</i>&nbsp;        return this;</b>
+<i>162</i>&nbsp;    }
+<i>163</i>&nbsp;
+<i>164</i>&nbsp;    /** @see #withFlatImports(SymbolTable...) */
+<i>165</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withFlatImports(final List&lt;SymbolTable&gt; tables)
+<i>166</i>&nbsp;    {
+<b class="nc"><i>167</i>&nbsp;        return withImports(ImportedSymbolResolverMode.FLAT, tables);</b>
+<i>168</i>&nbsp;    }
+<i>169</i>&nbsp;
+<i>170</i>&nbsp;    /*package*/ _Private_IonManagedBinaryWriterBuilder withImports(final ImportedSymbolResolverMode mode, final List&lt;SymbolTable&gt; tables) {
+<b class="fc"><i>171</i>&nbsp;        imports = new ImportedSymbolContext(mode, tables);</b>
+<b class="fc"><i>172</i>&nbsp;        return this;</b>
+<i>173</i>&nbsp;    }
+<i>174</i>&nbsp;
+<i>175</i>&nbsp;    /*package*/ _Private_IonManagedBinaryWriterBuilder withPreallocationMode(final PreallocationMode preallocationMode)
+<i>176</i>&nbsp;    {
+<b class="fc"><i>177</i>&nbsp;        this.preallocationMode = preallocationMode;</b>
+<b class="fc"><i>178</i>&nbsp;        return this;</b>
+<i>179</i>&nbsp;    }
+<i>180</i>&nbsp;
+<i>181</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withPaddedLengthPreallocation(final int pad)
+<i>182</i>&nbsp;    {
+<b class="fc"><i>183</i>&nbsp;        this.preallocationMode = PreallocationMode.withPadSize(pad);</b>
+<b class="fc"><i>184</i>&nbsp;        return this;</b>
+<i>185</i>&nbsp;    }
+<i>186</i>&nbsp;
+<i>187</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withCatalog(final IonCatalog catalog)
+<i>188</i>&nbsp;    {
+<b class="fc"><i>189</i>&nbsp;        this.catalog = catalog;</b>
+<b class="fc"><i>190</i>&nbsp;        return this;</b>
+<i>191</i>&nbsp;    }
+<i>192</i>&nbsp;
+<i>193</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withStreamCopyOptimization(boolean optimized)
+<i>194</i>&nbsp;    {
+<b class="fc"><i>195</i>&nbsp;        this.optimization = optimized ? WriteValueOptimization.COPY_OPTIMIZED : WriteValueOptimization.NONE;</b>
+<b class="fc"><i>196</i>&nbsp;        return this;</b>
+<i>197</i>&nbsp;    }
+<i>198</i>&nbsp;
+<i>199</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withLocalSymbolTableAppendEnabled()
+<i>200</i>&nbsp;    {
+<b class="fc"><i>201</i>&nbsp;        isLocalSymbolTableAppendEnabled = true;</b>
+<b class="fc"><i>202</i>&nbsp;        return this;</b>
+<i>203</i>&nbsp;    }
+<i>204</i>&nbsp;
+<i>205</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withLocalSymbolTableAppendDisabled()
+<i>206</i>&nbsp;    {
+<b class="fc"><i>207</i>&nbsp;        isLocalSymbolTableAppendEnabled = false;</b>
+<b class="fc"><i>208</i>&nbsp;        return this;</b>
+<i>209</i>&nbsp;    }
+<i>210</i>&nbsp;
+<i>211</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withFloatBinary32Enabled() {
+<b class="fc"><i>212</i>&nbsp;        isFloatBinary32Enabled = true;</b>
+<b class="fc"><i>213</i>&nbsp;        return this;</b>
+<i>214</i>&nbsp;    }
+<i>215</i>&nbsp;
+<i>216</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withFloatBinary32Disabled() {
+<b class="fc"><i>217</i>&nbsp;        isFloatBinary32Enabled = false;</b>
+<b class="fc"><i>218</i>&nbsp;        return this;</b>
+<i>219</i>&nbsp;    }
+<i>220</i>&nbsp;
+<i>221</i>&nbsp;    public _Private_IonManagedBinaryWriterBuilder withInitialSymbolTable(SymbolTable symbolTable)
+<i>222</i>&nbsp;    {
+<b class="fc"><i>223</i>&nbsp;        if (symbolTable != null)</b>
+<i>224</i>&nbsp;        {
+<b class="fc"><i>225</i>&nbsp;            if (!symbolTable.isLocalTable() &amp;&amp; !symbolTable.isSystemTable())</b>
+<i>226</i>&nbsp;            {
+<b class="nc"><i>227</i>&nbsp;                throw new IllegalArgumentException(&quot;Initial symbol table must be local or system&quot;);</b>
+<i>228</i>&nbsp;            }
+<b class="fc"><i>229</i>&nbsp;            if (symbolTable.isSystemTable())</b>
+<i>230</i>&nbsp;            {
+<b class="fc"><i>231</i>&nbsp;                if (symbolTable.getMaxId() != SystemSymbols.ION_1_0_MAX_ID)</b>
+<i>232</i>&nbsp;                {
+<b class="nc"><i>233</i>&nbsp;                    throw new IllegalArgumentException(&quot;Unsupported system symbol table&quot;);</b>
+<i>234</i>&nbsp;                }
+<i>235</i>&nbsp;                // don&#39;t need to set an explicit symbol table for system 1.0
+<b class="fc"><i>236</i>&nbsp;                symbolTable = null;</b>
+<i>237</i>&nbsp;            }
+<i>238</i>&nbsp;            else
+<i>239</i>&nbsp;            {
+<i>240</i>&nbsp;                // initial symbol table is local
+<b class="fc"><i>241</i>&nbsp;                for (final SymbolTable st : symbolTable.getImportedTables())</b>
+<i>242</i>&nbsp;                {
+<b class="fc"><i>243</i>&nbsp;                    if (st.isSubstitute())</b>
+<i>244</i>&nbsp;                    {
+<b class="nc"><i>245</i>&nbsp;                        throw new SubstituteSymbolTableException(</b>
+<i>246</i>&nbsp;                            &quot;Cannot use initial symbol table with imported substitutes&quot;);
+<i>247</i>&nbsp;                    }
+<i>248</i>&nbsp;                }
+<i>249</i>&nbsp;            }
+<i>250</i>&nbsp;        }
+<i>251</i>&nbsp;
+<b class="fc"><i>252</i>&nbsp;        this.initialSymbolTable = symbolTable;</b>
+<b class="fc"><i>253</i>&nbsp;        return this;</b>
+<i>254</i>&nbsp;    }
+<i>255</i>&nbsp;
+<i>256</i>&nbsp;    // Construction
+<i>257</i>&nbsp;
+<i>258</i>&nbsp;    public IonWriter newWriter(final OutputStream out) throws IOException
+<i>259</i>&nbsp;    {
+<b class="fc"><i>260</i>&nbsp;        return new IonManagedBinaryWriter(this, out);</b>
+<i>261</i>&nbsp;    }
+<i>262</i>&nbsp;
+<i>263</i>&nbsp;    public IonBinaryWriter newLegacyWriter()
+<i>264</i>&nbsp;    {
+<i>265</i>&nbsp;        try
+<i>266</i>&nbsp;        {
+<b class="nc"><i>267</i>&nbsp;            return new IonBinaryWriterAdapter(</b>
+<i>268</i>&nbsp;                new Factory()
+<b class="nc"><i>269</i>&nbsp;                {</b>
+<i>270</i>&nbsp;                    public IonWriter create(final OutputStream out) throws IOException
+<i>271</i>&nbsp;                    {
+<b class="nc"><i>272</i>&nbsp;                        return newWriter(out);</b>
+<i>273</i>&nbsp;                    }
+<i>274</i>&nbsp;                }
+<i>275</i>&nbsp;            );
+<i>276</i>&nbsp;        }
+<b class="nc"><i>277</i>&nbsp;        catch (final IOException e)</b>
+<i>278</i>&nbsp;        {
+<b class="nc"><i>279</i>&nbsp;            throw new IonException(&quot;I/O error&quot;, e);</b>
+<i>280</i>&nbsp;        }
+<i>281</i>&nbsp;    }
+<i>282</i>&nbsp;
+<i>283</i>&nbsp;    // Static Factories
+<i>284</i>&nbsp;
+<i>285</i>&nbsp;    /**
+<i>286</i>&nbsp;     * Constructs a new builder.
+<i>287</i>&nbsp;     * &lt;p&gt;
+<i>288</i>&nbsp;     * Builders generally bind to an allocation pool as defined by {@link AllocatorMode}, so applications should reuse
+<i>289</i>&nbsp;     * them as much as possible.
+<i>290</i>&nbsp;     */
+<i>291</i>&nbsp;    public static _Private_IonManagedBinaryWriterBuilder create(final AllocatorMode allocatorMode)
+<i>292</i>&nbsp;    {
+<b class="fc"><i>293</i>&nbsp;        return new _Private_IonManagedBinaryWriterBuilder(allocatorMode.createAllocatorProvider());</b>
+<i>294</i>&nbsp;    }
+<i>295</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

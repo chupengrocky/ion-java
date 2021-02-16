@@ -1,0 +1,98 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonText</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonText (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonText</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;/**
+<i>19</i>&nbsp; * Common functionality of Ion &lt;code&gt;string&lt;/code&gt; and &lt;code&gt;symbol&lt;/code&gt;
+<i>20</i>&nbsp; * types.
+<i>21</i>&nbsp; * &lt;p&gt;
+<i>22</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>23</i>&nbsp; * code outside of this library.
+<i>24</i>&nbsp; */
+<i>25</i>&nbsp;public interface IonText
+<i>26</i>&nbsp;    extends IonValue
+<i>27</i>&nbsp;{
+<i>28</i>&nbsp;    /**
+<i>29</i>&nbsp;     * Gets the characters of this text value.
+<i>30</i>&nbsp;     *
+<i>31</i>&nbsp;     * @return the text of this Ion value, or &lt;code&gt;null&lt;/code&gt; if
+<i>32</i>&nbsp;     * &lt;code&gt;this.isNullValue()&lt;/code&gt;.
+<i>33</i>&nbsp;     *
+<i>34</i>&nbsp;     * @throws UnknownSymbolException if this is a symbol with unknown text.
+<i>35</i>&nbsp;     *
+<i>36</i>&nbsp;     * @see IonSymbol#symbolValue()
+<i>37</i>&nbsp;     */
+<i>38</i>&nbsp;    public String stringValue();
+<i>39</i>&nbsp;
+<i>40</i>&nbsp;    /**
+<i>41</i>&nbsp;     * Changes the content.
+<i>42</i>&nbsp;     *
+<i>43</i>&nbsp;     * @param value the new value of this text value;
+<i>44</i>&nbsp;     * may be &lt;code&gt;null&lt;/code&gt; to make this an Ion null value.
+<i>45</i>&nbsp;     *
+<i>46</i>&nbsp;     */
+<i>47</i>&nbsp;    public void setValue(String value);
+<i>48</i>&nbsp;
+<i>49</i>&nbsp;    public IonText clone()
+<i>50</i>&nbsp;        throws UnknownSymbolException;
+<i>51</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,407 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonSymbolLite</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl.lite</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonSymbolLite (com.amazon.ion.impl.lite)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IonSymbolLite</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91.3%
+  </span>
+  <span class="absValue">
+    (21/ 23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.3%
+  </span>
+  <span class="absValue">
+    (97/ 104)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl.lite;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.SymbolTable.UNKNOWN_SYMBOL_ID;
+<i>19</i>&nbsp;import static com.amazon.ion.SystemSymbols.ION_1_0;
+<i>20</i>&nbsp;import static com.amazon.ion.SystemSymbols.ION_1_0_SID;
+<i>21</i>&nbsp;
+<i>22</i>&nbsp;import com.amazon.ion.IonType;
+<i>23</i>&nbsp;import com.amazon.ion.IonWriter;
+<i>24</i>&nbsp;import com.amazon.ion.NullValueException;
+<i>25</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>26</i>&nbsp;import com.amazon.ion.SymbolToken;
+<i>27</i>&nbsp;import com.amazon.ion.UnknownSymbolException;
+<i>28</i>&nbsp;import com.amazon.ion.ValueVisitor;
+<i>29</i>&nbsp;import com.amazon.ion.impl._Private_IonSymbol;
+<i>30</i>&nbsp;import com.amazon.ion.impl._Private_Utils;
+<i>31</i>&nbsp;import java.io.IOException;
+<i>32</i>&nbsp;
+<i>33</i>&nbsp;
+<b class="fc"><i>34</i>&nbsp;final class IonSymbolLite</b>
+<i>35</i>&nbsp;    extends IonTextLite
+<i>36</i>&nbsp;    implements _Private_IonSymbol
+<i>37</i>&nbsp;{
+<b class="fc"><i>38</i>&nbsp;    private static final int HASH_SIGNATURE =</b>
+<b class="fc"><i>39</i>&nbsp;        IonType.SYMBOL.toString().hashCode();</b>
+<i>40</i>&nbsp;
+<b class="fc"><i>41</i>&nbsp;    private int _sid = UNKNOWN_SYMBOL_ID;</b>
+<i>42</i>&nbsp;
+<i>43</i>&nbsp;    /**
+<i>44</i>&nbsp;     * @param isNull if {@code true}, constructs a {@code null.symbol} value.
+<i>45</i>&nbsp;     */
+<i>46</i>&nbsp;    IonSymbolLite(ContainerlessContext context, boolean isNull)
+<i>47</i>&nbsp;    {
+<b class="fc"><i>48</i>&nbsp;        super(context, isNull);</b>
+<b class="fc"><i>49</i>&nbsp;    }</b>
+<i>50</i>&nbsp;
+<i>51</i>&nbsp;    IonSymbolLite(IonSymbolLite existing, IonContext context) throws UnknownSymbolException
+<i>52</i>&nbsp;    {
+<b class="fc"><i>53</i>&nbsp;        super(existing, context);</b>
+<b class="fc"><i>54</i>&nbsp;    }</b>
+<i>55</i>&nbsp;
+<i>56</i>&nbsp;    IonSymbolLite(ContainerlessContext context, SymbolToken sym)
+<i>57</i>&nbsp;    {
+<b class="fc"><i>58</i>&nbsp;        super(context, sym == null);</b>
+<b class="fc"><i>59</i>&nbsp;        if (sym != null)</b>
+<i>60</i>&nbsp;        {
+<b class="fc"><i>61</i>&nbsp;            String text = sym.getText();</b>
+<b class="fc"><i>62</i>&nbsp;            int sid = sym.getSid();</b>
+<b class="fc"><i>63</i>&nbsp;            assert text != null || sid &gt;= 0;</b>
+<i>64</i>&nbsp;
+<b class="fc"><i>65</i>&nbsp;            if (text != null)</b>
+<i>66</i>&nbsp;            {
+<b class="fc"><i>67</i>&nbsp;                super.setValue(text);</b>
+<i>68</i>&nbsp;                // TODO [amzn/ion-java/issues/27] - needs consistent handling, when to retain SID&#39;s vs ignore
+<i>69</i>&nbsp;            }
+<i>70</i>&nbsp;            else
+<i>71</i>&nbsp;            {
+<i>72</i>&nbsp;                // TODO [amzn/ion-java/issues/223] - needs consistent handling, resolution against context symbol table
+<b class="fc"><i>73</i>&nbsp;                _sid = sid;</b>
+<i>74</i>&nbsp;                // there *is* an encoding present so we must update
+<b class="fc"><i>75</i>&nbsp;                _isSymbolIdPresent(true);</b>
+<i>76</i>&nbsp;            }
+<i>77</i>&nbsp;        }
+<b class="fc"><i>78</i>&nbsp;    }</b>
+<i>79</i>&nbsp;
+<i>80</i>&nbsp;    @Override
+<i>81</i>&nbsp;    IonSymbolLite clone(IonContext context)
+<i>82</i>&nbsp;    {
+<b class="fc"><i>83</i>&nbsp;        IonSymbolLite clone = new IonSymbolLite(this, context);</b>
+<b class="fc"><i>84</i>&nbsp;        if(this._sid == 0) {</b>
+<b class="fc"><i>85</i>&nbsp;            clone._sid = 0;</b>
+<i>86</i>&nbsp;        }
+<b class="fc"><i>87</i>&nbsp;        return clone;</b>
+<i>88</i>&nbsp;    }
+<i>89</i>&nbsp;
+<i>90</i>&nbsp;    @Override
+<i>91</i>&nbsp;    public IonSymbolLite clone() throws UnknownSymbolException
+<i>92</i>&nbsp;    {
+<i>93</i>&nbsp;        // If this symbol has unknown text but known Sid, this symbol has no
+<i>94</i>&nbsp;        // semantic meaning, as such cloning should throw an exception.
+<b class="fc"><i>95</i>&nbsp;        if (!isNullValue()</b>
+<i>96</i>&nbsp;            &amp;&amp; _sid != UNKNOWN_SYMBOL_ID &amp;&amp; _sid != 0
+<b class="fc"><i>97</i>&nbsp;            &amp;&amp; _stringValue() == null) {</b>
+<b class="fc"><i>98</i>&nbsp;            throw new UnknownSymbolException(_sid);</b>
+<i>99</i>&nbsp;        }
+<b class="fc"><i>100</i>&nbsp;        return clone(ContainerlessContext.wrap(getSystem()));</b>
+<i>101</i>&nbsp;    }
+<i>102</i>&nbsp;
+<i>103</i>&nbsp;    @Override
+<i>104</i>&nbsp;    int hashCode(SymbolTableProvider symbolTableProvider)
+<i>105</i>&nbsp;    {
+<b class="fc"><i>106</i>&nbsp;        final int sidHashSalt   = 127;      // prime to salt sid</b>
+<b class="fc"><i>107</i>&nbsp;        final int textHashSalt  = 31;       // prime to salt text</b>
+<b class="fc"><i>108</i>&nbsp;        int result = HASH_SIGNATURE;</b>
+<i>109</i>&nbsp;
+<b class="fc"><i>110</i>&nbsp;        if (!isNullValue())</b>
+<i>111</i>&nbsp;        {
+<b class="fc"><i>112</i>&nbsp;            SymbolToken token = symbolValue(symbolTableProvider);</b>
+<b class="fc"><i>113</i>&nbsp;            String text = token.getText();</b>
+<i>114</i>&nbsp;
+<b class="fc"><i>115</i>&nbsp;            int tokenHashCode = text == null</b>
+<b class="fc"><i>116</i>&nbsp;                ? token.getSid()  * sidHashSalt</b>
+<b class="fc"><i>117</i>&nbsp;                : text.hashCode() * textHashSalt;</b>
+<i>118</i>&nbsp;
+<i>119</i>&nbsp;            // mixing to account for small text and sid deltas
+<b class="fc"><i>120</i>&nbsp;            tokenHashCode ^= (tokenHashCode &lt;&lt; 29) ^ (tokenHashCode &gt;&gt; 3);</b>
+<i>121</i>&nbsp;
+<b class="fc"><i>122</i>&nbsp;            result ^= tokenHashCode;</b>
+<i>123</i>&nbsp;        }
+<i>124</i>&nbsp;
+<b class="fc"><i>125</i>&nbsp;        return hashTypeAnnotations(result, symbolTableProvider);</b>
+<i>126</i>&nbsp;    }
+<i>127</i>&nbsp;
+<i>128</i>&nbsp;    @Override
+<i>129</i>&nbsp;    public IonType getType()
+<i>130</i>&nbsp;    {
+<b class="fc"><i>131</i>&nbsp;        return IonType.SYMBOL;</b>
+<i>132</i>&nbsp;    }
+<i>133</i>&nbsp;
+<i>134</i>&nbsp;    @Deprecated
+<i>135</i>&nbsp;    public int getSymbolId()
+<i>136</i>&nbsp;        throws NullValueException
+<i>137</i>&nbsp;    {
+<b class="fc"><i>138</i>&nbsp;        return getSymbolId(null);</b>
+<i>139</i>&nbsp;    }
+<i>140</i>&nbsp;
+<i>141</i>&nbsp;    private int getSymbolId(SymbolTableProvider symbolTableProvider)
+<i>142</i>&nbsp;        throws NullValueException
+<i>143</i>&nbsp;    {
+<b class="fc"><i>144</i>&nbsp;        validateThisNotNull();</b>
+<i>145</i>&nbsp;
+<b class="fc"><i>146</i>&nbsp;        if (_sid != UNKNOWN_SYMBOL_ID || isReadOnly()) {</b>
+<b class="fc"><i>147</i>&nbsp;            return _sid;</b>
+<i>148</i>&nbsp;        }
+<i>149</i>&nbsp;
+<i>150</i>&nbsp;        SymbolTable symtab =
+<b class="fc"><i>151</i>&nbsp;                symbolTableProvider != null ? symbolTableProvider.getSymbolTable()</b>
+<b class="fc"><i>152</i>&nbsp;                                            : getSymbolTable();</b>
+<b class="fc"><i>153</i>&nbsp;        if (symtab == null) {</b>
+<b class="nc"><i>154</i>&nbsp;            symtab = getSystem().getSystemSymbolTable();</b>
+<i>155</i>&nbsp;        }
+<b class="fc"><i>156</i>&nbsp;        assert(symtab != null);</b>
+<i>157</i>&nbsp;
+<b class="fc"><i>158</i>&nbsp;        String name = _get_value();</b>
+<i>159</i>&nbsp;        // TODO [amzn/ion-java/issues/27] - needs consistent handling, when to retain SID&#39;s vs ignore (here memoizing SID on read)
+<b class="fc"><i>160</i>&nbsp;        if (!symtab.isLocalTable())</b>
+<i>161</i>&nbsp;        {
+<b class="fc"><i>162</i>&nbsp;            setSID(symtab.findSymbol(name));</b>
+<b class="fc"><i>163</i>&nbsp;            if (_sid &gt; 0 || isReadOnly()) {</b>
+<b class="fc"><i>164</i>&nbsp;                return _sid;</b>
+<i>165</i>&nbsp;            }
+<i>166</i>&nbsp;        }
+<b class="fc"><i>167</i>&nbsp;        SymbolToken tok = symtab.find(name);</b>
+<b class="fc"><i>168</i>&nbsp;        if (tok != null)</b>
+<i>169</i>&nbsp;        {
+<b class="fc"><i>170</i>&nbsp;            setSID(tok.getSid());</b>
+<b class="fc"><i>171</i>&nbsp;            _set_value(tok.getText()); // Use the interned instance of the text</b>
+<i>172</i>&nbsp;        }
+<b class="fc"><i>173</i>&nbsp;        return _sid;</b>
+<i>174</i>&nbsp;    }
+<i>175</i>&nbsp;
+<i>176</i>&nbsp;    private void setSID(int sid)
+<i>177</i>&nbsp;    {
+<b class="fc"><i>178</i>&nbsp;        _sid = sid;</b>
+<b class="fc"><i>179</i>&nbsp;        if (_sid &gt; 0)</b>
+<i>180</i>&nbsp;        {
+<b class="fc"><i>181</i>&nbsp;            cascadeSIDPresentToContextRoot();</b>
+<i>182</i>&nbsp;        }
+<b class="fc"><i>183</i>&nbsp;    }</b>
+<i>184</i>&nbsp;
+<i>185</i>&nbsp;
+<i>186</i>&nbsp;    /**
+<i>187</i>&nbsp;     * Get&#39;s the text of this NON-NULL symbol, finding it from our symbol
+<i>188</i>&nbsp;     * table if it&#39;s not yet known (and caching the result if possible).
+<i>189</i>&nbsp;     * &lt;p&gt;
+<i>190</i>&nbsp;     * Caller must check {@link #isNullValue()}
+<i>191</i>&nbsp;     *
+<i>192</i>&nbsp;     * @return null if symbol text is unknown.
+<i>193</i>&nbsp;     */
+<i>194</i>&nbsp;    private String _stringValue()
+<i>195</i>&nbsp;    {
+<b class="fc"><i>196</i>&nbsp;        return _stringValue(new LazySymbolTableProvider(this));</b>
+<i>197</i>&nbsp;    }
+<i>198</i>&nbsp;
+<i>199</i>&nbsp;    private String _stringValue(SymbolTableProvider symbolTableProvider)
+<i>200</i>&nbsp;    {
+<b class="fc"><i>201</i>&nbsp;        String name = _get_value();</b>
+<b class="fc"><i>202</i>&nbsp;        if (name == null)</b>
+<i>203</i>&nbsp;        {
+<b class="fc"><i>204</i>&nbsp;            assert _sid &gt;= 0;</b>
+<i>205</i>&nbsp;
+<b class="fc"><i>206</i>&nbsp;            SymbolTable symbols = symbolTableProvider.getSymbolTable();</b>
+<b class="fc"><i>207</i>&nbsp;            name = symbols.findKnownSymbol(_sid);</b>
+<b class="fc"><i>208</i>&nbsp;            if (name != null)</b>
+<i>209</i>&nbsp;            {
+<i>210</i>&nbsp;                // if this is a mutable value we&#39;ll hang onto
+<i>211</i>&nbsp;                // our now known symbol table so we don&#39;t have
+<i>212</i>&nbsp;                // to look it up again.
+<i>213</i>&nbsp;                // If the value is immutable, honor that contract.
+<b class="fc"><i>214</i>&nbsp;                if (_isLocked() == false) {</b>
+<b class="fc"><i>215</i>&nbsp;                    _set_value(name);</b>
+<i>216</i>&nbsp;                }
+<i>217</i>&nbsp;            }
+<i>218</i>&nbsp;        }
+<b class="fc"><i>219</i>&nbsp;        return name;</b>
+<i>220</i>&nbsp;    }
+<i>221</i>&nbsp;
+<i>222</i>&nbsp;    public SymbolToken symbolValue()
+<i>223</i>&nbsp;    {
+<b class="fc"><i>224</i>&nbsp;        return symbolValue(new LazySymbolTableProvider(this));</b>
+<i>225</i>&nbsp;    }
+<i>226</i>&nbsp;
+<i>227</i>&nbsp;    public SymbolToken symbolValue(SymbolTableProvider symbolTableProvider)
+<i>228</i>&nbsp;    {
+<b class="fc"><i>229</i>&nbsp;        if (isNullValue()) return null;</b>
+<i>230</i>&nbsp;
+<b class="fc"><i>231</i>&nbsp;        int sid = getSymbolId(symbolTableProvider);</b>
+<b class="fc"><i>232</i>&nbsp;        String text = _stringValue(symbolTableProvider);</b>
+<b class="fc"><i>233</i>&nbsp;        return _Private_Utils.newSymbolToken(text, sid);</b>
+<i>234</i>&nbsp;    }
+<i>235</i>&nbsp;
+<i>236</i>&nbsp;
+<i>237</i>&nbsp;    @Override
+<i>238</i>&nbsp;    public void setValue(String value)
+<i>239</i>&nbsp;    {
+<b class="fc"><i>240</i>&nbsp;        super.setValue(value);  // Calls checkForLock and _isNullValue</b>
+<b class="fc"><i>241</i>&nbsp;        _sid = UNKNOWN_SYMBOL_ID;</b>
+<b class="fc"><i>242</i>&nbsp;    }</b>
+<i>243</i>&nbsp;
+<i>244</i>&nbsp;    protected boolean isIonVersionMarker() {
+<b class="nc"><i>245</i>&nbsp;        return _isIVM();</b>
+<i>246</i>&nbsp;    }
+<i>247</i>&nbsp;
+<i>248</i>&nbsp;    @Override
+<i>249</i>&nbsp;    boolean attemptClearSymbolIDValues()
+<i>250</i>&nbsp;    {
+<b class="fc"><i>251</i>&nbsp;        boolean allSymbolIDsCleared = super.attemptClearSymbolIDValues();</b>
+<i>252</i>&nbsp;
+<i>253</i>&nbsp;        // if there is no value, or there is already no SID - there is no clear action
+<b class="fc"><i>254</i>&nbsp;        if (isNullValue() || _sid == UNKNOWN_SYMBOL_ID)</b>
+<i>255</i>&nbsp;        {
+<i>256</i>&nbsp;            // no behavior required - value has no SID value to clear
+<i>257</i>&nbsp;        }
+<i>258</i>&nbsp;        // if there is text, clear the SID
+<b class="fc"><i>259</i>&nbsp;        else if (_stringValue() != null)</b>
+<i>260</i>&nbsp;        {
+<b class="fc"><i>261</i>&nbsp;            _sid = UNKNOWN_SYMBOL_ID;</b>
+<i>262</i>&nbsp;        }
+<i>263</i>&nbsp;        else
+<i>264</i>&nbsp;        {
+<i>265</i>&nbsp;            // TODO [amzn/ion-java/issues/223] - needs consistent handling, resolution against context symbol table
+<i>266</i>&nbsp;            // there is not text, so we can&#39;t clear the SID.
+<b class="fc"><i>267</i>&nbsp;            allSymbolIDsCleared = false;</b>
+<i>268</i>&nbsp;        }
+<i>269</i>&nbsp;
+<b class="fc"><i>270</i>&nbsp;        return allSymbolIDsCleared;</b>
+<i>271</i>&nbsp;    }
+<i>272</i>&nbsp;
+<i>273</i>&nbsp;    protected void setIsIonVersionMarker(boolean isIVM)
+<i>274</i>&nbsp;    {
+<b class="nc"><i>275</i>&nbsp;        assert (ION_1_0.equals(this._get_value()) == isIVM);</b>
+<i>276</i>&nbsp;
+<i>277</i>&nbsp;        //_is_IonVersionMarker = isIVM;
+<b class="nc"><i>278</i>&nbsp;        _isIVM(isIVM);</b>
+<b class="nc"><i>279</i>&nbsp;        _isSystemValue(isIVM);</b>
+<i>280</i>&nbsp;
+<b class="nc"><i>281</i>&nbsp;        _sid = ION_1_0_SID;</b>
+<b class="nc"><i>282</i>&nbsp;    }</b>
+<i>283</i>&nbsp;
+<i>284</i>&nbsp;
+<i>285</i>&nbsp;    @Override
+<i>286</i>&nbsp;    final void writeBodyTo(IonWriter writer, SymbolTableProvider symbolTableProvider)
+<i>287</i>&nbsp;        throws IOException
+<i>288</i>&nbsp;    {
+<i>289</i>&nbsp;        // TODO amzn/ion-java/issues/27 Fix symbol handling
+<i>290</i>&nbsp;        // A million-dollar question is - if text is missing, do
+<i>291</i>&nbsp;        // we throw (cannot serialize) or do we pass the sid thru???
+<i>292</i>&nbsp;
+<i>293</i>&nbsp;        // NB! This will throw if symbol is not set
+<b class="fc"><i>294</i>&nbsp;        writer.writeSymbolToken(symbolValue(symbolTableProvider));</b>
+<b class="fc"><i>295</i>&nbsp;    }</b>
+<i>296</i>&nbsp;
+<i>297</i>&nbsp;    @Override
+<i>298</i>&nbsp;    public String stringValue()
+<i>299</i>&nbsp;        throws UnknownSymbolException
+<i>300</i>&nbsp;    {
+<b class="fc"><i>301</i>&nbsp;        return stringValue(new LazySymbolTableProvider(this));</b>
+<i>302</i>&nbsp;    }
+<i>303</i>&nbsp;
+<i>304</i>&nbsp;    private String stringValue(SymbolTableProvider symbolTableProvider)
+<i>305</i>&nbsp;        throws UnknownSymbolException
+<i>306</i>&nbsp;    {
+<b class="fc"><i>307</i>&nbsp;        if (isNullValue()) {</b>
+<b class="fc"><i>308</i>&nbsp;            return null;</b>
+<i>309</i>&nbsp;        }
+<b class="fc"><i>310</i>&nbsp;        String name = _stringValue(symbolTableProvider);</b>
+<b class="fc"><i>311</i>&nbsp;        if (name == null &amp;&amp; _sid != 0) {</b>
+<b class="fc"><i>312</i>&nbsp;            assert(_sid &gt; 0);</b>
+<b class="fc"><i>313</i>&nbsp;            throw new UnknownSymbolException(_sid);</b>
+<i>314</i>&nbsp;        }
+<b class="fc"><i>315</i>&nbsp;        return name;</b>
+<i>316</i>&nbsp;    }
+<i>317</i>&nbsp;
+<i>318</i>&nbsp;    @Override
+<i>319</i>&nbsp;    public void accept(ValueVisitor visitor) throws Exception
+<i>320</i>&nbsp;    {
+<b class="fc"><i>321</i>&nbsp;        visitor.visit(this);</b>
+<b class="fc"><i>322</i>&nbsp;    }</b>
+<i>323</i>&nbsp;
+<i>324</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

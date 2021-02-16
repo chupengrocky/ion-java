@@ -1,0 +1,616 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonSequence</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonSequence (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonSequence</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import java.util.Collection;
+<i>19</i>&nbsp;import java.util.Iterator;
+<i>20</i>&nbsp;import java.util.List;
+<i>21</i>&nbsp;import java.util.ListIterator;
+<i>22</i>&nbsp;
+<i>23</i>&nbsp;
+<i>24</i>&nbsp;
+<i>25</i>&nbsp;/**
+<i>26</i>&nbsp; * Common functionality of Ion &lt;code&gt;list&lt;/code&gt; and &lt;code&gt;sexp&lt;/code&gt; types.
+<i>27</i>&nbsp; * &lt;p&gt;
+<i>28</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>29</i>&nbsp; * code outside of this library.
+<i>30</i>&nbsp; * &lt;p&gt;
+<i>31</i>&nbsp; * Ion sequences implement the standard Java {@link List} interface, behaving
+<i>32</i>&nbsp; * generally as expected, with the following exceptions:
+<i>33</i>&nbsp; * &lt;ul&gt;
+<i>34</i>&nbsp; *   &lt;li&gt;
+<i>35</i>&nbsp; *     Due to the reference-equality-based semantics of Ion sequences, methods
+<i>36</i>&nbsp; *     like {@link #remove(Object)} do not use {@link Object#equals} as
+<i>37</i>&nbsp; *     specified by the contract of {@link java.util.Collection}.
+<i>38</i>&nbsp; *     Instead they use reference equality ({@code ==} operator) to find the
+<i>39</i>&nbsp; *     given instance.
+<i>40</i>&nbsp; *   &lt;/li&gt;
+<i>41</i>&nbsp; *   &lt;li&gt;
+<i>42</i>&nbsp; *     Any given {@link IonValue} instance may be a child of at most one
+<i>43</i>&nbsp; *     {@link IonContainer}.  Instances may be children of any number of
+<i>44</i>&nbsp; *     non-Ion {@link Collection}s.
+<i>45</i>&nbsp; *   &lt;/li&gt;
+<i>46</i>&nbsp; *   &lt;li&gt;
+<i>47</i>&nbsp; *     The implementations of {@link List#equals(Object)}} and
+<i>48</i>&nbsp; *     {@link List#hashCode()} does not conform to the specification of those
+<i>49</i>&nbsp; *     methods in order to conform with Ion&#39;s definition of equality which
+<i>50</i>&nbsp; *     takes into account the {@link IonSequence}&#39;s {@link IonType} and its
+<i>51</i>&nbsp; *     annotations in addition to the contents of the collection.
+<i>52</i>&nbsp; *     &lt;ul&gt;
+<i>53</i>&nbsp; *       &lt;li&gt;
+<i>54</i>&nbsp; *         {@link List#equals(Object)} always returns &lt;code&gt;false&lt;/code&gt;
+<i>55</i>&nbsp; *         for any non-{@link IonSequence} implementation of {@link List},
+<i>56</i>&nbsp; *         including the sub-list returned from
+<i>57</i>&nbsp; *         {@link IonSequence#subList(int, int)}.
+<i>58</i>&nbsp; *       &lt;/li&gt;
+<i>59</i>&nbsp; *       &lt;li&gt;
+<i>60</i>&nbsp; *         {@link List#hashCode()} returns a different hash code than
+<i>61</i>&nbsp; *         other {@link List#hashCode()} implementations. including the
+<i>62</i>&nbsp; *         sub-list returned from {@link IonSequence#subList(int, int)}.
+<i>63</i>&nbsp; *       &lt;/li&gt;
+<i>64</i>&nbsp; *     &lt;/ul&gt;
+<i>65</i>&nbsp; *   &lt;/li&gt;
+<i>66</i>&nbsp; * &lt;/ul&gt;
+<i>67</i>&nbsp; */
+<i>68</i>&nbsp;public interface IonSequence
+<i>69</i>&nbsp;    extends IonContainer, List&lt;IonValue&gt;
+<i>70</i>&nbsp;{
+<i>71</i>&nbsp;    /**
+<i>72</i>&nbsp;     * Returns the element at the specified position in this sequence.
+<i>73</i>&nbsp;     *
+<i>74</i>&nbsp;     * @param index identifies the element to return.
+<i>75</i>&nbsp;     * @return the element at the given index; not &lt;code&gt;null&lt;/code&gt;.
+<i>76</i>&nbsp;     * @throws NullValueException if {@link #isNullValue()}.
+<i>77</i>&nbsp;     * @throws IndexOutOfBoundsException if the index is out of range
+<i>78</i>&nbsp;     * (&lt;code&gt;index &amp;lt; 0 || index &amp;gt;= size()&lt;/code&gt;).
+<i>79</i>&nbsp;     */
+<i>80</i>&nbsp;    public IonValue get(int index)
+<i>81</i>&nbsp;        throws NullValueException, IndexOutOfBoundsException;
+<i>82</i>&nbsp;
+<i>83</i>&nbsp;
+<i>84</i>&nbsp;    /**
+<i>85</i>&nbsp;     * Appends a child value to the end of this sequence.
+<i>86</i>&nbsp;     * If {@link #isNullValue()}, then it becomes a single-element
+<i>87</i>&nbsp;     * sequence.
+<i>88</i>&nbsp;     *
+<i>89</i>&nbsp;     * @param child is the value to be appended to this sequence.
+<i>90</i>&nbsp;     * @return {@code true} (as per the general contract of the
+<i>91</i>&nbsp;     * {@link Collection#add} method).
+<i>92</i>&nbsp;     *
+<i>93</i>&nbsp;     * @throws NullPointerException
+<i>94</i>&nbsp;     *   if {@code child} is &lt;code&gt;null&lt;/code&gt;.
+<i>95</i>&nbsp;     * @throws ContainedValueException
+<i>96</i>&nbsp;     *   if {@code child} is already part of a container.
+<i>97</i>&nbsp;     * @throws IllegalArgumentException
+<i>98</i>&nbsp;     *   if {@code child} is an {@link IonDatagram}.
+<i>99</i>&nbsp;     */
+<i>100</i>&nbsp;    public boolean add(IonValue child)
+<i>101</i>&nbsp;        throws ContainedValueException, NullPointerException;
+<i>102</i>&nbsp;
+<i>103</i>&nbsp;
+<i>104</i>&nbsp;    /**
+<i>105</i>&nbsp;     * Provides a factory that when invoked constructs a new value and
+<i>106</i>&nbsp;     * {@code add}s it to this sequence.
+<i>107</i>&nbsp;     * &lt;p&gt;
+<i>108</i>&nbsp;     * These two lines are equivalent:
+<i>109</i>&nbsp;     *&lt;pre&gt;
+<i>110</i>&nbsp;     *    seq.add().newInt(3);
+<i>111</i>&nbsp;     *    seq.add(seq.getSystem().newInt(3));
+<i>112</i>&nbsp;     *&lt;/pre&gt;
+<i>113</i>&nbsp;     */
+<i>114</i>&nbsp;    public ValueFactory add();
+<i>115</i>&nbsp;
+<i>116</i>&nbsp;
+<i>117</i>&nbsp;    /**
+<i>118</i>&nbsp;     * Inserts a child value at the specified position in this sequence.
+<i>119</i>&nbsp;     * If {@link #isNullValue()}, then it becomes a single-element
+<i>120</i>&nbsp;     * sequence.
+<i>121</i>&nbsp;     *
+<i>122</i>&nbsp;     * @param child is the element to be appended to this sequence.
+<i>123</i>&nbsp;     *
+<i>124</i>&nbsp;     * @throws NullPointerException
+<i>125</i>&nbsp;     *   if {@code child} is &lt;code&gt;null&lt;/code&gt;.
+<i>126</i>&nbsp;     * @throws ContainedValueException
+<i>127</i>&nbsp;     *   if {@code child} is already part of a container.
+<i>128</i>&nbsp;     * @throws IllegalArgumentException
+<i>129</i>&nbsp;     *   if {@code child} is an {@link IonDatagram}.
+<i>130</i>&nbsp;     * @throws IndexOutOfBoundsException if the index is out of range
+<i>131</i>&nbsp;     * (index &amp;lt; 0 || index &amp;gt; size()).
+<i>132</i>&nbsp;     */
+<i>133</i>&nbsp;    public void add(int index, IonValue child)
+<i>134</i>&nbsp;        throws ContainedValueException, NullPointerException;
+<i>135</i>&nbsp;
+<i>136</i>&nbsp;
+<i>137</i>&nbsp;    /**
+<i>138</i>&nbsp;     * Provides a factory that when invoked constructs a new value and
+<i>139</i>&nbsp;     * {@code add}s it to this sequence at the specified position.
+<i>140</i>&nbsp;     * &lt;p&gt;
+<i>141</i>&nbsp;     * These two lines are equivalent:
+<i>142</i>&nbsp;     *&lt;pre&gt;
+<i>143</i>&nbsp;     *    seq.add(12).newInt(3);
+<i>144</i>&nbsp;     *    seq.add(12, seq.getSystem().newInt(3));
+<i>145</i>&nbsp;     *&lt;/pre&gt;
+<i>146</i>&nbsp;     * &lt;p&gt;
+<i>147</i>&nbsp;     * The given {@code index} is validated when the factory&#39;s creation method
+<i>148</i>&nbsp;     * is invoked, not when this method is invoked.
+<i>149</i>&nbsp;     */
+<i>150</i>&nbsp;    public ValueFactory add(int index);
+<i>151</i>&nbsp;
+<i>152</i>&nbsp;
+<i>153</i>&nbsp;    /**
+<i>154</i>&nbsp;     * Replaces the element at the specified position in this list with the
+<i>155</i>&nbsp;     * specified element.
+<i>156</i>&nbsp;     *
+<i>157</i>&nbsp;     * @param index index of the element to replace.
+<i>158</i>&nbsp;     * @param element element to be stored at the specified position.
+<i>159</i>&nbsp;     * @return the element previously at the specified index.
+<i>160</i>&nbsp;     *
+<i>161</i>&nbsp;     * @throws UnsupportedOperationException
+<i>162</i>&nbsp;     *   if this is an {@link IonDatagram}.
+<i>163</i>&nbsp;     * @throws NullPointerException
+<i>164</i>&nbsp;     *   if the specified element is {@code null}.
+<i>165</i>&nbsp;     * @throws ContainedValueException
+<i>166</i>&nbsp;     *   if the specified element is already part of a container.
+<i>167</i>&nbsp;     * @throws IllegalArgumentException
+<i>168</i>&nbsp;     *   if the specified element is an {@link IonDatagram}.
+<i>169</i>&nbsp;     * @throws ReadOnlyValueException
+<i>170</i>&nbsp;     *   if this value or the specified element {@link #isReadOnly()}.
+<i>171</i>&nbsp;     * @throws IndexOutOfBoundsException
+<i>172</i>&nbsp;     *   if the index is out of range ({@code index &lt; 0 || index &gt;= size()}).
+<i>173</i>&nbsp;     */
+<i>174</i>&nbsp;    public IonValue set(int index, IonValue element);
+<i>175</i>&nbsp;
+<i>176</i>&nbsp;
+<i>177</i>&nbsp;    /**
+<i>178</i>&nbsp;     * Removes the element at the specified position.
+<i>179</i>&nbsp;     * Shifts any subsequent elements to the left (subtracts one from their
+<i>180</i>&nbsp;     * indices). Returns the element that was removed from the list.
+<i>181</i>&nbsp;     *
+<i>182</i>&nbsp;     * @param index the index of the element to be removed.
+<i>183</i>&nbsp;     *
+<i>184</i>&nbsp;     * @return the element previously at the specified position.
+<i>185</i>&nbsp;     *
+<i>186</i>&nbsp;     * @throws IndexOutOfBoundsException if the index is out of range
+<i>187</i>&nbsp;     * (index &amp;lt; 0 || index &amp;gt;= size()).
+<i>188</i>&nbsp;     */
+<i>189</i>&nbsp;    public IonValue remove(int index);
+<i>190</i>&nbsp;
+<i>191</i>&nbsp;
+<i>192</i>&nbsp;    /**
+<i>193</i>&nbsp;     * Removes a given {@link IonValue} from this sequence, if it is present.
+<i>194</i>&nbsp;     * &lt;p&gt;
+<i>195</i>&nbsp;     * &lt;b&gt;Due to the reference-equality-based semantics of Ion sequences,
+<i>196</i>&nbsp;     * this method does not use {@link Object#equals} as specified by the
+<i>197</i>&nbsp;     * contract of {@link java.util.Collection}. Instead it uses reference
+<i>198</i>&nbsp;     * equality ({@code ==} operator) to find the given instance.&lt;/b&gt;
+<i>199</i>&nbsp;     *
+<i>200</i>&nbsp;     * @return {@code true} if this sequence changed as a result of the call.
+<i>201</i>&nbsp;     *
+<i>202</i>&nbsp;     * @throws NullPointerException if {@code o} is {@code null}.
+<i>203</i>&nbsp;     * @throws ClassCastException if {@code o} is not an {@link IonValue}.
+<i>204</i>&nbsp;     */
+<i>205</i>&nbsp;    public boolean remove(Object o);
+<i>206</i>&nbsp;
+<i>207</i>&nbsp;
+<i>208</i>&nbsp;    /**
+<i>209</i>&nbsp;     * Removes all elements from this sequence that are also contained in the
+<i>210</i>&nbsp;     * specified collection. After this call returns, this sequence will
+<i>211</i>&nbsp;     * contain no elements in common with the specified collection.
+<i>212</i>&nbsp;     * &lt;p&gt;
+<i>213</i>&nbsp;     * &lt;b&gt;Due to the reference-equality-based semantics of Ion sequences,
+<i>214</i>&nbsp;     * this method does not use {@link Object#equals} as specified by the
+<i>215</i>&nbsp;     * contract of {@link java.util.Collection}. Instead it uses reference
+<i>216</i>&nbsp;     * equality ({@code ==} operator) to find the given instance.&lt;/b&gt;
+<i>217</i>&nbsp;     *
+<i>218</i>&nbsp;     * @return {@code true} if this sequence changed as a result of the call.
+<i>219</i>&nbsp;     *
+<i>220</i>&nbsp;     * @throws NullPointerException if {@code c} is {@code null}.
+<i>221</i>&nbsp;     * @throws NullPointerException if {@code c} contains one or more
+<i>222</i>&nbsp;     * {@code null} elements.
+<i>223</i>&nbsp;     * @throws ClassCastException if {@code c} contains one or more elements
+<i>224</i>&nbsp;     * that do not implement {@link IonValue}.
+<i>225</i>&nbsp;     */
+<i>226</i>&nbsp;    public boolean removeAll(Collection&lt;?&gt; c);
+<i>227</i>&nbsp;
+<i>228</i>&nbsp;
+<i>229</i>&nbsp;    /**
+<i>230</i>&nbsp;     * Retains only the elements in this sequence that are also contained in
+<i>231</i>&nbsp;     * the specified collection. In other words, removes from this sequence
+<i>232</i>&nbsp;     * all of its elements that are not contained in the specified collection.
+<i>233</i>&nbsp;     * &lt;p&gt;
+<i>234</i>&nbsp;     * &lt;b&gt;Due to the reference-equality-based semantics of Ion sequences,
+<i>235</i>&nbsp;     * this method does not use {@link Object#equals} as specified by the
+<i>236</i>&nbsp;     * contract of {@link java.util.Collection}. Instead it uses reference
+<i>237</i>&nbsp;     * equality ({@code ==} operator) to find the given instance.&lt;/b&gt;
+<i>238</i>&nbsp;     *
+<i>239</i>&nbsp;     * @return {@code true} if this sequence changed as a result of the call.
+<i>240</i>&nbsp;     *
+<i>241</i>&nbsp;     * @throws NullPointerException if {@code c} is {@code null}.
+<i>242</i>&nbsp;     * @throws NullPointerException if {@code c} contains one or more
+<i>243</i>&nbsp;     * {@code null} elements.
+<i>244</i>&nbsp;     * @throws ClassCastException if {@code c} contains one or more elements
+<i>245</i>&nbsp;     * that do not implement {@link IonValue}.
+<i>246</i>&nbsp;     */
+<i>247</i>&nbsp;    public boolean retainAll(Collection&lt;?&gt; c);
+<i>248</i>&nbsp;
+<i>249</i>&nbsp;
+<i>250</i>&nbsp;    /**
+<i>251</i>&nbsp;     * Determines whether this sequence contains the given instance.
+<i>252</i>&nbsp;     * &lt;p&gt;
+<i>253</i>&nbsp;     * &lt;b&gt;Due to the reference-equality-based semantics of Ion sequences,
+<i>254</i>&nbsp;     * this method does not use {@link Object#equals} as specified by the
+<i>255</i>&nbsp;     * contract of {@link java.util.Collection}. Instead it uses reference
+<i>256</i>&nbsp;     * equality ({@code ==} operator) to find the given instance.&lt;/b&gt;
+<i>257</i>&nbsp;     *
+<i>258</i>&nbsp;     * @return {@code true} if {@code o} is an element of this sequence.
+<i>259</i>&nbsp;     *
+<i>260</i>&nbsp;     * @throws NullPointerException if {@code o} is {@code null}.
+<i>261</i>&nbsp;     * @throws ClassCastException if {@code o} is not an {@link IonValue}.
+<i>262</i>&nbsp;     */
+<i>263</i>&nbsp;    public boolean contains(Object o);
+<i>264</i>&nbsp;
+<i>265</i>&nbsp;
+<i>266</i>&nbsp;    /**
+<i>267</i>&nbsp;     * Determines whether this sequence contains all of the given instances.
+<i>268</i>&nbsp;     * &lt;p&gt;
+<i>269</i>&nbsp;     * &lt;b&gt;Due to the reference-equality-based semantics of Ion sequences,
+<i>270</i>&nbsp;     * this method does not use {@link Object#equals} as specified by the
+<i>271</i>&nbsp;     * contract of {@link java.util.Collection}. Instead it uses reference
+<i>272</i>&nbsp;     * equality ({@code ==} operator) to find the given instances.&lt;/b&gt;
+<i>273</i>&nbsp;     *
+<i>274</i>&nbsp;     * @return {@code true} if this sequence contains all of the elements of
+<i>275</i>&nbsp;     * the given collection.
+<i>276</i>&nbsp;     *
+<i>277</i>&nbsp;     * @throws NullPointerException if {@code c} is {@code null}.
+<i>278</i>&nbsp;     * @throws NullPointerException if {@code c} contains one or more
+<i>279</i>&nbsp;     * {@code null} elements.
+<i>280</i>&nbsp;     * @throws ClassCastException if {@code c} contains one or more elements
+<i>281</i>&nbsp;     * that do not implement {@link IonValue}.
+<i>282</i>&nbsp;     */
+<i>283</i>&nbsp;    public boolean containsAll(Collection&lt;?&gt; c);
+<i>284</i>&nbsp;
+<i>285</i>&nbsp;    /**
+<i>286</i>&nbsp;     * Returns the index in the sequence of the specified element,
+<i>287</i>&nbsp;     * or -1 if this sequence doesn&#39;t contain the element.
+<i>288</i>&nbsp;     * &lt;p&gt;
+<i>289</i>&nbsp;     * &lt;b&gt;Due to the reference-equality-based semantics of Ion sequences,
+<i>290</i>&nbsp;     * this method does not use {@link Object#equals} as specified by the
+<i>291</i>&nbsp;     * contract of {@link java.util.List}. Instead it uses reference
+<i>292</i>&nbsp;     * equality ({@code ==} operator) to find the instance.&lt;/b&gt;
+<i>293</i>&nbsp;     *
+<i>294</i>&nbsp;     * @param o the element to search for.
+<i>295</i>&nbsp;     * @return the index in this sequence of the element,
+<i>296</i>&nbsp;     * or -1 if this sequence doesn&#39;t contain the element.
+<i>297</i>&nbsp;     */
+<i>298</i>&nbsp;    public int indexOf(Object o);
+<i>299</i>&nbsp;
+<i>300</i>&nbsp;    /**
+<i>301</i>&nbsp;     * Returns the index in the sequence of the specified element,
+<i>302</i>&nbsp;     * or -1 if this sequence doesn&#39;t contain the element.
+<i>303</i>&nbsp;     * &lt;p&gt;
+<i>304</i>&nbsp;     * &lt;b&gt;
+<i>305</i>&nbsp;     * Due to the reference-equality-based semantics of Ion sequences,
+<i>306</i>&nbsp;     * this method does not use {@link Object#equals} as specified by the
+<i>307</i>&nbsp;     * contract of {@link java.util.List}. Instead it uses reference
+<i>308</i>&nbsp;     * equality ({@code ==} operator) to find the instance.
+<i>309</i>&nbsp;     *
+<i>310</i>&nbsp;     * And since IonSequences do not allow for duplicates this method behaves
+<i>311</i>&nbsp;     * in the same way as {@link IonSequence#indexOf(Object)}
+<i>312</i>&nbsp;     * &lt;/b&gt;
+<i>313</i>&nbsp;     *
+<i>314</i>&nbsp;     * @param o the element to search for.
+<i>315</i>&nbsp;     * @return the index in this sequence of the element,
+<i>316</i>&nbsp;     * or -1 if this sequence doesn&#39;t contain the element.
+<i>317</i>&nbsp;     */
+<i>318</i>&nbsp;    public int lastIndexOf(Object o);
+<i>319</i>&nbsp;
+<i>320</i>&nbsp;
+<i>321</i>&nbsp;    /**
+<i>322</i>&nbsp;     * Appends all of the elements in the specified collection to the end of
+<i>323</i>&nbsp;     * this sequence, in the order that they are returned by the collection&#39;s
+<i>324</i>&nbsp;     * iterator.
+<i>325</i>&nbsp;     * The behavior of this operation is unspecified if the specified
+<i>326</i>&nbsp;     * collection is modified while the operation is in progress.
+<i>327</i>&nbsp;     * (Note that this will occur if the specified collection is this sequence,
+<i>328</i>&nbsp;     * and it&#39;s nonempty.)
+<i>329</i>&nbsp;     * &lt;p&gt;
+<i>330</i>&nbsp;     * Since Ion values can only have a single parent, this method will fail if
+<i>331</i>&nbsp;     * the given collection is a non-empty {@link IonContainer}.
+<i>332</i>&nbsp;     *
+<i>333</i>&nbsp;     * @param c
+<i>334</i>&nbsp;     * elements to be appended to this sequence.
+<i>335</i>&nbsp;     *
+<i>336</i>&nbsp;     * @return {@code true} if this sequence changed as a result of the call.
+<i>337</i>&nbsp;     *
+<i>338</i>&nbsp;     * @throws UnsupportedOperationException
+<i>339</i>&nbsp;     * if this is an {@link IonDatagram}.
+<i>340</i>&nbsp;     * @throws ClassCastException
+<i>341</i>&nbsp;     * if one of the elements of the collection is not an {@link IonValue}
+<i>342</i>&nbsp;     * @throws NullPointerException
+<i>343</i>&nbsp;     * if one of the elements of the collection is {@code null}.
+<i>344</i>&nbsp;     * @throws ContainedValueException
+<i>345</i>&nbsp;     * if one of the elements is already contained by an {@link IonContainer}.
+<i>346</i>&nbsp;     */
+<i>347</i>&nbsp;    public boolean addAll(Collection&lt;? extends IonValue&gt; c);
+<i>348</i>&nbsp;
+<i>349</i>&nbsp;
+<i>350</i>&nbsp;    /**
+<i>351</i>&nbsp;     * Inserts all of the elements in the specified collection into this
+<i>352</i>&nbsp;     * sequence at the specified position. Shifts the element currently at that
+<i>353</i>&nbsp;     * position (if any) and any subsequent elements to the right (increases
+<i>354</i>&nbsp;     * their indices). The new elements will appear in this sequence in the
+<i>355</i>&nbsp;     * order that they are returned by the specified collection&#39;s iterator.
+<i>356</i>&nbsp;     * The behavior of this operation is unspecified if the specified
+<i>357</i>&nbsp;     * collection is modified while the operation is in progress.
+<i>358</i>&nbsp;     * (Note that this will occur if the specified collection is this sequence,
+<i>359</i>&nbsp;     * and it&#39;s nonempty.)
+<i>360</i>&nbsp;     * &lt;p&gt;
+<i>361</i>&nbsp;     * Since Ion values can only have a single parent, this method will fail if
+<i>362</i>&nbsp;     * the given collection is a non-empty {@link IonContainer}.
+<i>363</i>&nbsp;     *
+<i>364</i>&nbsp;     * @param index
+<i>365</i>&nbsp;     * index at which to insert first element from the specified collection.
+<i>366</i>&nbsp;     * @param c
+<i>367</i>&nbsp;     * elements to be inserted into this sequence.
+<i>368</i>&nbsp;     *
+<i>369</i>&nbsp;     * @return {@code true} if this sequence changed as a result of the call.
+<i>370</i>&nbsp;     *
+<i>371</i>&nbsp;     * @throws UnsupportedOperationException
+<i>372</i>&nbsp;     * if this is an {@link IonDatagram}.
+<i>373</i>&nbsp;     * @throws ClassCastException
+<i>374</i>&nbsp;     * if one of the elements of the collection is not an {@link IonValue}
+<i>375</i>&nbsp;     * @throws NullPointerException
+<i>376</i>&nbsp;     * if one of the elements of the collection is {@code null}.
+<i>377</i>&nbsp;     * @throws ContainedValueException
+<i>378</i>&nbsp;     * if one of the elements is already contained by an {@link IonContainer}.
+<i>379</i>&nbsp;     * @throws IndexOutOfBoundsException
+<i>380</i>&nbsp;     * if the index is out of range (index &amp;lt; 0 || index &amp;gt; size()).
+<i>381</i>&nbsp;     */
+<i>382</i>&nbsp;    public boolean addAll(int index, Collection&lt;? extends IonValue&gt; c);
+<i>383</i>&nbsp;
+<i>384</i>&nbsp;
+<i>385</i>&nbsp;    /**
+<i>386</i>&nbsp;     * Returns a list iterator of the elements in this sequence (in proper
+<i>387</i>&nbsp;     * order).
+<i>388</i>&nbsp;     * &lt;p&gt;
+<i>389</i>&nbsp;     * The result does not support {@link ListIterator#add(Object)} or
+<i>390</i>&nbsp;     * {@link ListIterator#set(Object)}.
+<i>391</i>&nbsp;     * If this sequence {@link #isReadOnly()} then it also does not support
+<i>392</i>&nbsp;     * {@link Iterator#remove()}.
+<i>393</i>&nbsp;     */
+<i>394</i>&nbsp;    public ListIterator&lt;IonValue&gt; listIterator();
+<i>395</i>&nbsp;
+<i>396</i>&nbsp;    /**
+<i>397</i>&nbsp;     * Returns a list iterator of the elements in this sequence (in proper
+<i>398</i>&nbsp;     * order), starting at the specified position in this sequence.
+<i>399</i>&nbsp;     * &lt;p&gt;
+<i>400</i>&nbsp;     * The result does not support {@link ListIterator#add(Object)} or
+<i>401</i>&nbsp;     * {@link ListIterator#set(Object)}.
+<i>402</i>&nbsp;     * If this sequence {@link #isReadOnly()} then it also does not support
+<i>403</i>&nbsp;     * {@link Iterator#remove()}.
+<i>404</i>&nbsp;     *
+<i>405</i>&nbsp;     * @param index
+<i>406</i>&nbsp;     * index of first element to be returned from the list iterator (by a call
+<i>407</i>&nbsp;     * to the {@code next} method).
+<i>408</i>&nbsp;     *
+<i>409</i>&nbsp;     * @throws IndexOutOfBoundsException
+<i>410</i>&nbsp;     * if the index is out of range ({@code index &lt; 0 || index &gt; size()}).
+<i>411</i>&nbsp;     */
+<i>412</i>&nbsp;    public ListIterator&lt;IonValue&gt; listIterator(int index);
+<i>413</i>&nbsp;
+<i>414</i>&nbsp;
+<i>415</i>&nbsp;    /**
+<i>416</i>&nbsp;     * &lt;p&gt;
+<i>417</i>&nbsp;     * Returns a view of the portion of this list according to
+<i>418</i>&nbsp;     * {@link List#subList(int, int)} contract.
+<i>419</i>&nbsp;     * &lt;/p&gt;
+<i>420</i>&nbsp;     *
+<i>421</i>&nbsp;     * &lt;p&gt;
+<i>422</i>&nbsp;     * Sublist methods will throw a
+<i>423</i>&nbsp;     * {@link java.util.ConcurrentModificationException} if its parent list,
+<i>424</i>&nbsp;     * i.e. this list, had any changes that affect its size the after sublist
+<i>425</i>&nbsp;     * was created.
+<i>426</i>&nbsp;     * &lt;/p&gt;
+<i>427</i>&nbsp;     *
+<i>428</i>&nbsp;     * The implementation of {@link List&lt;IonValue&gt;} returned by this method
+<i>429</i>&nbsp;     * implements {@link List#equals(Object)} and
+<i>430</i>&nbsp;     * {@link List#equals(Object)} ()} per the specification of these methods.
+<i>431</i>&nbsp;     * However, the existing implementation of {@link IonSequence} does not
+<i>432</i>&nbsp;     * provide a specification compliant {@link List#equals} and
+<i>433</i>&nbsp;     * {@link List#hashCode()}} which results to the following caveats:
+<i>434</i>&nbsp;     *
+<i>435</i>&nbsp;     * Given:
+<i>436</i>&nbsp;     *
+<i>437</i>&nbsp;     * &lt;code&gt;
+<i>438</i>&nbsp;     * int[] ints = new int[] {1, 2, 3, 4};
+<i>439</i>&nbsp;     * IonList list = SYSTEM.newList(ints);
+<i>440</i>&nbsp;     * IonSexp sexp = SYSTEM.newSexp(ints)
+<i>441</i>&nbsp;     * IonSexp dgrm = SYSTEM.newDatagram(ints)
+<i>442</i>&nbsp;     * List&lt;IonValue&gt; listSubList = list.subList(0, ints.size())
+<i>443</i>&nbsp;     * List&lt;IonValue&gt; sexpSubList = sexp.subList(0, ints.size())
+<i>444</i>&nbsp;     * List&lt;IonValue&gt; dgrmSubList = sexp.subList(0, ints.size())
+<i>445</i>&nbsp;     * List&lt;IonValue&gt; arrayList = new ArrayList&lt;IonValue&gt;();
+<i>446</i>&nbsp;     * for(int i : ints) { arrayList.add(SYSTEM.newInt(i)); }
+<i>447</i>&nbsp;     * &lt;/code&gt;
+<i>448</i>&nbsp;     *
+<i>449</i>&nbsp;     * {@link IonSequence#equals(Object)} always returns false when presented
+<i>450</i>&nbsp;     * with a non {@link IonSequence} instance of {@link List&lt;IonValue&gt;}.
+<i>451</i>&nbsp;     * Hence, the following invocations of {@link Object#equals(Object)}
+<i>452</i>&nbsp;     * return false even if the contained elements are equivalent.  This
+<i>453</i>&nbsp;     * means that {@link Object#equals(Object)} is not symmetric in these
+<i>454</i>&nbsp;     * cases.  The reason for the asymmetry is historical:
+<i>455</i>&nbsp;     * {@link IonSequence} has long violated the contract outlined by the
+<i>456</i>&nbsp;     * {@link List} documentation.  For the current major version of this
+<i>457</i>&nbsp;     * library we maintain backwards compatibility and support this behaviour
+<i>458</i>&nbsp;     * as-is.
+<i>459</i>&nbsp;     *
+<i>460</i>&nbsp;     * &lt;code&gt;
+<i>461</i>&nbsp;     * list.equals(listSubList)     // false
+<i>462</i>&nbsp;     * list.equals(sexpSubList)     // false
+<i>463</i>&nbsp;     * list.equals(dgrm)            // false
+<i>464</i>&nbsp;     * list.equals(arrayList)       // false
+<i>465</i>&nbsp;     *
+<i>466</i>&nbsp;     * sexp.equals(listSubList)     // false
+<i>467</i>&nbsp;     * sexp.equals(sexpSubList)     // false
+<i>468</i>&nbsp;     * sexp.equals(dgrm)            // false
+<i>469</i>&nbsp;     * sexp.equals(arrayList)       // false
+<i>470</i>&nbsp;     *
+<i>471</i>&nbsp;     * dgrm.equals(listSubList)     // false
+<i>472</i>&nbsp;     * dgrm.equals(sexpSubList)     // false
+<i>473</i>&nbsp;     * dgrm.equals(dgrmSubList)     // false
+<i>474</i>&nbsp;     * dgrm.equals(arrayList)       // false
+<i>475</i>&nbsp;     *&lt;/code&gt;
+<i>476</i>&nbsp;     *
+<i>477</i>&nbsp;     * However, {@link IonSequence#subList(int, int)} was implemented much
+<i>478</i>&nbsp;     * later and faithfully implements {@link List#equals(Object)} meaning
+<i>479</i>&nbsp;     * the cases below all work as expected.  While {@link IonSequence}
+<i>480</i>&nbsp;     * does not comply with the specification for {@link List#equals(Object)}
+<i>481</i>&nbsp;     * because it has to comply with Ion&#39;s rules for equality, the same is
+<i>482</i>&nbsp;     * not true for sub-lists.  Unlike {@link IonSequence}, sub-lists have
+<i>483</i>&nbsp;     * no notion of an {@link IonType}, annotations or nullability which
+<i>484</i>&nbsp;     * allows for compliance with the {@link List} specification.
+<i>485</i>&nbsp;     *
+<i>486</i>&nbsp;     * &lt;code&gt;
+<i>487</i>&nbsp;     * listSubList.equals(listSubList); // true
+<i>488</i>&nbsp;     * listSubList.equals(sexpSubList); // true
+<i>489</i>&nbsp;     * listSubList.equals(dgrmSubList); // true
+<i>490</i>&nbsp;     * listSubList.equals(list);        // true
+<i>491</i>&nbsp;     * listSubList.equals(sexp);        // true
+<i>492</i>&nbsp;     * listSubList.equals(arrayList);   // true
+<i>493</i>&nbsp;     *
+<i>494</i>&nbsp;     * sexpSubList.equals(listSubList); // true
+<i>495</i>&nbsp;     * sexpSubList.equals(sexpSubList); // true
+<i>496</i>&nbsp;     * sexpSubList.equals(dgrmSubList); // true
+<i>497</i>&nbsp;     * sexpSubList.equals(list);        // true
+<i>498</i>&nbsp;     * sexpSubList.equals(sexp);        // true
+<i>499</i>&nbsp;     * sexpSubList.equals(arrayList);   // true
+<i>500</i>&nbsp;     *
+<i>501</i>&nbsp;     * dgrmSubList.equals(listSubList); // true
+<i>502</i>&nbsp;     * dgrmSubList.equals(sexpSubList); // true
+<i>503</i>&nbsp;     * dgrmSubList.equals(dgrmSubList); // true
+<i>504</i>&nbsp;     * dgrmSubList.equals(list);        // true
+<i>505</i>&nbsp;     * dgrmSubList.equals(sexp);        // true
+<i>506</i>&nbsp;     * dgrmSubList.equals(arrayList);   // true
+<i>507</i>&nbsp;     * &lt;/code&gt;
+<i>508</i>&nbsp;     *
+<i>509</i>&nbsp;     * @see List#subList(int, int)
+<i>510</i>&nbsp;     */
+<i>511</i>&nbsp;    public List&lt;IonValue&gt; subList(int fromIndex, int toIndex);
+<i>512</i>&nbsp;
+<i>513</i>&nbsp;
+<i>514</i>&nbsp;    /**
+<i>515</i>&nbsp;     * Returns an array containing all of the elements in this sequence in
+<i>516</i>&nbsp;     * proper order. Obeys the general contract of the
+<i>517</i>&nbsp;     * {@link Collection#toArray()} method.
+<i>518</i>&nbsp;     * &lt;p&gt;
+<i>519</i>&nbsp;     * If this sequence is an {@linkplain #isNullValue() Ion null value}, it
+<i>520</i>&nbsp;     * will behave like an empty sequence.
+<i>521</i>&nbsp;     *
+<i>522</i>&nbsp;     * @return an array containing all of the elements in this sequence in
+<i>523</i>&nbsp;     *         proper order.
+<i>524</i>&nbsp;     */
+<i>525</i>&nbsp;    public IonValue[] toArray();
+<i>526</i>&nbsp;
+<i>527</i>&nbsp;
+<i>528</i>&nbsp;    /**
+<i>529</i>&nbsp;     * Returns an array containing all of the elements in this sequence in
+<i>530</i>&nbsp;     * proper order; the runtime type of the returned array is that of the
+<i>531</i>&nbsp;     * specified array. Obeys the general contract of the
+<i>532</i>&nbsp;     * {@link Collection#toArray()} method.
+<i>533</i>&nbsp;     * &lt;p&gt;
+<i>534</i>&nbsp;     * If this sequence is an {@linkplain #isNullValue() Ion null value}, it
+<i>535</i>&nbsp;     * will behave like an empty sequence.
+<i>536</i>&nbsp;     *
+<i>537</i>&nbsp;     * @param a the array into which the elements of this sequence are to be
+<i>538</i>&nbsp;     *        stored, if it is big enough; otherwise, a new array of the same
+<i>539</i>&nbsp;     *        runtime type is allocated for this purpose.
+<i>540</i>&nbsp;     *
+<i>541</i>&nbsp;     * @return an array containing all of the elements in this sequence in
+<i>542</i>&nbsp;     *         proper order.
+<i>543</i>&nbsp;     *
+<i>544</i>&nbsp;     * @throws ArrayStoreException if the runtime type of the specified array
+<i>545</i>&nbsp;     *         is not a supertype of the runtime type of every element in this
+<i>546</i>&nbsp;     *         sequence.
+<i>547</i>&nbsp;     * @throws NullPointerException if the specified array is &lt;code&gt;null&lt;/code&gt;.
+<i>548</i>&nbsp;     */
+<i>549</i>&nbsp;    public &lt;T&gt; T[] toArray(T[] a);
+<i>550</i>&nbsp;
+<i>551</i>&nbsp;
+<i>552</i>&nbsp;    /**
+<i>553</i>&nbsp;     * Removes all children of this sequence, returning them in an array.
+<i>554</i>&nbsp;     * This is much more efficient than iterating the sequence and removing
+<i>555</i>&nbsp;     * children one by one.
+<i>556</i>&nbsp;     *
+<i>557</i>&nbsp;     * @return a new array with all of the children of {@code s} in order, or
+<i>558</i>&nbsp;     * {@code null} if {@link #isNullValue()}.
+<i>559</i>&nbsp;     *
+<i>560</i>&nbsp;     * @throws NullPointerException if {@code type} is {@code null}.
+<i>561</i>&nbsp;     * @throws ClassCastException if any value in this sequence does not
+<i>562</i>&nbsp;     * implement the given type.
+<i>563</i>&nbsp;     */
+<i>564</i>&nbsp;    public &lt;T extends IonValue&gt; T[] extract(Class&lt;T&gt; type);
+<i>565</i>&nbsp;
+<i>566</i>&nbsp;
+<i>567</i>&nbsp;    public IonSequence clone()
+<i>568</i>&nbsp;        throws UnknownSymbolException;
+<i>569</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

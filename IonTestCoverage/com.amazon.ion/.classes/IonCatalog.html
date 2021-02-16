@@ -1,0 +1,158 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonCatalog</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonCatalog (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonCatalog</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import com.amazon.ion.system.IonSystemBuilder;
+<i>19</i>&nbsp;import com.amazon.ion.system.SimpleCatalog;
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;
+<i>22</i>&nbsp;/**
+<i>23</i>&nbsp; * Collects shared symbol tables for use by an {@link IonSystem}.
+<i>24</i>&nbsp; * &lt;p&gt;
+<i>25</i>&nbsp; * It is expected that many applications will implement this interface to
+<i>26</i>&nbsp; * customize behavior beyond that provided by the default {@link SimpleCatalog}.
+<i>27</i>&nbsp; * A typical implementation would retrieve symbol tables from some external
+<i>28</i>&nbsp; * source.
+<i>29</i>&nbsp; * &lt;p&gt;
+<i>30</i>&nbsp; * To utilize a custom catalog, it must be given to the
+<i>31</i>&nbsp; * {@link IonSystemBuilder} before a system is built, or to
+<i>32</i>&nbsp; * selected methods of the {@link IonSystem} for localized use.
+<i>33</i>&nbsp; *
+<i>34</i>&nbsp; * &lt;h2&gt;Notes for Implementors&lt;/h2&gt;
+<i>35</i>&nbsp; * This interface defines two methods with subtly different semantics.
+<i>36</i>&nbsp; * The first variant takes only a symbol table name, and returns the highest
+<i>37</i>&nbsp; * version possible. The second takes a version number and attempts to match it
+<i>38</i>&nbsp; * exactly, and if that&#39;s not possible it falls back to the the &quot;best match&quot;
+<i>39</i>&nbsp; * possible:
+<i>40</i>&nbsp; * &lt;ul&gt;
+<i>41</i>&nbsp; *   &lt;li&gt;If any versions &lt;em&gt;larger&lt;/em&gt; than the requested version are
+<i>42</i>&nbsp; *     available, select the smallest among them (still larger than requested).
+<i>43</i>&nbsp; *   &lt;li&gt;Otherwise all available versions are &lt;em&gt;smaller&lt;/em&gt; than the
+<i>44</i>&nbsp; *     requested version, so return the largest of them.
+<i>45</i>&nbsp; * &lt;/ul&gt;
+<i>46</i>&nbsp; * &lt;p&gt;
+<i>47</i>&nbsp; * Catalog implementations should &lt;em&gt;never&lt;/em&gt; accept substitute symbol
+<i>48</i>&nbsp; * tables and &lt;em&gt;never&lt;/em&gt; return them. Substitute tables are used when the
+<i>49</i>&nbsp; * catalog cannot find an exact match, that is, the catalog cannot find an
+<i>50</i>&nbsp; * imported shared symtab with the same name, version and max_id. Refer to
+<i>51</i>&nbsp; * {@link SymbolTable}.
+<i>52</i>&nbsp; * &lt;p&gt;
+<i>53</i>&nbsp; * This interface is the &lt;em&gt;only&lt;/em&gt; abstraction point for caching shared
+<i>54</i>&nbsp; * symbol tables. Within this library, there is no caching mechanism in place on
+<i>55</i>&nbsp; * shared symbol tables that are loaded into the {@link IonSystem}.
+<i>56</i>&nbsp; * This means that when a shared symbol table needs to be retrieved by the
+<i>57</i>&nbsp; * library&#39;s code-paths, methods of this interface are invoked directly,
+<i>58</i>&nbsp; * without any additional caching whatsoever.
+<i>59</i>&nbsp; * As such, implementors of this interface should implement their own caching
+<i>60</i>&nbsp; * mechanism if desired.
+<i>61</i>&nbsp; * &lt;p&gt;
+<i>62</i>&nbsp; * When encoding Ion binary data, its always best to use an exact match to the
+<i>63</i>&nbsp; * requested version whenever possible.  Earlier versions are very likely to be
+<i>64</i>&nbsp; * missing symbols that are needed by the data.  Later versions of the table
+<i>65</i>&nbsp; * could have the same problem, but that&#39;s less likely under best practices.
+<i>66</i>&nbsp; * &lt;p&gt;
+<i>67</i>&nbsp; * While &quot;get latest version&quot; is generally okay for encoding, it&#39;s not
+<i>68</i>&nbsp; * universally acceptable: one can imagine a client/server protocol where the
+<i>69</i>&nbsp; * client declares what symtab/versions it can handle, and the server needs to
+<i>70</i>&nbsp; * meet those requirements.
+<i>71</i>&nbsp; * &lt;p&gt;
+<i>72</i>&nbsp; * Binary &lt;em&gt;decoding&lt;/em&gt; prefers an exact match, and in a couple edge cases,
+<i>73</i>&nbsp; * requires it. Therefore a single &quot;get latest version&quot; method is insufficient.
+<i>74</i>&nbsp; * See the
+<i>75</i>&nbsp; * &lt;a href=&quot;http://amzn.github.io/ion-docs/docs/symbols.html&quot;&gt;Ion Symbols page&lt;/a&gt;
+<i>76</i>&nbsp; * for more details on this topic.
+<i>77</i>&nbsp; * &lt;p&gt;
+<i>78</i>&nbsp; * It&#39;s expected that many if not most applications will implement a dynamic
+<i>79</i>&nbsp; * catalog that can fetch symtabs from some source.  In such cases the catalog
+<i>80</i>&nbsp; * should make its best effort to find an exact match, and if that&#39;s not
+<i>81</i>&nbsp; * possible fall back to the best match it can acquire.
+<i>82</i>&nbsp; */
+<i>83</i>&nbsp;public interface IonCatalog
+<i>84</i>&nbsp;{
+<i>85</i>&nbsp;    /**
+<i>86</i>&nbsp;     * Gets a symbol table with a specific name and the highest version
+<i>87</i>&nbsp;     * possible.
+<i>88</i>&nbsp;     *
+<i>89</i>&nbsp;     * @param name identifies the desired symbol table.
+<i>90</i>&nbsp;     * @return a shared symbol table with the given name, or
+<i>91</i>&nbsp;     * {@code null} if this catalog has no table with the name.
+<i>92</i>&nbsp;     */
+<i>93</i>&nbsp;    public SymbolTable getTable(String name);
+<i>94</i>&nbsp;
+<i>95</i>&nbsp;
+<i>96</i>&nbsp;    /**
+<i>97</i>&nbsp;     * Gets a desired symbol table from this catalog, using an exact match if
+<i>98</i>&nbsp;     * possible.
+<i>99</i>&nbsp;     * &lt;p&gt;
+<i>100</i>&nbsp;     * Implentations must make a best effort to find an exact match.
+<i>101</i>&nbsp;     * If an exact match cannot be found, then this method must make a best
+<i>102</i>&nbsp;     * effort to find the best match available.
+<i>103</i>&nbsp;     *
+<i>104</i>&nbsp;     * @return the shared symbol table with the given name and version, when an
+<i>105</i>&nbsp;     * exact match is possible. Otherwise, returns the lowest possible version
+<i>106</i>&nbsp;     * larger than requested.  Otherwise, return the largest possible version
+<i>107</i>&nbsp;     * lower than requested.  If no table with the name can be found, then
+<i>108</i>&nbsp;     * this method returns {@code null}.
+<i>109</i>&nbsp;     */
+<i>110</i>&nbsp;    public SymbolTable getTable(String name, int version);
+<i>111</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

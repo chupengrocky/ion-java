@@ -1,4 +1,4 @@
-Amazon Ion Java(261Poject)
+# Amazon Ion Java(261Poject)
 
 A Java implementation of the [Ion data notation](http://amzn.github.io/ion-docs).
 

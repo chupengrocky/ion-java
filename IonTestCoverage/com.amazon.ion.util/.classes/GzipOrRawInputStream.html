@@ -1,0 +1,175 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: GzipOrRawInputStream</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.util</a> ]
+</div>
+
+<h1>Coverage Summary for Class: GzipOrRawInputStream (com.amazon.ion.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">GzipOrRawInputStream</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/ 3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (20/ 20)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.util;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import java.io.FilterInputStream;
+<i>19</i>&nbsp;import java.io.IOException;
+<i>20</i>&nbsp;import java.io.InputStream;
+<i>21</i>&nbsp;import java.io.PushbackInputStream;
+<i>22</i>&nbsp;import java.util.Arrays;
+<i>23</i>&nbsp;import java.util.zip.GZIPInputStream;
+<i>24</i>&nbsp;
+<i>25</i>&nbsp;/**
+<i>26</i>&nbsp; * Represents an {@link InputStream} that may be GZIP compressed or not.
+<i>27</i>&nbsp; * This stream assumes that the GZIP header is unique to the raw content.
+<i>28</i>&nbsp; * That is, one should not use this on a stream that may have raw data
+<i>29</i>&nbsp; * in the begining of the stream that collides with the GZIP header.
+<i>30</i>&nbsp; * In the case of Ion binary, Ion text, and XML, a GZIP stream is unambiguous
+<i>31</i>&nbsp; * from them.
+<i>32</i>&nbsp; */
+<b class="fc"><i>33</i>&nbsp;class GzipOrRawInputStream</b>
+<i>34</i>&nbsp;    extends FilterInputStream
+<i>35</i>&nbsp;{
+<i>36</i>&nbsp;    /** GZIP magic cookie. */
+<b class="fc"><i>37</i>&nbsp;    static final byte[] GZIP_HEADER = {0x1F, (byte) 0x8B};</b>
+<i>38</i>&nbsp;
+<i>39</i>&nbsp;    /**
+<i>40</i>&nbsp;     * Wraps the given stream determining based on the GZIP header
+<i>41</i>&nbsp;     * whether or not the stream is compressed and should be dynamically
+<i>42</i>&nbsp;     * de-compressed.
+<i>43</i>&nbsp;     *
+<i>44</i>&nbsp;     * @param raw The input stream to wrap.
+<i>45</i>&nbsp;     *
+<i>46</i>&nbsp;     * @throws IOException
+<i>47</i>&nbsp;     *         Thrown if there is a problem reading from the underlying stream.
+<i>48</i>&nbsp;     */
+<i>49</i>&nbsp;    GzipOrRawInputStream(final InputStream raw)
+<i>50</i>&nbsp;        throws IOException
+<i>51</i>&nbsp;    {
+<b class="fc"><i>52</i>&nbsp;        this(raw, 512); // 512 is the default buffer size in GZIPInputStream</b>
+<b class="fc"><i>53</i>&nbsp;    }</b>
+<i>54</i>&nbsp;
+<i>55</i>&nbsp;    /**
+<i>56</i>&nbsp;     * Wraps the given stream determining based on the GZIP header
+<i>57</i>&nbsp;     * whether or not the stream is compressed and should be dynamically
+<i>58</i>&nbsp;     * de-compressed.
+<i>59</i>&nbsp;     *
+<i>60</i>&nbsp;     * @param raw The input stream to wrap.
+<i>61</i>&nbsp;     * @param bufferSize internal buffer size to use for decompression.
+<i>62</i>&nbsp;     *
+<i>63</i>&nbsp;     * @throws IOException
+<i>64</i>&nbsp;     *         Thrown if there is a problem reading from the underlying stream.
+<i>65</i>&nbsp;     */
+<i>66</i>&nbsp;    GzipOrRawInputStream(final InputStream raw, final int bufferSize)
+<i>67</i>&nbsp;        throws IOException
+<i>68</i>&nbsp;    {
+<b class="fc"><i>69</i>&nbsp;        super(null);</b>
+<b class="fc"><i>70</i>&nbsp;        final byte[] header = new byte[GZIP_HEADER.length];</b>
+<b class="fc"><i>71</i>&nbsp;        final PushbackInputStream input = new PushbackInputStream(raw, 2);</b>
+<i>72</i>&nbsp;
+<i>73</i>&nbsp;        // fetch the header and determine length
+<b class="fc"><i>74</i>&nbsp;        int size = 0;</b>
+<b class="fc"><i>75</i>&nbsp;        while (size &lt; header.length) {</b>
+<b class="fc"><i>76</i>&nbsp;            int octet = input.read();</b>
+<b class="fc"><i>77</i>&nbsp;            if (octet == -1) break;</b>
+<i>78</i>&nbsp;
+<b class="fc"><i>79</i>&nbsp;            header[size] = (byte) octet;</b>
+<b class="fc"><i>80</i>&nbsp;            size++;</b>
+<b class="fc"><i>81</i>&nbsp;        }</b>
+<b class="fc"><i>82</i>&nbsp;        assert size &lt;= 2;</b>
+<i>83</i>&nbsp;        // unread the header
+<b class="fc"><i>84</i>&nbsp;        input.unread(header, 0, size);</b>
+<i>85</i>&nbsp;        // determine the underlying stream
+<b class="fc"><i>86</i>&nbsp;        if (size == 2 &amp;&amp; Arrays.equals(header, GZIP_HEADER)) {</b>
+<b class="fc"><i>87</i>&nbsp;            in = new GZIPInputStream(input, bufferSize);</b>
+<i>88</i>&nbsp;        } else {
+<b class="fc"><i>89</i>&nbsp;            in = input;</b>
+<i>90</i>&nbsp;        }
+<b class="fc"><i>91</i>&nbsp;    }</b>
+<i>92</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

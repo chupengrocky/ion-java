@@ -1,0 +1,123 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: Span</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: Span (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">Span</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import com.amazon.ion.facet.Faceted;
+<i>19</i>&nbsp;import com.amazon.ion.util.Spans;
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;/**
+<i>22</i>&nbsp; * An immutable reference to a consecutive sequence of values (perhaps
+<i>23</i>&nbsp; * including large hierarchies) within some base source of Ion data.
+<i>24</i>&nbsp; * &lt;p&gt;
+<i>25</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>26</i>&nbsp; * code outside of this library.
+<i>27</i>&nbsp; * &lt;p&gt;
+<i>28</i>&nbsp; * A span is conceptually comprised of two abstract &lt;em&gt;positions&lt;/em&gt; or
+<i>29</i>&nbsp; * offsets within the base source.  The &lt;em&gt;start&lt;/em&gt; position denotes the
+<i>30</i>&nbsp; * leftmost edge of the span, and the &lt;em&gt;finish&lt;/em&gt; position denotes the
+<i>31</i>&nbsp; * rightmost edge.
+<i>32</i>&nbsp; * Positions lie &lt;em&gt;between&lt;/em&gt; values, and when the start and finish
+<i>33</i>&nbsp; * positions are equal, the span is said to be &lt;em&gt;empty&lt;/em&gt;.
+<i>34</i>&nbsp; * &lt;p&gt;
+<i>35</i>&nbsp; * A span is said to &lt;em&gt;cover&lt;/em&gt; the values that lie within its edges.
+<i>36</i>&nbsp; * &lt;p&gt;
+<i>37</i>&nbsp; * A span is &lt;em&gt;balanced&lt;/em&gt; if it starts and finishes within the same
+<i>38</i>&nbsp; * container, otherwise it is &lt;em&gt;unbalanced&lt;/em&gt;.  This library currently
+<i>39</i>&nbsp; * does not support unbalanced spans.
+<i>40</i>&nbsp; * &lt;p&gt;
+<i>41</i>&nbsp; * Since different source types require different positioning techniques,
+<i>42</i>&nbsp; * spans is {@link Faceted} to expose the position implementation.
+<i>43</i>&nbsp; *
+<i>44</i>&nbsp; * &lt;h2&gt;Acknowledgements&lt;/h2&gt;
+<i>45</i>&nbsp; * This design and terminology is heavily based on Wilfred J. Hansen&#39;s work on
+<i>46</i>&nbsp; * subsequence references.
+<i>47</i>&nbsp; *
+<i>48</i>&nbsp; * @see SpanProvider
+<i>49</i>&nbsp; * @see Spans
+<i>50</i>&nbsp; * @see TextSpan
+<i>51</i>&nbsp; * @see OffsetSpan
+<i>52</i>&nbsp; *
+<i>53</i>&nbsp; * @see &lt;a href=&quot;http://portal.acm.org/citation.cfm?id=133234&quot;&gt;Subsequence
+<i>54</i>&nbsp; * References: First-Class Values for Substrings&lt;/a&gt;
+<i>55</i>&nbsp; *
+<i>56</i>&nbsp; */
+<i>57</i>&nbsp;public interface Span
+<i>58</i>&nbsp;    extends Faceted
+<i>59</i>&nbsp;{
+<i>60</i>&nbsp;    /**
+<i>61</i>&nbsp;     * Gets a span covering the container of this span.
+<i>62</i>&nbsp;     *
+<i>63</i>&nbsp;     * @throws IonException if the current span is at top-level.
+<i>64</i>&nbsp;     */
+<i>65</i>&nbsp;//    public Span containerSpan();  // TODO later.  Move to a facet?
+<i>66</i>&nbsp;
+<i>67</i>&nbsp;
+<i>68</i>&nbsp;    /**
+<i>69</i>&nbsp;     * Gets a span covering all the children of this span, which must cover a
+<i>70</i>&nbsp;     * single container.
+<i>71</i>&nbsp;     *
+<i>72</i>&nbsp;     * @throws IonException if this span covers anything other than a
+<i>73</i>&nbsp;     * single container.
+<i>74</i>&nbsp;     */
+<i>75</i>&nbsp;//    public Span contentSpan();  // TODO later.  Move to a facet?
+<i>76</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

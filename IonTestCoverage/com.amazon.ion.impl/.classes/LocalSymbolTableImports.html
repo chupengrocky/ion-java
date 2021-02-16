@@ -1,0 +1,380 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: LocalSymbolTableImports</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: LocalSymbolTableImports (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LocalSymbolTableImports</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.3%
+  </span>
+  <span class="absValue">
+    (12/ 13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    98.4%
+  </span>
+  <span class="absValue">
+    (63/ 64)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.SymbolTable.UNKNOWN_SYMBOL_ID;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>21</i>&nbsp;import com.amazon.ion.SymbolToken;
+<i>22</i>&nbsp;import java.util.Arrays;
+<i>23</i>&nbsp;import java.util.List;
+<i>24</i>&nbsp;
+<i>25</i>&nbsp;/**
+<i>26</i>&nbsp; * This class manages the system symbol table and any shared symbol table(s)
+<i>27</i>&nbsp; * imported by a local symbol table. It provides &quot;find&quot; methods to find
+<i>28</i>&nbsp; * either symbol Ids or names in the imported tables.
+<i>29</i>&nbsp; * &lt;p&gt;
+<i>30</i>&nbsp; * This class is &lt;b&gt;immutable&lt;/b&gt;, and hence safe for use by multiple threads.
+<i>31</i>&nbsp; */
+<i>32</i>&nbsp;// TODO amzn/ion-java/issues/37 Create specialized class to handle the common case where
+<i>33</i>&nbsp;//      there are zero or one imported non-system shared symtab(s).
+<b class="fc"><i>34</i>&nbsp;final class LocalSymbolTableImports</b>
+<i>35</i>&nbsp;{
+<i>36</i>&nbsp;    /**
+<i>37</i>&nbsp;     * The symtabs imported by a local symtab, never null or empty. The first
+<i>38</i>&nbsp;     * symtab must be a system symtab, the rest must be non-system shared
+<i>39</i>&nbsp;     * symtabs.
+<i>40</i>&nbsp;     */
+<i>41</i>&nbsp;    private final SymbolTable[] myImports;
+<i>42</i>&nbsp;
+<i>43</i>&nbsp;    /**
+<i>44</i>&nbsp;     * The maxId of all imported tables, i.e., the sum of all maxIds declared
+<i>45</i>&nbsp;     * by symtabs in {@link #myImports}.
+<i>46</i>&nbsp;     */
+<i>47</i>&nbsp;    private final int           myMaxId;
+<i>48</i>&nbsp;
+<i>49</i>&nbsp;    /**
+<i>50</i>&nbsp;     * The base Sid of each symtab in {@link #myImports} in parallel, i.e.,
+<i>51</i>&nbsp;     * {@link #myBaseSids}[0] references {@link #myImports}[0]. Must be
+<i>52</i>&nbsp;     * the same length as {@link #myImports}.
+<i>53</i>&nbsp;     */
+<i>54</i>&nbsp;    private final int[]         myBaseSids;
+<i>55</i>&nbsp;
+<i>56</i>&nbsp;    //==========================================================================
+<i>57</i>&nbsp;    // Constructor(s) and static factory methods
+<i>58</i>&nbsp;    //==========================================================================
+<i>59</i>&nbsp;
+<i>60</i>&nbsp;    /**
+<i>61</i>&nbsp;     * Constructor, takes the passed-in {@code importTables} containing the
+<i>62</i>&nbsp;     * imported symtabs.
+<i>63</i>&nbsp;     *
+<i>64</i>&nbsp;     * @param importTables
+<i>65</i>&nbsp;     *          the imported symtabs, must contain at least one element; the
+<i>66</i>&nbsp;     *          first element must be a system symtab, the rest must be
+<i>67</i>&nbsp;     *          non-system shared symtabs
+<i>68</i>&nbsp;     *
+<i>69</i>&nbsp;     * @throws IllegalArgumentException
+<i>70</i>&nbsp;     *          if any import is a local table, or if any but the first is a
+<i>71</i>&nbsp;     *          system table
+<i>72</i>&nbsp;     * @throws NullPointerException
+<i>73</i>&nbsp;     *          if any import is null
+<i>74</i>&nbsp;     */
+<i>75</i>&nbsp;    LocalSymbolTableImports(List&lt;SymbolTable&gt; importTables)
+<b class="fc"><i>76</i>&nbsp;    {</b>
+<b class="fc"><i>77</i>&nbsp;        int importTablesSize = importTables.size();</b>
+<i>78</i>&nbsp;
+<b class="fc"><i>79</i>&nbsp;        myImports = importTables.toArray(new SymbolTable[importTablesSize]);</b>
+<i>80</i>&nbsp;
+<b class="fc"><i>81</i>&nbsp;        myBaseSids = new int[importTablesSize];</b>
+<b class="fc"><i>82</i>&nbsp;        myMaxId = prepBaseSids(myBaseSids, myImports);</b>
+<b class="fc"><i>83</i>&nbsp;    }</b>
+<i>84</i>&nbsp;
+<i>85</i>&nbsp;    /**
+<i>86</i>&nbsp;     * @param defaultSystemSymtab
+<i>87</i>&nbsp;     *          the default system symtab, which will be used if the first
+<i>88</i>&nbsp;     *          import in {@code imports} isn&#39;t a system symtab, never null
+<i>89</i>&nbsp;     * @param imports
+<i>90</i>&nbsp;     *          the set of shared symbol tables to import; the first (and only
+<i>91</i>&nbsp;     *          the first) may be a system table, in which case the
+<i>92</i>&nbsp;     *          {@code defaultSystemSymtab is ignored}
+<i>93</i>&nbsp;     *
+<i>94</i>&nbsp;     * @throws IllegalArgumentException
+<i>95</i>&nbsp;     *          if any import is a local table, or if any but the first is a
+<i>96</i>&nbsp;     *          system table
+<i>97</i>&nbsp;     * @throws NullPointerException
+<i>98</i>&nbsp;     *          if any import is null
+<i>99</i>&nbsp;     */
+<i>100</i>&nbsp;    LocalSymbolTableImports(SymbolTable defaultSystemSymtab,
+<i>101</i>&nbsp;                            SymbolTable... imports)
+<b class="fc"><i>102</i>&nbsp;    {</b>
+<b class="fc"><i>103</i>&nbsp;        assert defaultSystemSymtab.isSystemTable()</b>
+<i>104</i>&nbsp;            : &quot;defaultSystemSymtab isn&#39;t a system symtab&quot;;
+<i>105</i>&nbsp;
+<b class="fc"><i>106</i>&nbsp;        if (imports != null &amp;&amp; imports.length &gt; 0)</b>
+<i>107</i>&nbsp;        {
+<b class="fc"><i>108</i>&nbsp;            if (imports[0].isSystemTable())</b>
+<i>109</i>&nbsp;            {
+<i>110</i>&nbsp;                // copy imports as-is
+<b class="fc"><i>111</i>&nbsp;                myImports = imports.clone();</b>
+<i>112</i>&nbsp;            }
+<i>113</i>&nbsp;            else
+<i>114</i>&nbsp;            {
+<i>115</i>&nbsp;                // use defaultSystemSymtab and append imports
+<b class="fc"><i>116</i>&nbsp;                myImports = new SymbolTable[imports.length + 1];</b>
+<b class="fc"><i>117</i>&nbsp;                myImports[0] = defaultSystemSymtab;</b>
+<b class="fc"><i>118</i>&nbsp;                System.arraycopy(imports, 0, myImports, 1, imports.length);</b>
+<i>119</i>&nbsp;            }
+<i>120</i>&nbsp;        }
+<i>121</i>&nbsp;        else
+<i>122</i>&nbsp;        {
+<i>123</i>&nbsp;            // use defaultSystemSymtab only
+<b class="fc"><i>124</i>&nbsp;            myImports = new SymbolTable[] { defaultSystemSymtab };</b>
+<i>125</i>&nbsp;        }
+<i>126</i>&nbsp;
+<b class="fc"><i>127</i>&nbsp;        myBaseSids = new int[myImports.length];</b>
+<b class="fc"><i>128</i>&nbsp;        myMaxId = prepBaseSids(myBaseSids, myImports);</b>
+<b class="fc"><i>129</i>&nbsp;    }</b>
+<i>130</i>&nbsp;
+<i>131</i>&nbsp;    /**
+<i>132</i>&nbsp;     * Collects the necessary maxId info. from the passed-in {@code imports}
+<i>133</i>&nbsp;     * and populates the {@code baseSids} array.
+<i>134</i>&nbsp;     *
+<i>135</i>&nbsp;     * @return the sum of all imports&#39; maxIds
+<i>136</i>&nbsp;     *
+<i>137</i>&nbsp;     * @throws IllegalArgumentException
+<i>138</i>&nbsp;     *          if any symtab beyond the first is a local or system symtab
+<i>139</i>&nbsp;     */
+<i>140</i>&nbsp;    private static int prepBaseSids(int[] baseSids, SymbolTable[] imports)
+<i>141</i>&nbsp;    {
+<b class="fc"><i>142</i>&nbsp;        SymbolTable firstImport = imports[0];</b>
+<i>143</i>&nbsp;
+<b class="fc"><i>144</i>&nbsp;        assert firstImport.isSystemTable()</b>
+<i>145</i>&nbsp;            : &quot;first symtab must be a system symtab&quot;;
+<i>146</i>&nbsp;
+<b class="fc"><i>147</i>&nbsp;        baseSids[0] = 0;</b>
+<b class="fc"><i>148</i>&nbsp;        int total = firstImport.getMaxId();</b>
+<i>149</i>&nbsp;
+<b class="fc"><i>150</i>&nbsp;        for (int i = 1; i &lt; imports.length; i++)</b>
+<i>151</i>&nbsp;        {
+<b class="fc"><i>152</i>&nbsp;            SymbolTable importedTable = imports[i];</b>
+<i>153</i>&nbsp;
+<b class="fc"><i>154</i>&nbsp;            if (importedTable.isLocalTable() || importedTable.isSystemTable())</b>
+<i>155</i>&nbsp;            {
+<b class="fc"><i>156</i>&nbsp;                String message = &quot;only non-system shared tables can be imported&quot;;</b>
+<b class="fc"><i>157</i>&nbsp;                throw new IllegalArgumentException(message);</b>
+<i>158</i>&nbsp;            }
+<i>159</i>&nbsp;
+<b class="fc"><i>160</i>&nbsp;            baseSids[i] = total;</b>
+<b class="fc"><i>161</i>&nbsp;            total += imports[i].getMaxId();</b>
+<i>162</i>&nbsp;        }
+<i>163</i>&nbsp;
+<b class="fc"><i>164</i>&nbsp;        return total;</b>
+<i>165</i>&nbsp;    }
+<i>166</i>&nbsp;
+<i>167</i>&nbsp;    //==========================================================================
+<i>168</i>&nbsp;
+<i>169</i>&nbsp;    String findKnownSymbol(int sid)
+<i>170</i>&nbsp;    {
+<b class="fc"><i>171</i>&nbsp;        String name = null;</b>
+<i>172</i>&nbsp;
+<b class="fc"><i>173</i>&nbsp;        if (sid &lt;= myMaxId)</b>
+<i>174</i>&nbsp;        {
+<b class="fc"><i>175</i>&nbsp;            int i, previousBaseSid = 0;</b>
+<b class="fc"><i>176</i>&nbsp;            for (i = 1; i &lt; myImports.length; i++)</b>
+<i>177</i>&nbsp;            {
+<b class="fc"><i>178</i>&nbsp;                int baseSid = myBaseSids[i];</b>
+<b class="fc"><i>179</i>&nbsp;                if (sid &lt;= baseSid)</b>
+<i>180</i>&nbsp;                {
+<b class="fc"><i>181</i>&nbsp;                    break;</b>
+<i>182</i>&nbsp;                }
+<b class="fc"><i>183</i>&nbsp;                previousBaseSid = baseSid;</b>
+<i>184</i>&nbsp;            }
+<i>185</i>&nbsp;
+<i>186</i>&nbsp;            // if we run over myImports.length, the sid is in the last symtab
+<b class="fc"><i>187</i>&nbsp;            int importScopedSid = sid - previousBaseSid;</b>
+<b class="fc"><i>188</i>&nbsp;            name = myImports[i-1].findKnownSymbol(importScopedSid);</b>
+<i>189</i>&nbsp;        }
+<i>190</i>&nbsp;
+<b class="fc"><i>191</i>&nbsp;        return name;</b>
+<i>192</i>&nbsp;    }
+<i>193</i>&nbsp;
+<i>194</i>&nbsp;    int findSymbol(String name)
+<i>195</i>&nbsp;    {
+<b class="fc"><i>196</i>&nbsp;        SymbolToken tok = find(name);</b>
+<b class="fc"><i>197</i>&nbsp;        return (tok == null ? UNKNOWN_SYMBOL_ID : tok.getSid());</b>
+<i>198</i>&nbsp;    }
+<i>199</i>&nbsp;
+<i>200</i>&nbsp;    /**
+<i>201</i>&nbsp;     * Finds a symbol already interned by an import, returning the lowest
+<i>202</i>&nbsp;     * known SID.
+<i>203</i>&nbsp;     * &lt;p&gt;
+<i>204</i>&nbsp;     * This method will not necessarily return the same instance given the
+<i>205</i>&nbsp;     * same input.
+<i>206</i>&nbsp;     *
+<i>207</i>&nbsp;     * @param text the symbol text to find
+<i>208</i>&nbsp;     *
+<i>209</i>&nbsp;     * @return
+<i>210</i>&nbsp;     *          the interned symbol (with both text and SID), or {@code null}
+<i>211</i>&nbsp;     *          if it&#39;s not defined by an imported table
+<i>212</i>&nbsp;     */
+<i>213</i>&nbsp;    SymbolToken find(String text)
+<i>214</i>&nbsp;    {
+<b class="fc"><i>215</i>&nbsp;        for (int i = 0; i &lt; myImports.length; i++)</b>
+<i>216</i>&nbsp;        {
+<b class="fc"><i>217</i>&nbsp;            SymbolTable importedTable = myImports[i];</b>
+<b class="fc"><i>218</i>&nbsp;            SymbolToken tok = importedTable.find(text);</b>
+<i>219</i>&nbsp;
+<b class="fc"><i>220</i>&nbsp;            if (tok != null)</b>
+<i>221</i>&nbsp;            {
+<b class="fc"><i>222</i>&nbsp;                int sid = tok.getSid() + myBaseSids[i];</b>
+<b class="fc"><i>223</i>&nbsp;                text = tok.getText(); // Use interned instance</b>
+<i>224</i>&nbsp;
+<b class="fc"><i>225</i>&nbsp;                assert text != null;</b>
+<i>226</i>&nbsp;
+<b class="fc"><i>227</i>&nbsp;                return new SymbolTokenImpl(text, sid);</b>
+<i>228</i>&nbsp;            }
+<i>229</i>&nbsp;        }
+<b class="fc"><i>230</i>&nbsp;        return null;</b>
+<i>231</i>&nbsp;    }
+<i>232</i>&nbsp;
+<i>233</i>&nbsp;    int getMaxId()
+<i>234</i>&nbsp;    {
+<b class="fc"><i>235</i>&nbsp;        return myMaxId;</b>
+<i>236</i>&nbsp;    }
+<i>237</i>&nbsp;
+<i>238</i>&nbsp;    /**
+<i>239</i>&nbsp;     * Gets the sole system symtab.
+<i>240</i>&nbsp;     */
+<i>241</i>&nbsp;    SymbolTable getSystemSymbolTable()
+<i>242</i>&nbsp;    {
+<b class="fc"><i>243</i>&nbsp;        assert myImports[0].isSystemTable();</b>
+<b class="fc"><i>244</i>&nbsp;        return myImports[0];</b>
+<i>245</i>&nbsp;    }
+<i>246</i>&nbsp;
+<i>247</i>&nbsp;    /**
+<i>248</i>&nbsp;     * Gets all non-system shared symtabs (if any).
+<i>249</i>&nbsp;     *
+<i>250</i>&nbsp;     * @return a newly allocated copy of the imported symtabs
+<i>251</i>&nbsp;     */
+<i>252</i>&nbsp;    SymbolTable[] getImportedTables()
+<i>253</i>&nbsp;    {
+<b class="fc"><i>254</i>&nbsp;        int count = myImports.length - 1; // we don&#39;t include system symtab</b>
+<b class="fc"><i>255</i>&nbsp;        SymbolTable[] imports = new SymbolTable[count];</b>
+<b class="fc"><i>256</i>&nbsp;        if (count &gt; 0)</b>
+<i>257</i>&nbsp;        {
+<i>258</i>&nbsp;            // defensive copy
+<b class="fc"><i>259</i>&nbsp;            System.arraycopy(myImports, 1, imports, 0, count);</b>
+<i>260</i>&nbsp;        }
+<b class="fc"><i>261</i>&nbsp;        return imports;</b>
+<i>262</i>&nbsp;    }
+<i>263</i>&nbsp;
+<i>264</i>&nbsp;    /**
+<i>265</i>&nbsp;     * Returns the {@link #myImports} member field without making a copy.
+<i>266</i>&nbsp;     * &lt;p&gt;
+<i>267</i>&nbsp;     * &lt;b&gt;Note:&lt;/b&gt; Callers must not modify the resulting SymbolTable array!
+<i>268</i>&nbsp;     * This will violate the immutability property of this class.
+<i>269</i>&nbsp;     *
+<i>270</i>&nbsp;     * @return
+<i>271</i>&nbsp;     *          the backing array of imported symtabs, as-is; the first element
+<i>272</i>&nbsp;     *          is a system symtab, the rest are non-system shared symtabs
+<i>273</i>&nbsp;     *
+<i>274</i>&nbsp;     * @see #getImportedTables()
+<i>275</i>&nbsp;     */
+<i>276</i>&nbsp;    SymbolTable[] getImportedTablesNoCopy()
+<i>277</i>&nbsp;    {
+<b class="fc"><i>278</i>&nbsp;        return myImports;</b>
+<i>279</i>&nbsp;    }
+<i>280</i>&nbsp;
+<i>281</i>&nbsp;    @Override
+<i>282</i>&nbsp;    public String toString()
+<i>283</i>&nbsp;    {
+<b class="nc"><i>284</i>&nbsp;        return Arrays.toString(myImports);</b>
+<i>285</i>&nbsp;    }
+<i>286</i>&nbsp;
+<i>287</i>&nbsp;    /**
+<i>288</i>&nbsp;     * Determines whether the passed-in instance has the same sequence of
+<i>289</i>&nbsp;     * symbol table imports as this instance. Note that equality of these
+<i>290</i>&nbsp;     * imports are checked using their reference, instead of their semantic
+<i>291</i>&nbsp;     * state.
+<i>292</i>&nbsp;     */
+<i>293</i>&nbsp;    boolean equalImports(LocalSymbolTableImports other)
+<i>294</i>&nbsp;    {
+<b class="fc"><i>295</i>&nbsp;        return Arrays.equals(myImports, other.myImports);</b>
+<i>296</i>&nbsp;    }
+<i>297</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

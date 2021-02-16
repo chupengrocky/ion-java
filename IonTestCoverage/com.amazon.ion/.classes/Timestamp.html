@@ -1,0 +1,3000 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: Timestamp</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: Timestamp (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Timestamp</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.1%
+  </span>
+  <span class="absValue">
+    (98/ 102)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.5%
+  </span>
+  <span class="absValue">
+    (681/ 706)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Timestamp$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">Timestamp$Precision</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/ 5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94.4%
+  </span>
+  <span class="absValue">
+    (17/ 18)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    96.3%
+  </span>
+  <span class="absValue">
+    (104/ 108)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.4%
+  </span>
+  <span class="absValue">
+    (699/ 725)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.impl._Private_Utils.safeEquals;
+<i>19</i>&nbsp;import static com.amazon.ion.util.IonTextUtils.printCodePointAsString;
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;import com.amazon.ion.impl._Private_Utils;
+<i>22</i>&nbsp;import com.amazon.ion.util.IonTextUtils;
+<i>23</i>&nbsp;import java.io.IOException;
+<i>24</i>&nbsp;import java.math.BigDecimal;
+<i>25</i>&nbsp;import java.math.RoundingMode;
+<i>26</i>&nbsp;import java.util.Calendar;
+<i>27</i>&nbsp;import java.util.Date;
+<i>28</i>&nbsp;import java.util.GregorianCalendar;
+<i>29</i>&nbsp;
+<i>30</i>&nbsp;/**
+<i>31</i>&nbsp; * An immutable representation of a point in time. Ion defines a simple
+<i>32</i>&nbsp; * representation of time based on Coordinated Universal Time (UTC).
+<i>33</i>&nbsp; * In practice the use of time could be more accurately described as
+<i>34</i>&nbsp; * UTC-SLS (UTC Smoothed Leap Seconds) as there is no representation for the
+<i>35</i>&nbsp; * leap second discontinuities that UTC has added.
+<i>36</i>&nbsp; * &lt;p&gt;
+<i>37</i>&nbsp; * Timestamps preserve precision, meaning the fields that are included, and the
+<i>38</i>&nbsp; * significant digits of any fractional second.  Only common break
+<i>39</i>&nbsp; * points in the values are supported.  Any unspecified fields are handled
+<i>40</i>&nbsp; * as the start of the new year/month/day.
+<i>41</i>&nbsp; *
+<i>42</i>&nbsp; *
+<i>43</i>&nbsp; * &lt;h3&gt;Equality and Comparison&lt;/h3&gt;
+<i>44</i>&nbsp; *
+<i>45</i>&nbsp; * As with {@link IonValue} classes, the {@link #equals equals} methods on this class
+<i>46</i>&nbsp; * perform a strict equivalence that observes the precision and local offset
+<i>47</i>&nbsp; * of each timestamp.
+<i>48</i>&nbsp; * This means that it&#39;s possible to have two {@link Timestamp} instances that
+<i>49</i>&nbsp; * represent the same point in time but are not {@code equals}.
+<i>50</i>&nbsp; * &lt;p&gt;
+<i>51</i>&nbsp; * On the other hand, the {@link #compareTo} methods perform point in time
+<i>52</i>&nbsp; * comparison, ignoring precision and local offset.
+<i>53</i>&nbsp; * Thus the &lt;em&gt;natural comparison method&lt;/em&gt; of this class is &lt;em&gt;not
+<i>54</i>&nbsp; * consistent with equals&lt;/em&gt;. See the documentation of {@link Comparable} for
+<i>55</i>&nbsp; * further discussion.
+<i>56</i>&nbsp; * &lt;p&gt;
+<i>57</i>&nbsp; * To illustrate this distinction, consider the following timestamps. None are
+<i>58</i>&nbsp; * {@link #equals} to each other, but any pair will return a zero result from
+<i>59</i>&nbsp; * {@link #compareTo}.
+<i>60</i>&nbsp; * &lt;ul&gt;
+<i>61</i>&nbsp; *   &lt;li&gt;{@code 2009T}&lt;/li&gt;
+<i>62</i>&nbsp; *   &lt;li&gt;{@code 2009-01T}&lt;/li&gt;
+<i>63</i>&nbsp; *   &lt;li&gt;{@code 2009-01-01T}&lt;/li&gt;
+<i>64</i>&nbsp; *   &lt;li&gt;{@code 2009-01-01T00:00Z}&lt;/li&gt;
+<i>65</i>&nbsp; *   &lt;li&gt;{@code 2009-01-01T00:00:00Z}&lt;/li&gt;
+<i>66</i>&nbsp; *   &lt;li&gt;{@code 2009-01-01T00:00:00.0Z}&lt;/li&gt;
+<i>67</i>&nbsp; *   &lt;li&gt;{@code 2009-01-01T00:00:00.00Z}&lt;/li&gt;
+<i>68</i>&nbsp; *   &lt;li&gt;{@code 2009-01-01T00:00:00.000Z} &lt;em&gt;etc.&lt;/em&gt;&lt;/li&gt;
+<i>69</i>&nbsp; * &lt;/ul&gt;
+<i>70</i>&nbsp; *
+<i>71</i>&nbsp; * @see #equals(Timestamp)
+<i>72</i>&nbsp; * @see #compareTo(Timestamp)
+<i>73</i>&nbsp; */
+<b class="fc"><i>74</i>&nbsp;public final class Timestamp</b>
+<i>75</i>&nbsp;    implements Comparable&lt;Timestamp&gt;, Cloneable
+<i>76</i>&nbsp;{
+<i>77</i>&nbsp;    private static final boolean APPLY_OFFSET_YES = true;
+<i>78</i>&nbsp;    private static final boolean APPLY_OFFSET_NO = false;
+<i>79</i>&nbsp;
+<i>80</i>&nbsp;    private static final int NO_MONTH = 0;
+<i>81</i>&nbsp;    private static final int NO_DAY = 0;
+<i>82</i>&nbsp;    private static final int NO_HOURS = 0;
+<i>83</i>&nbsp;    private static final int NO_MINUTES = 0;
+<i>84</i>&nbsp;    private static final int NO_SECONDS = 0;
+<b class="fc"><i>85</i>&nbsp;    private static final BigDecimal NO_FRACTIONAL_SECONDS = null;</b>
+<i>86</i>&nbsp;
+<i>87</i>&nbsp;    /**
+<i>88</i>&nbsp;     * 0001-01-01T00:00:00.0Z in millis.
+<i>89</i>&nbsp;     */
+<i>90</i>&nbsp;    static final long MINIMUM_TIMESTAMP_IN_MILLIS = -62135769600000L;
+<i>91</i>&nbsp;
+<i>92</i>&nbsp;    /**
+<i>93</i>&nbsp;     * 0001-01-01T00:00:00.0Z in millis.
+<i>94</i>&nbsp;     */
+<b class="fc"><i>95</i>&nbsp;    static final BigDecimal MINIMUM_TIMESTAMP_IN_MILLIS_DECIMAL = new BigDecimal(MINIMUM_TIMESTAMP_IN_MILLIS);</b>
+<i>96</i>&nbsp;
+<i>97</i>&nbsp;    /**
+<i>98</i>&nbsp;     * 10000T in millis, upper bound exclusive.
+<i>99</i>&nbsp;     */
+<i>100</i>&nbsp;    static final long MAXIMUM_TIMESTAMP_IN_MILLIS = 253402300800000L;
+<i>101</i>&nbsp;
+<i>102</i>&nbsp;    /**
+<i>103</i>&nbsp;     * 10000T in millis, upper bound exclusive.
+<i>104</i>&nbsp;     */
+<b class="fc"><i>105</i>&nbsp;    static final BigDecimal MAXIMUM_ALLOWED_TIMESTAMP_IN_MILLIS_DECIMAL = new BigDecimal(MAXIMUM_TIMESTAMP_IN_MILLIS);</b>
+<i>106</i>&nbsp;
+<i>107</i>&nbsp;
+<i>108</i>&nbsp;    /**
+<i>109</i>&nbsp;     * 0001-01-01T00:00:00.0Z epoch seconds.
+<i>110</i>&nbsp;     */
+<i>111</i>&nbsp;    static final long MINIMUM_TIMESTAMP_IN_EPOCH_SECONDS = MINIMUM_TIMESTAMP_IN_MILLIS / 1000;
+<i>112</i>&nbsp;
+<i>113</i>&nbsp;    /**
+<i>114</i>&nbsp;     * 10000T in epoch seconds, upper bound exclusive.
+<i>115</i>&nbsp;     */
+<i>116</i>&nbsp;    static final long MAXIMUM_TIMESTAMP_IN_EPOCH_SECONDS = MAXIMUM_TIMESTAMP_IN_MILLIS / 1000;
+<i>117</i>&nbsp;
+<i>118</i>&nbsp;    /**
+<i>119</i>&nbsp;     * Unknown local offset from UTC.
+<i>120</i>&nbsp;     */
+<b class="fc"><i>121</i>&nbsp;    public static final Integer UNKNOWN_OFFSET = null;</b>
+<i>122</i>&nbsp;
+<i>123</i>&nbsp;    /**
+<i>124</i>&nbsp;     * Local offset of zero hours from UTC.
+<i>125</i>&nbsp;     */
+<b class="fc"><i>126</i>&nbsp;    public static final Integer UTC_OFFSET = Integer.valueOf(0);</b>
+<i>127</i>&nbsp;
+<i>128</i>&nbsp;    private static final int FLAG_YEAR      = 0x01;
+<i>129</i>&nbsp;    private static final int FLAG_MONTH     = 0x02;
+<i>130</i>&nbsp;    private static final int FLAG_DAY       = 0x04;
+<i>131</i>&nbsp;    private static final int FLAG_MINUTE    = 0x08;
+<i>132</i>&nbsp;    private static final int FLAG_SECOND    = 0x10;
+<i>133</i>&nbsp;
+<i>134</i>&nbsp;    /**
+<i>135</i>&nbsp;     * The precision of the Timestamp.
+<i>136</i>&nbsp;     */
+<b class="fc"><i>137</i>&nbsp;    public static enum Precision {</b>
+<b class="fc"><i>138</i>&nbsp;        YEAR    (FLAG_YEAR),</b>
+<b class="fc"><i>139</i>&nbsp;        MONTH   (FLAG_YEAR | FLAG_MONTH),</b>
+<b class="fc"><i>140</i>&nbsp;        DAY     (FLAG_YEAR | FLAG_MONTH | FLAG_DAY),</b>
+<i>141</i>&nbsp;        // HOUR is not a supported precision per https://www.w3.org/TR/NOTE-datetime
+<b class="fc"><i>142</i>&nbsp;        MINUTE  (FLAG_YEAR | FLAG_MONTH | FLAG_DAY | FLAG_MINUTE),</b>
+<b class="fc"><i>143</i>&nbsp;        SECOND  (FLAG_YEAR | FLAG_MONTH | FLAG_DAY | FLAG_MINUTE | FLAG_SECOND),</b>
+<i>144</i>&nbsp;
+<i>145</i>&nbsp;        /**
+<i>146</i>&nbsp;         * DEPRECATED! Treating the fractional part of seconds separate from
+<i>147</i>&nbsp;         * the integer part has led to countless bugs. We intend to combine
+<i>148</i>&nbsp;         * the two under the SECOND precision.
+<i>149</i>&nbsp;         *
+<i>150</i>&nbsp;         */
+<b class="fc"><i>151</i>&nbsp;        @Deprecated</b>
+<i>152</i>&nbsp;        FRACTION(FLAG_YEAR | FLAG_MONTH | FLAG_DAY | FLAG_MINUTE | FLAG_SECOND);
+<i>153</i>&nbsp;
+<i>154</i>&nbsp;        /** Bit flags for the precision. */
+<i>155</i>&nbsp;        private final int flags;
+<i>156</i>&nbsp;
+<i>157</i>&nbsp;        private Precision(int flags)
+<b class="fc"><i>158</i>&nbsp;        {</b>
+<b class="fc"><i>159</i>&nbsp;            this.flags = flags;</b>
+<b class="fc"><i>160</i>&nbsp;        }</b>
+<i>161</i>&nbsp;
+<i>162</i>&nbsp;        public boolean includes(Precision isIncluded)
+<i>163</i>&nbsp;        {
+<b class="fc"><i>164</i>&nbsp;            switch (isIncluded)</b>
+<i>165</i>&nbsp;            {
+<i>166</i>&nbsp;                case FRACTION:
+<b class="fc"><i>167</i>&nbsp;                case SECOND:    return (flags &amp; FLAG_SECOND)   != 0;</b>
+<b class="fc"><i>168</i>&nbsp;                case MINUTE:    return (flags &amp; FLAG_MINUTE)   != 0;</b>
+<b class="fc"><i>169</i>&nbsp;                case DAY:       return (flags &amp; FLAG_DAY)      != 0;</b>
+<b class="fc"><i>170</i>&nbsp;                case MONTH:     return (flags &amp; FLAG_MONTH)    != 0;</b>
+<b class="fc"><i>171</i>&nbsp;                case YEAR:      return (flags &amp; FLAG_YEAR)     != 0;</b>
+<i>172</i>&nbsp;                default:        break;
+<i>173</i>&nbsp;            }
+<b class="nc"><i>174</i>&nbsp;            throw new IllegalStateException(&quot;unrecognized precision&quot; + isIncluded);</b>
+<i>175</i>&nbsp;        }
+<i>176</i>&nbsp;
+<i>177</i>&nbsp;        private boolean alwaysUnknownOffset()
+<i>178</i>&nbsp;        {
+<b class="fc"><i>179</i>&nbsp;            return this.ordinal() &lt;= DAY.ordinal();</b>
+<i>180</i>&nbsp;        }
+<i>181</i>&nbsp;    }
+<i>182</i>&nbsp;
+<b class="fc"><i>183</i>&nbsp;    private static final int HASH_SIGNATURE =</b>
+<b class="fc"><i>184</i>&nbsp;        &quot;INTERNAL TIMESTAMP&quot;.hashCode();</b>
+<i>185</i>&nbsp;
+<i>186</i>&nbsp;    /**
+<i>187</i>&nbsp;     * The precision of the Timestamp. The fractional seconds component is
+<i>188</i>&nbsp;     * defined by a BigDecimal.
+<i>189</i>&nbsp;     * &lt;p&gt;
+<i>190</i>&nbsp;     * During construction of all Timestamps, they will have a
+<i>191</i>&nbsp;     * date value (i.e. Year, Month, Day) but with reduced precision they may
+<i>192</i>&nbsp;     * exclude any time values that are more precise than the precision that is
+<i>193</i>&nbsp;     * being defined.
+<i>194</i>&nbsp;     */
+<i>195</i>&nbsp;    private Precision   _precision;
+<i>196</i>&nbsp;
+<i>197</i>&nbsp;    // These are the time field values for the Timestamp.
+<i>198</i>&nbsp;    // _month and _day are 1-based (0 is an invalid value for
+<i>199</i>&nbsp;    // these in a non-null Timestamp).
+<i>200</i>&nbsp;    private short       _year;
+<b class="fc"><i>201</i>&nbsp;    private byte        _month = 1; // Initialized to valid default</b>
+<b class="fc"><i>202</i>&nbsp;    private byte        _day   = 1; // Initialized to valid default</b>
+<i>203</i>&nbsp;    private byte        _hour;
+<i>204</i>&nbsp;    private byte        _minute;
+<i>205</i>&nbsp;    private byte        _second;
+<i>206</i>&nbsp;    private BigDecimal  _fraction;  // fractional seconds, must be within range [0, 1)
+<i>207</i>&nbsp;
+<i>208</i>&nbsp;    /**
+<i>209</i>&nbsp;     * Minutes offset from UTC; zero means UTC proper,
+<i>210</i>&nbsp;     * &lt;code&gt;null&lt;/code&gt; means that the offset is unknown.
+<i>211</i>&nbsp;     */
+<i>212</i>&nbsp;    private Integer     _offset;
+<i>213</i>&nbsp;
+<i>214</i>&nbsp;                                                      //   jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec
+<i>215</i>&nbsp;                                                      // the first 0 is to make these arrays 1 based (since month values are 1-12)
+<b class="fc"><i>216</i>&nbsp;    private static final int[] LEAP_DAYS_IN_MONTH   = { 0,  31,  29,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };</b>
+<b class="fc"><i>217</i>&nbsp;    private static final int[] NORMAL_DAYS_IN_MONTH = { 0,  31,  28,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };</b>
+<i>218</i>&nbsp;
+<i>219</i>&nbsp;    private static int last_day_in_month(int year, int month) {
+<i>220</i>&nbsp;        boolean is_leap;
+<b class="fc"><i>221</i>&nbsp;        if ((year % 4) == 0) {</b>
+<i>222</i>&nbsp;            // divisible by 4 (lower 2 bits are zero) - may be a leap year
+<b class="fc"><i>223</i>&nbsp;            if ((year % 100) == 0) {</b>
+<i>224</i>&nbsp;                // and divisible by 100 - not a leap year
+<b class="fc"><i>225</i>&nbsp;                if ((year % 400) == 0) {</b>
+<i>226</i>&nbsp;                    // but divisible by 400 - then it is a leap year
+<b class="fc"><i>227</i>&nbsp;                    is_leap = true;</b>
+<i>228</i>&nbsp;                }
+<i>229</i>&nbsp;                else {
+<b class="fc"><i>230</i>&nbsp;                    is_leap = false;</b>
+<i>231</i>&nbsp;                }
+<i>232</i>&nbsp;            }
+<i>233</i>&nbsp;            else {
+<b class="fc"><i>234</i>&nbsp;                is_leap = true;</b>
+<i>235</i>&nbsp;            }
+<i>236</i>&nbsp;        }
+<i>237</i>&nbsp;        else {
+<b class="fc"><i>238</i>&nbsp;            is_leap = false;</b>
+<i>239</i>&nbsp;        }
+<b class="fc"><i>240</i>&nbsp;        return is_leap ? LEAP_DAYS_IN_MONTH[month] : NORMAL_DAYS_IN_MONTH[month];</b>
+<i>241</i>&nbsp;    }
+<i>242</i>&nbsp;
+<i>243</i>&nbsp;    /**
+<i>244</i>&nbsp;     * Applies the local time zone offset from UTC to the applicable time field
+<i>245</i>&nbsp;     * values. Depending on the local time zone offset, adjustments
+<i>246</i>&nbsp;     * (i.e. rollover) will be made to the Year, Day, Hour, Minute time field
+<i>247</i>&nbsp;     * values.
+<i>248</i>&nbsp;     *
+<i>249</i>&nbsp;     * @param offset the local offset, in minutes from UTC.
+<i>250</i>&nbsp;     */
+<i>251</i>&nbsp;    private void apply_offset(int offset)
+<i>252</i>&nbsp;    {
+<b class="fc"><i>253</i>&nbsp;        if (offset == 0) return;</b>
+<b class="fc"><i>254</i>&nbsp;        if (offset &lt; -24*60 || offset &gt; 24*60) {</b>
+<b class="nc"><i>255</i>&nbsp;            throw new IllegalArgumentException(&quot;bad offset &quot; + offset);</b>
+<i>256</i>&nbsp;        }
+<i>257</i>&nbsp;        // To convert _to_ UTC you must SUBTRACT the local offset
+<b class="fc"><i>258</i>&nbsp;        offset = -offset;</b>
+<b class="fc"><i>259</i>&nbsp;        int hour_offset = offset / 60;</b>
+<b class="fc"><i>260</i>&nbsp;        int min_offset = offset - (hour_offset * 60);</b>
+<i>261</i>&nbsp;
+<b class="fc"><i>262</i>&nbsp;        if (offset &lt; 0) {</b>
+<b class="fc"><i>263</i>&nbsp;            _minute += min_offset;  // lower the minute value by adding a negative offset</b>
+<b class="fc"><i>264</i>&nbsp;            _hour += hour_offset;</b>
+<b class="fc"><i>265</i>&nbsp;            if (_minute &lt; 0) {</b>
+<b class="fc"><i>266</i>&nbsp;                _minute += 60;</b>
+<b class="fc"><i>267</i>&nbsp;                _hour -= 1;</b>
+<i>268</i>&nbsp;            }
+<b class="fc"><i>269</i>&nbsp;            if (_hour &gt;= 0) return;  // hour is 0-23</b>
+<b class="fc"><i>270</i>&nbsp;            _hour += 24;</b>
+<b class="fc"><i>271</i>&nbsp;            _day -= 1;</b>
+<b class="fc"><i>272</i>&nbsp;            if (_day &gt;= 1) return;  // day is 1-31</b>
+<i>273</i>&nbsp;            // we can&#39;t do this until we&#39;ve figured out the month and year: _day += last_day_in_month(_year, _month);
+<b class="fc"><i>274</i>&nbsp;            _month -= 1;</b>
+<b class="fc"><i>275</i>&nbsp;            if (_month &gt;= 1) {</b>
+<b class="fc"><i>276</i>&nbsp;                _day += last_day_in_month(_year, _month);  // now we know (when the year doesn&#39;t change</b>
+<b class="fc"><i>277</i>&nbsp;                assert(_day == last_day_in_month(_year, _month));</b>
+<b class="fc"><i>278</i>&nbsp;                return;  // 1-12</b>
+<i>279</i>&nbsp;            }
+<b class="fc"><i>280</i>&nbsp;            _month += 12;</b>
+<b class="fc"><i>281</i>&nbsp;            _year -= 1;</b>
+<b class="fc"><i>282</i>&nbsp;            if (_year &lt; 1) throw new IllegalArgumentException(&quot;year is less than 1&quot;);</b>
+<b class="fc"><i>283</i>&nbsp;            _day += last_day_in_month(_year, _month);  // and now we know, even if the year did change</b>
+<b class="fc"><i>284</i>&nbsp;            assert(_day == last_day_in_month(_year, _month));</b>
+<i>285</i>&nbsp;        }
+<i>286</i>&nbsp;        else {
+<b class="fc"><i>287</i>&nbsp;            _minute += min_offset;  // lower the minute value by adding a negative offset</b>
+<b class="fc"><i>288</i>&nbsp;            _hour += hour_offset;</b>
+<b class="fc"><i>289</i>&nbsp;            if (_minute &gt; 59) {</b>
+<b class="fc"><i>290</i>&nbsp;                _minute -= 60;</b>
+<b class="fc"><i>291</i>&nbsp;                _hour += 1;</b>
+<i>292</i>&nbsp;            }
+<b class="fc"><i>293</i>&nbsp;            if (_hour &lt; 24) return;  // hour is 0-23</b>
+<b class="fc"><i>294</i>&nbsp;            _hour -= 24;</b>
+<b class="fc"><i>295</i>&nbsp;            _day += 1;</b>
+<b class="fc"><i>296</i>&nbsp;            if (_day &lt;= last_day_in_month(_year, _month)) return;  // day is 1-31</b>
+<i>297</i>&nbsp;            // we can&#39;t do this until we figure out the final month and year: _day -= last_day_in_month(_year, _month);
+<b class="fc"><i>298</i>&nbsp;            _day = 1; // this is always the case</b>
+<b class="fc"><i>299</i>&nbsp;            _month += 1;</b>
+<b class="fc"><i>300</i>&nbsp;            if (_month &lt;= 12) {</b>
+<b class="fc"><i>301</i>&nbsp;                return;  // 1-12</b>
+<i>302</i>&nbsp;            }
+<b class="fc"><i>303</i>&nbsp;            _month -= 12;</b>
+<b class="fc"><i>304</i>&nbsp;            _year += 1;</b>
+<b class="fc"><i>305</i>&nbsp;            if (_year &gt; 9999) throw new IllegalArgumentException(&quot;year exceeds 9999&quot;);</b>
+<i>306</i>&nbsp;        }
+<b class="fc"><i>307</i>&nbsp;    }</b>
+<i>308</i>&nbsp;
+<i>309</i>&nbsp;    private static byte requireByte(int value, String location) {
+<b class="fc"><i>310</i>&nbsp;        if (value &gt; Byte.MAX_VALUE || value &lt; Byte.MIN_VALUE) {</b>
+<b class="nc"><i>311</i>&nbsp;            throw new IllegalArgumentException(String.format(&quot;%s of %d is out of range.&quot;, location, value));</b>
+<i>312</i>&nbsp;        }
+<b class="fc"><i>313</i>&nbsp;        return (byte) value;</b>
+<i>314</i>&nbsp;    }
+<i>315</i>&nbsp;
+<i>316</i>&nbsp;    private static short requireShort(int value, String location) {
+<b class="fc"><i>317</i>&nbsp;        if (value &gt; Short.MAX_VALUE || value &lt; Short.MIN_VALUE) {</b>
+<b class="nc"><i>318</i>&nbsp;            throw new IllegalArgumentException(String.format(&quot;%s of %d is out of range.&quot;, location, value));</b>
+<i>319</i>&nbsp;        }
+<b class="fc"><i>320</i>&nbsp;        return (short) value;</b>
+<i>321</i>&nbsp;    }
+<i>322</i>&nbsp;
+<i>323</i>&nbsp;    /**
+<i>324</i>&nbsp;     * This method uses deprecated methods from {@link java.util.Date}
+<i>325</i>&nbsp;     * instead of {@link Calendar} so that this code can be used (more easily)
+<i>326</i>&nbsp;     * on the mobile Java platform (which has Date but does not have Calendar).
+<i>327</i>&nbsp;     */
+<i>328</i>&nbsp;    @SuppressWarnings(&quot;deprecation&quot;)
+<i>329</i>&nbsp;    private void set_fields_from_millis(long millis)
+<i>330</i>&nbsp;    {
+<b class="fc"><i>331</i>&nbsp;        if(millis &lt; MINIMUM_TIMESTAMP_IN_MILLIS){</b>
+<b class="nc"><i>332</i>&nbsp;            throw new IllegalArgumentException(&quot;year is less than 1&quot;);</b>
+<i>333</i>&nbsp;        }
+<i>334</i>&nbsp;
+<b class="fc"><i>335</i>&nbsp;        Date date = new Date(millis);</b>
+<i>336</i>&nbsp;
+<i>337</i>&nbsp;        // The Date getters return values in the Date&#39;s time zone (i.e. the system time zone).
+<i>338</i>&nbsp;        // The components need to be converted to UTC before being validated for exact ranges, because the offset
+<i>339</i>&nbsp;        // conversion can affect which values are considered valid. Simply verify that the values can fit in the
+<i>340</i>&nbsp;        // destination type here. If they do not, they would be out of range no matter the offset.
+<b class="fc"><i>341</i>&nbsp;        _minute = requireByte(date.getMinutes(), &quot;Minute&quot;);</b>
+<b class="fc"><i>342</i>&nbsp;        _second = requireByte(date.getSeconds(), &quot;Second&quot;);</b>
+<b class="fc"><i>343</i>&nbsp;        _hour = requireByte(date.getHours(), &quot;Hour&quot;);</b>
+<b class="fc"><i>344</i>&nbsp;        _day = requireByte(date.getDate(), &quot;Day&quot;);</b>
+<b class="fc"><i>345</i>&nbsp;        _month = requireByte(date.getMonth() + 1, &quot;Month&quot;);</b>
+<i>346</i>&nbsp;
+<i>347</i>&nbsp;        // Date does not correctly handle year values that represent year 0 or earlier in the system time zone through
+<i>348</i>&nbsp;        // getYear(). This case is detected and forced to zero.
+<b class="fc"><i>349</i>&nbsp;        int offset = -date.getTimezoneOffset();</b>
+<b class="fc"><i>350</i>&nbsp;        if(offset &lt; 0 &amp;&amp; MINIMUM_TIMESTAMP_IN_MILLIS - offset &gt; millis) {</b>
+<b class="fc"><i>351</i>&nbsp;            _year = 0;</b>
+<i>352</i>&nbsp;        } else {
+<b class="fc"><i>353</i>&nbsp;            _year = requireShort(date.getYear() + 1900, &quot;Year&quot;);</b>
+<i>354</i>&nbsp;        }
+<i>355</i>&nbsp;
+<i>356</i>&nbsp;        // Now apply the offset to convert the components to UTC.
+<b class="fc"><i>357</i>&nbsp;        apply_offset(offset);</b>
+<i>358</i>&nbsp;
+<i>359</i>&nbsp;        // Now that all components are in UTC, they may be validated for exact ranges.
+<b class="fc"><i>360</i>&nbsp;        this._year    = checkAndCastYear(_year);</b>
+<b class="fc"><i>361</i>&nbsp;        this._month   = checkAndCastMonth(_month);</b>
+<b class="fc"><i>362</i>&nbsp;        this._day     = checkAndCastDay(_day, _year, _month);</b>
+<b class="fc"><i>363</i>&nbsp;        this._hour    = checkAndCastHour(_hour);</b>
+<b class="fc"><i>364</i>&nbsp;        this._minute  = checkAndCastMinute(_minute);</b>
+<b class="fc"><i>365</i>&nbsp;        this._second  = checkAndCastSecond(_second);</b>
+<b class="fc"><i>366</i>&nbsp;    }</b>
+<i>367</i>&nbsp;
+<i>368</i>&nbsp;    /**
+<i>369</i>&nbsp;     * Copies data from a {@link Calendar} into this timestamp.
+<i>370</i>&nbsp;     * Must only be called during construction due to timestamp immutabliity.
+<i>371</i>&nbsp;     *
+<i>372</i>&nbsp;     * @param cal must have at least one field set.
+<i>373</i>&nbsp;     *
+<i>374</i>&nbsp;     * @throws IllegalArgumentException if the calendar has no fields set.
+<i>375</i>&nbsp;     */
+<i>376</i>&nbsp;    private void set_fields_from_calendar(Calendar cal,
+<i>377</i>&nbsp;                                          Precision precision,
+<i>378</i>&nbsp;                                          boolean setLocalOffset)
+<i>379</i>&nbsp;    {
+<b class="fc"><i>380</i>&nbsp;        _precision = precision;</b>
+<b class="fc"><i>381</i>&nbsp;        _offset = UNKNOWN_OFFSET;</b>
+<b class="fc"><i>382</i>&nbsp;        boolean dayPrecision = false;</b>
+<b class="fc"><i>383</i>&nbsp;        boolean calendarHasMilliseconds = cal.isSet(Calendar.MILLISECOND);</b>
+<i>384</i>&nbsp;
+<b class="fc"><i>385</i>&nbsp;        switch (this._precision) {</b>
+<i>386</i>&nbsp;            case FRACTION:
+<i>387</i>&nbsp;            case SECOND:
+<b class="fc"><i>388</i>&nbsp;                this._second = checkAndCastSecond(cal.get(Calendar.SECOND));</b>
+<b class="fc"><i>389</i>&nbsp;                if (calendarHasMilliseconds) {</b>
+<b class="fc"><i>390</i>&nbsp;                    BigDecimal millis = BigDecimal.valueOf(cal.get(Calendar.MILLISECOND));</b>
+<b class="fc"><i>391</i>&nbsp;                    this._fraction = millis.movePointLeft(3); // convert to fraction</b>
+<b class="fc"><i>392</i>&nbsp;                    checkFraction(precision, this._fraction);</b>
+<i>393</i>&nbsp;                }
+<i>394</i>&nbsp;            case MINUTE:
+<i>395</i>&nbsp;            {
+<b class="fc"><i>396</i>&nbsp;                this._hour   = checkAndCastHour(cal.get(Calendar.HOUR_OF_DAY));</b>
+<b class="fc"><i>397</i>&nbsp;                this._minute = checkAndCastMinute(cal.get(Calendar.MINUTE));</b>
+<i>398</i>&nbsp;
+<i>399</i>&nbsp;                // If this test is made before calling get(), it will return
+<i>400</i>&nbsp;                // false even when Calendar.setTimeZone() was called.
+<b class="fc"><i>401</i>&nbsp;                if (setLocalOffset &amp;&amp; cal.isSet(Calendar.ZONE_OFFSET))</b>
+<i>402</i>&nbsp;                {
+<b class="fc"><i>403</i>&nbsp;                    int offset = cal.get(Calendar.ZONE_OFFSET);</b>
+<b class="fc"><i>404</i>&nbsp;                    if (cal.isSet(Calendar.DST_OFFSET)) {</b>
+<b class="fc"><i>405</i>&nbsp;                        offset += cal.get(Calendar.DST_OFFSET);</b>
+<i>406</i>&nbsp;                    }
+<i>407</i>&nbsp;
+<i>408</i>&nbsp;                    // convert ms to minutes
+<b class="fc"><i>409</i>&nbsp;                    _offset = offset / (1000*60);</b>
+<i>410</i>&nbsp;                }
+<i>411</i>&nbsp;            }
+<i>412</i>&nbsp;            case DAY:
+<b class="fc"><i>413</i>&nbsp;                dayPrecision = true;</b>
+<i>414</i>&nbsp;            case MONTH:
+<i>415</i>&nbsp;                // Calendar months are 0 based, Timestamp months are 1 based
+<b class="fc"><i>416</i>&nbsp;                this._month  = checkAndCastMonth((cal.get(Calendar.MONTH) + 1));</b>
+<i>417</i>&nbsp;            case YEAR:
+<i>418</i>&nbsp;                int year;
+<b class="fc"><i>419</i>&nbsp;                if(cal.get(Calendar.ERA) == GregorianCalendar.AD) {</b>
+<b class="fc"><i>420</i>&nbsp;                    year = cal.get(Calendar.YEAR);</b>
+<i>421</i>&nbsp;                }
+<i>422</i>&nbsp;                else {
+<b class="fc"><i>423</i>&nbsp;                    year = -cal.get(Calendar.YEAR);</b>
+<i>424</i>&nbsp;                }
+<i>425</i>&nbsp;
+<b class="fc"><i>426</i>&nbsp;                this._year = checkAndCastYear(year);</b>
+<i>427</i>&nbsp;        }
+<i>428</i>&nbsp;
+<b class="fc"><i>429</i>&nbsp;        if (dayPrecision)</b>
+<i>430</i>&nbsp;        {
+<b class="fc"><i>431</i>&nbsp;            this._day = checkAndCastDay(cal.get(Calendar.DAY_OF_MONTH), _year, _month);</b>
+<i>432</i>&nbsp;        }
+<i>433</i>&nbsp;
+<b class="fc"><i>434</i>&nbsp;        if (_offset != UNKNOWN_OFFSET) {</b>
+<i>435</i>&nbsp;            // Transform our members from local time to Zulu
+<b class="fc"><i>436</i>&nbsp;            this.apply_offset(_offset);</b>
+<i>437</i>&nbsp;        }
+<b class="fc"><i>438</i>&nbsp;    }</b>
+<i>439</i>&nbsp;
+<i>440</i>&nbsp;    /**
+<i>441</i>&nbsp;     * Creates a new Timestamp, precise to the year, with unknown local offset.
+<i>442</i>&nbsp;     * &lt;p&gt;
+<i>443</i>&nbsp;     * This is equivalent to the corresponding Ion value {@code YYYYT}.
+<i>444</i>&nbsp;     */
+<i>445</i>&nbsp;    private Timestamp(int zyear)
+<i>446</i>&nbsp;    {
+<b class="fc"><i>447</i>&nbsp;        this(Precision.YEAR, zyear, NO_MONTH, NO_DAY, NO_HOURS, NO_MINUTES, NO_SECONDS, NO_FRACTIONAL_SECONDS, UNKNOWN_OFFSET, APPLY_OFFSET_NO);</b>
+<b class="fc"><i>448</i>&nbsp;    }</b>
+<i>449</i>&nbsp;
+<i>450</i>&nbsp;    /**
+<i>451</i>&nbsp;     * Creates a new Timestamp, precise to the month, with unknown local offset.
+<i>452</i>&nbsp;     * &lt;p&gt;
+<i>453</i>&nbsp;     * This is equivalent to the corresponding Ion value {@code YYYY-MMT}.
+<i>454</i>&nbsp;     */
+<i>455</i>&nbsp;    private Timestamp(int zyear, int zmonth)
+<i>456</i>&nbsp;    {
+<b class="fc"><i>457</i>&nbsp;        this(Precision.MONTH, zyear, zmonth, NO_DAY, NO_HOURS, NO_MINUTES, NO_SECONDS, NO_FRACTIONAL_SECONDS, UNKNOWN_OFFSET, APPLY_OFFSET_NO);</b>
+<b class="fc"><i>458</i>&nbsp;    }</b>
+<i>459</i>&nbsp;
+<i>460</i>&nbsp;    /**
+<i>461</i>&nbsp;     * Creates a new Timestamp, precise to the day, with unknown local offset.
+<i>462</i>&nbsp;     * &lt;p&gt;
+<i>463</i>&nbsp;     * This is equivalent to the corresponding Ion value {@code YYYY-MM-DD}.
+<i>464</i>&nbsp;     *
+<i>465</i>&nbsp;     * @deprecated Use {@link #forDay(int, int, int)} instead.
+<i>466</i>&nbsp;     */
+<i>467</i>&nbsp;    @Deprecated
+<i>468</i>&nbsp;    public Timestamp(int zyear, int zmonth, int zday)
+<i>469</i>&nbsp;    {
+<b class="fc"><i>470</i>&nbsp;        this(Precision.DAY, zyear, zmonth, zday, NO_HOURS, NO_MINUTES, NO_SECONDS, NO_FRACTIONAL_SECONDS, UNKNOWN_OFFSET, APPLY_OFFSET_NO);</b>
+<b class="fc"><i>471</i>&nbsp;    }</b>
+<i>472</i>&nbsp;
+<i>473</i>&nbsp;
+<i>474</i>&nbsp;    /**
+<i>475</i>&nbsp;     * Creates a new Timestamp, precise to the minute, with a given local
+<i>476</i>&nbsp;     * offset.
+<i>477</i>&nbsp;     * &lt;p&gt;
+<i>478</i>&nbsp;     * This is equivalent to the corresponding Ion value
+<i>479</i>&nbsp;     * {@code YYYY-MM-DDThh:mm+-oo:oo}, where {@code oo:oo} represents the
+<i>480</i>&nbsp;     * hour and minutes of the local offset from UTC.
+<i>481</i>&nbsp;     *
+<i>482</i>&nbsp;     * @param offset
+<i>483</i>&nbsp;     *          the local offset from UTC, measured in minutes;
+<i>484</i>&nbsp;     *          may be {@code null} to represent an unknown local offset
+<i>485</i>&nbsp;     *
+<i>486</i>&nbsp;     * @deprecated Use {@link #forMinute(int, int, int, int, int, Integer)} instead.
+<i>487</i>&nbsp;     */
+<i>488</i>&nbsp;    @Deprecated
+<i>489</i>&nbsp;    public Timestamp(int year, int month, int day,
+<i>490</i>&nbsp;                     int hour, int minute,
+<i>491</i>&nbsp;                     Integer offset)
+<i>492</i>&nbsp;    {
+<b class="fc"><i>493</i>&nbsp;        this(Precision.MINUTE, year, month, day, hour, minute, NO_SECONDS, NO_FRACTIONAL_SECONDS, offset, APPLY_OFFSET_YES);</b>
+<b class="fc"><i>494</i>&nbsp;    }</b>
+<i>495</i>&nbsp;
+<i>496</i>&nbsp;    /**
+<i>497</i>&nbsp;     * Creates a new Timestamp, precise to the second, with a given local
+<i>498</i>&nbsp;     * offset.
+<i>499</i>&nbsp;     * &lt;p&gt;
+<i>500</i>&nbsp;     * This is equivalent to the corresponding Ion value
+<i>501</i>&nbsp;     * {@code YYYY-MM-DDThh:mm:ss+-oo:oo}, where {@code oo:oo} represents the
+<i>502</i>&nbsp;     * hour and minutes of the local offset from UTC.
+<i>503</i>&nbsp;     *
+<i>504</i>&nbsp;     * @param offset
+<i>505</i>&nbsp;     *          the local offset from UTC, measured in minutes;
+<i>506</i>&nbsp;     *          may be {@code null} to represent an unknown local offset.
+<i>507</i>&nbsp;     *
+<i>508</i>&nbsp;     * @deprecated Use {@link #forSecond(int, int, int, int, int, int, Integer)} instead.
+<i>509</i>&nbsp;     */
+<i>510</i>&nbsp;    @Deprecated
+<i>511</i>&nbsp;    public Timestamp(int year, int month, int day,
+<i>512</i>&nbsp;                     int hour, int minute, int second,
+<i>513</i>&nbsp;                     Integer offset)
+<i>514</i>&nbsp;    {
+<b class="fc"><i>515</i>&nbsp;        this(Precision.SECOND, year, month, day, hour, minute, second, NO_FRACTIONAL_SECONDS, offset, APPLY_OFFSET_YES);</b>
+<b class="fc"><i>516</i>&nbsp;    }</b>
+<i>517</i>&nbsp;
+<i>518</i>&nbsp;    /**
+<i>519</i>&nbsp;     * Creates a new Timestamp, precise to the second or fractional second,
+<i>520</i>&nbsp;     * with a given local offset.
+<i>521</i>&nbsp;     * &lt;p&gt;
+<i>522</i>&nbsp;     * This is equivalent to the corresponding Ion value
+<i>523</i>&nbsp;     * {@code YYYY-MM-DDThh:mm:ss.fff+-oo:oo}, where {@code oo:oo} represents
+<i>524</i>&nbsp;     * the hour and minutes of the local offset from UTC, and {@code fff}
+<i>525</i>&nbsp;     * represents the fractional seconds.
+<i>526</i>&nbsp;     *
+<i>527</i>&nbsp;     * @param frac
+<i>528</i>&nbsp;     *          the fractional seconds; must not be {@code null}; if negative,
+<i>529</i>&nbsp;     *          its absolute value is used
+<i>530</i>&nbsp;     * @param offset
+<i>531</i>&nbsp;     *          the local offset from UTC, measured in minutes;
+<i>532</i>&nbsp;     *          may be {@code null} to represent an unknown local offset
+<i>533</i>&nbsp;     *
+<i>534</i>&nbsp;     * @throws NullPointerException if {@code frac} is {@code null}
+<i>535</i>&nbsp;     *
+<i>536</i>&nbsp;     * @deprecated Use {@link #forSecond(int, int, int, int, int, BigDecimal, Integer)}
+<i>537</i>&nbsp;     * instead.
+<i>538</i>&nbsp;     */
+<i>539</i>&nbsp;    @Deprecated
+<i>540</i>&nbsp;    public Timestamp(int year, int month, int day,
+<i>541</i>&nbsp;                     int hour, int minute, int second, BigDecimal frac,
+<i>542</i>&nbsp;                     Integer offset)
+<i>543</i>&nbsp;    {
+<b class="fc"><i>544</i>&nbsp;        this(Precision.SECOND, year, month, day, hour, minute, second, frac, offset, APPLY_OFFSET_YES);</b>
+<b class="fc"><i>545</i>&nbsp;    }</b>
+<i>546</i>&nbsp;
+<i>547</i>&nbsp;    /**
+<i>548</i>&nbsp;     * Creates a new Timestamp from the individual time components. The
+<i>549</i>&nbsp;     * individual time components are expected to be in UTC,
+<i>550</i>&nbsp;     * with the local offset from UTC (i.e. {@code offset}) &lt;em&gt;already
+<i>551</i>&nbsp;     * applied&lt;/em&gt; to the time components.
+<i>552</i>&nbsp;     * &lt;p&gt;
+<i>553</i>&nbsp;     * Any time component that is more precise
+<i>554</i>&nbsp;     * than the precision parameter {@code p} will be &lt;em&gt;excluded&lt;/em&gt; from the
+<i>555</i>&nbsp;     * calculation of the resulting Timestamp&#39;s point in time.
+<i>556</i>&nbsp;     *
+<i>557</i>&nbsp;     * @param frac must be &gt;= 0 and &lt; 1
+<i>558</i>&nbsp;     *
+<i>559</i>&nbsp;     * @param offset
+<i>560</i>&nbsp;     *          the local offset from UTC, measured in minutes;
+<i>561</i>&nbsp;     *          may be {@code null} to represent an unknown local offset
+<i>562</i>&nbsp;     *
+<i>563</i>&nbsp;     * @see #createFromUtcFields(Precision, int, int, int, int, int, int, BigDecimal, Integer)
+<i>564</i>&nbsp;     */
+<i>565</i>&nbsp;    private Timestamp(Precision p, int zyear, int zmonth, int zday,
+<i>566</i>&nbsp;                      int zhour, int zminute, int zsecond, BigDecimal frac,
+<i>567</i>&nbsp;                      Integer offset, boolean shouldApplyOffset)
+<b class="fc"><i>568</i>&nbsp;    {</b>
+<b class="fc"><i>569</i>&nbsp;        boolean dayPrecision = false;</b>
+<i>570</i>&nbsp;
+<b class="fc"><i>571</i>&nbsp;        switch (p) {</b>
+<i>572</i>&nbsp;        default:
+<b class="nc"><i>573</i>&nbsp;            throw new IllegalArgumentException(&quot;invalid Precision passed to constructor&quot;);</b>
+<i>574</i>&nbsp;        case FRACTION:
+<i>575</i>&nbsp;        case SECOND:
+<b class="fc"><i>576</i>&nbsp;            if (frac == null || frac.equals(BigDecimal.ZERO))</b>
+<i>577</i>&nbsp;            {
+<b class="fc"><i>578</i>&nbsp;                _fraction = null;</b>
+<i>579</i>&nbsp;            }
+<i>580</i>&nbsp;            else
+<i>581</i>&nbsp;            {
+<b class="fc"><i>582</i>&nbsp;                _fraction = frac.abs();</b>
+<i>583</i>&nbsp;            }
+<b class="fc"><i>584</i>&nbsp;            _second = checkAndCastSecond(zsecond);</b>
+<i>585</i>&nbsp;        case MINUTE:
+<b class="fc"><i>586</i>&nbsp;            _minute = checkAndCastMinute(zminute);</b>
+<b class="fc"><i>587</i>&nbsp;            _hour   = checkAndCastHour(zhour);</b>
+<b class="fc"><i>588</i>&nbsp;            _offset = offset;      // offset must be null for years/months/days</b>
+<i>589</i>&nbsp;        case DAY:
+<b class="fc"><i>590</i>&nbsp;             dayPrecision = true;</b>
+<i>591</i>&nbsp;        case MONTH:
+<b class="fc"><i>592</i>&nbsp;            _month  = checkAndCastMonth(zmonth);</b>
+<i>593</i>&nbsp;        case YEAR:
+<b class="fc"><i>594</i>&nbsp;            _year   = checkAndCastYear(zyear);</b>
+<i>595</i>&nbsp;        }
+<i>596</i>&nbsp;
+<b class="fc"><i>597</i>&nbsp;        if (dayPrecision)</b>
+<i>598</i>&nbsp;        {
+<b class="fc"><i>599</i>&nbsp;            _day    = checkAndCastDay(zday, zyear, zmonth);</b>
+<i>600</i>&nbsp;        }
+<i>601</i>&nbsp;
+<b class="fc"><i>602</i>&nbsp;        _precision = checkFraction(p, _fraction);</b>
+<i>603</i>&nbsp;
+<b class="fc"><i>604</i>&nbsp;        if (shouldApplyOffset &amp;&amp; offset != null) {</b>
+<b class="fc"><i>605</i>&nbsp;            apply_offset(offset);</b>
+<i>606</i>&nbsp;        }
+<b class="fc"><i>607</i>&nbsp;    }</b>
+<i>608</i>&nbsp;
+<i>609</i>&nbsp;    /**
+<i>610</i>&nbsp;     * Creates a new Timestamp from the individual time components. The
+<i>611</i>&nbsp;     * individual time components are expected to be in UTC,
+<i>612</i>&nbsp;     * with the local offset from UTC (i.e. {@code offset}) &lt;em&gt;already
+<i>613</i>&nbsp;     * applied&lt;/em&gt; to the time components.
+<i>614</i>&nbsp;     * As such, if the given {@code offset} is non-null or zero, the resulting
+<i>615</i>&nbsp;     * Timestamp will have time values that &lt;em&gt;DO NOT&lt;/em&gt; match the time
+<i>616</i>&nbsp;     * parameters. This method also has a behavior of precision &quot;narrowing&quot;,
+<i>617</i>&nbsp;     * detailed in the sub-section below.
+<i>618</i>&nbsp;     *
+<i>619</i>&nbsp;     * &lt;p&gt;
+<i>620</i>&nbsp;     * For example, the following method calls will return Timestamps with
+<i>621</i>&nbsp;     * values (in its local time) respectively:
+<i>622</i>&nbsp;     *&lt;pre&gt;
+<i>623</i>&nbsp;     * createFromUtcFields(Precision.SECOND, 2012, 2, 3, 4, 5, 6, 0.007, &lt;b&gt;null&lt;/b&gt;)    will return 2012-02-03T04:05:06.007-00:00 (match)
+<i>624</i>&nbsp;     * createFromUtcFields(Precision.SECOND, 2012, 2, 3, 4, 5, 6, 0.007, &lt;b&gt;0&lt;/b&gt;)       will return 2012-02-03T04:05:06.007+00:00 (match)
+<i>625</i>&nbsp;     * createFromUtcFields(Precision.SECOND, 2012, 2, 3, 4, 5, 6, 0.007, &lt;b&gt;480&lt;/b&gt;)     will return 2012-02-03T&lt;b&gt;12&lt;/b&gt;:05:06.007&lt;b&gt;+08:00&lt;/b&gt; (do not match)
+<i>626</i>&nbsp;     * createFromUtcFields(Precision.SECOND, 2012, 2, 3, 4, 5, 6, 0.007, &lt;b&gt;-480&lt;/b&gt;)    will return 2012-02-&lt;b&gt;02&lt;/b&gt;T&lt;b&gt;20&lt;/b&gt;:05:06.007&lt;b&gt;-08:00&lt;/b&gt; (do not match)
+<i>627</i>&nbsp;     * createFromUtcFields(Precision.SECOND, 2012, 2, 3, 4, 5, 6, 0.007, &lt;b&gt;720&lt;/b&gt;)     will return 2012-02-03T&lt;b&gt;16&lt;/b&gt;:05:06.007&lt;b&gt;+12:00&lt;/b&gt; (do not match)
+<i>628</i>&nbsp;     * createFromUtcFields(Precision.SECOND, 2012, 2, 3, 4, 5, 6, 0.007, &lt;b&gt;-720&lt;/b&gt;)    will return 2012-02-&lt;b&gt;02&lt;/b&gt;T&lt;b&gt;16&lt;/b&gt;:05:06.007&lt;b&gt;-12:00&lt;/b&gt; (do not match)
+<i>629</i>&nbsp;     *&lt;/pre&gt;
+<i>630</i>&nbsp;     * Note: All of these resulting Timestamps have the similar value (in UTC) 2012-02-03T04:05:06.007Z.
+<i>631</i>&nbsp;     *
+<i>632</i>&nbsp;     * &lt;h3&gt;Precision &quot;Narrowing&quot;&lt;/h3&gt;
+<i>633</i>&nbsp;     *
+<i>634</i>&nbsp;     * &lt;p&gt;
+<i>635</i>&nbsp;     * Any time component that is more precise
+<i>636</i>&nbsp;     * than the precision parameter {@code p} will be &lt;em&gt;excluded&lt;/em&gt; from the
+<i>637</i>&nbsp;     * calculation of the resulting Timestamp&#39;s point in time.
+<i>638</i>&nbsp;     * &lt;p&gt;
+<i>639</i>&nbsp;     * For example, the following method calls will return Timestamps with
+<i>640</i>&nbsp;     * values respectively:
+<i>641</i>&nbsp;     *&lt;pre&gt;
+<i>642</i>&nbsp;     * createFromUtcFields(&lt;b&gt;Precision.YEAR&lt;/b&gt;    , 2012, 2, 3, 4, 5, 6, 0.007, 0)    will return 2012T
+<i>643</i>&nbsp;     * createFromUtcFields(&lt;b&gt;Precision.MONTH&lt;/b&gt;   , 2012, 2, 3, 4, 5, 6, 0.007, 0)    will return 2012-02T
+<i>644</i>&nbsp;     * createFromUtcFields(&lt;b&gt;Precision.DAY&lt;/b&gt;     , 2012, 2, 3, 4, 5, 6, 0.007, 0)    will return 2012-02-03T
+<i>645</i>&nbsp;     * createFromUtcFields(&lt;b&gt;Precision.MINUTE&lt;/b&gt;  , 2012, 2, 3, 4, 5, 6, 0.007, 0)    will return 2012-02-03T04:05Z
+<i>646</i>&nbsp;     * createFromUtcFields(&lt;b&gt;Precision.SECOND&lt;/b&gt;  , 2012, 2, 3, 4, 5, 6,  null, 0)    will return 2012-02-03T04:05:06Z
+<i>647</i>&nbsp;     * createFromUtcFields(&lt;b&gt;Precision.SECOND&lt;/b&gt;  , 2012, 2, 3, 4, 5, 6, 0.007, 0)    will return 2012-02-03T04:05:06.007Z
+<i>648</i>&nbsp;     *&lt;/pre&gt;
+<i>649</i>&nbsp;     *
+<i>650</i>&nbsp;     * @param p the desired timestamp precision. The result may have a
+<i>651</i>&nbsp;     * different precision if the input data isn&#39;t precise enough.
+<i>652</i>&nbsp;     *
+<i>653</i>&nbsp;     * @param offset
+<i>654</i>&nbsp;     *          the local offset from UTC, measured in minutes;
+<i>655</i>&nbsp;     *          may be {@code null} to represent an unknown local offset.
+<i>656</i>&nbsp;     */
+<i>657</i>&nbsp;    @Deprecated
+<i>658</i>&nbsp;    public static Timestamp
+<i>659</i>&nbsp;    createFromUtcFields(Precision p, int zyear, int zmonth, int zday,
+<i>660</i>&nbsp;                        int zhour, int zminute, int zsecond, BigDecimal frac,
+<i>661</i>&nbsp;                        Integer offset)
+<i>662</i>&nbsp;    {
+<b class="fc"><i>663</i>&nbsp;        return new Timestamp(p, zyear, zmonth, zday,</b>
+<i>664</i>&nbsp;                             zhour, zminute, zsecond, frac,
+<i>665</i>&nbsp;                             offset, APPLY_OFFSET_NO);
+<i>666</i>&nbsp;    }
+<i>667</i>&nbsp;
+<i>668</i>&nbsp;    /**
+<i>669</i>&nbsp;     * Creates a new Timestamp from a {@link Calendar}, preserving the
+<i>670</i>&nbsp;     * {@link Calendar}&#39;s precision and local offset from UTC.
+<i>671</i>&nbsp;     * &lt;p&gt;
+<i>672</i>&nbsp;     * The most precise calendar field of {@code cal} will be used to determine
+<i>673</i>&nbsp;     * the precision of the resulting Timestamp.
+<i>674</i>&nbsp;     *
+<i>675</i>&nbsp;     * For example, the calendar field will have a Timestamp precision accordingly:
+<i>676</i>&nbsp;     * &lt;ul&gt;
+<i>677</i>&nbsp;     *   &lt;li&gt;{@link Calendar#YEAR} - year precision, unknown local offset&lt;/li&gt;
+<i>678</i>&nbsp;     *   &lt;li&gt;{@link Calendar#MONTH} - month precision, unknown local offset&lt;/li&gt;
+<i>679</i>&nbsp;     *   &lt;li&gt;{@link Calendar#DAY_OF_MONTH} - day precision, unknown local offset&lt;/li&gt;
+<i>680</i>&nbsp;     *   &lt;li&gt;{@link Calendar#HOUR_OF_DAY} or {@link Calendar#MINUTE} - minute precision&lt;/li&gt;
+<i>681</i>&nbsp;     *   &lt;li&gt;{@link Calendar#SECOND} - second precision&lt;/li&gt;
+<i>682</i>&nbsp;     *   &lt;li&gt;{@link Calendar#MILLISECOND} - fractional second precision&lt;/li&gt;
+<i>683</i>&nbsp;     * &lt;/ul&gt;
+<i>684</i>&nbsp;     *
+<i>685</i>&nbsp;     * @throws IllegalArgumentException
+<i>686</i>&nbsp;     *          if {@code cal} has no appropriate calendar fields set.
+<i>687</i>&nbsp;     *
+<i>688</i>&nbsp;     * @deprecated Use {@link #forCalendar(Calendar)} instead.
+<i>689</i>&nbsp;     */
+<i>690</i>&nbsp;    @Deprecated
+<i>691</i>&nbsp;    public Timestamp(Calendar cal)
+<b class="fc"><i>692</i>&nbsp;    {</b>
+<i>693</i>&nbsp;        Precision precision;
+<i>694</i>&nbsp;
+<b class="fc"><i>695</i>&nbsp;        if (cal.isSet(Calendar.MILLISECOND) || cal.isSet(Calendar.SECOND)) {</b>
+<b class="fc"><i>696</i>&nbsp;            precision = Precision.SECOND;</b>
+<i>697</i>&nbsp;        }
+<b class="fc"><i>698</i>&nbsp;        else if (cal.isSet(Calendar.HOUR_OF_DAY) || cal.isSet(Calendar.MINUTE)) {</b>
+<b class="fc"><i>699</i>&nbsp;            precision = Precision.MINUTE;</b>
+<i>700</i>&nbsp;        }
+<b class="fc"><i>701</i>&nbsp;        else if (cal.isSet(Calendar.DAY_OF_MONTH)) {</b>
+<b class="fc"><i>702</i>&nbsp;            precision = Precision.DAY;</b>
+<i>703</i>&nbsp;        }
+<b class="fc"><i>704</i>&nbsp;        else if (cal.isSet(Calendar.MONTH)) {</b>
+<b class="fc"><i>705</i>&nbsp;            precision = Precision.MONTH;</b>
+<i>706</i>&nbsp;        }
+<b class="fc"><i>707</i>&nbsp;        else if (cal.isSet(Calendar.YEAR)) {</b>
+<b class="fc"><i>708</i>&nbsp;            precision = Precision.YEAR;</b>
+<i>709</i>&nbsp;        }
+<i>710</i>&nbsp;        else {
+<b class="fc"><i>711</i>&nbsp;            throw new IllegalArgumentException(&quot;Calendar has no fields set&quot;);</b>
+<i>712</i>&nbsp;        }
+<i>713</i>&nbsp;
+<b class="fc"><i>714</i>&nbsp;        set_fields_from_calendar(cal, precision, true);</b>
+<b class="fc"><i>715</i>&nbsp;    }</b>
+<i>716</i>&nbsp;
+<i>717</i>&nbsp;
+<i>718</i>&nbsp;    private Timestamp(Calendar cal, Precision precision, BigDecimal fraction,
+<i>719</i>&nbsp;                      Integer offset)
+<b class="fc"><i>720</i>&nbsp;    {</b>
+<b class="fc"><i>721</i>&nbsp;        set_fields_from_calendar(cal, precision, false);</b>
+<b class="fc"><i>722</i>&nbsp;        _fraction = fraction;</b>
+<b class="fc"><i>723</i>&nbsp;        if (offset != null)</b>
+<i>724</i>&nbsp;        {
+<b class="fc"><i>725</i>&nbsp;            _offset = offset;</b>
+<b class="fc"><i>726</i>&nbsp;            apply_offset(offset);</b>
+<i>727</i>&nbsp;        }
+<b class="fc"><i>728</i>&nbsp;    }</b>
+<i>729</i>&nbsp;
+<i>730</i>&nbsp;
+<i>731</i>&nbsp;    private Timestamp(BigDecimal millis, Precision precision, Integer localOffset)
+<b class="fc"><i>732</i>&nbsp;    {</b>
+<i>733</i>&nbsp;        // check bounds to avoid hanging when calling longValue() on decimals with large positive exponents,
+<i>734</i>&nbsp;        // e.g. 1e10000000
+<b class="fc"><i>735</i>&nbsp;        if(millis.compareTo(MINIMUM_TIMESTAMP_IN_MILLIS_DECIMAL) &lt; 0 ||</b>
+<b class="fc"><i>736</i>&nbsp;                MAXIMUM_ALLOWED_TIMESTAMP_IN_MILLIS_DECIMAL.compareTo(millis) &lt;= 0) {</b>
+<b class="fc"><i>737</i>&nbsp;            throwTimestampOutOfRangeError(millis);</b>
+<i>738</i>&nbsp;        }
+<i>739</i>&nbsp;        // quick handle integral zero
+<b class="fc"><i>740</i>&nbsp;        long ms = isIntegralZero(millis) ? 0 : millis.longValue();</b>
+<b class="fc"><i>741</i>&nbsp;        set_fields_from_millis(ms);</b>
+<i>742</i>&nbsp;
+<b class="fc"><i>743</i>&nbsp;        switch (precision)</b>
+<i>744</i>&nbsp;        {
+<i>745</i>&nbsp;            case YEAR:
+<b class="fc"><i>746</i>&nbsp;                _month  = 1;</b>
+<i>747</i>&nbsp;            case MONTH:
+<b class="fc"><i>748</i>&nbsp;                _day    = 1;</b>
+<i>749</i>&nbsp;            case DAY:
+<b class="fc"><i>750</i>&nbsp;                _hour   = 0;</b>
+<b class="fc"><i>751</i>&nbsp;                _minute = 0;</b>
+<i>752</i>&nbsp;            case MINUTE:
+<b class="fc"><i>753</i>&nbsp;                _second = 0;</b>
+<i>754</i>&nbsp;            case SECOND:
+<i>755</i>&nbsp;            case FRACTION:
+<i>756</i>&nbsp;        }
+<i>757</i>&nbsp;
+<b class="fc"><i>758</i>&nbsp;        _offset = localOffset;</b>
+<i>759</i>&nbsp;        // The given BigDecimal may contain greater than milliseconds precision, which is the maximum precision that
+<i>760</i>&nbsp;        // a Calendar can handle. Set the _fraction here so that extra precision (if any) is not lost.
+<i>761</i>&nbsp;        // However, don&#39;t set the fraction if the given BigDecimal does not have precision at least to the tenth of
+<i>762</i>&nbsp;        // a second.
+<b class="fc"><i>763</i>&nbsp;        if ((precision.includes(Precision.SECOND)) &amp;&amp; millis.scale() &gt; -3) {</b>
+<b class="fc"><i>764</i>&nbsp;            BigDecimal secs = millis.movePointLeft(3);</b>
+<b class="fc"><i>765</i>&nbsp;            BigDecimal secsDown = fastRoundZeroFloor(secs);</b>
+<b class="fc"><i>766</i>&nbsp;            _fraction = secs.subtract(secsDown);</b>
+<b class="fc"><i>767</i>&nbsp;        } else {</b>
+<b class="fc"><i>768</i>&nbsp;            _fraction = null;</b>
+<i>769</i>&nbsp;        }
+<b class="fc"><i>770</i>&nbsp;        _precision = checkFraction(precision, _fraction);</b>
+<b class="fc"><i>771</i>&nbsp;    }</b>
+<i>772</i>&nbsp;
+<i>773</i>&nbsp;
+<i>774</i>&nbsp;    /**
+<i>775</i>&nbsp;     * Creates a new Timestamp that represents the point in time that is
+<i>776</i>&nbsp;     * {@code millis} milliseconds (including any fractional
+<i>777</i>&nbsp;     * milliseconds) from the epoch, with a given local offset.
+<i>778</i>&nbsp;     *
+<i>779</i>&nbsp;     * &lt;p&gt;
+<i>780</i>&nbsp;     * The resulting Timestamp will be precise to the second if {@code millis}
+<i>781</i>&nbsp;     * doesn&#39;t contain information that is more granular than seconds.
+<i>782</i>&nbsp;     * For example, a {@code BigDecimal} of
+<i>783</i>&nbsp;     * value &lt;tt&gt;132541995e4 (132541995 &amp;times; 10&lt;sup&gt;4&lt;/sup&gt;)&lt;/tt&gt;
+<i>784</i>&nbsp;     * will return a Timestamp of {@code 2012-01-01T12:12:30Z},
+<i>785</i>&nbsp;     * precise to the second.
+<i>786</i>&nbsp;     *
+<i>787</i>&nbsp;     * &lt;p&gt;
+<i>788</i>&nbsp;     * The resulting Timestamp will be precise to the fractional second if
+<i>789</i>&nbsp;     * {@code millis} contains information that is at least granular to
+<i>790</i>&nbsp;     * milliseconds.
+<i>791</i>&nbsp;     * For example, a {@code BigDecimal} of
+<i>792</i>&nbsp;     * value &lt;tt&gt;1325419950555&lt;/tt&gt;
+<i>793</i>&nbsp;     * will return a Timestamp of {@code 2012-01-01T12:12:30.555Z},
+<i>794</i>&nbsp;     * precise to the fractional second.
+<i>795</i>&nbsp;     *
+<i>796</i>&nbsp;     * @param millis
+<i>797</i>&nbsp;     *          number of milliseconds (including any fractional
+<i>798</i>&nbsp;     *          milliseconds) from the epoch (1970-01-01T00:00:00.000Z);
+<i>799</i>&nbsp;     *          must not be {@code null}
+<i>800</i>&nbsp;     * @param localOffset
+<i>801</i>&nbsp;     *          the local offset from UTC, measured in minutes;
+<i>802</i>&nbsp;     *          may be {@code null} to represent an unknown local offset
+<i>803</i>&nbsp;     *
+<i>804</i>&nbsp;     * @throws NullPointerException if {@code millis} is {@code null}
+<i>805</i>&nbsp;     *
+<i>806</i>&nbsp;     * @deprecated Use {@link #forMillis(BigDecimal, Integer)} instead.
+<i>807</i>&nbsp;     */
+<i>808</i>&nbsp;    @Deprecated
+<i>809</i>&nbsp;    public Timestamp(BigDecimal millis, Integer localOffset)
+<b class="fc"><i>810</i>&nbsp;    {</b>
+<b class="fc"><i>811</i>&nbsp;        if (millis == null) throw new NullPointerException(&quot;millis is null&quot;);</b>
+<i>812</i>&nbsp;
+<i>813</i>&nbsp;        // check bounds to avoid hanging when calling longValue() on decimals with large positive exponents,
+<i>814</i>&nbsp;        // e.g. 1e10000000
+<b class="fc"><i>815</i>&nbsp;        if(millis.compareTo(MINIMUM_TIMESTAMP_IN_MILLIS_DECIMAL) &lt; 0 ||</b>
+<b class="fc"><i>816</i>&nbsp;            MAXIMUM_ALLOWED_TIMESTAMP_IN_MILLIS_DECIMAL.compareTo(millis) &lt; 0) {</b>
+<b class="fc"><i>817</i>&nbsp;            throwTimestampOutOfRangeError(millis);</b>
+<i>818</i>&nbsp;        }
+<i>819</i>&nbsp;
+<i>820</i>&nbsp;        // quick handle integral zero
+<b class="fc"><i>821</i>&nbsp;        long ms = isIntegralZero(millis) ? 0 : millis.longValue();</b>
+<i>822</i>&nbsp;
+<b class="fc"><i>823</i>&nbsp;        set_fields_from_millis(ms);</b>
+<i>824</i>&nbsp;
+<b class="fc"><i>825</i>&nbsp;        int scale = millis.scale();</b>
+<b class="fc"><i>826</i>&nbsp;        if (scale &lt;= -3) {</b>
+<b class="fc"><i>827</i>&nbsp;            this._precision = Precision.SECOND;</b>
+<b class="fc"><i>828</i>&nbsp;            this._fraction = null;</b>
+<i>829</i>&nbsp;        }
+<i>830</i>&nbsp;        else {
+<b class="fc"><i>831</i>&nbsp;            BigDecimal secs = millis.movePointLeft(3);</b>
+<b class="fc"><i>832</i>&nbsp;            BigDecimal secsDown = fastRoundZeroFloor(secs);</b>
+<b class="fc"><i>833</i>&nbsp;            this._fraction = secs.subtract(secsDown);</b>
+<b class="fc"><i>834</i>&nbsp;            this._precision = checkFraction(Precision.SECOND, _fraction);</b>
+<i>835</i>&nbsp;        }
+<b class="fc"><i>836</i>&nbsp;        this._offset = localOffset;</b>
+<b class="fc"><i>837</i>&nbsp;    }</b>
+<i>838</i>&nbsp;
+<i>839</i>&nbsp;    private BigDecimal fastRoundZeroFloor(final BigDecimal decimal) {
+<b class="fc"><i>840</i>&nbsp;        BigDecimal fastValue = decimal.signum() &lt; 0 ? BigDecimal.ONE.negate() : BigDecimal.ZERO;</b>
+<i>841</i>&nbsp;
+<b class="fc"><i>842</i>&nbsp;        return isIntegralZero(decimal) ? fastValue : decimal.setScale(0, RoundingMode.FLOOR);</b>
+<i>843</i>&nbsp;    }
+<i>844</i>&nbsp;
+<i>845</i>&nbsp;    private boolean isIntegralZero(final BigDecimal decimal) {
+<i>846</i>&nbsp;        // zero || no low-order bits || &lt; 1.0
+<b class="fc"><i>847</i>&nbsp;        return  decimal.signum() == 0</b>
+<b class="fc"><i>848</i>&nbsp;            || decimal.scale() &lt; -63</b>
+<b class="fc"><i>849</i>&nbsp;            || (decimal.precision() - decimal.scale() &lt;= 0);</b>
+<i>850</i>&nbsp;    }
+<i>851</i>&nbsp;
+<i>852</i>&nbsp;    private static void throwTimestampOutOfRangeError(Number millis) {
+<b class="fc"><i>853</i>&nbsp;        throw new IllegalArgumentException(&quot;millis: &quot; + millis + &quot; is outside of valid the range: from &quot;</b>
+<i>854</i>&nbsp;                + MINIMUM_TIMESTAMP_IN_MILLIS
+<i>855</i>&nbsp;                + &quot; (0001T)&quot;
+<i>856</i>&nbsp;                + &quot;, inclusive, to &quot;
+<i>857</i>&nbsp;                + MAXIMUM_TIMESTAMP_IN_MILLIS
+<i>858</i>&nbsp;                + &quot; (10000T)&quot;
+<i>859</i>&nbsp;                + &quot; , exclusive&quot;);
+<i>860</i>&nbsp;    }
+<i>861</i>&nbsp;
+<i>862</i>&nbsp;    /**
+<i>863</i>&nbsp;     * Creates a new Timestamp that represents the point in time that is
+<i>864</i>&nbsp;     * {@code millis} milliseconds from the epoch, with a given local offset.
+<i>865</i>&nbsp;     * &lt;p&gt;
+<i>866</i>&nbsp;     * The resulting Timestamp will be precise to the fractional second.
+<i>867</i>&nbsp;     *
+<i>868</i>&nbsp;     * @param millis
+<i>869</i>&nbsp;     *          number of milliseconds from the epoch (1970-01-01T00:00:00.000Z)
+<i>870</i>&nbsp;     * @param localOffset
+<i>871</i>&nbsp;     *          the local offset from UTC, measured in minutes;
+<i>872</i>&nbsp;     *          may be {@code null} to represent an unknown local offset.
+<i>873</i>&nbsp;     *
+<i>874</i>&nbsp;     * @deprecated Use {@link #forMillis(long, Integer)} instead.
+<i>875</i>&nbsp;     */
+<i>876</i>&nbsp;    @Deprecated
+<i>877</i>&nbsp;    public Timestamp(long millis, Integer localOffset)
+<b class="fc"><i>878</i>&nbsp;    {</b>
+<b class="fc"><i>879</i>&nbsp;        if(millis &lt; MINIMUM_TIMESTAMP_IN_MILLIS || millis &gt;= MAXIMUM_TIMESTAMP_IN_MILLIS) {</b>
+<b class="fc"><i>880</i>&nbsp;            throwTimestampOutOfRangeError(millis);</b>
+<i>881</i>&nbsp;        }
+<b class="fc"><i>882</i>&nbsp;        this.set_fields_from_millis(millis);</b>
+<i>883</i>&nbsp;
+<i>884</i>&nbsp;        // fractional seconds portion
+<b class="fc"><i>885</i>&nbsp;        BigDecimal secs = BigDecimal.valueOf(millis).movePointLeft(3);</b>
+<b class="fc"><i>886</i>&nbsp;        BigDecimal secsDown = secs.setScale(0, RoundingMode.FLOOR);</b>
+<b class="fc"><i>887</i>&nbsp;        this._fraction = secs.subtract(secsDown);</b>
+<b class="fc"><i>888</i>&nbsp;        this._precision = checkFraction(Precision.SECOND, _fraction);</b>
+<i>889</i>&nbsp;
+<b class="fc"><i>890</i>&nbsp;        this._offset = localOffset;</b>
+<b class="fc"><i>891</i>&nbsp;    }</b>
+<i>892</i>&nbsp;
+<i>893</i>&nbsp;
+<i>894</i>&nbsp;    private static IllegalArgumentException fail(CharSequence input, String reason)
+<i>895</i>&nbsp;    {
+<b class="fc"><i>896</i>&nbsp;        input = IonTextUtils.printString(input);</b>
+<b class="fc"><i>897</i>&nbsp;        return new IllegalArgumentException(&quot;invalid timestamp: &quot; + reason</b>
+<i>898</i>&nbsp;                                            + &quot;: &quot; + input);
+<i>899</i>&nbsp;    }
+<i>900</i>&nbsp;
+<i>901</i>&nbsp;    private static IllegalArgumentException fail(CharSequence input)
+<i>902</i>&nbsp;    {
+<b class="fc"><i>903</i>&nbsp;        input = IonTextUtils.printString(input);</b>
+<b class="fc"><i>904</i>&nbsp;        return new IllegalArgumentException(&quot;invalid timestamp: &quot; + input);</b>
+<i>905</i>&nbsp;    }
+<i>906</i>&nbsp;
+<i>907</i>&nbsp;    static final String NULL_TIMESTAMP_IMAGE = &quot;null.timestamp&quot;;
+<b class="fc"><i>908</i>&nbsp;    static final int    LEN_OF_NULL_IMAGE    = NULL_TIMESTAMP_IMAGE.length();</b>
+<i>909</i>&nbsp;    static final int    END_OF_YEAR          =  4;  // 1234T
+<i>910</i>&nbsp;    static final int    END_OF_MONTH         =  7;  // 1234-67T
+<i>911</i>&nbsp;    static final int    END_OF_DAY           = 10;  // 1234-67-90T
+<i>912</i>&nbsp;    static final int    END_OF_MINUTES       = 16;
+<i>913</i>&nbsp;    static final int    END_OF_SECONDS       = 19;
+<i>914</i>&nbsp;
+<i>915</i>&nbsp;
+<i>916</i>&nbsp;    /**
+<i>917</i>&nbsp;     * Returns a new Timestamp that represents the point in time, precision
+<i>918</i>&nbsp;     * and local offset defined in Ion format by the {@link CharSequence}.
+<i>919</i>&nbsp;     *
+<i>920</i>&nbsp;     * @param ionFormattedTimestamp
+<i>921</i>&nbsp;     *          a sequence of characters that is the Ion representation of a
+<i>922</i>&nbsp;     *          Timestamp
+<i>923</i>&nbsp;     *
+<i>924</i>&nbsp;     * @throws IllegalArgumentException
+<i>925</i>&nbsp;     *          if the {@code CharSequence} is an invalid Ion representation
+<i>926</i>&nbsp;     *          of a Timestamp;
+<i>927</i>&nbsp;     *          or if the {@code CharSequence} has excess characters which
+<i>928</i>&nbsp;     *          are not one of the following valid thirteen numeric-stop
+<i>929</i>&nbsp;     *          characters (escaped accordingly for readability):
+<i>930</i>&nbsp;     *          &lt;code&gt;{}[](),\&quot;\&#39;\ \t\n\r}&lt;/code&gt;
+<i>931</i>&nbsp;     *
+<i>932</i>&nbsp;     * @return
+<i>933</i>&nbsp;     *          {@code null} if the {@code CharSequence} is &quot;null.timestamp&quot;
+<i>934</i>&nbsp;     *
+<i>935</i>&nbsp;     * @see &lt;a href=&quot;http://amzn.github.io/ion-docs/docs/spec.html#timestamp&quot;&gt;Ion Timestamp Page&lt;/a&gt;
+<i>936</i>&nbsp;     * @see &lt;a href=&quot;http://www.w3.org/TR/NOTE-datetime&quot;&gt;W3C Note on Date and Time Formats&lt;/a&gt;
+<i>937</i>&nbsp;     */
+<i>938</i>&nbsp;    public static Timestamp valueOf(CharSequence ionFormattedTimestamp)
+<i>939</i>&nbsp;    {
+<b class="fc"><i>940</i>&nbsp;        final CharSequence in = ionFormattedTimestamp;</b>
+<i>941</i>&nbsp;        int pos;
+<i>942</i>&nbsp;
+<b class="fc"><i>943</i>&nbsp;        final int length = in.length();</b>
+<b class="fc"><i>944</i>&nbsp;        if (length == 0)</b>
+<i>945</i>&nbsp;        {
+<b class="nc"><i>946</i>&nbsp;            throw fail(in);</b>
+<i>947</i>&nbsp;        }
+<i>948</i>&nbsp;
+<i>949</i>&nbsp;        // check for &#39;null.timestamp&#39;
+<b class="fc"><i>950</i>&nbsp;        if (in.charAt(0) == &#39;n&#39;) {</b>
+<b class="fc"><i>951</i>&nbsp;            if (length &gt;= LEN_OF_NULL_IMAGE</b>
+<b class="fc"><i>952</i>&nbsp;                &amp;&amp; NULL_TIMESTAMP_IMAGE.contentEquals(in.subSequence(0, LEN_OF_NULL_IMAGE)))</b>
+<i>953</i>&nbsp;            {
+<b class="fc"><i>954</i>&nbsp;                if (length &gt; LEN_OF_NULL_IMAGE) {</b>
+<b class="fc"><i>955</i>&nbsp;                    if (!isValidFollowChar(in.charAt(LEN_OF_NULL_IMAGE))) {</b>
+<b class="fc"><i>956</i>&nbsp;                        throw fail(in);</b>
+<i>957</i>&nbsp;                    }
+<i>958</i>&nbsp;                }
+<b class="fc"><i>959</i>&nbsp;                return null;</b>
+<i>960</i>&nbsp;            }
+<b class="fc"><i>961</i>&nbsp;            throw fail(in);</b>
+<i>962</i>&nbsp;        }
+<i>963</i>&nbsp;
+<b class="fc"><i>964</i>&nbsp;        int year  = 1;</b>
+<b class="fc"><i>965</i>&nbsp;        int month = 1;</b>
+<b class="fc"><i>966</i>&nbsp;        int day   = 1;</b>
+<b class="fc"><i>967</i>&nbsp;        int hour  = 0;</b>
+<b class="fc"><i>968</i>&nbsp;        int minute = 0;</b>
+<b class="fc"><i>969</i>&nbsp;        int seconds = 0;</b>
+<b class="fc"><i>970</i>&nbsp;        BigDecimal fraction = null;</b>
+<i>971</i>&nbsp;        Precision precision;
+<i>972</i>&nbsp;
+<i>973</i>&nbsp;        // fake label to turn goto&#39;s into a break so Java is happy :) enjoy
+<i>974</i>&nbsp;        do {
+<i>975</i>&nbsp;            // otherwise we expect yyyy-mm-ddThh:mm:ss.ssss+hh:mm
+<b class="fc"><i>976</i>&nbsp;            if (length &lt; END_OF_YEAR + 1) {  // +1 for the &quot;T&quot;</b>
+<b class="nc"><i>977</i>&nbsp;                throw fail(in, &quot;year is too short (must be at least yyyyT)&quot;);</b>
+<i>978</i>&nbsp;            }
+<b class="fc"><i>979</i>&nbsp;            pos = END_OF_YEAR;</b>
+<b class="fc"><i>980</i>&nbsp;            precision = Precision.YEAR;</b>
+<b class="fc"><i>981</i>&nbsp;            year  = read_digits(in, 0, 4, -1, &quot;year&quot;);</b>
+<i>982</i>&nbsp;
+<b class="fc"><i>983</i>&nbsp;            char c = in.charAt(END_OF_YEAR);</b>
+<b class="fc"><i>984</i>&nbsp;            if (c == &#39;T&#39;) break;</b>
+<b class="fc"><i>985</i>&nbsp;            if (c != &#39;-&#39;) {</b>
+<b class="fc"><i>986</i>&nbsp;                throw fail(in,</b>
+<i>987</i>&nbsp;                           &quot;expected \&quot;-\&quot; between year and month, found &quot;
+<b class="fc"><i>988</i>&nbsp;                               + printCodePointAsString(c));</b>
+<i>989</i>&nbsp;            }
+<b class="fc"><i>990</i>&nbsp;            if (length &lt; END_OF_MONTH + 1) {  // +1 for the &quot;T&quot;</b>
+<b class="fc"><i>991</i>&nbsp;                throw fail(in, &quot;month is too short (must be yyyy-mmT)&quot;);</b>
+<i>992</i>&nbsp;            }
+<b class="fc"><i>993</i>&nbsp;            pos = END_OF_MONTH;</b>
+<b class="fc"><i>994</i>&nbsp;            precision = Precision.MONTH;</b>
+<b class="fc"><i>995</i>&nbsp;            month = read_digits(in, END_OF_YEAR + 1, 2, -1,  &quot;month&quot;);</b>
+<i>996</i>&nbsp;
+<b class="fc"><i>997</i>&nbsp;            c = in.charAt(END_OF_MONTH);</b>
+<b class="fc"><i>998</i>&nbsp;            if (c == &#39;T&#39;) break;</b>
+<b class="fc"><i>999</i>&nbsp;            if (c != &#39;-&#39;) {</b>
+<b class="fc"><i>1000</i>&nbsp;                throw fail(in,</b>
+<i>1001</i>&nbsp;                           &quot;expected \&quot;-\&quot; between month and day, found &quot;
+<b class="fc"><i>1002</i>&nbsp;                               + printCodePointAsString(c));</b>
+<i>1003</i>&nbsp;            }
+<b class="fc"><i>1004</i>&nbsp;            if (length &lt; END_OF_DAY) {</b>
+<b class="fc"><i>1005</i>&nbsp;                throw fail(in, &quot;too short for yyyy-mm-dd&quot;);</b>
+<i>1006</i>&nbsp;            }
+<b class="fc"><i>1007</i>&nbsp;            pos = END_OF_DAY;</b>
+<b class="fc"><i>1008</i>&nbsp;            precision = Precision.DAY;</b>
+<b class="fc"><i>1009</i>&nbsp;            day   = read_digits(in, END_OF_MONTH + 1, 2, -1, &quot;day&quot;);</b>
+<b class="fc"><i>1010</i>&nbsp;            if (length == END_OF_DAY) break;</b>
+<b class="fc"><i>1011</i>&nbsp;            c = in.charAt(END_OF_DAY);</b>
+<b class="fc"><i>1012</i>&nbsp;            if (c != &#39;T&#39;) {</b>
+<b class="fc"><i>1013</i>&nbsp;                throw fail(in,</b>
+<i>1014</i>&nbsp;                           &quot;expected \&quot;T\&quot; after day, found &quot;
+<b class="fc"><i>1015</i>&nbsp;                               + printCodePointAsString(c));</b>
+<i>1016</i>&nbsp;            }
+<b class="fc"><i>1017</i>&nbsp;            if (length == END_OF_DAY + 1) break;</b>
+<i>1018</i>&nbsp;
+<i>1019</i>&nbsp;            // now lets see if we have a time value
+<b class="fc"><i>1020</i>&nbsp;            if (length &lt; END_OF_MINUTES) {</b>
+<b class="fc"><i>1021</i>&nbsp;                throw fail(in, &quot;too short for yyyy-mm-ddThh:mm&quot;);</b>
+<i>1022</i>&nbsp;            }
+<b class="fc"><i>1023</i>&nbsp;            hour   = read_digits(in, 11, 2, &#39;:&#39;, &quot;hour&quot;);</b>
+<b class="fc"><i>1024</i>&nbsp;            minute = read_digits(in, 14, 2, -1, &quot;minutes&quot;);</b>
+<b class="fc"><i>1025</i>&nbsp;            pos = END_OF_MINUTES;</b>
+<b class="fc"><i>1026</i>&nbsp;            precision = Precision.MINUTE;</b>
+<i>1027</i>&nbsp;
+<i>1028</i>&nbsp;            // we may have seconds
+<b class="fc"><i>1029</i>&nbsp;            if (length &lt;= END_OF_MINUTES || in.charAt(END_OF_MINUTES) != &#39;:&#39;)</b>
+<i>1030</i>&nbsp;            {
+<b class="fc"><i>1031</i>&nbsp;                break;</b>
+<i>1032</i>&nbsp;            }
+<b class="fc"><i>1033</i>&nbsp;            if (length &lt; END_OF_SECONDS) {</b>
+<b class="fc"><i>1034</i>&nbsp;                throw fail(in, &quot;too short for yyyy-mm-ddThh:mm:ss&quot;);</b>
+<i>1035</i>&nbsp;            }
+<b class="fc"><i>1036</i>&nbsp;            seconds = read_digits(in, 17, 2, -1, &quot;seconds&quot;);</b>
+<b class="fc"><i>1037</i>&nbsp;            pos = END_OF_SECONDS;</b>
+<b class="fc"><i>1038</i>&nbsp;            precision = Precision.SECOND;</b>
+<i>1039</i>&nbsp;
+<b class="fc"><i>1040</i>&nbsp;            if (length &lt;= END_OF_SECONDS || in.charAt(END_OF_SECONDS) != &#39;.&#39;)</b>
+<i>1041</i>&nbsp;            {
+<b class="fc"><i>1042</i>&nbsp;                break;</b>
+<i>1043</i>&nbsp;            }
+<b class="fc"><i>1044</i>&nbsp;            pos = END_OF_SECONDS + 1;</b>
+<b class="fc"><i>1045</i>&nbsp;            while (length &gt; pos &amp;&amp; Character.isDigit(in.charAt(pos))) {</b>
+<b class="fc"><i>1046</i>&nbsp;                pos++;</b>
+<i>1047</i>&nbsp;            }
+<b class="fc"><i>1048</i>&nbsp;            if (pos &lt;= END_OF_SECONDS + 1) {</b>
+<b class="fc"><i>1049</i>&nbsp;                throw fail(in,</b>
+<i>1050</i>&nbsp;                           &quot;must have at least one digit after decimal point&quot;);
+<i>1051</i>&nbsp;            }
+<b class="fc"><i>1052</i>&nbsp;            fraction = new BigDecimal(in.subSequence(19, pos).toString());</b>
+<i>1053</i>&nbsp;        } while (false);
+<i>1054</i>&nbsp;
+<i>1055</i>&nbsp;        Integer offset;
+<i>1056</i>&nbsp;
+<i>1057</i>&nbsp;        // now see if they included a timezone offset
+<b class="fc"><i>1058</i>&nbsp;        char timezone_start = pos &lt; length ? in.charAt(pos) : &#39;\n&#39;;</b>
+<b class="fc"><i>1059</i>&nbsp;        if (timezone_start == &#39;Z&#39;) {</b>
+<b class="fc"><i>1060</i>&nbsp;            offset = 0;</b>
+<b class="fc"><i>1061</i>&nbsp;            pos++;</b>
+<i>1062</i>&nbsp;        }
+<b class="fc"><i>1063</i>&nbsp;        else if (timezone_start == &#39;+&#39; || timezone_start == &#39;-&#39;)</b>
+<i>1064</i>&nbsp;        {
+<b class="fc"><i>1065</i>&nbsp;            if (length &lt; pos + 5) {</b>
+<b class="fc"><i>1066</i>&nbsp;                throw fail(in, &quot;local offset too short&quot;);</b>
+<i>1067</i>&nbsp;            }
+<i>1068</i>&nbsp;            // +/- hh:mm
+<b class="fc"><i>1069</i>&nbsp;            pos++;</b>
+<b class="fc"><i>1070</i>&nbsp;            int tzdHours = read_digits(in, pos, 2, &#39;:&#39;, &quot;local offset hours&quot;);</b>
+<b class="fc"><i>1071</i>&nbsp;            if (tzdHours &lt; 0 || tzdHours &gt; 23) {</b>
+<b class="fc"><i>1072</i>&nbsp;                throw fail(in,</b>
+<i>1073</i>&nbsp;                           &quot;local offset hours must be between 0 and 23 inclusive&quot;);
+<i>1074</i>&nbsp;            }
+<b class="fc"><i>1075</i>&nbsp;            pos += 3;</b>
+<i>1076</i>&nbsp;
+<b class="fc"><i>1077</i>&nbsp;            int tzdMinutes = read_digits(in, pos, 2, -1, &quot;local offset minutes&quot;);</b>
+<b class="fc"><i>1078</i>&nbsp;            if (tzdMinutes &gt; 59) {</b>
+<b class="fc"><i>1079</i>&nbsp;                throw fail(in,</b>
+<i>1080</i>&nbsp;                           &quot;local offset minutes must be between 0 and 59 inclusive&quot;);
+<i>1081</i>&nbsp;            }
+<b class="fc"><i>1082</i>&nbsp;            pos += 2;</b>
+<i>1083</i>&nbsp;
+<b class="fc"><i>1084</i>&nbsp;            int temp = tzdHours * 60 + tzdMinutes;</b>
+<b class="fc"><i>1085</i>&nbsp;            if (timezone_start == &#39;-&#39;) {</b>
+<b class="fc"><i>1086</i>&nbsp;                temp = -temp;</b>
+<i>1087</i>&nbsp;            }
+<b class="fc"><i>1088</i>&nbsp;            if (temp == 0 &amp;&amp; timezone_start == &#39;-&#39;) {</b>
+<i>1089</i>&nbsp;                // int doesn&#39;t do negative zero very elegantly
+<b class="fc"><i>1090</i>&nbsp;                offset = null;</b>
+<i>1091</i>&nbsp;            }
+<i>1092</i>&nbsp;            else {
+<b class="fc"><i>1093</i>&nbsp;                offset = temp;</b>
+<i>1094</i>&nbsp;            }
+<b class="fc"><i>1095</i>&nbsp;        }</b>
+<i>1096</i>&nbsp;        else {
+<b class="fc"><i>1097</i>&nbsp;            switch (precision) {</b>
+<i>1098</i>&nbsp;                case YEAR:
+<i>1099</i>&nbsp;                case MONTH:
+<i>1100</i>&nbsp;                case DAY:
+<b class="fc"><i>1101</i>&nbsp;                    break;</b>
+<i>1102</i>&nbsp;                default:
+<b class="fc"><i>1103</i>&nbsp;                    throw fail(in, &quot;missing local offset&quot;);</b>
+<i>1104</i>&nbsp;            }
+<b class="fc"><i>1105</i>&nbsp;            offset = null;</b>
+<i>1106</i>&nbsp;        }
+<b class="fc"><i>1107</i>&nbsp;        if (length &gt; (pos + 1) &amp;&amp; !isValidFollowChar(in.charAt(pos + 1)))</b>
+<i>1108</i>&nbsp;        {
+<b class="fc"><i>1109</i>&nbsp;            throw fail(in, &quot;invalid excess characters&quot;);</b>
+<i>1110</i>&nbsp;        }
+<i>1111</i>&nbsp;
+<b class="fc"><i>1112</i>&nbsp;        Timestamp ts =</b>
+<i>1113</i>&nbsp;            new Timestamp(precision, year, month, day,
+<i>1114</i>&nbsp;                          hour, minute, seconds, fraction, offset, APPLY_OFFSET_YES);
+<b class="fc"><i>1115</i>&nbsp;        return ts;</b>
+<i>1116</i>&nbsp;    }
+<i>1117</i>&nbsp;
+<i>1118</i>&nbsp;    private static int read_digits(CharSequence in, int start, int length,
+<i>1119</i>&nbsp;                                   int terminator, String field)
+<i>1120</i>&nbsp;    {
+<b class="fc"><i>1121</i>&nbsp;        int ii, value = 0;</b>
+<b class="fc"><i>1122</i>&nbsp;        int end = start + length;</b>
+<i>1123</i>&nbsp;
+<b class="fc"><i>1124</i>&nbsp;        if (in.length() &lt; end) {</b>
+<b class="fc"><i>1125</i>&nbsp;            throw fail(in,</b>
+<i>1126</i>&nbsp;                       field + &quot; requires &quot; + length + &quot; digits&quot;);
+<i>1127</i>&nbsp;        }
+<i>1128</i>&nbsp;
+<b class="fc"><i>1129</i>&nbsp;        for (ii=start; ii&lt;end; ii++) {</b>
+<b class="fc"><i>1130</i>&nbsp;            char c = in.charAt(ii);</b>
+<b class="fc"><i>1131</i>&nbsp;            if (!Character.isDigit(c)) {</b>
+<i>1132</i>&nbsp;                // FIXME this will give incorrect message if c is a surrogate
+<b class="fc"><i>1133</i>&nbsp;                throw fail(in,</b>
+<i>1134</i>&nbsp;                           field + &quot; has non-digit character &quot;
+<b class="fc"><i>1135</i>&nbsp;                               + printCodePointAsString(c));</b>
+<i>1136</i>&nbsp;            }
+<b class="fc"><i>1137</i>&nbsp;            value *= 10;</b>
+<b class="fc"><i>1138</i>&nbsp;            value += c - &#39;0&#39;;</b>
+<i>1139</i>&nbsp;        }
+<i>1140</i>&nbsp;
+<i>1141</i>&nbsp;        // Check the terminator if requested.
+<b class="fc"><i>1142</i>&nbsp;        if (terminator != -1) {</b>
+<b class="fc"><i>1143</i>&nbsp;            if (ii &gt;= in.length() || in.charAt(ii) != terminator) {</b>
+<b class="fc"><i>1144</i>&nbsp;                throw fail(in,</b>
+<i>1145</i>&nbsp;                           field + &quot; should end with &quot;
+<b class="fc"><i>1146</i>&nbsp;                               + printCodePointAsString(terminator));</b>
+<i>1147</i>&nbsp;            }
+<i>1148</i>&nbsp;        }
+<i>1149</i>&nbsp;        // Otherwise make sure we don&#39;t have too many digits.
+<b class="fc"><i>1150</i>&nbsp;        else if (ii &lt; in.length() &amp;&amp; Character.isDigit(in.charAt(ii))) {</b>
+<b class="fc"><i>1151</i>&nbsp;            throw fail(in,</b>
+<i>1152</i>&nbsp;                       field + &quot; requires &quot; + length + &quot; digits but has more&quot;);
+<i>1153</i>&nbsp;        }
+<i>1154</i>&nbsp;
+<b class="fc"><i>1155</i>&nbsp;        return value;</b>
+<i>1156</i>&nbsp;    }
+<i>1157</i>&nbsp;
+<i>1158</i>&nbsp;    private static boolean isValidFollowChar(char c) {
+<b class="fc"><i>1159</i>&nbsp;        switch (c) {</b>
+<i>1160</i>&nbsp;        default:
+<b class="fc"><i>1161</i>&nbsp;            return false;</b>
+<i>1162</i>&nbsp;        case &#39;{&#39;:
+<i>1163</i>&nbsp;        case &#39;}&#39;:
+<i>1164</i>&nbsp;        case &#39;[&#39;:
+<i>1165</i>&nbsp;        case &#39;]&#39;:
+<i>1166</i>&nbsp;        case &#39;(&#39;:
+<i>1167</i>&nbsp;        case &#39;)&#39;:
+<i>1168</i>&nbsp;        case &#39;,&#39;:
+<i>1169</i>&nbsp;        case &#39;\&quot;&#39;:
+<i>1170</i>&nbsp;        case &#39;\&#39;&#39;:
+<i>1171</i>&nbsp;        case &#39;\\&#39;:
+<i>1172</i>&nbsp;        case &#39;\t&#39;:
+<i>1173</i>&nbsp;        case &#39;\n&#39;:
+<i>1174</i>&nbsp;        case &#39;\r&#39;:
+<b class="nc"><i>1175</i>&nbsp;            return true;</b>
+<i>1176</i>&nbsp;        }
+<i>1177</i>&nbsp;    }
+<i>1178</i>&nbsp;
+<i>1179</i>&nbsp;    /**
+<i>1180</i>&nbsp;     * Creates a copy of this Timestamp. The resulting Timestamp will
+<i>1181</i>&nbsp;     * represent the same point in time and has the same precision and local
+<i>1182</i>&nbsp;     * offset.
+<i>1183</i>&nbsp;     * &lt;p&gt;
+<i>1184</i>&nbsp;     * {@inheritDoc}
+<i>1185</i>&nbsp;     */
+<i>1186</i>&nbsp;    @Override
+<i>1187</i>&nbsp;    public Timestamp clone()
+<i>1188</i>&nbsp;    {
+<i>1189</i>&nbsp;        // The Copy-Constructor we&#39;re using here already expects the time field
+<i>1190</i>&nbsp;        // values to be in UTC, and that is already what we have for this
+<i>1191</i>&nbsp;        // Timestamp -- no adjustment necessary to make it local time.
+<b class="fc"><i>1192</i>&nbsp;        return new Timestamp(_precision,</b>
+<i>1193</i>&nbsp;                             _year,
+<i>1194</i>&nbsp;                             _month,
+<i>1195</i>&nbsp;                             _day,
+<i>1196</i>&nbsp;                             _hour,
+<i>1197</i>&nbsp;                             _minute,
+<i>1198</i>&nbsp;                             _second,
+<i>1199</i>&nbsp;                             _fraction,
+<i>1200</i>&nbsp;                             _offset,
+<i>1201</i>&nbsp;                             APPLY_OFFSET_NO);
+<i>1202</i>&nbsp;    }
+<i>1203</i>&nbsp;
+<i>1204</i>&nbsp;    /**
+<i>1205</i>&nbsp;     * Applies the local offset from UTC to each of the applicable time field
+<i>1206</i>&nbsp;     * values and returns the new Timestamp. In short, this makes the Timestamp
+<i>1207</i>&nbsp;     * represent local time.
+<i>1208</i>&nbsp;     *
+<i>1209</i>&nbsp;     * @return a new Timestamp in its local time
+<i>1210</i>&nbsp;     */
+<i>1211</i>&nbsp;    private Timestamp make_localtime()
+<i>1212</i>&nbsp;    {
+<b class="fc"><i>1213</i>&nbsp;        int offset = _offset != null</b>
+<b class="fc"><i>1214</i>&nbsp;            ? _offset.intValue()</b>
+<b class="fc"><i>1215</i>&nbsp;            : 0;</b>
+<i>1216</i>&nbsp;
+<i>1217</i>&nbsp;        // We use a Copy-Constructor that expects the time parameters to be in
+<i>1218</i>&nbsp;        // UTC, as that&#39;s what we&#39;re supposed to have.
+<i>1219</i>&nbsp;        // As this Copy-Constructor doesn&#39;t apply local offset to the time
+<i>1220</i>&nbsp;        // field values (it assumes that the local offset is already applied to
+<i>1221</i>&nbsp;        // them), we explicitly apply the local offset to the time field values
+<i>1222</i>&nbsp;        // after we obtain the new Timestamp instance.
+<b class="fc"><i>1223</i>&nbsp;        Timestamp localtime = new Timestamp(_precision,</b>
+<i>1224</i>&nbsp;                                            _year,
+<i>1225</i>&nbsp;                                            _month,
+<i>1226</i>&nbsp;                                            _day,
+<i>1227</i>&nbsp;                                            _hour,
+<i>1228</i>&nbsp;                                            _minute,
+<i>1229</i>&nbsp;                                            _second,
+<i>1230</i>&nbsp;                                            _fraction,
+<i>1231</i>&nbsp;                                            _offset,
+<i>1232</i>&nbsp;                                            APPLY_OFFSET_NO);
+<i>1233</i>&nbsp;        // explicitly apply the local offset to the time field values
+<b class="fc"><i>1234</i>&nbsp;        localtime.apply_offset(-offset);</b>
+<i>1235</i>&nbsp;
+<b class="fc"><i>1236</i>&nbsp;        assert localtime._offset == _offset;</b>
+<i>1237</i>&nbsp;
+<b class="fc"><i>1238</i>&nbsp;        return localtime;</b>
+<i>1239</i>&nbsp;    }
+<i>1240</i>&nbsp;
+<i>1241</i>&nbsp;    /**
+<i>1242</i>&nbsp;     * Returns a Timestamp, precise to the year, with unknown local offset.
+<i>1243</i>&nbsp;     * &lt;p&gt;
+<i>1244</i>&nbsp;     * This is equivalent to the corresponding Ion value {@code YYYYT}.
+<i>1245</i>&nbsp;     */
+<i>1246</i>&nbsp;    public static Timestamp forYear(int yearZ)
+<i>1247</i>&nbsp;    {
+<b class="fc"><i>1248</i>&nbsp;        return new Timestamp(yearZ);</b>
+<i>1249</i>&nbsp;    }
+<i>1250</i>&nbsp;
+<i>1251</i>&nbsp;    /**
+<i>1252</i>&nbsp;     * Returns a Timestamp, precise to the month, with unknown local offset.
+<i>1253</i>&nbsp;     * &lt;p&gt;
+<i>1254</i>&nbsp;     * This is equivalent to the corresponding Ion value {@code YYYY-MMT}.
+<i>1255</i>&nbsp;     */
+<i>1256</i>&nbsp;    public static Timestamp forMonth(int yearZ, int monthZ)
+<i>1257</i>&nbsp;    {
+<b class="fc"><i>1258</i>&nbsp;        return new Timestamp(yearZ, monthZ);</b>
+<i>1259</i>&nbsp;    }
+<i>1260</i>&nbsp;
+<i>1261</i>&nbsp;    /**
+<i>1262</i>&nbsp;     * Returns a Timestamp, precise to the day, with unknown local offset.
+<i>1263</i>&nbsp;     * &lt;p&gt;
+<i>1264</i>&nbsp;     * This is equivalent to the corresponding Ion value {@code YYYY-MM-DD}.
+<i>1265</i>&nbsp;     *
+<i>1266</i>&nbsp;     */
+<i>1267</i>&nbsp;    public static Timestamp forDay(int yearZ, int monthZ, int dayZ)
+<i>1268</i>&nbsp;    {
+<b class="fc"><i>1269</i>&nbsp;        return new Timestamp(yearZ, monthZ, dayZ);</b>
+<i>1270</i>&nbsp;    }
+<i>1271</i>&nbsp;
+<i>1272</i>&nbsp;
+<i>1273</i>&nbsp;    /**
+<i>1274</i>&nbsp;     * Returns a Timestamp, precise to the minute, with a given local
+<i>1275</i>&nbsp;     * offset.
+<i>1276</i>&nbsp;     *
+<i>1277</i>&nbsp;     * &lt;p&gt;This is equivalent to the corresponding Ion value
+<i>1278</i>&nbsp;     * {@code YYYY-MM-DDThh:mm+-oo:oo}, where {@code oo:oo} represents the
+<i>1279</i>&nbsp;     * hour and minutes of the local offset from UTC.&lt;/p&gt;
+<i>1280</i>&nbsp;     *
+<i>1281</i>&nbsp;     * &lt;p&gt;The values of the {@code year}, {@code month}, {@code day},
+<i>1282</i>&nbsp;     * {@code hour}, and {@code minute} parameters are relative to the
+<i>1283</i>&nbsp;     * local {@code offset}.&lt;/p&gt;
+<i>1284</i>&nbsp;     *
+<i>1285</i>&nbsp;     * @param offset
+<i>1286</i>&nbsp;     *          the local offset from UTC, measured in minutes;
+<i>1287</i>&nbsp;     *          may be {@code null} to represent an unknown local offset
+<i>1288</i>&nbsp;     *
+<i>1289</i>&nbsp;     */
+<i>1290</i>&nbsp;    public static Timestamp forMinute(int year, int month, int day,
+<i>1291</i>&nbsp;                                      int hour, int minute,
+<i>1292</i>&nbsp;                                      Integer offset)
+<i>1293</i>&nbsp;    {
+<b class="nc"><i>1294</i>&nbsp;        return new Timestamp(year, month, day, hour, minute, offset);</b>
+<i>1295</i>&nbsp;    }
+<i>1296</i>&nbsp;
+<i>1297</i>&nbsp;
+<i>1298</i>&nbsp;    /**
+<i>1299</i>&nbsp;     * Returns a Timestamp, precise to the second, with a given local offset.
+<i>1300</i>&nbsp;     *
+<i>1301</i>&nbsp;     * &lt;p&gt;This is equivalent to the corresponding Ion value
+<i>1302</i>&nbsp;     * {@code YYYY-MM-DDThh:mm:ss+-oo:oo}, where {@code oo:oo} represents the
+<i>1303</i>&nbsp;     * hour and minutes of the local offset from UTC.&lt;/p&gt;
+<i>1304</i>&nbsp;     *
+<i>1305</i>&nbsp;     * &lt;p&gt;The values of the {@code year}, {@code month}, {@code day},
+<i>1306</i>&nbsp;     * {@code hour}, {@code minute} and {@code second} parameters are relative
+<i>1307</i>&nbsp;     * to the local {@code offset}.&lt;/p&gt;
+<i>1308</i>&nbsp;     *
+<i>1309</i>&nbsp;     * @param offset
+<i>1310</i>&nbsp;     *          the local offset from UTC, measured in minutes;
+<i>1311</i>&nbsp;     *          may be {@code null} to represent an unknown local offset
+<i>1312</i>&nbsp;     *
+<i>1313</i>&nbsp;
+<i>1314</i>&nbsp;     */
+<i>1315</i>&nbsp;    public static Timestamp forSecond(int year, int month, int day,
+<i>1316</i>&nbsp;                                      int hour, int minute, int second,
+<i>1317</i>&nbsp;                                      Integer offset)
+<i>1318</i>&nbsp;    {
+<b class="fc"><i>1319</i>&nbsp;        return new Timestamp(year, month, day, hour, minute, second, offset);</b>
+<i>1320</i>&nbsp;    }
+<i>1321</i>&nbsp;
+<i>1322</i>&nbsp;
+<i>1323</i>&nbsp;    /**
+<i>1324</i>&nbsp;     * Returns a Timestamp, precise to the second, with a given local offset.
+<i>1325</i>&nbsp;     *
+<i>1326</i>&nbsp;     * &lt;p&gt;This is equivalent to the corresponding Ion value
+<i>1327</i>&nbsp;     * {@code YYYY-MM-DDThh:mm:ss.sss+-oo:oo}, where {@code oo:oo} represents
+<i>1328</i>&nbsp;     * the hour and minutes of the local offset from UTC.&lt;/p&gt;
+<i>1329</i>&nbsp;     *
+<i>1330</i>&nbsp;     * &lt;p&gt;The values of the {@code year}, {@code month}, {@code day},
+<i>1331</i>&nbsp;     * {@code hour}, {@code minute} and {@code second} parameters are relative
+<i>1332</i>&nbsp;     * to the local {@code offset}.&lt;/p&gt;
+<i>1333</i>&nbsp;     *
+<i>1334</i>&nbsp;     * @param second must be at least zero and less than 60. Must not be null.
+<i>1335</i>&nbsp;     * @param offset the local offset from UTC, measured in minutes;
+<i>1336</i>&nbsp;     *              may be {@code null} to represent an unknown local offset
+<i>1337</i>&nbsp;     *
+<i>1338</i>&nbsp;     */
+<i>1339</i>&nbsp;    public static Timestamp forSecond(int year, int month, int day,
+<i>1340</i>&nbsp;                                      int hour, int minute, BigDecimal second,
+<i>1341</i>&nbsp;                                      Integer offset)
+<i>1342</i>&nbsp;    {
+<i>1343</i>&nbsp;        // Tease apart the whole and fractional seconds.
+<i>1344</i>&nbsp;        // Storing them separately is silly.
+<b class="fc"><i>1345</i>&nbsp;        int s = second.intValue();</b>
+<b class="fc"><i>1346</i>&nbsp;        BigDecimal frac = second.subtract(BigDecimal.valueOf(s));</b>
+<b class="fc"><i>1347</i>&nbsp;        return new Timestamp(Precision.SECOND, year, month, day, hour, minute, s, frac, offset, APPLY_OFFSET_YES);</b>
+<i>1348</i>&nbsp;    }
+<i>1349</i>&nbsp;
+<i>1350</i>&nbsp;
+<i>1351</i>&nbsp;    /**
+<i>1352</i>&nbsp;     * Returns a Timestamp that represents the point in time that is {@code millis} milliseconds from the epoch,
+<i>1353</i>&nbsp;     * with a given local offset.
+<i>1354</i>&nbsp;     *
+<i>1355</i>&nbsp;     * &lt;p&gt;The resulting Timestamp will be precise to the millisecond.&lt;/p&gt;
+<i>1356</i>&nbsp;     *
+<i>1357</i>&nbsp;     * &lt;p&gt;{@code millis} is relative to UTC, regardless of the value supplied for {@code localOffset}.  This
+<i>1358</i>&nbsp;     * varies from the {@link #forMinute} and {@link #forSecond} methods that assume the specified date and time
+<i>1359</i>&nbsp;     * values are relative to the local offset.  For example, the following two Timestamps represent
+<i>1360</i>&nbsp;     * the same point in time:&lt;/p&gt;
+<i>1361</i>&nbsp;     *
+<i>1362</i>&nbsp;     * &lt;code&gt;
+<i>1363</i>&nbsp;     * Timestamp theEpoch = Timestamp.forMillis(0, 0);
+<i>1364</i>&nbsp;     * Timestamp alsoTheEpoch = Timestamp.forSecond(1969, 12, 31, 23, 0, BigDecimal.ZERO, -60);
+<i>1365</i>&nbsp;     * &lt;/code&gt;
+<i>1366</i>&nbsp;     *
+<i>1367</i>&nbsp;     * @param millis the number of milliseconds from the epoch (1970-01-01T00:00:00.000Z) in UTC.
+<i>1368</i>&nbsp;     * @param localOffset the local offset from UTC, measured in minutes;
+<i>1369</i>&nbsp;     *                    may be {@code null} to represent an unknown local offset.
+<i>1370</i>&nbsp;     */
+<i>1371</i>&nbsp;    public static Timestamp forMillis(long millis, Integer localOffset)
+<i>1372</i>&nbsp;    {
+<b class="fc"><i>1373</i>&nbsp;        return new Timestamp(millis, localOffset);</b>
+<i>1374</i>&nbsp;    }
+<i>1375</i>&nbsp;
+<i>1376</i>&nbsp;    /**
+<i>1377</i>&nbsp;     * The same as {@link #forMillis(long, Integer)} but the millisecond component is specified using a
+<i>1378</i>&nbsp;     * {@link BigDecimal} and therefore may include fractional milliseconds.
+<i>1379</i>&nbsp;     *
+<i>1380</i>&nbsp;     * @param millis
+<i>1381</i>&nbsp;     *          number of milliseconds (including any fractional
+<i>1382</i>&nbsp;     *          milliseconds) from the epoch (1970-01-01T00:00:00.000Z);
+<i>1383</i>&nbsp;     *          must not be {@code null}
+<i>1384</i>&nbsp;     * @param localOffset
+<i>1385</i>&nbsp;     *          the local offset from UTC, measured in minutes;
+<i>1386</i>&nbsp;     *          may be {@code null} to represent an unknown local offset
+<i>1387</i>&nbsp;     *
+<i>1388</i>&nbsp;     * @throws NullPointerException if {@code millis} is {@code null}
+<i>1389</i>&nbsp;     *
+<i>1390</i>&nbsp;     */
+<i>1391</i>&nbsp;    public static Timestamp forMillis(BigDecimal millis, Integer localOffset)
+<i>1392</i>&nbsp;    {
+<b class="fc"><i>1393</i>&nbsp;        return new Timestamp(millis, localOffset);</b>
+<i>1394</i>&nbsp;    }
+<i>1395</i>&nbsp;
+<i>1396</i>&nbsp;
+<i>1397</i>&nbsp;    /**
+<i>1398</i>&nbsp;     * Returns a Timestamp that represents the point in time that is {@code seconds} from the unix epoch
+<i>1399</i>&nbsp;     * (1970-01-01T00:00:00.000Z), with the {@code nanoOffset} applied and a given local offset.
+<i>1400</i>&nbsp;     *
+<i>1401</i>&nbsp;     * &lt;p&gt;This function is intended to allow easy conversion to Timestamp from Java 8&#39;s {@code java.time.Instant}
+<i>1402</i>&nbsp;     * without having to port this library to Java 8.  The following snippet will yield a Timestamp {@code ts}
+<i>1403</i>&nbsp;     * that equivalent to the {@code java.time.Instant} {@code i}:&lt;/p&gt;
+<i>1404</i>&nbsp;     *
+<i>1405</i>&nbsp;     * &lt;code&gt;
+<i>1406</i>&nbsp;     *     Instant i = Instant.now();
+<i>1407</i>&nbsp;     *     Timestamp ts = Timestamp.forEpochSecond(i.getEpochSecond(), i.getNano(), 0);
+<i>1408</i>&nbsp;     * &lt;/code&gt;
+<i>1409</i>&nbsp;     *
+<i>1410</i>&nbsp;     * &lt;p&gt;Like {@link #forMillis}, {@code seconds} is relative to UTC, regardless of the value
+<i>1411</i>&nbsp;     * supplied for {@code localOffset}.&lt;/p&gt;
+<i>1412</i>&nbsp;     *
+<i>1413</i>&nbsp;     * @param seconds The number of seconds from the unix epoch (1970-01-01T00:00:00.000Z) UTC.
+<i>1414</i>&nbsp;     * @param nanoOffset The number of nanoseconds for the fractional component. Must be between 0 and 999,999,999.
+<i>1415</i>&nbsp;     * @param localOffset the local offset from UTC, measured in minutes;
+<i>1416</i>&nbsp;     *                    may be {@code null} to represent an unknown local offset.
+<i>1417</i>&nbsp;     */
+<i>1418</i>&nbsp;    public static Timestamp forEpochSecond(long seconds, int nanoOffset, Integer localOffset) {
+<i>1419</i>&nbsp;        // We do not validate seconds here because that is done within the forMillis static constructor.
+<b class="fc"><i>1420</i>&nbsp;        long millis = seconds * 1000L;</b>
+<b class="fc"><i>1421</i>&nbsp;        Timestamp ts = forMillis(millis, localOffset);</b>
+<b class="fc"><i>1422</i>&nbsp;        if(nanoOffset != 0) {</b>
+<b class="fc"><i>1423</i>&nbsp;            if(nanoOffset &lt; 0 || nanoOffset &gt; 999999999) {</b>
+<b class="fc"><i>1424</i>&nbsp;                throw new IllegalArgumentException(&quot;nanoOffset must be between 0 and 999,999,999&quot;);</b>
+<i>1425</i>&nbsp;            }
+<b class="fc"><i>1426</i>&nbsp;            ts._fraction = ts._fraction.add(BigDecimal.valueOf(nanoOffset).movePointLeft(9));</b>
+<i>1427</i>&nbsp;        }
+<b class="fc"><i>1428</i>&nbsp;        return ts;</b>
+<i>1429</i>&nbsp;    }
+<i>1430</i>&nbsp;
+<i>1431</i>&nbsp;
+<i>1432</i>&nbsp;    /**
+<i>1433</i>&nbsp;     * Converts a {@link Calendar} to a Timestamp, preserving the calendar&#39;s
+<i>1434</i>&nbsp;     * time zone as the equivalent local offset when it has at least minutes
+<i>1435</i>&nbsp;     * precision.
+<i>1436</i>&nbsp;     *
+<i>1437</i>&nbsp;     * @return a Timestamp instance, with precision determined by the smallest
+<i>1438</i>&nbsp;     *   field set in the {@code Calendar};
+<i>1439</i>&nbsp;     *   or {@code null} if {@code calendar} is {@code null}
+<i>1440</i>&nbsp;     *
+<i>1441</i>&nbsp;
+<i>1442</i>&nbsp;     */
+<i>1443</i>&nbsp;    public static Timestamp forCalendar(Calendar calendar)
+<i>1444</i>&nbsp;    {
+<b class="fc"><i>1445</i>&nbsp;        if (calendar == null) return null;</b>
+<b class="fc"><i>1446</i>&nbsp;        return new Timestamp(calendar);</b>
+<i>1447</i>&nbsp;    }
+<i>1448</i>&nbsp;
+<i>1449</i>&nbsp;
+<i>1450</i>&nbsp;    /**
+<i>1451</i>&nbsp;     * Converts a {@link Date} to a Timestamp in UTC representing the same
+<i>1452</i>&nbsp;     * point in time.
+<i>1453</i>&nbsp;     * &lt;p&gt;
+<i>1454</i>&nbsp;     * The resulting Timestamp will be precise to the millisecond.
+<i>1455</i>&nbsp;     *
+<i>1456</i>&nbsp;     * @return
+<i>1457</i>&nbsp;     *          a new Timestamp instance, in UTC, precise to the millisecond;
+<i>1458</i>&nbsp;     *          {@code null} if {@code date} is {@code null}
+<i>1459</i>&nbsp;     *
+<i>1460</i>&nbsp;
+<i>1461</i>&nbsp;     */
+<i>1462</i>&nbsp;    public static Timestamp forDateZ(Date date)
+<i>1463</i>&nbsp;    {
+<b class="fc"><i>1464</i>&nbsp;        if (date == null) return null;</b>
+<b class="fc"><i>1465</i>&nbsp;        long millis = date.getTime();</b>
+<b class="fc"><i>1466</i>&nbsp;        return new Timestamp(millis, UTC_OFFSET);</b>
+<i>1467</i>&nbsp;    }
+<i>1468</i>&nbsp;
+<i>1469</i>&nbsp;
+<i>1470</i>&nbsp;    /**
+<i>1471</i>&nbsp;     * Converts a {@link java.sql.Timestamp} to a Timestamp in UTC representing
+<i>1472</i>&nbsp;     * the same point in time.
+<i>1473</i>&nbsp;     * &lt;p&gt;
+<i>1474</i>&nbsp;     * The resulting Timestamp will be precise to the nanosecond.
+<i>1475</i>&nbsp;     *
+<i>1476</i>&nbsp;     * @param sqlTimestamp assumed to have nanoseconds precision
+<i>1477</i>&nbsp;     *
+<i>1478</i>&nbsp;     * @return
+<i>1479</i>&nbsp;     *          a new Timestamp instance, in UTC, precise to the
+<i>1480</i>&nbsp;     *          nanosecond
+<i>1481</i>&nbsp;     *          {@code null} if {@code sqlTimestamp} is {@code null}
+<i>1482</i>&nbsp;     *
+<i>1483</i>&nbsp;
+<i>1484</i>&nbsp;     */
+<i>1485</i>&nbsp;    public static Timestamp forSqlTimestampZ(java.sql.Timestamp sqlTimestamp)
+<i>1486</i>&nbsp;    {
+<b class="fc"><i>1487</i>&nbsp;        if (sqlTimestamp == null) return null;</b>
+<i>1488</i>&nbsp;
+<b class="fc"><i>1489</i>&nbsp;        long millis = sqlTimestamp.getTime();</b>
+<b class="fc"><i>1490</i>&nbsp;        Timestamp ts = new Timestamp(millis, UTC_OFFSET);</b>
+<b class="fc"><i>1491</i>&nbsp;        int nanos = sqlTimestamp.getNanos();</b>
+<b class="fc"><i>1492</i>&nbsp;        BigDecimal frac = BigDecimal.valueOf(nanos).movePointLeft(9);</b>
+<b class="fc"><i>1493</i>&nbsp;        ts._fraction = frac;</b>
+<b class="fc"><i>1494</i>&nbsp;        return ts;</b>
+<i>1495</i>&nbsp;    }
+<i>1496</i>&nbsp;
+<i>1497</i>&nbsp;
+<i>1498</i>&nbsp;    /**
+<i>1499</i>&nbsp;     * Returns a Timestamp representing the current time (based on the JVM
+<i>1500</i>&nbsp;     * clock), with an unknown local offset.
+<i>1501</i>&nbsp;     * &lt;p&gt;
+<i>1502</i>&nbsp;     * The resulting Timestamp will be precise to the millisecond.
+<i>1503</i>&nbsp;     *
+<i>1504</i>&nbsp;     * @return
+<i>1505</i>&nbsp;     *          a new Timestamp instance representing the current time.
+<i>1506</i>&nbsp;     */
+<i>1507</i>&nbsp;    public static Timestamp now()
+<i>1508</i>&nbsp;    {
+<b class="nc"><i>1509</i>&nbsp;        long millis = System.currentTimeMillis();</b>
+<b class="nc"><i>1510</i>&nbsp;        return new Timestamp(millis, UNKNOWN_OFFSET);</b>
+<i>1511</i>&nbsp;    }
+<i>1512</i>&nbsp;
+<i>1513</i>&nbsp;    /**
+<i>1514</i>&nbsp;     * Returns a Timestamp in UTC representing the current time (based on the
+<i>1515</i>&nbsp;     * the JVM clock).
+<i>1516</i>&nbsp;     * &lt;p&gt;
+<i>1517</i>&nbsp;     * The resulting Timestamp will be precise to the millisecond.
+<i>1518</i>&nbsp;     *
+<i>1519</i>&nbsp;     * @return
+<i>1520</i>&nbsp;     *          a new Timestamp instance, in UTC, representing the current
+<i>1521</i>&nbsp;     *          time.
+<i>1522</i>&nbsp;     *
+<i>1523</i>&nbsp;
+<i>1524</i>&nbsp;     */
+<i>1525</i>&nbsp;    public static Timestamp nowZ()
+<i>1526</i>&nbsp;    {
+<b class="nc"><i>1527</i>&nbsp;        long millis = System.currentTimeMillis();</b>
+<b class="nc"><i>1528</i>&nbsp;        return new Timestamp(millis, UTC_OFFSET);</b>
+<i>1529</i>&nbsp;    }
+<i>1530</i>&nbsp;
+<i>1531</i>&nbsp;
+<i>1532</i>&nbsp;    /**
+<i>1533</i>&nbsp;     * Converts the value of this Timestamp into a {@link Date},
+<i>1534</i>&nbsp;     * representing the time in UTC.
+<i>1535</i>&nbsp;     * &lt;p&gt;
+<i>1536</i>&nbsp;     * This method will return the same result for all Timestamps representing
+<i>1537</i>&nbsp;     * the same point in time, regardless of the local offset.
+<i>1538</i>&nbsp;     * &lt;p&gt;
+<i>1539</i>&nbsp;     * Because {@link Date} instances are mutable, this method returns a
+<i>1540</i>&nbsp;     * new instance from each call.
+<i>1541</i>&nbsp;     *
+<i>1542</i>&nbsp;     * @return a new {@code Date} instance, in UTC
+<i>1543</i>&nbsp;     */
+<i>1544</i>&nbsp;    public Date dateValue()
+<i>1545</i>&nbsp;    {
+<b class="fc"><i>1546</i>&nbsp;        long millis = getMillis();</b>
+<b class="fc"><i>1547</i>&nbsp;        return new Date(millis);</b>
+<i>1548</i>&nbsp;    }
+<i>1549</i>&nbsp;
+<i>1550</i>&nbsp;
+<i>1551</i>&nbsp;    /**
+<i>1552</i>&nbsp;     * Converts the value of this Timestamp as a {@link Calendar}, in its
+<i>1553</i>&nbsp;     * local time.
+<i>1554</i>&nbsp;     * &lt;p&gt;
+<i>1555</i>&nbsp;     * Because {@link Calendar} instances are mutable, this method returns a
+<i>1556</i>&nbsp;     * new instance from each call.
+<i>1557</i>&nbsp;     *
+<i>1558</i>&nbsp;     * @return a new {@code Calendar} instance, in its local time.
+<i>1559</i>&nbsp;     *
+<i>1560</i>&nbsp;
+<i>1561</i>&nbsp;     */
+<i>1562</i>&nbsp;    public Calendar calendarValue()
+<i>1563</i>&nbsp;    {
+<b class="fc"><i>1564</i>&nbsp;        Calendar cal = new GregorianCalendar(_Private_Utils.UTC);</b>
+<i>1565</i>&nbsp;
+<b class="fc"><i>1566</i>&nbsp;        long millis = getMillis();</b>
+<b class="fc"><i>1567</i>&nbsp;        Integer offset = _offset;</b>
+<b class="fc"><i>1568</i>&nbsp;        if (offset != null &amp;&amp; offset != 0)</b>
+<i>1569</i>&nbsp;        {
+<b class="fc"><i>1570</i>&nbsp;            int offsetMillis = offset * 60 * 1000;</b>
+<b class="fc"><i>1571</i>&nbsp;            millis += offsetMillis;</b>
+<b class="fc"><i>1572</i>&nbsp;            cal.setTimeInMillis(millis);                // Resets the offset!</b>
+<b class="fc"><i>1573</i>&nbsp;            cal.set(Calendar.ZONE_OFFSET, offsetMillis);</b>
+<b class="fc"><i>1574</i>&nbsp;        }</b>
+<i>1575</i>&nbsp;        else
+<i>1576</i>&nbsp;        {
+<b class="fc"><i>1577</i>&nbsp;            cal.setTimeInMillis(millis);</b>
+<i>1578</i>&nbsp;        }
+<i>1579</i>&nbsp;
+<b class="fc"><i>1580</i>&nbsp;        switch (_precision) {</b>
+<i>1581</i>&nbsp;            case YEAR:
+<b class="fc"><i>1582</i>&nbsp;                cal.clear(Calendar.MONTH);</b>
+<i>1583</i>&nbsp;            case MONTH:
+<b class="fc"><i>1584</i>&nbsp;                cal.clear(Calendar.DAY_OF_MONTH);</b>
+<i>1585</i>&nbsp;            case DAY:
+<b class="fc"><i>1586</i>&nbsp;                cal.clear(Calendar.HOUR_OF_DAY);</b>
+<b class="fc"><i>1587</i>&nbsp;                cal.clear(Calendar.MINUTE);</b>
+<i>1588</i>&nbsp;            case MINUTE:
+<b class="fc"><i>1589</i>&nbsp;                cal.clear(Calendar.SECOND);</b>
+<b class="fc"><i>1590</i>&nbsp;                cal.clear(Calendar.MILLISECOND);</b>
+<i>1591</i>&nbsp;            case SECOND:
+<b class="fc"><i>1592</i>&nbsp;                if (_fraction == null) {</b>
+<b class="fc"><i>1593</i>&nbsp;                    cal.clear(Calendar.MILLISECOND);</b>
+<i>1594</i>&nbsp;                }
+<i>1595</i>&nbsp;        }
+<i>1596</i>&nbsp;
+<b class="fc"><i>1597</i>&nbsp;        return cal;</b>
+<i>1598</i>&nbsp;    }
+<i>1599</i>&nbsp;
+<i>1600</i>&nbsp;
+<i>1601</i>&nbsp;    /**
+<i>1602</i>&nbsp;     * Returns a number representing the Timestamp&#39;s point in time that is
+<i>1603</i>&nbsp;     * the number of milliseconds (&lt;em&gt;ignoring&lt;/em&gt; any fractional milliseconds)
+<i>1604</i>&nbsp;     * from the epoch.
+<i>1605</i>&nbsp;     * &lt;p&gt;
+<i>1606</i>&nbsp;     * This method will return the same result for all Timestamps representing
+<i>1607</i>&nbsp;     * the same point in time, regardless of the local offset.
+<i>1608</i>&nbsp;     *
+<i>1609</i>&nbsp;     * @return
+<i>1610</i>&nbsp;     *          number of milliseconds (&lt;em&gt;ignoring&lt;/em&gt; any fractional
+<i>1611</i>&nbsp;     *          milliseconds) from the epoch (1970-01-01T00:00:00.000Z)
+<i>1612</i>&nbsp;     */
+<i>1613</i>&nbsp;    @SuppressWarnings(&quot;deprecation&quot;)
+<i>1614</i>&nbsp;    public long getMillis()
+<i>1615</i>&nbsp;    {
+<i>1616</i>&nbsp;        //                                        month is 0 based for Date
+<b class="fc"><i>1617</i>&nbsp;        long millis = Date.UTC(this._year - 1900, this._month - 1, this._day, this._hour, this._minute, this._second);</b>
+<b class="fc"><i>1618</i>&nbsp;        if (this._fraction != null) {</b>
+<b class="fc"><i>1619</i>&nbsp;            BigDecimal fracAsDecimal = this._fraction.movePointRight(3);</b>
+<b class="fc"><i>1620</i>&nbsp;            int frac = isIntegralZero(fracAsDecimal) ? 0 : fracAsDecimal.intValue();</b>
+<b class="fc"><i>1621</i>&nbsp;            millis += frac;</b>
+<i>1622</i>&nbsp;        }
+<b class="fc"><i>1623</i>&nbsp;        return millis;</b>
+<i>1624</i>&nbsp;
+<i>1625</i>&nbsp;    }
+<i>1626</i>&nbsp;
+<i>1627</i>&nbsp;    /**
+<i>1628</i>&nbsp;     * Returns a BigDecimal representing the Timestamp&#39;s point in time that is
+<i>1629</i>&nbsp;     * the number of milliseconds (&lt;em&gt;including&lt;/em&gt; any fractional milliseconds)
+<i>1630</i>&nbsp;     * from the epoch.
+<i>1631</i>&nbsp;     * &lt;p&gt;
+<i>1632</i>&nbsp;     * This method will return the same result for all Timestamps representing
+<i>1633</i>&nbsp;     * the same point in time, regardless of the local offset.
+<i>1634</i>&nbsp;     *
+<i>1635</i>&nbsp;     * @return
+<i>1636</i>&nbsp;     *          number of milliseconds (&lt;em&gt;including&lt;/em&gt; any fractional
+<i>1637</i>&nbsp;     *          milliseconds) from the epoch (1970-01-01T00:00:00.000Z)
+<i>1638</i>&nbsp;     */
+<i>1639</i>&nbsp;    @SuppressWarnings(&quot;deprecation&quot;)
+<i>1640</i>&nbsp;    public BigDecimal getDecimalMillis()
+<i>1641</i>&nbsp;    {
+<b class="fc"><i>1642</i>&nbsp;        switch (this._precision) {</b>
+<i>1643</i>&nbsp;        case YEAR:
+<i>1644</i>&nbsp;        case MONTH:
+<i>1645</i>&nbsp;        case DAY:
+<i>1646</i>&nbsp;        case MINUTE:
+<i>1647</i>&nbsp;        case SECOND:
+<i>1648</i>&nbsp;        case FRACTION:
+<b class="fc"><i>1649</i>&nbsp;            long millis = Date.UTC(this._year - 1900, this._month - 1, this._day, this._hour, this._minute, this._second);</b>
+<b class="fc"><i>1650</i>&nbsp;            BigDecimal dec = BigDecimal.valueOf(millis);</b>
+<b class="fc"><i>1651</i>&nbsp;            if (_fraction != null) {</b>
+<b class="fc"><i>1652</i>&nbsp;                dec = dec.add(this._fraction.movePointRight(3));</b>
+<i>1653</i>&nbsp;            }
+<b class="fc"><i>1654</i>&nbsp;            return dec;</b>
+<i>1655</i>&nbsp;        }
+<b class="nc"><i>1656</i>&nbsp;        throw new IllegalArgumentException();</b>
+<i>1657</i>&nbsp;    }
+<i>1658</i>&nbsp;
+<i>1659</i>&nbsp;
+<i>1660</i>&nbsp;    /**
+<i>1661</i>&nbsp;     * Returns the precision of this Timestamp.
+<i>1662</i>&nbsp;     */
+<i>1663</i>&nbsp;    public Precision getPrecision()
+<i>1664</i>&nbsp;    {
+<b class="fc"><i>1665</i>&nbsp;        return this._precision;</b>
+<i>1666</i>&nbsp;    }
+<i>1667</i>&nbsp;
+<i>1668</i>&nbsp;    /**
+<i>1669</i>&nbsp;     * Returns the offset of this Timestamp, measured in minutes, for the local
+<i>1670</i>&nbsp;     * timezone in UTC.
+<i>1671</i>&nbsp;     * &lt;p&gt;
+<i>1672</i>&nbsp;     * For example, calling this method on Timestamps of:
+<i>1673</i>&nbsp;     * &lt;ul&gt;
+<i>1674</i>&nbsp;     *     &lt;li&gt;{@code 1969-02-23T07:00+07:00} will return {@code 420}&lt;/li&gt;
+<i>1675</i>&nbsp;     *     &lt;li&gt;{@code 1969-02-22T22:45:00.00-01:15} will return {@code -75}&lt;/li&gt;
+<i>1676</i>&nbsp;     *     &lt;li&gt;{@code 1969-02-23} (by Ion&#39;s definition, equivalent to
+<i>1677</i>&nbsp;     *     {@code 1969-02-23T00:00-00:00}) will return {@code null}&lt;/li&gt;
+<i>1678</i>&nbsp;     * &lt;/ul&gt;
+<i>1679</i>&nbsp;     *
+<i>1680</i>&nbsp;     * @return
+<i>1681</i>&nbsp;     *          {@code null} if the local offset is unknown
+<i>1682</i>&nbsp;     *          (i.e. {@code -00:00})
+<i>1683</i>&nbsp;     */
+<i>1684</i>&nbsp;    public Integer getLocalOffset()
+<i>1685</i>&nbsp;    {
+<b class="fc"><i>1686</i>&nbsp;        return _offset;</b>
+<i>1687</i>&nbsp;    }
+<i>1688</i>&nbsp;
+<i>1689</i>&nbsp;
+<i>1690</i>&nbsp;    /**
+<i>1691</i>&nbsp;     * Returns the year of this Timestamp, in its local time.
+<i>1692</i>&nbsp;     *
+<i>1693</i>&nbsp;     * @return
+<i>1694</i>&nbsp;     *          a number within the range [1, 9999], in its local time
+<i>1695</i>&nbsp;     */
+<i>1696</i>&nbsp;    public int getYear()
+<i>1697</i>&nbsp;    {
+<b class="fc"><i>1698</i>&nbsp;        Timestamp adjusted = this;</b>
+<i>1699</i>&nbsp;
+<b class="fc"><i>1700</i>&nbsp;        if (this._offset != null) {</b>
+<b class="fc"><i>1701</i>&nbsp;            if (this._offset.intValue() != 0) {</b>
+<b class="fc"><i>1702</i>&nbsp;                adjusted = make_localtime();</b>
+<i>1703</i>&nbsp;            }
+<i>1704</i>&nbsp;        }
+<b class="fc"><i>1705</i>&nbsp;        return adjusted._year;</b>
+<i>1706</i>&nbsp;    }
+<i>1707</i>&nbsp;
+<i>1708</i>&nbsp;
+<i>1709</i>&nbsp;    /**
+<i>1710</i>&nbsp;     * Returns the month of this Timestamp, in its local time.
+<i>1711</i>&nbsp;     *
+<i>1712</i>&nbsp;     * @return
+<i>1713</i>&nbsp;     *          a number within the range [1, 12], whereby 1 refers to January
+<i>1714</i>&nbsp;     *          and 12 refers to December, in its local time;
+<i>1715</i>&nbsp;     *          1 is returned if the Timestamp isn&#39;t precise to
+<i>1716</i>&nbsp;     *          the month
+<i>1717</i>&nbsp;     */
+<i>1718</i>&nbsp;    public int getMonth()
+<i>1719</i>&nbsp;    {
+<b class="fc"><i>1720</i>&nbsp;        Timestamp adjusted = this;</b>
+<i>1721</i>&nbsp;
+<b class="fc"><i>1722</i>&nbsp;        if (this._offset != null) {</b>
+<b class="fc"><i>1723</i>&nbsp;            if (this._offset.intValue() != 0) {</b>
+<b class="fc"><i>1724</i>&nbsp;                adjusted = make_localtime();</b>
+<i>1725</i>&nbsp;            }
+<i>1726</i>&nbsp;        }
+<b class="fc"><i>1727</i>&nbsp;        return adjusted._month;</b>
+<i>1728</i>&nbsp;    }
+<i>1729</i>&nbsp;
+<i>1730</i>&nbsp;
+<i>1731</i>&nbsp;    /**
+<i>1732</i>&nbsp;     * Returns the day (within the month) of this Timestamp, in its local time.
+<i>1733</i>&nbsp;     *
+<i>1734</i>&nbsp;     * @return
+<i>1735</i>&nbsp;     *          a number within the range [1, 31], in its local time;
+<i>1736</i>&nbsp;     *          1 is returned if the Timestamp isn&#39;t
+<i>1737</i>&nbsp;     *          precise to the day
+<i>1738</i>&nbsp;     */
+<i>1739</i>&nbsp;    public int getDay()
+<i>1740</i>&nbsp;    {
+<b class="fc"><i>1741</i>&nbsp;        Timestamp adjusted = this;</b>
+<b class="fc"><i>1742</i>&nbsp;        if (this._offset != null) {</b>
+<b class="fc"><i>1743</i>&nbsp;            if (this._offset.intValue() != 0) {</b>
+<b class="fc"><i>1744</i>&nbsp;                adjusted = make_localtime();</b>
+<i>1745</i>&nbsp;            }
+<i>1746</i>&nbsp;        }
+<b class="fc"><i>1747</i>&nbsp;        return adjusted._day;</b>
+<i>1748</i>&nbsp;    }
+<i>1749</i>&nbsp;
+<i>1750</i>&nbsp;
+<i>1751</i>&nbsp;    /**
+<i>1752</i>&nbsp;     * Returns the hour of this Timestamp, in its local time.
+<i>1753</i>&nbsp;     *
+<i>1754</i>&nbsp;     * @return
+<i>1755</i>&nbsp;     *          a number within the range [0, 23], in its local time;
+<i>1756</i>&nbsp;     *          0 is returned if the Timestamp isn&#39;t
+<i>1757</i>&nbsp;     *          precise to the hour
+<i>1758</i>&nbsp;     */
+<i>1759</i>&nbsp;    public int getHour()
+<i>1760</i>&nbsp;    {
+<b class="fc"><i>1761</i>&nbsp;        Timestamp adjusted = this;</b>
+<b class="fc"><i>1762</i>&nbsp;        if (this._offset != null) {</b>
+<b class="fc"><i>1763</i>&nbsp;            if (this._offset.intValue() != 0) {</b>
+<b class="fc"><i>1764</i>&nbsp;                adjusted = make_localtime();</b>
+<i>1765</i>&nbsp;            }
+<i>1766</i>&nbsp;        }
+<b class="fc"><i>1767</i>&nbsp;        return adjusted._hour;</b>
+<i>1768</i>&nbsp;    }
+<i>1769</i>&nbsp;
+<i>1770</i>&nbsp;
+<i>1771</i>&nbsp;    /**
+<i>1772</i>&nbsp;     * Returns the minute of this Timestamp, in its local time.
+<i>1773</i>&nbsp;     *
+<i>1774</i>&nbsp;     * @return
+<i>1775</i>&nbsp;     *          a number within the range [0, 59], in its local time;
+<i>1776</i>&nbsp;     *          0 is returned if the Timestamp isn&#39;t
+<i>1777</i>&nbsp;     *          precise to the minute
+<i>1778</i>&nbsp;     */
+<i>1779</i>&nbsp;    public int getMinute()
+<i>1780</i>&nbsp;    {
+<b class="fc"><i>1781</i>&nbsp;        Timestamp adjusted = this;</b>
+<b class="fc"><i>1782</i>&nbsp;        if (this._offset != null) {</b>
+<b class="fc"><i>1783</i>&nbsp;            if (this._offset.intValue() != 0) {</b>
+<b class="fc"><i>1784</i>&nbsp;                adjusted = make_localtime();</b>
+<i>1785</i>&nbsp;            }
+<i>1786</i>&nbsp;        }
+<b class="fc"><i>1787</i>&nbsp;        return adjusted._minute;</b>
+<i>1788</i>&nbsp;    }
+<i>1789</i>&nbsp;
+<i>1790</i>&nbsp;
+<i>1791</i>&nbsp;    /**
+<i>1792</i>&nbsp;     * Returns the seconds of this Timestamp, truncated to an integer.
+<i>1793</i>&nbsp;     * &lt;p&gt;
+<i>1794</i>&nbsp;     * Seconds are not affected by local offsets.
+<i>1795</i>&nbsp;     * As such, this method produces the same output as {@link #getZSecond()}.
+<i>1796</i>&nbsp;     *
+<i>1797</i>&nbsp;     * @return
+<i>1798</i>&nbsp;     *          a number within the range [0, 59];
+<i>1799</i>&nbsp;     *          0 is returned if the Timestamp isn&#39;t precise to the second
+<i>1800</i>&nbsp;     *
+<i>1801</i>&nbsp;     * @see #getZSecond()
+<i>1802</i>&nbsp;     */
+<i>1803</i>&nbsp;    public int getSecond()
+<i>1804</i>&nbsp;    {
+<b class="fc"><i>1805</i>&nbsp;        return this._second;</b>
+<i>1806</i>&nbsp;    }
+<i>1807</i>&nbsp;
+<i>1808</i>&nbsp;
+<i>1809</i>&nbsp;    /**
+<i>1810</i>&nbsp;     * Returns the seconds of this Timestamp.
+<i>1811</i>&nbsp;     * &lt;p&gt;
+<i>1812</i>&nbsp;     * Seconds are not affected by local offsets.
+<i>1813</i>&nbsp;     * As such, this method produces the same output as
+<i>1814</i>&nbsp;     * {@link #getZDecimalSecond()}.
+<i>1815</i>&nbsp;     *
+<i>1816</i>&nbsp;     * @return
+<i>1817</i>&nbsp;     *          a number within the range [0, 60);
+<i>1818</i>&nbsp;     *          0 is returned if the Timestamp isn&#39;t precise to the second
+<i>1819</i>&nbsp;     *
+<i>1820</i>&nbsp;     * @see #getZDecimalSecond()
+<i>1821</i>&nbsp;     */
+<i>1822</i>&nbsp;    public BigDecimal getDecimalSecond()
+<i>1823</i>&nbsp;    {
+<b class="fc"><i>1824</i>&nbsp;        BigDecimal sec = BigDecimal.valueOf(_second);</b>
+<b class="fc"><i>1825</i>&nbsp;        if (_fraction != null)</b>
+<i>1826</i>&nbsp;        {
+<b class="fc"><i>1827</i>&nbsp;            sec = sec.add(_fraction);</b>
+<i>1828</i>&nbsp;        }
+<b class="fc"><i>1829</i>&nbsp;        return sec;</b>
+<i>1830</i>&nbsp;    }
+<i>1831</i>&nbsp;
+<i>1832</i>&nbsp;
+<i>1833</i>&nbsp;    /**
+<i>1834</i>&nbsp;     * Returns the fractional second of this Timestamp.
+<i>1835</i>&nbsp;     * &lt;p&gt;
+<i>1836</i>&nbsp;     * Fractional seconds are not affected by local offsets.
+<i>1837</i>&nbsp;     * As such, this method produces the same output as
+<i>1838</i>&nbsp;     * {@link #getZFractionalSecond()}.
+<i>1839</i>&nbsp;     *
+<i>1840</i>&nbsp;     * @return
+<i>1841</i>&nbsp;     *          a BigDecimal within the range [0, 1);
+<i>1842</i>&nbsp;     *          {@code null} is returned if the Timestamp isn&#39;t
+<i>1843</i>&nbsp;     *          precise to the fractional second
+<i>1844</i>&nbsp;     *
+<i>1845</i>&nbsp;     * @see #getZFractionalSecond()
+<i>1846</i>&nbsp;     *
+<i>1847</i>&nbsp;     * Use {@link #getDecimalSecond()} instead.
+<i>1848</i>&nbsp;     */
+<i>1849</i>&nbsp;    @Deprecated
+<i>1850</i>&nbsp;    public BigDecimal getFractionalSecond()
+<i>1851</i>&nbsp;    {
+<b class="fc"><i>1852</i>&nbsp;        return this._fraction;</b>
+<i>1853</i>&nbsp;    }
+<i>1854</i>&nbsp;
+<i>1855</i>&nbsp;
+<i>1856</i>&nbsp;    /**
+<i>1857</i>&nbsp;     * Returns the year of this Timestamp, in UTC.
+<i>1858</i>&nbsp;     *
+<i>1859</i>&nbsp;     * @return
+<i>1860</i>&nbsp;     *          a number within the range [1, 9999], in UTC
+<i>1861</i>&nbsp;     */
+<i>1862</i>&nbsp;    public int getZYear()
+<i>1863</i>&nbsp;    {
+<b class="fc"><i>1864</i>&nbsp;        return this._year;</b>
+<i>1865</i>&nbsp;    }
+<i>1866</i>&nbsp;
+<i>1867</i>&nbsp;
+<i>1868</i>&nbsp;    /**
+<i>1869</i>&nbsp;     * Returns the month of this Timestamp, in UTC.
+<i>1870</i>&nbsp;     *
+<i>1871</i>&nbsp;     * @return
+<i>1872</i>&nbsp;     *          a number within the range [1, 12], whereby 1 refers to January
+<i>1873</i>&nbsp;     *          and 12 refers to December, in UTC;
+<i>1874</i>&nbsp;     *          1 is returned if the Timestamp isn&#39;t precise to
+<i>1875</i>&nbsp;     *          the month
+<i>1876</i>&nbsp;     */
+<i>1877</i>&nbsp;    public int getZMonth()
+<i>1878</i>&nbsp;    {
+<b class="fc"><i>1879</i>&nbsp;        return this._month;</b>
+<i>1880</i>&nbsp;    }
+<i>1881</i>&nbsp;
+<i>1882</i>&nbsp;
+<i>1883</i>&nbsp;    /**
+<i>1884</i>&nbsp;     * Returns the day of this Timestamp, in UTC.
+<i>1885</i>&nbsp;     *
+<i>1886</i>&nbsp;     * @return
+<i>1887</i>&nbsp;     *          a number within the range [1, 31], in UTC;
+<i>1888</i>&nbsp;     *          1 is returned if the Timestamp isn&#39;t
+<i>1889</i>&nbsp;     *          precise to the day
+<i>1890</i>&nbsp;     */
+<i>1891</i>&nbsp;    public int getZDay()
+<i>1892</i>&nbsp;    {
+<b class="fc"><i>1893</i>&nbsp;        return this._day;</b>
+<i>1894</i>&nbsp;    }
+<i>1895</i>&nbsp;
+<i>1896</i>&nbsp;
+<i>1897</i>&nbsp;    /**
+<i>1898</i>&nbsp;     * Returns the hour of this Timestamp, in UTC.
+<i>1899</i>&nbsp;     *
+<i>1900</i>&nbsp;     * @return
+<i>1901</i>&nbsp;     *          a number within the range [0, 23], in UTC;
+<i>1902</i>&nbsp;     *          0 is returned if the Timestamp isn&#39;t
+<i>1903</i>&nbsp;     *          precise to the hour
+<i>1904</i>&nbsp;     */
+<i>1905</i>&nbsp;    public int getZHour()
+<i>1906</i>&nbsp;    {
+<b class="fc"><i>1907</i>&nbsp;        return this._hour;</b>
+<i>1908</i>&nbsp;    }
+<i>1909</i>&nbsp;
+<i>1910</i>&nbsp;
+<i>1911</i>&nbsp;    /**
+<i>1912</i>&nbsp;     * Returns the minute of this Timestamp, in UTC.
+<i>1913</i>&nbsp;     *
+<i>1914</i>&nbsp;     * @return
+<i>1915</i>&nbsp;     *          a number within the range [0, 59], in UTC;
+<i>1916</i>&nbsp;     *          0 is returned if the Timestamp isn&#39;t
+<i>1917</i>&nbsp;     *          precise to the minute
+<i>1918</i>&nbsp;     */
+<i>1919</i>&nbsp;    public int getZMinute()
+<i>1920</i>&nbsp;    {
+<b class="fc"><i>1921</i>&nbsp;        return this._minute;</b>
+<i>1922</i>&nbsp;    }
+<i>1923</i>&nbsp;
+<i>1924</i>&nbsp;
+<i>1925</i>&nbsp;    /**
+<i>1926</i>&nbsp;     * Returns the second of this Timestamp.
+<i>1927</i>&nbsp;     * &lt;p&gt;
+<i>1928</i>&nbsp;     * Seconds are not affected by local offsets.
+<i>1929</i>&nbsp;     * As such, this method produces the same output as {@link #getSecond()}.
+<i>1930</i>&nbsp;     *
+<i>1931</i>&nbsp;     * @return
+<i>1932</i>&nbsp;     *          a number within the range [0, 59];
+<i>1933</i>&nbsp;     *          0 is returned if the Timestamp isn&#39;t precise to the second
+<i>1934</i>&nbsp;     *
+<i>1935</i>&nbsp;     * @see #getSecond()
+<i>1936</i>&nbsp;     */
+<i>1937</i>&nbsp;    public int getZSecond()
+<i>1938</i>&nbsp;    {
+<b class="fc"><i>1939</i>&nbsp;        return this._second;</b>
+<i>1940</i>&nbsp;    }
+<i>1941</i>&nbsp;
+<i>1942</i>&nbsp;
+<i>1943</i>&nbsp;    /**
+<i>1944</i>&nbsp;     * Returns the seconds of this Timestamp.
+<i>1945</i>&nbsp;     * &lt;p&gt;
+<i>1946</i>&nbsp;     * Seconds are not affected by local offsets.
+<i>1947</i>&nbsp;     * As such, this method produces the same output as
+<i>1948</i>&nbsp;     * {@link #getDecimalSecond()}.
+<i>1949</i>&nbsp;     *
+<i>1950</i>&nbsp;     * @return
+<i>1951</i>&nbsp;     *          a number within the range [0, 60);
+<i>1952</i>&nbsp;     *          0 is returned if the Timestamp isn&#39;t precise to the second
+<i>1953</i>&nbsp;     *
+<i>1954</i>&nbsp;     * @see #getDecimalSecond()
+<i>1955</i>&nbsp;     */
+<i>1956</i>&nbsp;    public BigDecimal getZDecimalSecond()
+<i>1957</i>&nbsp;    {
+<b class="nc"><i>1958</i>&nbsp;        return getDecimalSecond();</b>
+<i>1959</i>&nbsp;    }
+<i>1960</i>&nbsp;
+<i>1961</i>&nbsp;
+<i>1962</i>&nbsp;    /**
+<i>1963</i>&nbsp;     * Returns the fractional second of this Timestamp.
+<i>1964</i>&nbsp;     * &lt;p&gt;
+<i>1965</i>&nbsp;     * Fractional seconds are not affected by local offsets.
+<i>1966</i>&nbsp;     * As such, this method produces the same output as
+<i>1967</i>&nbsp;     * {@link #getFractionalSecond()}.
+<i>1968</i>&nbsp;     *
+<i>1969</i>&nbsp;     * @return
+<i>1970</i>&nbsp;     *          a BigDecimal within the range [0, 1);
+<i>1971</i>&nbsp;     *          {@code null} is returned if the Timestamp isn&#39;t
+<i>1972</i>&nbsp;     *          precise to the fractional second
+<i>1973</i>&nbsp;     *
+<i>1974</i>&nbsp;     * @see #getFractionalSecond()
+<i>1975</i>&nbsp;     *
+<i>1976</i>&nbsp;     * @deprecated Use {@link #getZDecimalSecond()} instead.
+<i>1977</i>&nbsp;     */
+<i>1978</i>&nbsp;    @Deprecated
+<i>1979</i>&nbsp;    public BigDecimal getZFractionalSecond()
+<i>1980</i>&nbsp;    {
+<b class="fc"><i>1981</i>&nbsp;        return this._fraction;</b>
+<i>1982</i>&nbsp;    }
+<i>1983</i>&nbsp;
+<i>1984</i>&nbsp;
+<i>1985</i>&nbsp;    //=========================================================================
+<i>1986</i>&nbsp;    // Modification methods
+<i>1987</i>&nbsp;
+<i>1988</i>&nbsp;
+<i>1989</i>&nbsp;    /**
+<i>1990</i>&nbsp;     * Returns a timestamp at the same point in time, but with the given local
+<i>1991</i>&nbsp;     * offset.  If this timestamp has precision coarser than minutes, then it
+<i>1992</i>&nbsp;     * is returned unchanged since such timestamps always have an unknown
+<i>1993</i>&nbsp;     * offset.
+<i>1994</i>&nbsp;     */
+<i>1995</i>&nbsp;    public Timestamp withLocalOffset(Integer offset)
+<i>1996</i>&nbsp;    {
+<b class="fc"><i>1997</i>&nbsp;        Precision precision = getPrecision();</b>
+<b class="fc"><i>1998</i>&nbsp;        if (precision.alwaysUnknownOffset() ||</b>
+<b class="fc"><i>1999</i>&nbsp;            safeEquals(offset, getLocalOffset()))</b>
+<i>2000</i>&nbsp;        {
+<b class="fc"><i>2001</i>&nbsp;            return this;</b>
+<i>2002</i>&nbsp;        }
+<i>2003</i>&nbsp;
+<b class="fc"><i>2004</i>&nbsp;        Timestamp ts = createFromUtcFields(precision,</b>
+<b class="fc"><i>2005</i>&nbsp;                                           getZYear(),</b>
+<b class="fc"><i>2006</i>&nbsp;                                           getZMonth(),</b>
+<b class="fc"><i>2007</i>&nbsp;                                           getZDay(),</b>
+<b class="fc"><i>2008</i>&nbsp;                                           getZHour(),</b>
+<b class="fc"><i>2009</i>&nbsp;                                           getZMinute(),</b>
+<b class="fc"><i>2010</i>&nbsp;                                           getZSecond(),</b>
+<b class="fc"><i>2011</i>&nbsp;                                           getZFractionalSecond(),</b>
+<i>2012</i>&nbsp;                                           offset);
+<b class="fc"><i>2013</i>&nbsp;        return ts;</b>
+<i>2014</i>&nbsp;    }
+<i>2015</i>&nbsp;
+<i>2016</i>&nbsp;
+<i>2017</i>&nbsp;    //=========================================================================
+<i>2018</i>&nbsp;
+<i>2019</i>&nbsp;
+<i>2020</i>&nbsp;    /**
+<i>2021</i>&nbsp;     * Returns the string representation (in Ion format) of this Timestamp in
+<i>2022</i>&nbsp;     * its local time.
+<i>2023</i>&nbsp;     *
+<i>2024</i>&nbsp;     * @see #toZString()
+<i>2025</i>&nbsp;     * @see #print(Appendable)
+<i>2026</i>&nbsp;     */
+<i>2027</i>&nbsp;    @Override
+<i>2028</i>&nbsp;    public String toString()
+<i>2029</i>&nbsp;    {
+<b class="fc"><i>2030</i>&nbsp;        StringBuilder buffer = new StringBuilder(32);</b>
+<i>2031</i>&nbsp;        try
+<i>2032</i>&nbsp;        {
+<b class="fc"><i>2033</i>&nbsp;            print(buffer);</b>
+<i>2034</i>&nbsp;        }
+<b class="nc"><i>2035</i>&nbsp;        catch (IOException e)</b>
+<i>2036</i>&nbsp;        {
+<b class="nc"><i>2037</i>&nbsp;            throw new RuntimeException(&quot;Exception printing to StringBuilder&quot;,</b>
+<i>2038</i>&nbsp;                                       e);
+<b class="fc"><i>2039</i>&nbsp;        }</b>
+<b class="fc"><i>2040</i>&nbsp;        return buffer.toString();</b>
+<i>2041</i>&nbsp;    }
+<i>2042</i>&nbsp;
+<i>2043</i>&nbsp;
+<i>2044</i>&nbsp;    /**
+<i>2045</i>&nbsp;     * Returns the string representation (in Ion format) of this Timestamp
+<i>2046</i>&nbsp;     * in UTC.
+<i>2047</i>&nbsp;     *
+<i>2048</i>&nbsp;     * @see #toString()
+<i>2049</i>&nbsp;     * @see #printZ(Appendable)
+<i>2050</i>&nbsp;     */
+<i>2051</i>&nbsp;    public String toZString()
+<i>2052</i>&nbsp;    {
+<b class="fc"><i>2053</i>&nbsp;        StringBuilder buffer = new StringBuilder(32);</b>
+<i>2054</i>&nbsp;        try
+<i>2055</i>&nbsp;        {
+<b class="fc"><i>2056</i>&nbsp;            printZ(buffer);</b>
+<i>2057</i>&nbsp;        }
+<b class="nc"><i>2058</i>&nbsp;        catch (IOException e)</b>
+<i>2059</i>&nbsp;        {
+<b class="nc"><i>2060</i>&nbsp;            throw new RuntimeException(&quot;Exception printing to StringBuilder&quot;,</b>
+<i>2061</i>&nbsp;                                       e);
+<b class="fc"><i>2062</i>&nbsp;        }</b>
+<b class="fc"><i>2063</i>&nbsp;        return buffer.toString();</b>
+<i>2064</i>&nbsp;    }
+<i>2065</i>&nbsp;
+<i>2066</i>&nbsp;
+<i>2067</i>&nbsp;    /**
+<i>2068</i>&nbsp;     * Prints to an {@code Appendable} the string representation (in Ion format)
+<i>2069</i>&nbsp;     * of this Timestamp in its local time.
+<i>2070</i>&nbsp;     * &lt;p&gt;
+<i>2071</i>&nbsp;     * This method produces the same output as {@link #toString()}.
+<i>2072</i>&nbsp;     *
+<i>2073</i>&nbsp;     * @param out not {@code null}
+<i>2074</i>&nbsp;     *
+<i>2075</i>&nbsp;     * @throws IOException propagated when the {@link Appendable} throws it
+<i>2076</i>&nbsp;     *
+<i>2077</i>&nbsp;     * @see #printZ(Appendable)
+<i>2078</i>&nbsp;     */
+<i>2079</i>&nbsp;    public void print(Appendable out)
+<i>2080</i>&nbsp;        throws IOException
+<i>2081</i>&nbsp;    {
+<i>2082</i>&nbsp;        // we have to make a copy to preserve the &quot;immutable&quot; contract
+<i>2083</i>&nbsp;        // on Timestamp and we don&#39;t want someone reading the calendar
+<i>2084</i>&nbsp;        // member while we&#39;ve shifted it around.
+<b class="fc"><i>2085</i>&nbsp;        Timestamp adjusted = this;</b>
+<i>2086</i>&nbsp;
+<i>2087</i>&nbsp;        // Adjust UTC time back to local time
+<b class="fc"><i>2088</i>&nbsp;        if (this._offset != null &amp;&amp; this._offset.intValue() != 0) {</b>
+<b class="fc"><i>2089</i>&nbsp;            adjusted = make_localtime();</b>
+<i>2090</i>&nbsp;        }
+<i>2091</i>&nbsp;
+<b class="fc"><i>2092</i>&nbsp;        print(out, adjusted);</b>
+<b class="fc"><i>2093</i>&nbsp;    }</b>
+<i>2094</i>&nbsp;
+<i>2095</i>&nbsp;
+<i>2096</i>&nbsp;    /**
+<i>2097</i>&nbsp;     * Prints to an {@code Appendable} the string representation (in Ion format)
+<i>2098</i>&nbsp;     * of this Timestamp in UTC.
+<i>2099</i>&nbsp;     * &lt;p&gt;
+<i>2100</i>&nbsp;     * This method produces the same output as {@link #toZString()}.
+<i>2101</i>&nbsp;     *
+<i>2102</i>&nbsp;     * @param out not {@code null}
+<i>2103</i>&nbsp;     *
+<i>2104</i>&nbsp;     * @throws IOException propagated when the {@code Appendable} throws it.
+<i>2105</i>&nbsp;     *
+<i>2106</i>&nbsp;     * @see #print(Appendable)
+<i>2107</i>&nbsp;     */
+<i>2108</i>&nbsp;    public void printZ(Appendable out)
+<i>2109</i>&nbsp;        throws IOException
+<i>2110</i>&nbsp;    {
+<b class="fc"><i>2111</i>&nbsp;        switch (_precision)</b>
+<i>2112</i>&nbsp;        {
+<i>2113</i>&nbsp;            case YEAR:
+<i>2114</i>&nbsp;            case MONTH:
+<i>2115</i>&nbsp;            case DAY:
+<i>2116</i>&nbsp;            {
+<b class="fc"><i>2117</i>&nbsp;                assert _offset == UNKNOWN_OFFSET;</b>
+<i>2118</i>&nbsp;                // No need to adjust offset, we won&#39;t be using it.
+<b class="fc"><i>2119</i>&nbsp;                print(out);</b>
+<b class="fc"><i>2120</i>&nbsp;                break;</b>
+<i>2121</i>&nbsp;            }
+<i>2122</i>&nbsp;            case MINUTE:
+<i>2123</i>&nbsp;            case SECOND:
+<i>2124</i>&nbsp;            case FRACTION:
+<i>2125</i>&nbsp;            {
+<b class="fc"><i>2126</i>&nbsp;                Timestamp ztime = this.clone();</b>
+<b class="fc"><i>2127</i>&nbsp;                ztime._offset = UTC_OFFSET;</b>
+<b class="fc"><i>2128</i>&nbsp;                ztime.print(out);</b>
+<b class="fc"><i>2129</i>&nbsp;                break;</b>
+<i>2130</i>&nbsp;            }
+<i>2131</i>&nbsp;        }
+<b class="fc"><i>2132</i>&nbsp;    }</b>
+<i>2133</i>&nbsp;
+<i>2134</i>&nbsp;
+<i>2135</i>&nbsp;    /**
+<i>2136</i>&nbsp;     * helper for print(out) and printZ(out) so that printZ can create
+<i>2137</i>&nbsp;     * a zulu time and pass it directly and print can apply the local
+<i>2138</i>&nbsp;     * offset and adjust the various fields (without breaking the
+<i>2139</i>&nbsp;     * contract to be immutable).
+<i>2140</i>&nbsp;     * @param out destination for the text image of the value
+<i>2141</i>&nbsp;     * @param adjusted the time value with the fields adjusted to match the desired text output
+<i>2142</i>&nbsp;     * @throws IOException
+<i>2143</i>&nbsp;     */
+<i>2144</i>&nbsp;    private static void print(Appendable out, Timestamp adjusted)
+<i>2145</i>&nbsp;        throws IOException
+<i>2146</i>&nbsp;    {
+<i>2147</i>&nbsp;        // null is our first &quot;guess&quot; to get it out of the way
+<b class="fc"><i>2148</i>&nbsp;        if (adjusted == null) {</b>
+<b class="nc"><i>2149</i>&nbsp;            out.append(&quot;null.timestamp&quot;);</b>
+<b class="nc"><i>2150</i>&nbsp;            return;</b>
+<i>2151</i>&nbsp;        }
+<i>2152</i>&nbsp;
+<i>2153</i>&nbsp;        // so we have a real value - we&#39;ll start with the date portion
+<i>2154</i>&nbsp;        // which we always have
+<b class="fc"><i>2155</i>&nbsp;        print_digits(out, adjusted._year, 4);</b>
+<b class="fc"><i>2156</i>&nbsp;        if (adjusted._precision == Precision.YEAR) {</b>
+<b class="fc"><i>2157</i>&nbsp;            assert adjusted._offset == UNKNOWN_OFFSET;</b>
+<b class="fc"><i>2158</i>&nbsp;            out.append(&quot;T&quot;);</b>
+<b class="fc"><i>2159</i>&nbsp;            return;</b>
+<i>2160</i>&nbsp;        }
+<i>2161</i>&nbsp;
+<b class="fc"><i>2162</i>&nbsp;        out.append(&quot;-&quot;);</b>
+<b class="fc"><i>2163</i>&nbsp;        print_digits(out, adjusted._month, 2);  // convert calendar months to a base 1 value</b>
+<b class="fc"><i>2164</i>&nbsp;        if (adjusted._precision == Precision.MONTH) {</b>
+<b class="fc"><i>2165</i>&nbsp;            assert adjusted._offset == UNKNOWN_OFFSET;</b>
+<b class="fc"><i>2166</i>&nbsp;            out.append(&quot;T&quot;);</b>
+<b class="fc"><i>2167</i>&nbsp;            return;</b>
+<i>2168</i>&nbsp;        }
+<i>2169</i>&nbsp;
+<b class="fc"><i>2170</i>&nbsp;        out.append(&quot;-&quot;);</b>
+<b class="fc"><i>2171</i>&nbsp;        print_digits(out, adjusted._day, 2);</b>
+<b class="fc"><i>2172</i>&nbsp;        if (adjusted._precision == Precision.DAY) {</b>
+<b class="fc"><i>2173</i>&nbsp;            assert adjusted._offset == UNKNOWN_OFFSET;</b>
+<i>2174</i>&nbsp;            // out.append(&quot;T&quot;);
+<b class="fc"><i>2175</i>&nbsp;            return;</b>
+<i>2176</i>&nbsp;        }
+<i>2177</i>&nbsp;
+<b class="fc"><i>2178</i>&nbsp;        out.append(&quot;T&quot;);</b>
+<b class="fc"><i>2179</i>&nbsp;        print_digits(out, adjusted._hour, 2);</b>
+<b class="fc"><i>2180</i>&nbsp;        out.append(&quot;:&quot;);</b>
+<b class="fc"><i>2181</i>&nbsp;        print_digits(out, adjusted._minute, 2);</b>
+<i>2182</i>&nbsp;        // ok, so how much time do we have ?
+<b class="fc"><i>2183</i>&nbsp;        if (adjusted._precision == Precision.SECOND) {</b>
+<b class="fc"><i>2184</i>&nbsp;            out.append(&quot;:&quot;);</b>
+<b class="fc"><i>2185</i>&nbsp;            print_digits(out, adjusted._second, 2);</b>
+<b class="fc"><i>2186</i>&nbsp;            if (adjusted._fraction != null) {</b>
+<b class="fc"><i>2187</i>&nbsp;                print_fractional_digits(out, adjusted._fraction);</b>
+<i>2188</i>&nbsp;            }
+<i>2189</i>&nbsp;        }
+<i>2190</i>&nbsp;
+<b class="fc"><i>2191</i>&nbsp;        if (adjusted._offset != UNKNOWN_OFFSET) {</b>
+<i>2192</i>&nbsp;            int min, hour;
+<b class="fc"><i>2193</i>&nbsp;            min = adjusted._offset;</b>
+<b class="fc"><i>2194</i>&nbsp;            if (min == 0) {</b>
+<b class="fc"><i>2195</i>&nbsp;                out.append(&#39;Z&#39;);</b>
+<i>2196</i>&nbsp;            }
+<i>2197</i>&nbsp;            else {
+<b class="fc"><i>2198</i>&nbsp;                if (min &lt; 0) {</b>
+<b class="fc"><i>2199</i>&nbsp;                    min = -min;</b>
+<b class="fc"><i>2200</i>&nbsp;                    out.append(&#39;-&#39;);</b>
+<i>2201</i>&nbsp;                }
+<i>2202</i>&nbsp;                else {
+<b class="fc"><i>2203</i>&nbsp;                    out.append(&#39;+&#39;);</b>
+<i>2204</i>&nbsp;                }
+<b class="fc"><i>2205</i>&nbsp;                hour = min / 60;</b>
+<b class="fc"><i>2206</i>&nbsp;                min = min - hour*60;</b>
+<b class="fc"><i>2207</i>&nbsp;                print_digits(out, hour, 2);</b>
+<b class="fc"><i>2208</i>&nbsp;                out.append(&quot;:&quot;);</b>
+<b class="fc"><i>2209</i>&nbsp;                print_digits(out, min, 2);</b>
+<i>2210</i>&nbsp;            }
+<b class="fc"><i>2211</i>&nbsp;        }</b>
+<i>2212</i>&nbsp;        else {
+<b class="fc"><i>2213</i>&nbsp;            out.append(&quot;-00:00&quot;);</b>
+<i>2214</i>&nbsp;        }
+<b class="fc"><i>2215</i>&nbsp;    }</b>
+<i>2216</i>&nbsp;    private static void print_digits(Appendable out, int value, int length)
+<i>2217</i>&nbsp;        throws IOException
+<i>2218</i>&nbsp;    {
+<b class="fc"><i>2219</i>&nbsp;        char temp[] = new char[length];</b>
+<b class="fc"><i>2220</i>&nbsp;        while (length &gt; 0) {</b>
+<b class="fc"><i>2221</i>&nbsp;            length--;</b>
+<b class="fc"><i>2222</i>&nbsp;            int next = value / 10;</b>
+<b class="fc"><i>2223</i>&nbsp;            temp[length] =  (char)(&#39;0&#39; + (value - next*10));</b>
+<b class="fc"><i>2224</i>&nbsp;            value = next;</b>
+<b class="fc"><i>2225</i>&nbsp;        }</b>
+<b class="fc"><i>2226</i>&nbsp;        while (length &gt; 0) {</b>
+<b class="nc"><i>2227</i>&nbsp;            length--;</b>
+<b class="nc"><i>2228</i>&nbsp;            temp[length] =  &#39;0&#39;;</b>
+<i>2229</i>&nbsp;        }
+<b class="fc"><i>2230</i>&nbsp;        for (char c : temp) {</b>
+<b class="fc"><i>2231</i>&nbsp;            out.append(c);</b>
+<i>2232</i>&nbsp;        }
+<b class="fc"><i>2233</i>&nbsp;    }</b>
+<i>2234</i>&nbsp;    private static void print_fractional_digits(Appendable out, BigDecimal value)
+<i>2235</i>&nbsp;        throws IOException
+<i>2236</i>&nbsp;    {
+<b class="fc"><i>2237</i>&nbsp;        String temp = value.toPlainString(); // crude, but it works</b>
+<b class="fc"><i>2238</i>&nbsp;        if (temp.charAt(0) == &#39;0&#39;) { // this should always be true</b>
+<b class="fc"><i>2239</i>&nbsp;            temp = temp.substring(1);</b>
+<i>2240</i>&nbsp;        }
+<b class="fc"><i>2241</i>&nbsp;        out.append(temp);</b>
+<b class="fc"><i>2242</i>&nbsp;    }</b>
+<i>2243</i>&nbsp;
+<i>2244</i>&nbsp;
+<i>2245</i>&nbsp;    //=========================================================================
+<i>2246</i>&nbsp;    // Timestamp arithmetic
+<i>2247</i>&nbsp;
+<i>2248</i>&nbsp;
+<i>2249</i>&nbsp;    /**
+<i>2250</i>&nbsp;     * Returns a timestamp relative to this one by the given number of
+<i>2251</i>&nbsp;     * milliseconds.
+<i>2252</i>&nbsp;     * &lt;p&gt;
+<i>2253</i>&nbsp;     * This method always returns a Timestamp with the same precision as
+<i>2254</i>&nbsp;     * the original. After performing the arithmetic, the resulting Timestamp&#39;s
+<i>2255</i>&nbsp;     * seconds value will be truncated to the same fractional precision as the
+<i>2256</i>&nbsp;     * original. For example, adjusting {@code 2012-04-01T00:00:00Z} by one
+<i>2257</i>&nbsp;     * millisecond results in {@code 2012-04-01T00:00:00Z}; adjusting
+<i>2258</i>&nbsp;     * {@code 2012-04-01T00:00:00.0010Z} by -1 millisecond results in
+<i>2259</i>&nbsp;     * {@code 2012-04-01T00:00:00.0000Z}. To extend the precision when the
+<i>2260</i>&nbsp;     * original Timestamp has coarser than SECOND precision and to avoid
+<i>2261</i>&nbsp;     * truncation of the seconds value, use {@link #addSecond(int)}.
+<i>2262</i>&nbsp;     *
+<i>2263</i>&nbsp;     * @param amount a number of milliseconds.
+<i>2264</i>&nbsp;     */
+<i>2265</i>&nbsp;    public final Timestamp adjustMillis(long amount) {
+<b class="fc"><i>2266</i>&nbsp;        if (amount == 0) return this;</b>
+<b class="fc"><i>2267</i>&nbsp;        Timestamp ts = addMillisForPrecision(amount, _precision, false);</b>
+<i>2268</i>&nbsp;        //ts._precision = _precision;
+<b class="fc"><i>2269</i>&nbsp;        ts.clearUnusedPrecision();</b>
+<b class="fc"><i>2270</i>&nbsp;        if (ts._precision.includes(Precision.SECOND)) {</b>
+<i>2271</i>&nbsp;            // Maintain the same amount of fractional precision.
+<b class="fc"><i>2272</i>&nbsp;            if (_fraction == null) {</b>
+<b class="fc"><i>2273</i>&nbsp;                ts._fraction = null;</b>
+<i>2274</i>&nbsp;            } else {
+<i>2275</i>&nbsp;                // Truncate the result only if it exceeds the fractional precision of the original.
+<b class="fc"><i>2276</i>&nbsp;                if (ts._fraction.scale() &gt; _fraction.scale()) {</b>
+<b class="nc"><i>2277</i>&nbsp;                    ts._fraction = ts._fraction.setScale(_fraction.scale(), RoundingMode.FLOOR);</b>
+<i>2278</i>&nbsp;                }
+<i>2279</i>&nbsp;            }
+<i>2280</i>&nbsp;        }
+<b class="fc"><i>2281</i>&nbsp;        return ts;</b>
+<i>2282</i>&nbsp;    }
+<i>2283</i>&nbsp;
+<i>2284</i>&nbsp;    /**
+<i>2285</i>&nbsp;     * Returns a timestamp relative to this one by the given number of
+<i>2286</i>&nbsp;     * milliseconds.
+<i>2287</i>&nbsp;     * &lt;p&gt;
+<i>2288</i>&nbsp;     * This method always returns a Timestamp with SECOND precision and a seconds
+<i>2289</i>&nbsp;     * value precise at least to the millisecond. For example, adding one millisecond
+<i>2290</i>&nbsp;     * to {@code 2011T} results in {@code 2011-01-01T00:00:00.001-00:00}. To receive
+<i>2291</i>&nbsp;     * a Timestamp that always maintains the same precision as the original, use
+<i>2292</i>&nbsp;     * {@link #adjustMillis(long)}.
+<i>2293</i>&nbsp;     * milliseconds.
+<i>2294</i>&nbsp;     *
+<i>2295</i>&nbsp;     * @param amount a number of milliseconds.
+<i>2296</i>&nbsp;     */
+<i>2297</i>&nbsp;    public final Timestamp addMillis(long amount)
+<i>2298</i>&nbsp;    {
+<b class="fc"><i>2299</i>&nbsp;        if (amount == 0 &amp;&amp; _precision.includes(Precision.SECOND) &amp;&amp; _fraction != null &amp;&amp; _fraction.scale() &gt;= 3) {</b>
+<i>2300</i>&nbsp;            // Zero milliseconds are to be added, and the precision does not need to be increased.
+<b class="fc"><i>2301</i>&nbsp;            return this;</b>
+<i>2302</i>&nbsp;        }
+<b class="fc"><i>2303</i>&nbsp;        return addMillisForPrecision(amount, Precision.SECOND, true);</b>
+<i>2304</i>&nbsp;    }
+<i>2305</i>&nbsp;
+<i>2306</i>&nbsp;    /**
+<i>2307</i>&nbsp;     * Adds the given number of milliseconds, extending (if necessary) the resulting Timestamp to the given
+<i>2308</i>&nbsp;     * precision.
+<i>2309</i>&nbsp;     * @param amount the number of milliseconds to add.
+<i>2310</i>&nbsp;     * @param precision the precision that the Timestamp will be extended to, if it does not already include that
+<i>2311</i>&nbsp;     *                  precision.
+<i>2312</i>&nbsp;     * @param millisecondsPrecision true if and only if the `amount` includes milliseconds precision. If true, the
+<i>2313</i>&nbsp;     *                              resulting timestamp&#39;s fraction will have precision at least to the millisecond.
+<i>2314</i>&nbsp;     * @return a new Timestamp.
+<i>2315</i>&nbsp;     */
+<i>2316</i>&nbsp;    private Timestamp addMillisForPrecision(long amount, Precision precision, boolean millisecondsPrecision) {
+<i>2317</i>&nbsp;        // When millisecondsPrecision is true, the caller must do its own short-circuiting because it must
+<i>2318</i>&nbsp;        // check the fractional precision.
+<b class="fc"><i>2319</i>&nbsp;        if (!millisecondsPrecision &amp;&amp; amount == 0 &amp;&amp; _precision == precision) return this;</b>
+<i>2320</i>&nbsp;        // This strips off the local offset, expressing our fields as if they
+<i>2321</i>&nbsp;        // were UTC.
+<b class="fc"><i>2322</i>&nbsp;        BigDecimal millis = make_localtime().getDecimalMillis();</b>
+<b class="fc"><i>2323</i>&nbsp;        millis = millis.add(BigDecimal.valueOf(amount));</b>
+<b class="fc"><i>2324</i>&nbsp;        Precision newPrecision = _precision.includes(precision) ? _precision : precision;</b>
+<i>2325</i>&nbsp;
+<i>2326</i>&nbsp;
+<b class="fc"><i>2327</i>&nbsp;        Timestamp ts = new Timestamp(millis, newPrecision, _offset);</b>
+<i>2328</i>&nbsp;        // Anything with courser-than-millis precision will have been extended
+<i>2329</i>&nbsp;        // to 3 decimal places due to use of getDecimalMillis(). Compensate for
+<i>2330</i>&nbsp;        // that by setting the scale such that it is never extended unless
+<i>2331</i>&nbsp;        // milliseconds precision is being added and the fraction does not yet
+<i>2332</i>&nbsp;        // have milliseconds precision.
+<b class="fc"><i>2333</i>&nbsp;        int newScale = millisecondsPrecision ? 3 : 0;</b>
+<b class="fc"><i>2334</i>&nbsp;        if (_fraction != null) {</b>
+<b class="fc"><i>2335</i>&nbsp;            newScale = Math.max(newScale, _fraction.scale());</b>
+<i>2336</i>&nbsp;        }
+<b class="fc"><i>2337</i>&nbsp;        if (ts._fraction != null) {</b>
+<b class="fc"><i>2338</i>&nbsp;            ts._fraction = newScale == 0 ? null : ts._fraction.setScale(newScale, RoundingMode.FLOOR);</b>
+<i>2339</i>&nbsp;        }
+<b class="fc"><i>2340</i>&nbsp;        if (_offset != null &amp;&amp; _offset != 0)</b>
+<i>2341</i>&nbsp;        {
+<b class="fc"><i>2342</i>&nbsp;            ts.apply_offset(_offset);</b>
+<i>2343</i>&nbsp;        }
+<b class="fc"><i>2344</i>&nbsp;        return ts;</b>
+<i>2345</i>&nbsp;    }
+<i>2346</i>&nbsp;
+<i>2347</i>&nbsp;    /**
+<i>2348</i>&nbsp;     * Clears any fields more precise than this Timestamp&#39;s precision supports.
+<i>2349</i>&nbsp;     */
+<i>2350</i>&nbsp;    private void clearUnusedPrecision() {
+<b class="fc"><i>2351</i>&nbsp;        switch (_precision) {</b>
+<i>2352</i>&nbsp;            case YEAR:
+<b class="fc"><i>2353</i>&nbsp;                _month = 1;</b>
+<i>2354</i>&nbsp;            case MONTH:
+<b class="fc"><i>2355</i>&nbsp;                _day = 1;</b>
+<i>2356</i>&nbsp;            case DAY:
+<b class="fc"><i>2357</i>&nbsp;                _hour = 0;</b>
+<b class="fc"><i>2358</i>&nbsp;                _minute = 0;</b>
+<i>2359</i>&nbsp;            case MINUTE:
+<b class="fc"><i>2360</i>&nbsp;                _second = 0;</b>
+<b class="fc"><i>2361</i>&nbsp;                _fraction = null;</b>
+<i>2362</i>&nbsp;            case SECOND:
+<i>2363</i>&nbsp;        }
+<b class="fc"><i>2364</i>&nbsp;    }</b>
+<i>2365</i>&nbsp;
+<i>2366</i>&nbsp;    /**
+<i>2367</i>&nbsp;     * Returns a timestamp relative to this one by the given number of seconds.
+<i>2368</i>&nbsp;     * &lt;p&gt;
+<i>2369</i>&nbsp;     * This method always returns a Timestamp with the same precision as
+<i>2370</i>&nbsp;     * the original. For example, adjusting {@code 2012-04-01T00:00Z} by one
+<i>2371</i>&nbsp;     * second results in {@code 2012-04-01T00:00Z}; adjusting
+<i>2372</i>&nbsp;     * {@code 2012-04-01T00:00:00Z} by -1 second results in
+<i>2373</i>&nbsp;     * {@code 2012-03-31T23:59:59Z}. To extend the precision when the original
+<i>2374</i>&nbsp;     * Timestamp has coarser than SECOND precision, use {@link #addSecond(int)}.
+<i>2375</i>&nbsp;     *
+<i>2376</i>&nbsp;     * @param amount a number of seconds.
+<i>2377</i>&nbsp;     */
+<i>2378</i>&nbsp;    public final Timestamp adjustSecond(int amount)
+<i>2379</i>&nbsp;    {
+<b class="fc"><i>2380</i>&nbsp;        long delta = (long) amount * 1000;</b>
+<b class="fc"><i>2381</i>&nbsp;        return adjustMillis(delta);</b>
+<i>2382</i>&nbsp;    }
+<i>2383</i>&nbsp;
+<i>2384</i>&nbsp;    /**
+<i>2385</i>&nbsp;     * Returns a timestamp relative to this one by the given number of seconds.
+<i>2386</i>&nbsp;     * &lt;p&gt;
+<i>2387</i>&nbsp;     * This method always returns a Timestamp with SECOND precision.
+<i>2388</i>&nbsp;     * For example, adding one second to {@code 2011T} results in
+<i>2389</i>&nbsp;     * {@code 2011-01-01T00:00:01-00:00}. To receive a Timestamp that always
+<i>2390</i>&nbsp;     * maintains the same precision as the original, use {@link #adjustSecond(int)}.
+<i>2391</i>&nbsp;     *
+<i>2392</i>&nbsp;     * @param amount a number of seconds.
+<i>2393</i>&nbsp;     */
+<i>2394</i>&nbsp;    public final Timestamp addSecond(int amount)
+<i>2395</i>&nbsp;    {
+<b class="fc"><i>2396</i>&nbsp;        long delta = (long) amount * 1000;</b>
+<b class="fc"><i>2397</i>&nbsp;        return addMillisForPrecision(delta, Precision.SECOND, false);</b>
+<i>2398</i>&nbsp;    }
+<i>2399</i>&nbsp;
+<i>2400</i>&nbsp;    /**
+<i>2401</i>&nbsp;     * Returns a timestamp relative to this one by the given number of minutes.
+<i>2402</i>&nbsp;     * &lt;p&gt;
+<i>2403</i>&nbsp;     * This method always returns a Timestamp with the same precision as
+<i>2404</i>&nbsp;     * the original. For example, adjusting {@code 2012-04-01T} by one minute
+<i>2405</i>&nbsp;     * results in {@code 2012-04-01T}; adjusting {@code 2012-04-01T00:00-00:00}
+<i>2406</i>&nbsp;     * by -1 minute results in {@code 2012-03-31T23:59-00:00}. To extend the
+<i>2407</i>&nbsp;     * precision when the original Timestamp has coarser than MINUTE precision,
+<i>2408</i>&nbsp;     * use {@link #addMinute(int)}.
+<i>2409</i>&nbsp;     *
+<i>2410</i>&nbsp;     * @param amount a number of minutes.
+<i>2411</i>&nbsp;     */
+<i>2412</i>&nbsp;    public final Timestamp adjustMinute(int amount)
+<i>2413</i>&nbsp;    {
+<b class="fc"><i>2414</i>&nbsp;        long delta = (long) amount * 60 * 1000;</b>
+<b class="fc"><i>2415</i>&nbsp;        return adjustMillis(delta);</b>
+<i>2416</i>&nbsp;    }
+<i>2417</i>&nbsp;
+<i>2418</i>&nbsp;    /**
+<i>2419</i>&nbsp;     * Returns a timestamp relative to this one by the given number of minutes.
+<i>2420</i>&nbsp;     * &lt;p&gt;
+<i>2421</i>&nbsp;     * This method always returns a Timestamp with at least MINUTE precision.
+<i>2422</i>&nbsp;     * For example, adding one minute to {@code 2011T} results in
+<i>2423</i>&nbsp;     * {@code 2011-01-01T00:01-00:00}. To receive a Timestamp that always
+<i>2424</i>&nbsp;     * maintains the same precision as the original, use {@link #adjustMinute(int)}.
+<i>2425</i>&nbsp;     *
+<i>2426</i>&nbsp;     * @param amount a number of minutes.
+<i>2427</i>&nbsp;     */
+<i>2428</i>&nbsp;    public final Timestamp addMinute(int amount)
+<i>2429</i>&nbsp;    {
+<b class="fc"><i>2430</i>&nbsp;        long delta = (long) amount * 60 * 1000;</b>
+<b class="fc"><i>2431</i>&nbsp;        return addMillisForPrecision(delta, Precision.MINUTE, false);</b>
+<i>2432</i>&nbsp;    }
+<i>2433</i>&nbsp;
+<i>2434</i>&nbsp;    /**
+<i>2435</i>&nbsp;     * Returns a timestamp relative to this one by the given number of hours.
+<i>2436</i>&nbsp;     * &lt;p&gt;
+<i>2437</i>&nbsp;     * This method always returns a Timestamp with the same precision as
+<i>2438</i>&nbsp;     * the original. For example, adjusting {@code 2012-04-01T} by one hour
+<i>2439</i>&nbsp;     * results in {@code 2012-04-01T}; adjusting {@code 2012-04-01T00:00-00:00}
+<i>2440</i>&nbsp;     * by -1 hour results in {@code 2012-03-31T23:00-00:00}. To extend the
+<i>2441</i>&nbsp;     * precision when the original Timestamp has coarser than MINUTE precision,
+<i>2442</i>&nbsp;     * use {@link #addHour(int)}.
+<i>2443</i>&nbsp;     *
+<i>2444</i>&nbsp;     * @param amount a number of hours.
+<i>2445</i>&nbsp;     */
+<i>2446</i>&nbsp;    public final Timestamp adjustHour(int amount)
+<i>2447</i>&nbsp;    {
+<b class="fc"><i>2448</i>&nbsp;        long delta = (long) amount * 60 * 60 * 1000;</b>
+<b class="fc"><i>2449</i>&nbsp;        return adjustMillis(delta);</b>
+<i>2450</i>&nbsp;    }
+<i>2451</i>&nbsp;
+<i>2452</i>&nbsp;    /**
+<i>2453</i>&nbsp;     * Returns a timestamp relative to this one by the given number of hours.
+<i>2454</i>&nbsp;     * &lt;p&gt;
+<i>2455</i>&nbsp;     * This method always returns a Timestamp with at least MINUTE precision.
+<i>2456</i>&nbsp;     * For example, adding one hour to {@code 2011T} results in
+<i>2457</i>&nbsp;     * {@code 2011-01-01T01:00-00:00}. To receive a Timestamp that always
+<i>2458</i>&nbsp;     * maintains the same precision as the original, use {@link #adjustHour(int)}.
+<i>2459</i>&nbsp;     *
+<i>2460</i>&nbsp;     * @param amount a number of hours.
+<i>2461</i>&nbsp;     */
+<i>2462</i>&nbsp;    public final Timestamp addHour(int amount)
+<i>2463</i>&nbsp;    {
+<b class="fc"><i>2464</i>&nbsp;        long delta = (long) amount * 60 * 60 * 1000;</b>
+<b class="fc"><i>2465</i>&nbsp;        return addMillisForPrecision(delta, Precision.MINUTE, false);</b>
+<i>2466</i>&nbsp;    }
+<i>2467</i>&nbsp;
+<i>2468</i>&nbsp;    /**
+<i>2469</i>&nbsp;     * Returns a timestamp relative to this one by the given number of days.
+<i>2470</i>&nbsp;     * &lt;p&gt;
+<i>2471</i>&nbsp;     * This method always returns a Timestamp with the same precision as
+<i>2472</i>&nbsp;     * the original. For example, adjusting {@code 2012-04T} by one day results
+<i>2473</i>&nbsp;     * in {@code 2012-04T}; adjusting {@code 2012-04-01T} by -1 days results in
+<i>2474</i>&nbsp;     * {@code 2012-03-31T}. To extend the precision when the original Timestamp
+<i>2475</i>&nbsp;     * has coarser than DAY precision, use {@link #addDay(int)}.
+<i>2476</i>&nbsp;     *
+<i>2477</i>&nbsp;     * @param amount a number of days.
+<i>2478</i>&nbsp;     */
+<i>2479</i>&nbsp;    public final Timestamp adjustDay(int amount)
+<i>2480</i>&nbsp;    {
+<b class="fc"><i>2481</i>&nbsp;        long delta = (long) amount * 24 * 60 * 60 * 1000;</b>
+<b class="fc"><i>2482</i>&nbsp;        return adjustMillis(delta);</b>
+<i>2483</i>&nbsp;    }
+<i>2484</i>&nbsp;
+<i>2485</i>&nbsp;    /**
+<i>2486</i>&nbsp;     * Returns a timestamp relative to this one by the given number of days.
+<i>2487</i>&nbsp;     *
+<i>2488</i>&nbsp;     * @param amount a number of days.
+<i>2489</i>&nbsp;     */
+<i>2490</i>&nbsp;    public final Timestamp addDay(int amount)
+<i>2491</i>&nbsp;    {
+<b class="fc"><i>2492</i>&nbsp;        long delta = (long) amount * 24 * 60 * 60 * 1000;</b>
+<b class="fc"><i>2493</i>&nbsp;        return addMillisForPrecision(delta, Precision.DAY, false);</b>
+<i>2494</i>&nbsp;    }
+<i>2495</i>&nbsp;
+<i>2496</i>&nbsp;    // Shifting month and year are more complicated since the length of a month
+<i>2497</i>&nbsp;    // varies and we want the day-of-month to stay the same when possible.
+<i>2498</i>&nbsp;    // We rely on Calendar for the logic.
+<i>2499</i>&nbsp;
+<i>2500</i>&nbsp;    /**
+<i>2501</i>&nbsp;     * Returns a timestamp relative to this one by the given number of months.
+<i>2502</i>&nbsp;     * The day field may be adjusted to account for different month length and
+<i>2503</i>&nbsp;     * leap days.
+<i>2504</i>&nbsp;     * &lt;p&gt;
+<i>2505</i>&nbsp;     * This method always returns a Timestamp with the same precision as the
+<i>2506</i>&nbsp;     * original. For example, adjusting {@code 2011T} by one month results in
+<i>2507</i>&nbsp;     * {@code 2011T}; adding 12 months to {@code 2011T} results in {@code 2012T}.
+<i>2508</i>&nbsp;     * To extend the precision when the original Timestamp has coarser than MONTH
+<i>2509</i>&nbsp;     * precision, use {@link #addMonth(int)}.
+<i>2510</i>&nbsp;     *
+<i>2511</i>&nbsp;     * @param amount a number of months.
+<i>2512</i>&nbsp;     */
+<i>2513</i>&nbsp;    public final Timestamp adjustMonth(int amount)
+<i>2514</i>&nbsp;    {
+<b class="fc"><i>2515</i>&nbsp;        if (amount == 0) return this;</b>
+<b class="fc"><i>2516</i>&nbsp;        return addMonthForPrecision(amount, _precision);</b>
+<i>2517</i>&nbsp;    }
+<i>2518</i>&nbsp;
+<i>2519</i>&nbsp;    /**
+<i>2520</i>&nbsp;     * Adds the given number of months, extending (if necessary) the resulting Timestamp to the given
+<i>2521</i>&nbsp;     * precision.
+<i>2522</i>&nbsp;     * @param amount the number of months to add.
+<i>2523</i>&nbsp;     * @param precision the precision that the Timestamp will be extended to, if it does not already include that
+<i>2524</i>&nbsp;     *                  precision.
+<i>2525</i>&nbsp;     * @return a new Timestamp.
+<i>2526</i>&nbsp;     */
+<i>2527</i>&nbsp;    private Timestamp addMonthForPrecision(int amount, Precision precision) {
+<b class="fc"><i>2528</i>&nbsp;        Calendar cal = calendarValue();</b>
+<b class="fc"><i>2529</i>&nbsp;        cal.add(Calendar.MONTH, amount);</b>
+<b class="fc"><i>2530</i>&nbsp;        return new Timestamp(cal, precision, _fraction, _offset);</b>
+<i>2531</i>&nbsp;    }
+<i>2532</i>&nbsp;
+<i>2533</i>&nbsp;    /**
+<i>2534</i>&nbsp;     * Returns a timestamp relative to this one by the given number of months.
+<i>2535</i>&nbsp;     * The day field may be adjusted to account for different month length and
+<i>2536</i>&nbsp;     * leap days.  For example, adding one month to {@code 2011-01-31}
+<i>2537</i>&nbsp;     * results in {@code 2011-02-28}.
+<i>2538</i>&nbsp;     *
+<i>2539</i>&nbsp;     * @param amount a number of months.
+<i>2540</i>&nbsp;     */
+<i>2541</i>&nbsp;    public final Timestamp addMonth(int amount)
+<i>2542</i>&nbsp;    {
+<b class="fc"><i>2543</i>&nbsp;        if (amount == 0 &amp;&amp; _precision.includes(Precision.MONTH)) return this;</b>
+<b class="fc"><i>2544</i>&nbsp;        return addMonthForPrecision(amount, _precision.includes(Precision.MONTH) ? _precision : Precision.MONTH);</b>
+<i>2545</i>&nbsp;    }
+<i>2546</i>&nbsp;
+<i>2547</i>&nbsp;    /**
+<i>2548</i>&nbsp;     * Returns a timestamp relative to this one by the given number of years.
+<i>2549</i>&nbsp;     * The day field may be adjusted to account for leap days. For example,
+<i>2550</i>&nbsp;     * adjusting {@code 2012-02-29} by one year results in {@code 2013-02-28}.
+<i>2551</i>&nbsp;     * &lt;p&gt;
+<i>2552</i>&nbsp;     * Because YEAR is the coarsest precision possible, this method always
+<i>2553</i>&nbsp;     * returns a Timestamp with the same precision as the original and
+<i>2554</i>&nbsp;     * behaves identically to {@link #addYear(int)}.
+<i>2555</i>&nbsp;     *
+<i>2556</i>&nbsp;     * @param amount a number of years.
+<i>2557</i>&nbsp;     */
+<i>2558</i>&nbsp;    public final Timestamp adjustYear(int amount) {
+<b class="fc"><i>2559</i>&nbsp;        return addYear(amount);</b>
+<i>2560</i>&nbsp;    }
+<i>2561</i>&nbsp;
+<i>2562</i>&nbsp;    /**
+<i>2563</i>&nbsp;     * Returns a timestamp relative to this one by the given number of years.
+<i>2564</i>&nbsp;     * The day field may be adjusted to account for leap days.  For example,
+<i>2565</i>&nbsp;     * adding one year to {@code 2012-02-29} results in {@code 2013-02-28}.
+<i>2566</i>&nbsp;     *
+<i>2567</i>&nbsp;     * @param amount a number of years.
+<i>2568</i>&nbsp;     */
+<i>2569</i>&nbsp;    public final Timestamp addYear(int amount)
+<i>2570</i>&nbsp;    {
+<b class="fc"><i>2571</i>&nbsp;        if (amount == 0) return this;</b>
+<i>2572</i>&nbsp;
+<b class="fc"><i>2573</i>&nbsp;        Calendar cal = calendarValue();</b>
+<b class="fc"><i>2574</i>&nbsp;        cal.add(Calendar.YEAR, amount);</b>
+<b class="fc"><i>2575</i>&nbsp;        return new Timestamp(cal, _precision, _fraction, _offset);</b>
+<i>2576</i>&nbsp;    }
+<i>2577</i>&nbsp;
+<i>2578</i>&nbsp;
+<i>2579</i>&nbsp;    //=========================================================================
+<i>2580</i>&nbsp;
+<i>2581</i>&nbsp;    /**
+<i>2582</i>&nbsp;     * Returns a hash code consistent with {@link #equals(Object)}.
+<i>2583</i>&nbsp;     * &lt;p&gt;
+<i>2584</i>&nbsp;     * {@inheritDoc}
+<i>2585</i>&nbsp;     */
+<i>2586</i>&nbsp;    @Override
+<i>2587</i>&nbsp;    public int hashCode()
+<i>2588</i>&nbsp;    {
+<i>2589</i>&nbsp;        // Performs a Shift-Add-XOR-Rotate hash. Rotating at each step to
+<i>2590</i>&nbsp;        // produce an &quot;Avalanche&quot; effect for timestamps with small deltas, which
+<i>2591</i>&nbsp;        // is found to be a common input data set.
+<i>2592</i>&nbsp;
+<b class="fc"><i>2593</i>&nbsp;        final int prime = 8191;</b>
+<b class="fc"><i>2594</i>&nbsp;        int result = HASH_SIGNATURE;</b>
+<i>2595</i>&nbsp;
+<b class="fc"><i>2596</i>&nbsp;        result = prime * result + (_fraction != null</b>
+<b class="fc"><i>2597</i>&nbsp;            ? _fraction.hashCode()</b>
+<b class="fc"><i>2598</i>&nbsp;            : 0);</b>
+<i>2599</i>&nbsp;
+<b class="fc"><i>2600</i>&nbsp;        result ^= (result &lt;&lt; 19) ^ (result &gt;&gt; 13);</b>
+<i>2601</i>&nbsp;
+<b class="fc"><i>2602</i>&nbsp;        result = prime * result + this._year;</b>
+<b class="fc"><i>2603</i>&nbsp;        result = prime * result + this._month;</b>
+<b class="fc"><i>2604</i>&nbsp;        result = prime * result + this._day;</b>
+<b class="fc"><i>2605</i>&nbsp;        result = prime * result + this._hour;</b>
+<b class="fc"><i>2606</i>&nbsp;        result = prime * result + this._minute;</b>
+<b class="fc"><i>2607</i>&nbsp;        result = prime * result + this._second;</b>
+<i>2608</i>&nbsp;
+<b class="fc"><i>2609</i>&nbsp;        result ^= (result &lt;&lt; 19) ^ (result &gt;&gt; 13);</b>
+<i>2610</i>&nbsp;
+<b class="fc"><i>2611</i>&nbsp;        Precision precision = this._precision == Precision.FRACTION ? Precision.SECOND : this._precision;</b>
+<b class="fc"><i>2612</i>&nbsp;        result = prime * result + precision.toString().hashCode();</b>
+<i>2613</i>&nbsp;
+<b class="fc"><i>2614</i>&nbsp;        result ^= (result &lt;&lt; 19) ^ (result &gt;&gt; 13);</b>
+<i>2615</i>&nbsp;
+<b class="fc"><i>2616</i>&nbsp;        result = prime * result + (_offset == null ? 0 : _offset.hashCode());</b>
+<i>2617</i>&nbsp;
+<b class="fc"><i>2618</i>&nbsp;        result ^= (result &lt;&lt; 19) ^ (result &gt;&gt; 13);</b>
+<i>2619</i>&nbsp;
+<b class="fc"><i>2620</i>&nbsp;        return result;</b>
+<i>2621</i>&nbsp;    }
+<i>2622</i>&nbsp;
+<i>2623</i>&nbsp;
+<i>2624</i>&nbsp;
+<i>2625</i>&nbsp;    /**
+<i>2626</i>&nbsp;     * Performs a comparison of the two points in time represented by two
+<i>2627</i>&nbsp;     * Timestamps.
+<i>2628</i>&nbsp;     * If the point in time represented by this Timestamp precedes that of
+<i>2629</i>&nbsp;     * {@code t}, then {@code -1} is returned.
+<i>2630</i>&nbsp;     * If {@code t} precedes this Timestamp then {@code 1} is returned.
+<i>2631</i>&nbsp;     * If the Timestamps represent the same point in time, then
+<i>2632</i>&nbsp;     * {@code 0} is returned.
+<i>2633</i>&nbsp;     * Note that a {@code 0} result does not imply that the two Timestamps are
+<i>2634</i>&nbsp;     * {@link #equals}, as the local offset or precision of the two Timestamps
+<i>2635</i>&nbsp;     * may be different.
+<i>2636</i>&nbsp;     *
+<i>2637</i>&nbsp;     * &lt;p&gt;
+<i>2638</i>&nbsp;     * This method is provided in preference to individual methods for each of
+<i>2639</i>&nbsp;     * the six boolean comparison operators (&amp;lt;, ==, &amp;gt;, &amp;gt;=, !=, &amp;lt;=).
+<i>2640</i>&nbsp;     * The suggested idiom for performing these comparisons is:
+<i>2641</i>&nbsp;     * {@code (x.compareTo(y)}&lt;em&gt;&amp;lt;op&amp;gt;&lt;/em&gt;{@code 0)},
+<i>2642</i>&nbsp;     * where &lt;em&gt;&amp;lt;op&amp;gt;&lt;/em&gt; is one of the six comparison operators.
+<i>2643</i>&nbsp;     *
+<i>2644</i>&nbsp;     * &lt;p&gt;
+<i>2645</i>&nbsp;     * For example, the pairs below will return a {@code 0} result:
+<i>2646</i>&nbsp;     * &lt;ul&gt;
+<i>2647</i>&nbsp;     *   &lt;li&gt;{@code 2009T}&lt;/li&gt;
+<i>2648</i>&nbsp;     *   &lt;li&gt;{@code 2009-01T}&lt;/li&gt;
+<i>2649</i>&nbsp;     *   &lt;li&gt;{@code 2009-01-01T}&lt;/li&gt;
+<i>2650</i>&nbsp;     *   &lt;li&gt;{@code 2009-01-01T00:00Z}&lt;/li&gt;
+<i>2651</i>&nbsp;     *   &lt;li&gt;{@code 2009-01-01T00:00:00Z}&lt;/li&gt;
+<i>2652</i>&nbsp;     *   &lt;li&gt;{@code 2009-01-01T00:00:00.0Z}&lt;/li&gt;
+<i>2653</i>&nbsp;     *   &lt;li&gt;{@code 2009-01-01T00:00:00.00Z}&lt;/li&gt;
+<i>2654</i>&nbsp;     *
+<i>2655</i>&nbsp;     *   &lt;li&gt;{@code 2008-12-31T16:00-08:00}&lt;/li&gt;
+<i>2656</i>&nbsp;     *   &lt;li&gt;{@code 2008-12-31T12:00-12:00}&lt;/li&gt;
+<i>2657</i>&nbsp;     *   &lt;li&gt;{@code 2009-01-01T12:00+12:00}&lt;/li&gt;
+<i>2658</i>&nbsp;     * &lt;/ul&gt;
+<i>2659</i>&nbsp;     *
+<i>2660</i>&nbsp;     * &lt;p&gt;
+<i>2661</i>&nbsp;     * Use the {@link #equals(Timestamp)} method to compare the point
+<i>2662</i>&nbsp;     * in time, &lt;em&gt;including&lt;/em&gt; precision and local offset.
+<i>2663</i>&nbsp;     *
+<i>2664</i>&nbsp;     * @param t
+<i>2665</i>&nbsp;     *          the other {@code Timestamp} to compare this {@code Timestamp} to
+<i>2666</i>&nbsp;     *
+<i>2667</i>&nbsp;     * @return
+<i>2668</i>&nbsp;     *          -1, 0, or 1 if this {@code Timestamp}
+<i>2669</i>&nbsp;     *          is less than, equal to, or greater than {@code t} respectively
+<i>2670</i>&nbsp;     *
+<i>2671</i>&nbsp;     * @throws NullPointerException if {@code t} is null.
+<i>2672</i>&nbsp;     *
+<i>2673</i>&nbsp;     * @see #equals(Timestamp)
+<i>2674</i>&nbsp;     */
+<i>2675</i>&nbsp;    public int compareTo(Timestamp t)
+<i>2676</i>&nbsp;    {
+<i>2677</i>&nbsp;        // Test at millisecond precision first.
+<b class="fc"><i>2678</i>&nbsp;        long this_millis = this.getMillis();</b>
+<b class="fc"><i>2679</i>&nbsp;        long arg_millis = t.getMillis();</b>
+<b class="fc"><i>2680</i>&nbsp;        if (this_millis != arg_millis) {</b>
+<b class="fc"><i>2681</i>&nbsp;            return (this_millis &lt; arg_millis) ? -1 : 1;</b>
+<i>2682</i>&nbsp;        }
+<i>2683</i>&nbsp;
+<i>2684</i>&nbsp;        // Values are equivalent at millisecond precision, so compare fraction
+<i>2685</i>&nbsp;
+<i>2686</i>&nbsp;        BigDecimal this_fraction =
+<b class="fc"><i>2687</i>&nbsp;            ((this._fraction == null) ? BigDecimal.ZERO : this._fraction);</b>
+<i>2688</i>&nbsp;        BigDecimal arg_fraction =
+<b class="fc"><i>2689</i>&nbsp;            (( t._fraction == null) ? BigDecimal.ZERO :  t._fraction);</b>
+<b class="fc"><i>2690</i>&nbsp;        return this_fraction.compareTo(arg_fraction);</b>
+<i>2691</i>&nbsp;    }
+<i>2692</i>&nbsp;
+<i>2693</i>&nbsp;
+<i>2694</i>&nbsp;    /**
+<i>2695</i>&nbsp;     * Compares this {@link Timestamp} to the specified Object.
+<i>2696</i>&nbsp;     * The result is {@code true} if and only if the parameter is a
+<i>2697</i>&nbsp;     * {@link Timestamp} object that represents the same point in time,
+<i>2698</i>&nbsp;     * precision and local offset as this Timestamp.
+<i>2699</i>&nbsp;     * &lt;p&gt;
+<i>2700</i>&nbsp;     * Use the {@link #compareTo(Timestamp)} method to compare only the point
+<i>2701</i>&nbsp;     * in time, &lt;em&gt;ignoring&lt;/em&gt; precision and local offset.
+<i>2702</i>&nbsp;     *
+<i>2703</i>&nbsp;     * @see #equals(Timestamp)
+<i>2704</i>&nbsp;     * @see #compareTo(Timestamp)
+<i>2705</i>&nbsp;     */
+<i>2706</i>&nbsp;    @Override
+<i>2707</i>&nbsp;    public boolean equals(Object t)
+<i>2708</i>&nbsp;    {
+<b class="fc"><i>2709</i>&nbsp;        if (!(t instanceof Timestamp)) return false;</b>
+<b class="fc"><i>2710</i>&nbsp;        return equals((Timestamp)t);</b>
+<i>2711</i>&nbsp;    }
+<i>2712</i>&nbsp;
+<i>2713</i>&nbsp;    /**
+<i>2714</i>&nbsp;     * Compares this {@link Timestamp} to another {@link Timestamp} object.
+<i>2715</i>&nbsp;     * The result is {@code true} if and only if the parameter
+<i>2716</i>&nbsp;     * represents the same point in time and has
+<i>2717</i>&nbsp;     * the same precision and local offset as this object.
+<i>2718</i>&nbsp;     * &lt;p&gt;
+<i>2719</i>&nbsp;     * These pairs are {@link #equals} to each other, as they
+<i>2720</i>&nbsp;     * represent the same points in time, precision and local offset:
+<i>2721</i>&nbsp;     *
+<i>2722</i>&nbsp;     * &lt;ul&gt;
+<i>2723</i>&nbsp;     *   &lt;li&gt;{@code 2001-01-01T11:22+00:00} (minute precision, in UTC)&lt;/li&gt;
+<i>2724</i>&nbsp;     *   &lt;li&gt;{@code 2001-01-01T11:22Z} (minute precision, in UTC)&lt;/li&gt;
+<i>2725</i>&nbsp;     * &lt;/ul&gt;
+<i>2726</i>&nbsp;     *
+<i>2727</i>&nbsp;     * &lt;p&gt;
+<i>2728</i>&nbsp;     * On the other hand, none of these pairs are {@link #equals} to each other,
+<i>2729</i>&nbsp;     * they represent the same points in time, but with different precisions
+<i>2730</i>&nbsp;     * and/or local offsets:
+<i>2731</i>&nbsp;     *
+<i>2732</i>&nbsp;     * &lt;ul&gt;
+<i>2733</i>&nbsp;     *   &lt;li&gt;{@code 2001T} (year precision, unknown local offset)&lt;/li&gt;
+<i>2734</i>&nbsp;     *   &lt;li&gt;{@code 2001-01T} (month precision, unknown local offset)&lt;/li&gt;
+<i>2735</i>&nbsp;     *   &lt;li&gt;{@code 2001-01-01T} (day precision, unknown local offset)&lt;/li&gt;
+<i>2736</i>&nbsp;     *
+<i>2737</i>&nbsp;     *   &lt;li&gt;{@code 2001-01-01T00:00-00:00} (second precision, unknown local offset)&lt;/li&gt;
+<i>2738</i>&nbsp;     *   &lt;li&gt;{@code 2001-01-01T00:00+00:00} (second precision, in UTC)&lt;/li&gt;
+<i>2739</i>&nbsp;     *
+<i>2740</i>&nbsp;     *   &lt;li&gt;{@code 2001-01-01T00:00.000-00:00} (millisecond precision, unknown local offset)&lt;/li&gt;
+<i>2741</i>&nbsp;     *   &lt;li&gt;{@code 2001-01-01T00:00.000+00:00} (millisecond precision, in UTC)&lt;/li&gt;
+<i>2742</i>&nbsp;     * &lt;/ul&gt;
+<i>2743</i>&nbsp;     *
+<i>2744</i>&nbsp;     * &lt;p&gt;
+<i>2745</i>&nbsp;     * Use the {@link #compareTo(Timestamp)} method to compare only the point
+<i>2746</i>&nbsp;     * in time, &lt;em&gt;ignoring&lt;/em&gt; precision and local offset.
+<i>2747</i>&nbsp;     *
+<i>2748</i>&nbsp;     * @see #compareTo(Timestamp)
+<i>2749</i>&nbsp;     */
+<i>2750</i>&nbsp;    public boolean equals(Timestamp t)
+<i>2751</i>&nbsp;    {
+<b class="fc"><i>2752</i>&nbsp;        if (this == t) return true;</b>
+<b class="fc"><i>2753</i>&nbsp;        if (t == null) return false;</b>
+<i>2754</i>&nbsp;
+<i>2755</i>&nbsp;        // FRACTION precision is equivalent to SECOND precision.
+<b class="fc"><i>2756</i>&nbsp;        Precision thisPrecision = this._precision.includes(Precision.SECOND) ? Precision.SECOND : this._precision;</b>
+<b class="fc"><i>2757</i>&nbsp;        Precision thatPrecision = t._precision.includes(Precision.SECOND) ? Precision.SECOND : t._precision;</b>
+<i>2758</i>&nbsp;
+<i>2759</i>&nbsp;        // if the precisions are not the same the values are not
+<i>2760</i>&nbsp;        // precision doesn&#39;t matter WRT equality
+<b class="fc"><i>2761</i>&nbsp;        if (thisPrecision != thatPrecision) return false;</b>
+<i>2762</i>&nbsp;
+<i>2763</i>&nbsp;        // if the local offset are not the same the values are not
+<b class="fc"><i>2764</i>&nbsp;        if (this._offset == null) {</b>
+<b class="fc"><i>2765</i>&nbsp;            if (t._offset != null)  return false;</b>
+<i>2766</i>&nbsp;        }
+<i>2767</i>&nbsp;        else {
+<b class="fc"><i>2768</i>&nbsp;            if (t._offset == null) return false;</b>
+<i>2769</i>&nbsp;        }
+<i>2770</i>&nbsp;
+<i>2771</i>&nbsp;        // so now we check the actual time value
+<b class="fc"><i>2772</i>&nbsp;        if (this._year   != t._year)    return false;</b>
+<b class="fc"><i>2773</i>&nbsp;        if (this._month  != t._month)   return false;</b>
+<b class="fc"><i>2774</i>&nbsp;        if (this._day    != t._day)     return false;</b>
+<b class="fc"><i>2775</i>&nbsp;        if (this._hour   != t._hour)    return false;</b>
+<b class="fc"><i>2776</i>&nbsp;        if (this._minute != t._minute)  return false;</b>
+<b class="fc"><i>2777</i>&nbsp;        if (this._second != t._second)  return false;</b>
+<i>2778</i>&nbsp;
+<i>2779</i>&nbsp;        // and if we have a local offset, check the value here
+<b class="fc"><i>2780</i>&nbsp;        if (this._offset != null) {</b>
+<b class="fc"><i>2781</i>&nbsp;            if (this._offset.intValue() != t._offset.intValue()) return false;</b>
+<i>2782</i>&nbsp;        }
+<i>2783</i>&nbsp;
+<i>2784</i>&nbsp;        // we only look at the fraction if we know that it&#39;s actually there
+<b class="fc"><i>2785</i>&nbsp;        if ((this._fraction != null &amp;&amp; t._fraction == null)</b>
+<i>2786</i>&nbsp;                || (this._fraction == null &amp;&amp; t._fraction != null)) {
+<i>2787</i>&nbsp;            // one of the fractions are null
+<b class="fc"><i>2788</i>&nbsp;            return false;</b>
+<i>2789</i>&nbsp;        }
+<b class="fc"><i>2790</i>&nbsp;        if (this._fraction == null &amp;&amp; t._fraction == null) {</b>
+<i>2791</i>&nbsp;            // both are null
+<b class="fc"><i>2792</i>&nbsp;            return true;</b>
+<i>2793</i>&nbsp;        }
+<b class="fc"><i>2794</i>&nbsp;        return this._fraction.equals(t._fraction);</b>
+<i>2795</i>&nbsp;    }
+<i>2796</i>&nbsp;
+<i>2797</i>&nbsp;    private static short checkAndCastYear(int year)
+<i>2798</i>&nbsp;    {
+<b class="fc"><i>2799</i>&nbsp;        if (year &lt; 1 || year &gt; 9999)</b>
+<i>2800</i>&nbsp;        {
+<b class="fc"><i>2801</i>&nbsp;            throw new IllegalArgumentException(String.format(&quot;Year %s must be between 1 and 9999 inclusive&quot;, year));</b>
+<i>2802</i>&nbsp;        }
+<i>2803</i>&nbsp;
+<b class="fc"><i>2804</i>&nbsp;        return (short) year;</b>
+<i>2805</i>&nbsp;    }
+<i>2806</i>&nbsp;
+<i>2807</i>&nbsp;    private static byte checkAndCastMonth(int month)
+<i>2808</i>&nbsp;    {
+<b class="fc"><i>2809</i>&nbsp;        if (month &lt; 1 || month &gt; 12)</b>
+<i>2810</i>&nbsp;        {
+<b class="fc"><i>2811</i>&nbsp;            throw new IllegalArgumentException(String.format(&quot;Month %s must be between 1 and 12 inclusive&quot;, month));</b>
+<i>2812</i>&nbsp;        }
+<i>2813</i>&nbsp;
+<b class="fc"><i>2814</i>&nbsp;        return (byte) month;</b>
+<i>2815</i>&nbsp;    }
+<i>2816</i>&nbsp;
+<i>2817</i>&nbsp;    private static byte checkAndCastDay(int day, int year, int month)
+<i>2818</i>&nbsp;    {
+<b class="fc"><i>2819</i>&nbsp;        int lastDayInMonth = last_day_in_month(year, month);</b>
+<b class="fc"><i>2820</i>&nbsp;        if (day &lt; 1 || day &gt; lastDayInMonth) {</b>
+<b class="fc"><i>2821</i>&nbsp;            throw new IllegalArgumentException(String.format(&quot;Day %s for year %s and month %s must be between 1 and %s inclusive&quot;, day, year, month, lastDayInMonth));</b>
+<i>2822</i>&nbsp;        }
+<i>2823</i>&nbsp;
+<b class="fc"><i>2824</i>&nbsp;        return (byte) day;</b>
+<i>2825</i>&nbsp;    }
+<i>2826</i>&nbsp;
+<i>2827</i>&nbsp;    private static byte checkAndCastHour(int hour)
+<i>2828</i>&nbsp;    {
+<b class="fc"><i>2829</i>&nbsp;        if (hour &lt; 0 || hour &gt; 23)</b>
+<i>2830</i>&nbsp;        {
+<b class="fc"><i>2831</i>&nbsp;            throw new IllegalArgumentException(String.format(&quot;Hour %s must be between 0 and 23 inclusive&quot;, hour));</b>
+<i>2832</i>&nbsp;        }
+<i>2833</i>&nbsp;
+<b class="fc"><i>2834</i>&nbsp;        return (byte) hour;</b>
+<i>2835</i>&nbsp;    }
+<i>2836</i>&nbsp;
+<i>2837</i>&nbsp;    private static byte checkAndCastMinute(int minute)
+<i>2838</i>&nbsp;    {
+<b class="fc"><i>2839</i>&nbsp;        if (minute &lt; 0 || minute &gt; 59)</b>
+<i>2840</i>&nbsp;        {
+<b class="fc"><i>2841</i>&nbsp;            throw new IllegalArgumentException(String.format(&quot;Minute %s must be between between 0 and 59 inclusive&quot;, minute));</b>
+<i>2842</i>&nbsp;        }
+<i>2843</i>&nbsp;
+<b class="fc"><i>2844</i>&nbsp;        return (byte) minute;</b>
+<i>2845</i>&nbsp;    }
+<i>2846</i>&nbsp;
+<i>2847</i>&nbsp;    private static byte checkAndCastSecond(int second)
+<i>2848</i>&nbsp;    {
+<b class="fc"><i>2849</i>&nbsp;        if (second &lt; 0 || second &gt; 59)</b>
+<i>2850</i>&nbsp;        {
+<b class="fc"><i>2851</i>&nbsp;            throw new IllegalArgumentException(String.format(&quot;Second %s must be between between 0 and 59 inclusive&quot;, second));</b>
+<i>2852</i>&nbsp;        }
+<i>2853</i>&nbsp;
+<b class="fc"><i>2854</i>&nbsp;        return (byte) second;</b>
+<i>2855</i>&nbsp;    }
+<i>2856</i>&nbsp;
+<i>2857</i>&nbsp;    private static Precision checkFraction(Precision precision, BigDecimal fraction)
+<i>2858</i>&nbsp;    {
+<b class="fc"><i>2859</i>&nbsp;        if (precision.includes(Precision.SECOND)) {</b>
+<b class="fc"><i>2860</i>&nbsp;            if (fraction != null &amp;&amp; (fraction.signum() == -1 || BigDecimal.ONE.compareTo(fraction) != 1)) {</b>
+<b class="fc"><i>2861</i>&nbsp;                throw new IllegalArgumentException(String.format(&quot;Fractional seconds %s must be greater than or equal to 0 and less than 1&quot;, fraction));</b>
+<i>2862</i>&nbsp;            }
+<i>2863</i>&nbsp;        }
+<i>2864</i>&nbsp;        else {
+<b class="fc"><i>2865</i>&nbsp;            if (fraction != null) {</b>
+<b class="nc"><i>2866</i>&nbsp;                throw new IllegalArgumentException(&quot;Fraction must be null for non-second precision: &quot; + fraction);</b>
+<i>2867</i>&nbsp;            }
+<i>2868</i>&nbsp;        }
+<i>2869</i>&nbsp;
+<b class="fc"><i>2870</i>&nbsp;        return precision;</b>
+<i>2871</i>&nbsp;    }
+<i>2872</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

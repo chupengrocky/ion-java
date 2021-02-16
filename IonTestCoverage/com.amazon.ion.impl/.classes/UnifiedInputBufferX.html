@@ -1,0 +1,480 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: UnifiedInputBufferX</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: UnifiedInputBufferX (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UnifiedInputBufferX</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.5%
+  </span>
+  <span class="absValue">
+    (19/ 21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    60.7%
+  </span>
+  <span class="absValue">
+    (65/ 107)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">UnifiedInputBufferX$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">UnifiedInputBufferX$BufferType</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">UnifiedInputBufferX$Bytes</td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (4/ 5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.9%
+  </span>
+  <span class="absValue">
+    (10/ 11)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">UnifiedInputBufferX$Chars</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (4/ 6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    76.9%
+  </span>
+  <span class="absValue">
+    (10/ 13)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    85.3%
+  </span>
+  <span class="absValue">
+    (29/ 34)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    65.4%
+  </span>
+  <span class="absValue">
+    (87/ 133)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;
+<b class="fc"><i>19</i>&nbsp;abstract class UnifiedInputBufferX</b>
+<i>20</i>&nbsp;{
+<b class="fc"><i>21</i>&nbsp;    public enum BufferType { BYTES, CHARS }</b>
+<i>22</i>&nbsp;
+<i>23</i>&nbsp;    protected int               _page_size;
+<i>24</i>&nbsp;    protected UnifiedDataPageX[] _buffers;
+<i>25</i>&nbsp;    protected int               _buffer_current;
+<i>26</i>&nbsp;    protected int               _buffer_count;
+<i>27</i>&nbsp;    protected int               _locks;
+<i>28</i>&nbsp;
+<i>29</i>&nbsp;    public static UnifiedInputBufferX makePageBuffer(byte[] bytes, int offset, int length) {
+<b class="fc"><i>30</i>&nbsp;        UnifiedInputBufferX buf = new UnifiedInputBufferX.Bytes(bytes, offset, length);</b>
+<b class="fc"><i>31</i>&nbsp;        return buf;</b>
+<i>32</i>&nbsp;    }
+<i>33</i>&nbsp;    public static UnifiedInputBufferX makePageBuffer(char[] chars, int offset, int length) {
+<b class="fc"><i>34</i>&nbsp;        UnifiedInputBufferX buf = new UnifiedInputBufferX.Chars(chars, offset, length);</b>
+<b class="fc"><i>35</i>&nbsp;        return buf;</b>
+<i>36</i>&nbsp;    }
+<i>37</i>&nbsp;    public static UnifiedInputBufferX makePageBuffer(CharSequence chars, int offset, int length) {
+<b class="fc"><i>38</i>&nbsp;        char [] char_array = chars_make_char_array(chars, offset, length);</b>
+<b class="fc"><i>39</i>&nbsp;        UnifiedInputBufferX buf = makePageBuffer(char_array, 0, length);</b>
+<b class="fc"><i>40</i>&nbsp;        return buf;</b>
+<i>41</i>&nbsp;    }
+<i>42</i>&nbsp;    public static UnifiedInputBufferX makePageBuffer(BufferType bufferType, int initialPageSize)
+<i>43</i>&nbsp;    {
+<i>44</i>&nbsp;        UnifiedInputBufferX buf;
+<b class="fc"><i>45</i>&nbsp;        switch(bufferType) {</b>
+<i>46</i>&nbsp;        case CHARS:
+<b class="fc"><i>47</i>&nbsp;            buf = new UnifiedInputBufferX.Chars(initialPageSize);</b>
+<b class="fc"><i>48</i>&nbsp;            break;</b>
+<i>49</i>&nbsp;        case BYTES:
+<b class="fc"><i>50</i>&nbsp;            buf = new UnifiedInputBufferX.Bytes(initialPageSize);</b>
+<b class="fc"><i>51</i>&nbsp;            break;</b>
+<i>52</i>&nbsp;        default:
+<b class="nc"><i>53</i>&nbsp;            throw new IllegalArgumentException(&quot;invalid buffer type&quot;);</b>
+<i>54</i>&nbsp;        }
+<b class="fc"><i>55</i>&nbsp;        return buf;</b>
+<i>56</i>&nbsp;    }
+<i>57</i>&nbsp;    protected static final char[] chars_make_char_array(CharSequence chars,
+<i>58</i>&nbsp;                                                         int offset,
+<i>59</i>&nbsp;                                                         int length)
+<i>60</i>&nbsp;    {
+<b class="fc"><i>61</i>&nbsp;        char[] char_array = new char[length];</b>
+<b class="fc"><i>62</i>&nbsp;        for (int ii=offset; ii&lt;length; ii++) {</b>
+<b class="fc"><i>63</i>&nbsp;            char_array[ii] = chars.charAt(ii);</b>
+<i>64</i>&nbsp;        }
+<b class="fc"><i>65</i>&nbsp;        return char_array;</b>
+<i>66</i>&nbsp;    }
+<b class="fc"><i>67</i>&nbsp;    private UnifiedInputBufferX(int initialPageSize) {</b>
+<b class="fc"><i>68</i>&nbsp;        if (initialPageSize &lt; 0) {</b>
+<b class="nc"><i>69</i>&nbsp;            throw new IllegalArgumentException(&quot;page size must be &gt; 0&quot;);</b>
+<i>70</i>&nbsp;        }
+<b class="fc"><i>71</i>&nbsp;        _page_size = initialPageSize;</b>
+<b class="fc"><i>72</i>&nbsp;        _buffers = new UnifiedDataPageX[10];</b>
+<b class="fc"><i>73</i>&nbsp;    }</b>
+<i>74</i>&nbsp;
+<i>75</i>&nbsp;    public abstract BufferType getType();
+<i>76</i>&nbsp;    public abstract int maxValue();
+<i>77</i>&nbsp;
+<i>78</i>&nbsp;    public final void putCharAt(long fileOffset, int c) {
+<b class="nc"><i>79</i>&nbsp;        if (c &lt; 0 || c &gt; maxValue()) throw new IllegalArgumentException(&quot;value (&quot;+c+&quot;)is out of range (0 to &quot;+maxValue()+&quot;)&quot;);</b>
+<i>80</i>&nbsp;
+<i>81</i>&nbsp;        // since we start at _curr the common case find the buffer immediately
+<b class="nc"><i>82</i>&nbsp;        UnifiedDataPageX page = null;</b>
+<b class="nc"><i>83</i>&nbsp;        for (int ii=_buffer_current; ii&gt;=0; ii--) {</b>
+<b class="nc"><i>84</i>&nbsp;            if (_buffers[ii].containsOffset(fileOffset)) {</b>
+<b class="nc"><i>85</i>&nbsp;                page = _buffers[ii];</b>
+<b class="nc"><i>86</i>&nbsp;                break;</b>
+<i>87</i>&nbsp;            }
+<i>88</i>&nbsp;        }
+<b class="nc"><i>89</i>&nbsp;        if (page == null) throw new IllegalArgumentException();</b>
+<b class="nc"><i>90</i>&nbsp;        int offset = (int)(fileOffset - page.getStartingFileOffset());</b>
+<b class="nc"><i>91</i>&nbsp;        page.putValue(offset, c);</b>
+<b class="nc"><i>92</i>&nbsp;    }</b>
+<i>93</i>&nbsp;
+<i>94</i>&nbsp;    public final UnifiedDataPageX getCurrentPage() {
+<b class="fc"><i>95</i>&nbsp;        return _buffers[_buffer_current];</b>
+<i>96</i>&nbsp;    }
+<i>97</i>&nbsp;
+<i>98</i>&nbsp;    public final int getCurrentPageIdx()   {
+<b class="fc"><i>99</i>&nbsp;        return _buffer_current;</b>
+<i>100</i>&nbsp;    }
+<i>101</i>&nbsp;
+<i>102</i>&nbsp;    public final int getPageCount() {
+<b class="fc"><i>103</i>&nbsp;        return _buffer_count;</b>
+<i>104</i>&nbsp;    }
+<i>105</i>&nbsp;
+<i>106</i>&nbsp;    public final void incLock() {
+<b class="fc"><i>107</i>&nbsp;        _locks++;</b>
+<b class="fc"><i>108</i>&nbsp;    }</b>
+<i>109</i>&nbsp;    public final boolean decLock() {
+<b class="fc"><i>110</i>&nbsp;        _locks--;</b>
+<b class="fc"><i>111</i>&nbsp;        return (_locks == 0);</b>
+<i>112</i>&nbsp;    }
+<i>113</i>&nbsp;
+<i>114</i>&nbsp;    public final UnifiedDataPageX getPage(int pageIdx) {
+<b class="fc"><i>115</i>&nbsp;        if (pageIdx &lt; 0 || pageIdx &gt;= _buffer_count) {</b>
+<b class="nc"><i>116</i>&nbsp;            throw new IndexOutOfBoundsException();</b>
+<i>117</i>&nbsp;        }
+<b class="fc"><i>118</i>&nbsp;        return _buffers[pageIdx];</b>
+<i>119</i>&nbsp;    }
+<i>120</i>&nbsp;
+<i>121</i>&nbsp;    protected final int getNextFilledPageIdx() {
+<b class="fc"><i>122</i>&nbsp;        int idx = _buffer_current + 1;</b>
+<i>123</i>&nbsp;
+<b class="fc"><i>124</i>&nbsp;        if (idx &lt; _buffer_count) {</b>
+<b class="nc"><i>125</i>&nbsp;            UnifiedDataPageX p = _buffers[idx];</b>
+<b class="nc"><i>126</i>&nbsp;            if (p != null) {</b>
+<b class="nc"><i>127</i>&nbsp;                _buffer_current = idx;</b>
+<b class="nc"><i>128</i>&nbsp;                return idx;</b>
+<i>129</i>&nbsp;            }
+<i>130</i>&nbsp;        }
+<b class="fc"><i>131</i>&nbsp;        return -1;</b>
+<i>132</i>&nbsp;    }
+<i>133</i>&nbsp;
+<i>134</i>&nbsp;    protected final UnifiedDataPageX getEmptyPageIdx() {
+<b class="fc"><i>135</i>&nbsp;        UnifiedDataPageX next = null;</b>
+<i>136</i>&nbsp;
+<b class="fc"><i>137</i>&nbsp;        if (_buffer_count &lt; _buffers.length) {</b>
+<b class="fc"><i>138</i>&nbsp;            next = _buffers[_buffer_count];</b>
+<i>139</i>&nbsp;        }
+<b class="fc"><i>140</i>&nbsp;        if (next == null) {</b>
+<b class="fc"><i>141</i>&nbsp;            next = make_page(_page_size);</b>
+<i>142</i>&nbsp;        }
+<i>143</i>&nbsp;        else {
+<b class="nc"><i>144</i>&nbsp;            assert(_buffer_count == (_buffer_current + 1));</b>
+<i>145</i>&nbsp;        }
+<b class="fc"><i>146</i>&nbsp;        return next;</b>
+<i>147</i>&nbsp;    }
+<i>148</i>&nbsp;
+<i>149</i>&nbsp;    abstract protected UnifiedDataPageX make_page(int page_size);
+<i>150</i>&nbsp;
+<i>151</i>&nbsp;    protected final UnifiedDataPageX setCurrentPage(int idx, UnifiedDataPageX curr) {
+<b class="fc"><i>152</i>&nbsp;        setPage(idx, curr, true);</b>
+<b class="fc"><i>153</i>&nbsp;        if (idx != _buffer_current) {</b>
+<b class="nc"><i>154</i>&nbsp;            _buffer_current = idx;</b>
+<b class="nc"><i>155</i>&nbsp;            if (idx &gt;= _buffer_count) {</b>
+<b class="nc"><i>156</i>&nbsp;                _buffer_count = idx + 1;</b>
+<i>157</i>&nbsp;            }
+<i>158</i>&nbsp;        }
+<b class="fc"><i>159</i>&nbsp;        UnifiedDataPageX p = _buffers[idx];</b>
+<b class="fc"><i>160</i>&nbsp;        return p;</b>
+<i>161</i>&nbsp;    }
+<i>162</i>&nbsp;
+<i>163</i>&nbsp;    protected final void setPage(int idx, UnifiedDataPageX curr, boolean recycleOldPage)
+<i>164</i>&nbsp;    {
+<b class="fc"><i>165</i>&nbsp;        int oldlen = _buffers.length;</b>
+<b class="fc"><i>166</i>&nbsp;        if (idx &gt;= oldlen) {</b>
+<b class="nc"><i>167</i>&nbsp;            int newlen = oldlen * 2;</b>
+<b class="nc"><i>168</i>&nbsp;            UnifiedDataPageX[] newbuf = new UnifiedDataPageX[newlen];</b>
+<b class="nc"><i>169</i>&nbsp;            System.arraycopy(_buffers, 0, newbuf, 0, oldlen);</b>
+<b class="nc"><i>170</i>&nbsp;            _buffers = newbuf;</b>
+<i>171</i>&nbsp;        }
+<b class="fc"><i>172</i>&nbsp;        UnifiedDataPageX prev = _buffers[idx];</b>
+<b class="fc"><i>173</i>&nbsp;        _buffers[idx] = curr;</b>
+<b class="fc"><i>174</i>&nbsp;        if (idx &gt;= _buffer_count) {</b>
+<b class="fc"><i>175</i>&nbsp;            _buffer_count = idx + 1;</b>
+<i>176</i>&nbsp;        }
+<i>177</i>&nbsp;        // if the caller wants us to we&#39;ll hold onto this
+<i>178</i>&nbsp;        // page for a bit, since it&#39;s now available
+<b class="fc"><i>179</i>&nbsp;        if (recycleOldPage</b>
+<i>180</i>&nbsp;         &amp;&amp; prev != null
+<i>181</i>&nbsp;         &amp;&amp; prev != curr
+<i>182</i>&nbsp;         &amp;&amp; (idx + 1) &lt; _buffers.length // it&#39;s not worth reallocating the _buffers array for this
+<i>183</i>&nbsp;         ) {
+<b class="nc"><i>184</i>&nbsp;            _buffers[idx+1] = prev;</b>
+<i>185</i>&nbsp;        }
+<b class="fc"><i>186</i>&nbsp;    }</b>
+<i>187</i>&nbsp;
+<i>188</i>&nbsp;    /**
+<i>189</i>&nbsp;     * resets the buffer list to start at the current page
+<i>190</i>&nbsp;     * this releases any &quot;extra&quot; pages.  This does hold
+<i>191</i>&nbsp;     * on to 1 extra page, if there is one, since two pages
+<i>192</i>&nbsp;     * if a common occurrence for values that cross the
+<i>193</i>&nbsp;     * page boundary.
+<i>194</i>&nbsp;     *
+<i>195</i>&nbsp;     * when this exits there will be either just the current
+<i>196</i>&nbsp;     * page in the buffer list or the current page and 1
+<i>197</i>&nbsp;     * preallocated page just after it (in idx 1).
+<i>198</i>&nbsp;     */
+<i>199</i>&nbsp;    protected final void resetToCurrentPage()
+<i>200</i>&nbsp;    {
+<b class="fc"><i>201</i>&nbsp;        int p0_idx = getCurrentPageIdx();</b>
+<b class="fc"><i>202</i>&nbsp;        if (p0_idx &gt; 0) {</b>
+<i>203</i>&nbsp;            // this is a common &quot;do nothing&quot; case, it happens
+<i>204</i>&nbsp;            // when we reset to the page and there are no saved
+<i>205</i>&nbsp;            // pages - i.e. the mark is contained in curr
+<b class="nc"><i>206</i>&nbsp;            release_pages_to(p0_idx);</b>
+<i>207</i>&nbsp;        }
+<b class="fc"><i>208</i>&nbsp;    }</b>
+<i>209</i>&nbsp;
+<i>210</i>&nbsp;    private final void release_pages_to(int p0_idx) {
+<b class="nc"><i>211</i>&nbsp;        assert(p0_idx &gt; 0);</b>
+<i>212</i>&nbsp;
+<i>213</i>&nbsp;        // we&#39;ll try to save the now unneeded 0th empty page
+<b class="nc"><i>214</i>&nbsp;        UnifiedDataPageX empty_page = _buffers[0];</b>
+<i>215</i>&nbsp;
+<i>216</i>&nbsp;        // now bump all the page ptrs down to release the
+<i>217</i>&nbsp;        // pages that precede the current page
+<b class="nc"><i>218</i>&nbsp;        int dst = 0;</b>
+<b class="nc"><i>219</i>&nbsp;        int src = p0_idx;</b>
+<b class="nc"><i>220</i>&nbsp;        while (src&lt;_buffer_count) {</b>
+<b class="nc"><i>221</i>&nbsp;            _buffers[dst++] = _buffers[src++];</b>
+<i>222</i>&nbsp;        }
+<i>223</i>&nbsp;
+<i>224</i>&nbsp;        // clear any trailing page ptrs
+<b class="nc"><i>225</i>&nbsp;        int end = _buffer_count + 1; // we may have an extra page ptr saved at buffer[count]</b>
+<b class="nc"><i>226</i>&nbsp;        if (end &gt;= _buffers.length) {</b>
+<b class="nc"><i>227</i>&nbsp;            end = _buffers.length;</b>
+<i>228</i>&nbsp;        }
+<b class="nc"><i>229</i>&nbsp;        while (dst &lt; end) {</b>
+<b class="nc"><i>230</i>&nbsp;            _buffers[dst++] = null;</b>
+<i>231</i>&nbsp;        }
+<i>232</i>&nbsp;
+<b class="nc"><i>233</i>&nbsp;        _buffer_current -= p0_idx;</b>
+<b class="nc"><i>234</i>&nbsp;        _buffer_count -= p0_idx;</b>
+<b class="nc"><i>235</i>&nbsp;        _buffers[_buffer_count] = empty_page;</b>
+<b class="nc"><i>236</i>&nbsp;    }</b>
+<i>237</i>&nbsp;
+<i>238</i>&nbsp;    /**
+<i>239</i>&nbsp;     * this clears all the pages out, except to save
+<i>240</i>&nbsp;     * one page (unallocated)
+<i>241</i>&nbsp;     *
+<i>242</i>&nbsp;     */
+<i>243</i>&nbsp;    protected final void clear() {
+<b class="fc"><i>244</i>&nbsp;        UnifiedDataPageX curr = getCurrentPage();</b>
+<i>245</i>&nbsp;
+<b class="fc"><i>246</i>&nbsp;        for (int ii=0; ii&lt;_buffers.length; ii++) {</b>
+<b class="fc"><i>247</i>&nbsp;            _buffers[ii] = null;</b>
+<i>248</i>&nbsp;        }
+<i>249</i>&nbsp;
+<i>250</i>&nbsp;        // curr is null when underlying stream is empty.
+<b class="fc"><i>251</i>&nbsp;        if (curr != null)</b>
+<i>252</i>&nbsp;        {
+<b class="fc"><i>253</i>&nbsp;            _buffers[0] = curr;</b>
+<b class="fc"><i>254</i>&nbsp;            curr.reset(0);</b>
+<i>255</i>&nbsp;        }
+<i>256</i>&nbsp;
+<b class="fc"><i>257</i>&nbsp;        _buffer_count = 0;</b>
+<b class="fc"><i>258</i>&nbsp;        _buffer_current = 0;</b>
+<b class="fc"><i>259</i>&nbsp;    }</b>
+<i>260</i>&nbsp;
+<i>261</i>&nbsp;    static class Bytes extends UnifiedInputBufferX {
+<i>262</i>&nbsp;        protected Bytes(int initialPageSize) {
+<b class="fc"><i>263</i>&nbsp;            super(initialPageSize);</b>
+<b class="fc"><i>264</i>&nbsp;        }</b>
+<i>265</i>&nbsp;        protected Bytes(byte[] bytes, int offset, int length) {
+<b class="fc"><i>266</i>&nbsp;            super(length);</b>
+<b class="fc"><i>267</i>&nbsp;            _buffers[0] = new UnifiedDataPageX.Bytes(bytes, offset, length);</b>
+<b class="fc"><i>268</i>&nbsp;            _buffer_current = 0;</b>
+<b class="fc"><i>269</i>&nbsp;            _buffer_count = 1;</b>
+<b class="fc"><i>270</i>&nbsp;        }</b>
+<i>271</i>&nbsp;        @Override
+<b class="nc"><i>272</i>&nbsp;        public final BufferType getType() { return BufferType.BYTES; }</b>
+<i>273</i>&nbsp;
+<i>274</i>&nbsp;        @Override
+<i>275</i>&nbsp;        protected final UnifiedDataPageX make_page(int page_size) {
+<b class="fc"><i>276</i>&nbsp;            UnifiedDataPageX p = new UnifiedDataPageX.Bytes(page_size);</b>
+<b class="fc"><i>277</i>&nbsp;            return p;</b>
+<i>278</i>&nbsp;        }
+<i>279</i>&nbsp;
+<i>280</i>&nbsp;        @Override
+<b class="fc"><i>281</i>&nbsp;        public final int maxValue() { return 0xff; }</b>
+<i>282</i>&nbsp;
+<i>283</i>&nbsp;    }
+<i>284</i>&nbsp;    static class Chars extends UnifiedInputBufferX {
+<i>285</i>&nbsp;        protected Chars(int initialPageSize) {
+<b class="fc"><i>286</i>&nbsp;            super(initialPageSize);</b>
+<b class="fc"><i>287</i>&nbsp;        }</b>
+<i>288</i>&nbsp;        /** Retains a reference to the chars array! */
+<i>289</i>&nbsp;        protected Chars(char[] chars, int offset, int length) {
+<b class="fc"><i>290</i>&nbsp;            super(offset + length);</b>
+<b class="fc"><i>291</i>&nbsp;            _buffers[0] = new UnifiedDataPageX.Chars(chars, offset, length);</b>
+<b class="fc"><i>292</i>&nbsp;            _buffer_current = 0;</b>
+<b class="fc"><i>293</i>&nbsp;            _buffer_count = 1;</b>
+<i>294</i>&nbsp;
+<b class="fc"><i>295</i>&nbsp;        }</b>
+<i>296</i>&nbsp;        /**
+<i>297</i>&nbsp;         * Makes a copy of the {@link CharSequence}.
+<i>298</i>&nbsp;         */
+<i>299</i>&nbsp;        protected Chars(CharSequence chars, int offset, int length) {
+<b class="nc"><i>300</i>&nbsp;            this(chars_make_char_array(chars, offset, length), 0, length);</b>
+<b class="nc"><i>301</i>&nbsp;        }</b>
+<i>302</i>&nbsp;        @Override
+<b class="nc"><i>303</i>&nbsp;        public final BufferType getType() { return BufferType.CHARS; }</b>
+<i>304</i>&nbsp;
+<i>305</i>&nbsp;        @Override
+<i>306</i>&nbsp;        protected final UnifiedDataPageX make_page(int page_size) {
+<b class="fc"><i>307</i>&nbsp;            UnifiedDataPageX p = new UnifiedDataPageX.Chars(page_size);</b>
+<b class="fc"><i>308</i>&nbsp;            return p;</b>
+<i>309</i>&nbsp;        }
+<i>310</i>&nbsp;
+<i>311</i>&nbsp;        @Override
+<b class="fc"><i>312</i>&nbsp;        public final int maxValue() { return 0xffff; }</b>
+<i>313</i>&nbsp;    }
+<i>314</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

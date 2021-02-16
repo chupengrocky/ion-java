@@ -1,0 +1,118 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: _Private_FastAppendable</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.util</a> ]
+</div>
+
+<h1>Coverage Summary for Class: _Private_FastAppendable (com.amazon.ion.util)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">_Private_FastAppendable</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.util;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import java.io.IOException;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;public interface _Private_FastAppendable
+<i>22</i>&nbsp;    extends Appendable
+<i>23</i>&nbsp;{
+<i>24</i>&nbsp;    /**
+<i>25</i>&nbsp;     * High performance method for appending an ASCII character. METHOD DOESN&#39;T
+<i>26</i>&nbsp;     * VERIFY IF CHARACTER IS ASCII.
+<i>27</i>&nbsp;     * @param c
+<i>28</i>&nbsp;     * @throws IOException
+<i>29</i>&nbsp;     */
+<i>30</i>&nbsp;    public void appendAscii(char c)
+<i>31</i>&nbsp;        throws IOException;
+<i>32</i>&nbsp;
+<i>33</i>&nbsp;    /**
+<i>34</i>&nbsp;     * High performance method for appending a sequence of ASCII characters.
+<i>35</i>&nbsp;     * METHOD DOESN&#39;T VERIFY IF CHARACTERS ARE ASCII.
+<i>36</i>&nbsp;     * @param csq
+<i>37</i>&nbsp;     * @throws IOException
+<i>38</i>&nbsp;     */
+<i>39</i>&nbsp;    public void appendAscii(CharSequence csq)
+<i>40</i>&nbsp;        throws IOException;
+<i>41</i>&nbsp;
+<i>42</i>&nbsp;    /**
+<i>43</i>&nbsp;     * High performance method for appending a range in sequence of ASCII
+<i>44</i>&nbsp;     * characters. METHOD DOESN&#39;T VERIFY IF CHARACTERS ARE ASCII.
+<i>45</i>&nbsp;     * @param csq
+<i>46</i>&nbsp;     * @param start
+<i>47</i>&nbsp;     * @param end
+<i>48</i>&nbsp;     * @throws IOException
+<i>49</i>&nbsp;     */
+<i>50</i>&nbsp;    public void appendAscii(CharSequence csq, int start, int end)
+<i>51</i>&nbsp;        throws IOException;
+<i>52</i>&nbsp;
+<i>53</i>&nbsp;    /**
+<i>54</i>&nbsp;     * High performance method for appending a UTF-16 non-surrogate character.
+<i>55</i>&nbsp;     * METHOD DOESN&#39;T VERIFY IF CHARACTER IS OR IS NOT SURROGATE.
+<i>56</i>&nbsp;     * @param c
+<i>57</i>&nbsp;     * @throws IOException
+<i>58</i>&nbsp;     */
+<i>59</i>&nbsp;    public void appendUtf16(char c)
+<i>60</i>&nbsp;        throws IOException;
+<i>61</i>&nbsp;
+<i>62</i>&nbsp;    /**
+<i>63</i>&nbsp;     * High performance method for appending a UTF-16 surrogate pair. METHOD
+<i>64</i>&nbsp;     * DOESN&#39;T VERIFY IF LEAD AND TRAIL SURROGATES ARE VALID.
+<i>65</i>&nbsp;     * @param leadSurrogate
+<i>66</i>&nbsp;     * @param trailSurrogate
+<i>67</i>&nbsp;     * @throws IOException
+<i>68</i>&nbsp;     */
+<i>69</i>&nbsp;    public void appendUtf16Surrogate(char leadSurrogate, char trailSurrogate)
+<i>70</i>&nbsp;        throws IOException;
+<i>71</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

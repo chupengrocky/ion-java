@@ -1,0 +1,1449 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonReaderBinaryRawX</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonReaderBinaryRawX (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IonReaderBinaryRawX</td>
+<td class="coverageStat">
+  <span class="percent">
+    96.4%
+  </span>
+  <span class="absValue">
+    (54/ 56)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.8%
+  </span>
+  <span class="absValue">
+    (579/ 624)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">IonReaderBinaryRawX$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonReaderBinaryRawX$State</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/ 7)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    96.6%
+  </span>
+  <span class="absValue">
+    (57/ 59)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.9%
+  </span>
+  <span class="absValue">
+    (588/ 633)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.SystemSymbols.ION_1_0_SID;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;import com.amazon.ion.Decimal;
+<i>21</i>&nbsp;import com.amazon.ion.IonException;
+<i>22</i>&nbsp;import com.amazon.ion.IonReader;
+<i>23</i>&nbsp;import com.amazon.ion.IonType;
+<i>24</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>25</i>&nbsp;import com.amazon.ion.Timestamp;
+<i>26</i>&nbsp;import com.amazon.ion.Timestamp.Precision;
+<i>27</i>&nbsp;import com.amazon.ion.impl.UnifiedSavePointManagerX.SavePoint;
+<i>28</i>&nbsp;import com.amazon.ion.impl._Private_ScalarConversions.AS_TYPE;
+<i>29</i>&nbsp;import com.amazon.ion.impl._Private_ScalarConversions.ValueVariant;
+<i>30</i>&nbsp;
+<i>31</i>&nbsp;import java.io.IOException;
+<i>32</i>&nbsp;import java.math.BigDecimal;
+<i>33</i>&nbsp;import java.math.BigInteger;
+<i>34</i>&nbsp;import java.math.MathContext;
+<i>35</i>&nbsp;import java.nio.ByteBuffer;
+<i>36</i>&nbsp;import java.nio.CharBuffer;
+<i>37</i>&nbsp;import java.nio.charset.Charset;
+<i>38</i>&nbsp;import java.nio.charset.CharsetDecoder;
+<i>39</i>&nbsp;import java.nio.charset.CoderResult;
+<i>40</i>&nbsp;
+<i>41</i>&nbsp;
+<i>42</i>&nbsp;/**
+<i>43</i>&nbsp; *  low level reader, base class, for reading Ion binary
+<i>44</i>&nbsp; *  input sources.  This using the UnifiedInputStream just
+<i>45</i>&nbsp; *  as the updated (july 2009) text reader does.  The
+<i>46</i>&nbsp; *  routines in this impl only include those needed to handle
+<i>47</i>&nbsp; *  field id&#39;s, annotation ids&#39;, and access to the value
+<i>48</i>&nbsp; *  headers.  In particular hasNext, next, stepIn and stepOut
+<i>49</i>&nbsp; *  are handled here.
+<i>50</i>&nbsp; *
+<i>51</i>&nbsp; *  scalar values are handled by IonReaderBinarySystem and
+<i>52</i>&nbsp; *  symbol tables (as well as field names and annotations as
+<i>53</i>&nbsp; *  strings) are handled by IonBinaryReaderUser.
+<i>54</i>&nbsp; */
+<b class="fc"><i>55</i>&nbsp;abstract class IonReaderBinaryRawX</b>
+<i>56</i>&nbsp;    implements IonReader
+<i>57</i>&nbsp;{
+<i>58</i>&nbsp;    static final int DEFAULT_CONTAINER_STACK_SIZE = 12; // a multiple of 3
+<i>59</i>&nbsp;    static final int DEFAULT_ANNOTATION_SIZE = 10;
+<i>60</i>&nbsp;    static final int NO_LIMIT = Integer.MIN_VALUE;
+<i>61</i>&nbsp;    static final int UTF8_BUFFER_SIZE_IN_BYTES = 4 * 1024;
+<i>62</i>&nbsp;
+<b class="fc"><i>63</i>&nbsp;    protected enum State {</b>
+<b class="fc"><i>64</i>&nbsp;        S_INVALID,</b>
+<b class="fc"><i>65</i>&nbsp;        S_BEFORE_FIELD, // only true in structs</b>
+<b class="fc"><i>66</i>&nbsp;        S_BEFORE_TID,</b>
+<b class="fc"><i>67</i>&nbsp;        S_BEFORE_VALUE,</b>
+<b class="fc"><i>68</i>&nbsp;        S_AFTER_VALUE,</b>
+<b class="fc"><i>69</i>&nbsp;        S_EOF</b>
+<i>70</i>&nbsp;    }
+<i>71</i>&nbsp;    State               _state;
+<i>72</i>&nbsp;    UnifiedInputStreamX _input;
+<i>73</i>&nbsp;    int                 _local_remaining;
+<i>74</i>&nbsp;    boolean             _eof;
+<i>75</i>&nbsp;    boolean             _has_next_needed;
+<i>76</i>&nbsp;    ValueVariant        _v;
+<i>77</i>&nbsp;    IonType             _value_type;
+<i>78</i>&nbsp;    boolean             _value_is_null;
+<i>79</i>&nbsp;    boolean             _value_is_true;   // cached boolean value (since we step on the length)
+<i>80</i>&nbsp;
+<i>81</i>&nbsp;    /**
+<i>82</i>&nbsp;     * {@link SymbolTable#UNKNOWN_SYMBOL_ID} means &quot;not on a struct field&quot;
+<i>83</i>&nbsp;     * since otherwise we always know the SID.
+<i>84</i>&nbsp;     */
+<i>85</i>&nbsp;    int                 _value_field_id;
+<i>86</i>&nbsp;    int                 _value_tid;
+<i>87</i>&nbsp;    int                 _value_len;
+<i>88</i>&nbsp;    long                _value_start;
+<i>89</i>&nbsp;    int                 _value_lob_remaining;
+<i>90</i>&nbsp;    boolean             _value_lob_is_ready;
+<i>91</i>&nbsp;
+<i>92</i>&nbsp;    long                _position_start;
+<i>93</i>&nbsp;    long                _position_len;
+<i>94</i>&nbsp;
+<i>95</i>&nbsp;
+<i>96</i>&nbsp;    SavePoint           _annotations;
+<i>97</i>&nbsp;    int[]               _annotation_ids;
+<i>98</i>&nbsp;    int                 _annotation_count;
+<i>99</i>&nbsp;
+<i>100</i>&nbsp;    // local stack for stepInto() and stepOut()
+<i>101</i>&nbsp;    boolean             _is_in_struct;
+<i>102</i>&nbsp;    boolean             _struct_is_ordered;
+<i>103</i>&nbsp;    int                 _parent_tid;
+<i>104</i>&nbsp;    int                 _container_top;
+<i>105</i>&nbsp;    long[]              _container_stack; // triples of: position, type, local_end
+<i>106</i>&nbsp;
+<i>107</i>&nbsp;
+<i>108</i>&nbsp;    // `StandardCharsets.UTF_8` wasn&#39;t introduced until Java 7, so we have to use Charset#forName(String) instead.
+<b class="fc"><i>109</i>&nbsp;    private static final Charset UTF8 = Charset.forName(&quot;UTF-8&quot;);</b>
+<b class="fc"><i>110</i>&nbsp;    private CharsetDecoder utf8CharsetDecoder = UTF8.newDecoder();</b>
+<i>111</i>&nbsp;
+<i>112</i>&nbsp;    // Calling read() to pull in the next byte of a string requires an EOF check to be performed for each byte.
+<i>113</i>&nbsp;    // This reusable buffer allows us to call read(utf8InputBuffer) instead, letting us can pay the cost of an EOF check
+<i>114</i>&nbsp;    // once per buffer rather than once per byte.
+<b class="fc"><i>115</i>&nbsp;    private ByteBuffer utf8InputBuffer = ByteBuffer.allocate(UTF8_BUFFER_SIZE_IN_BYTES);</b>
+<i>116</i>&nbsp;
+<i>117</i>&nbsp;    // A reusable scratch space to hold the decoded bytes as they&#39;re read from the utf8InputBuffer.
+<b class="fc"><i>118</i>&nbsp;    private CharBuffer utf8DecodingBuffer = CharBuffer.allocate(UTF8_BUFFER_SIZE_IN_BYTES);</b>
+<i>119</i>&nbsp;
+<b class="fc"><i>120</i>&nbsp;    protected IonReaderBinaryRawX() {</b>
+<b class="fc"><i>121</i>&nbsp;    }</b>
+<i>122</i>&nbsp;
+<i>123</i>&nbsp;    /**
+<i>124</i>&nbsp;     * @return This implementation always returns null.
+<i>125</i>&nbsp;     */
+<i>126</i>&nbsp;    public &lt;T&gt; T asFacet(Class&lt;T&gt; facetType)
+<i>127</i>&nbsp;    {
+<b class="fc"><i>128</i>&nbsp;        return null;</b>
+<i>129</i>&nbsp;    }
+<i>130</i>&nbsp;
+<i>131</i>&nbsp;    protected final void init_raw(UnifiedInputStreamX uis) {
+<b class="fc"><i>132</i>&nbsp;        _input = uis;</b>
+<b class="fc"><i>133</i>&nbsp;        _container_stack = new long[DEFAULT_CONTAINER_STACK_SIZE];</b>
+<b class="fc"><i>134</i>&nbsp;        _annotations = uis.savePointAllocate();</b>
+<b class="fc"><i>135</i>&nbsp;        _v = new ValueVariant();</b>
+<b class="fc"><i>136</i>&nbsp;        _annotation_ids = new int[DEFAULT_ANNOTATION_SIZE];</b>
+<i>137</i>&nbsp;
+<b class="fc"><i>138</i>&nbsp;        re_init_raw();</b>
+<i>139</i>&nbsp;
+<b class="fc"><i>140</i>&nbsp;        _position_start = -1;</b>
+<b class="fc"><i>141</i>&nbsp;    }</b>
+<i>142</i>&nbsp;
+<i>143</i>&nbsp;    final void re_init_raw() {
+<b class="fc"><i>144</i>&nbsp;        _local_remaining = NO_LIMIT;</b>
+<b class="fc"><i>145</i>&nbsp;        _parent_tid = _Private_IonConstants.tidDATAGRAM;</b>
+<b class="fc"><i>146</i>&nbsp;        _value_field_id = SymbolTable.UNKNOWN_SYMBOL_ID;</b>
+<b class="fc"><i>147</i>&nbsp;        _state = State.S_BEFORE_TID; // this is where we always start</b>
+<b class="fc"><i>148</i>&nbsp;        _has_next_needed = true;</b>
+<i>149</i>&nbsp;
+<b class="fc"><i>150</i>&nbsp;        _eof = false;</b>
+<b class="fc"><i>151</i>&nbsp;        _value_type = null;</b>
+<b class="fc"><i>152</i>&nbsp;        _value_is_null = false;</b>
+<b class="fc"><i>153</i>&nbsp;        _value_is_true = false;</b>
+<i>154</i>&nbsp;
+<b class="fc"><i>155</i>&nbsp;        _value_len = 0;</b>
+<b class="fc"><i>156</i>&nbsp;        _value_start = 0;</b>
+<b class="fc"><i>157</i>&nbsp;        _value_lob_remaining = 0;</b>
+<b class="fc"><i>158</i>&nbsp;        _value_lob_is_ready = false;</b>
+<i>159</i>&nbsp;
+<b class="fc"><i>160</i>&nbsp;        _annotation_count = 0;</b>
+<i>161</i>&nbsp;
+<b class="fc"><i>162</i>&nbsp;        _is_in_struct = false;</b>
+<b class="fc"><i>163</i>&nbsp;        _struct_is_ordered = false;</b>
+<b class="fc"><i>164</i>&nbsp;        _parent_tid = 0;</b>
+<b class="fc"><i>165</i>&nbsp;        _container_top = 0;</b>
+<b class="fc"><i>166</i>&nbsp;    }</b>
+<i>167</i>&nbsp;
+<i>168</i>&nbsp;    public void close()
+<i>169</i>&nbsp;        throws IOException
+<i>170</i>&nbsp;    {
+<b class="fc"><i>171</i>&nbsp;        _input.close();</b>
+<b class="fc"><i>172</i>&nbsp;    }</b>
+<i>173</i>&nbsp;
+<i>174</i>&nbsp;    static private final int  POS_OFFSET        = 0;
+<i>175</i>&nbsp;    static private final int  TYPE_LIMIT_OFFSET = 1;
+<i>176</i>&nbsp;    static private final long TYPE_MASK         = 0xffffffff;
+<i>177</i>&nbsp;    static private final int  LIMIT_SHIFT       = 32;
+<i>178</i>&nbsp;    static private final int  POS_STACK_STEP    = 2;
+<i>179</i>&nbsp;
+<i>180</i>&nbsp;    private final void push(int type, long position, int local_remaining)
+<i>181</i>&nbsp;    {
+<b class="fc"><i>182</i>&nbsp;        int oldlen = _container_stack.length;</b>
+<b class="fc"><i>183</i>&nbsp;        if ((_container_top + POS_STACK_STEP) &gt;= oldlen) {</b>
+<b class="fc"><i>184</i>&nbsp;            int newlen = oldlen * 2;</b>
+<b class="fc"><i>185</i>&nbsp;            long[] temp = new long[newlen];</b>
+<b class="fc"><i>186</i>&nbsp;            System.arraycopy(_container_stack, 0, temp, 0, oldlen);</b>
+<b class="fc"><i>187</i>&nbsp;            _container_stack = temp;</b>
+<i>188</i>&nbsp;        }
+<b class="fc"><i>189</i>&nbsp;        _container_stack[_container_top + POS_OFFSET]  = position;</b>
+<b class="fc"><i>190</i>&nbsp;        long type_limit = local_remaining;</b>
+<b class="fc"><i>191</i>&nbsp;        type_limit &lt;&lt;= LIMIT_SHIFT;</b>
+<b class="fc"><i>192</i>&nbsp;        type_limit  |= (type &amp; TYPE_MASK);</b>
+<b class="fc"><i>193</i>&nbsp;        _container_stack[_container_top + TYPE_LIMIT_OFFSET] = type_limit;</b>
+<b class="fc"><i>194</i>&nbsp;        _container_top += POS_STACK_STEP;</b>
+<b class="fc"><i>195</i>&nbsp;    }</b>
+<i>196</i>&nbsp;    private final long get_top_position() {
+<b class="fc"><i>197</i>&nbsp;        assert(_container_top &gt; 0);</b>
+<b class="fc"><i>198</i>&nbsp;        long pos = _container_stack[(_container_top - POS_STACK_STEP) + POS_OFFSET];</b>
+<b class="fc"><i>199</i>&nbsp;        return pos;</b>
+<i>200</i>&nbsp;    }
+<i>201</i>&nbsp;    private final int get_top_type() {
+<b class="fc"><i>202</i>&nbsp;        assert(_container_top &gt; 0);</b>
+<b class="fc"><i>203</i>&nbsp;        long type_limit = _container_stack[(_container_top - POS_STACK_STEP) + TYPE_LIMIT_OFFSET];</b>
+<b class="fc"><i>204</i>&nbsp;        int type = (int)(type_limit &amp; TYPE_MASK);</b>
+<b class="fc"><i>205</i>&nbsp;        if (type &lt; 0 || type &gt; _Private_IonConstants.tidDATAGRAM) {</b>
+<b class="nc"><i>206</i>&nbsp;            throwErrorAt(&quot;invalid type id in parent stack&quot;);</b>
+<i>207</i>&nbsp;        }
+<b class="fc"><i>208</i>&nbsp;        return type;</b>
+<i>209</i>&nbsp;    }
+<i>210</i>&nbsp;    private final int get_top_local_remaining() {
+<b class="fc"><i>211</i>&nbsp;        assert(_container_top &gt; 0);</b>
+<b class="fc"><i>212</i>&nbsp;        long type_limit = _container_stack[_container_top - POS_STACK_STEP + TYPE_LIMIT_OFFSET];</b>
+<b class="fc"><i>213</i>&nbsp;        int  local_remaining = (int)((type_limit &gt;&gt; LIMIT_SHIFT) &amp; TYPE_MASK);</b>
+<b class="fc"><i>214</i>&nbsp;        return local_remaining;</b>
+<i>215</i>&nbsp;    }
+<i>216</i>&nbsp;    private final void pop() {
+<b class="fc"><i>217</i>&nbsp;        assert(_container_top &gt; 0);</b>
+<b class="fc"><i>218</i>&nbsp;        _container_top -= POS_STACK_STEP;</b>
+<b class="fc"><i>219</i>&nbsp;    }</b>
+<i>220</i>&nbsp;    public boolean hasNext()
+<i>221</i>&nbsp;    {
+<b class="fc"><i>222</i>&nbsp;        if (!_eof &amp;&amp; _has_next_needed) {</b>
+<i>223</i>&nbsp;            try {
+<b class="fc"><i>224</i>&nbsp;                has_next_helper_raw();</b>
+<i>225</i>&nbsp;            }
+<b class="fc"><i>226</i>&nbsp;            catch (IOException e) {</b>
+<b class="fc"><i>227</i>&nbsp;                error(e);</b>
+<b class="fc"><i>228</i>&nbsp;            }</b>
+<i>229</i>&nbsp;        }
+<b class="fc"><i>230</i>&nbsp;        return !_eof;</b>
+<i>231</i>&nbsp;    }
+<i>232</i>&nbsp;    public IonType next()
+<i>233</i>&nbsp;    {
+<b class="fc"><i>234</i>&nbsp;        if (_eof) {</b>
+<b class="fc"><i>235</i>&nbsp;            return null;</b>
+<i>236</i>&nbsp;        }
+<b class="fc"><i>237</i>&nbsp;        if (_has_next_needed) {</b>
+<i>238</i>&nbsp;            try {
+<b class="fc"><i>239</i>&nbsp;                has_next_helper_raw();</b>
+<i>240</i>&nbsp;            }
+<b class="nc"><i>241</i>&nbsp;            catch (IOException e) {</b>
+<b class="nc"><i>242</i>&nbsp;                error(e);</b>
+<b class="fc"><i>243</i>&nbsp;            }</b>
+<i>244</i>&nbsp;        }
+<b class="fc"><i>245</i>&nbsp;        _has_next_needed = true;</b>
+<i>246</i>&nbsp;        // this should only be null here if we&#39;re at eof
+<b class="fc"><i>247</i>&nbsp;        assert( _value_type != null || _eof == true);</b>
+<b class="fc"><i>248</i>&nbsp;        return _value_type;</b>
+<i>249</i>&nbsp;    }
+<i>250</i>&nbsp;    //from IonConstants
+<i>251</i>&nbsp;    //public static final byte[] BINARY_VERSION_MARKER_1_0 =
+<i>252</i>&nbsp;    //    { (byte) 0xE0,
+<i>253</i>&nbsp;    //      (byte) 0x01,
+<i>254</i>&nbsp;    //      (byte) 0x00,
+<i>255</i>&nbsp;    //      (byte) 0xEA };
+<b class="fc"><i>256</i>&nbsp;    private static final int BINARY_VERSION_MARKER_TID = _Private_IonConstants.getTypeCode(_Private_IonConstants.BINARY_VERSION_MARKER_1_0[0] &amp; 0xff);</b>
+<b class="fc"><i>257</i>&nbsp;    private static final int BINARY_VERSION_MARKER_LEN = _Private_IonConstants.getLowNibble(_Private_IonConstants.BINARY_VERSION_MARKER_1_0[0] &amp; 0xff);</b>
+<i>258</i>&nbsp;    private final void has_next_helper_raw() throws IOException
+<i>259</i>&nbsp;    {
+<b class="fc"><i>260</i>&nbsp;        clear_value();</b>
+<b class="fc"><i>261</i>&nbsp;        while (_value_tid == -1 &amp;&amp; !_eof) {</b>
+<b class="fc"><i>262</i>&nbsp;            switch (_state) {</b>
+<i>263</i>&nbsp;            case S_BEFORE_FIELD:
+<b class="fc"><i>264</i>&nbsp;                assert _value_field_id == SymbolTable.UNKNOWN_SYMBOL_ID;</b>
+<b class="fc"><i>265</i>&nbsp;                _value_field_id = read_field_id();</b>
+<b class="fc"><i>266</i>&nbsp;                if (_value_field_id == UnifiedInputStreamX.EOF) {</b>
+<i>267</i>&nbsp;                    // FIXME why is EOF ever okay in the middle of a struct?
+<i>268</i>&nbsp;                    assert UnifiedInputStreamX.EOF == SymbolTable.UNKNOWN_SYMBOL_ID;
+<b class="fc"><i>269</i>&nbsp;                    _eof = true;</b>
+<b class="fc"><i>270</i>&nbsp;                    break;</b>
+<i>271</i>&nbsp;                }
+<i>272</i>&nbsp;                // fall through to try to read the type id right now
+<i>273</i>&nbsp;            case S_BEFORE_TID:
+<b class="fc"><i>274</i>&nbsp;                _state = State.S_BEFORE_VALUE; // read_type_id may change this for null and bool values</b>
+<b class="fc"><i>275</i>&nbsp;                _value_tid = read_type_id();</b>
+<b class="fc"><i>276</i>&nbsp;                if (_value_tid == UnifiedInputStreamX.EOF) {</b>
+<b class="fc"><i>277</i>&nbsp;                    _state = State.S_EOF;</b>
+<b class="fc"><i>278</i>&nbsp;                    _eof = true;</b>
+<b class="fc"><i>279</i>&nbsp;                    break;</b>
+<i>280</i>&nbsp;                }
+<b class="fc"><i>281</i>&nbsp;                if (_value_tid == _Private_IonConstants.tidNopPad) {</b>
+<i>282</i>&nbsp;                    // skips size of pad and resets State machine
+<b class="fc"><i>283</i>&nbsp;                    skip(_value_len);</b>
+<b class="fc"><i>284</i>&nbsp;                    clear_value();</b>
+<b class="fc"><i>285</i>&nbsp;                    break;</b>
+<i>286</i>&nbsp;                }
+<b class="fc"><i>287</i>&nbsp;                else if (_value_tid == _Private_IonConstants.tidTypedecl) {</b>
+<b class="fc"><i>288</i>&nbsp;                    assert (_value_tid == (BINARY_VERSION_MARKER_TID &amp; 0xff)); // the bvm tid happens to be type decl</b>
+<b class="fc"><i>289</i>&nbsp;                    if (_value_len == BINARY_VERSION_MARKER_LEN ) {</b>
+<i>290</i>&nbsp;                        // this isn&#39;t valid for any type descriptor except the first byte
+<i>291</i>&nbsp;                        // of a 4 byte version marker - so lets read the rest
+<b class="fc"><i>292</i>&nbsp;                        load_version_marker();</b>
+<b class="fc"><i>293</i>&nbsp;                        _value_type = IonType.SYMBOL;</b>
+<i>294</i>&nbsp;                    }
+<i>295</i>&nbsp;                    else {
+<i>296</i>&nbsp;                        // if it&#39;s not a bvm then it&#39;s an ordinary annotated value
+<i>297</i>&nbsp;
+<i>298</i>&nbsp;                        // The next call changes our positions to that of the
+<i>299</i>&nbsp;                        // wrapped value, but we need to remember the overall
+<i>300</i>&nbsp;                        // wrapper position.
+<b class="fc"><i>301</i>&nbsp;                        long wrapperStart = _position_start;</b>
+<b class="fc"><i>302</i>&nbsp;                        long wrapperLen   = _position_len;</b>
+<i>303</i>&nbsp;
+<b class="fc"><i>304</i>&nbsp;                        _value_type = load_annotation_start_with_value_type();</b>
+<i>305</i>&nbsp;
+<i>306</i>&nbsp;                        // Wrapper and wrapped value should finish together!
+<b class="fc"><i>307</i>&nbsp;                        long wrapperFinish = wrapperStart + wrapperLen;</b>
+<b class="fc"><i>308</i>&nbsp;                        long wrappedValueFinish = _position_start + _position_len;</b>
+<b class="fc"><i>309</i>&nbsp;                        if (wrapperFinish != wrappedValueFinish) {</b>
+<b class="fc"><i>310</i>&nbsp;                            throw newErrorAt(String.format(&quot;Wrapper length mismatch: wrapper %s wrapped value %s&quot;, wrapperFinish, wrappedValueFinish));</b>
+<i>311</i>&nbsp;                        }
+<i>312</i>&nbsp;
+<b class="fc"><i>313</i>&nbsp;                        _position_start = wrapperStart;</b>
+<b class="fc"><i>314</i>&nbsp;                        _position_len   = wrapperLen;</b>
+<b class="fc"><i>315</i>&nbsp;                    }</b>
+<i>316</i>&nbsp;                }
+<i>317</i>&nbsp;                else {
+<i>318</i>&nbsp;                    // if it&#39;s not a typedesc then we just get the IonType and we&#39;re done
+<b class="fc"><i>319</i>&nbsp;                    _value_type = get_iontype_from_tid(_value_tid);</b>
+<i>320</i>&nbsp;                }
+<b class="fc"><i>321</i>&nbsp;                break;</b>
+<i>322</i>&nbsp;            case S_BEFORE_VALUE:
+<b class="fc"><i>323</i>&nbsp;                skip(_value_len);</b>
+<i>324</i>&nbsp;                // fall through to &quot;after value&quot;
+<i>325</i>&nbsp;            case S_AFTER_VALUE:
+<b class="fc"><i>326</i>&nbsp;                if (isInStruct()) {</b>
+<b class="fc"><i>327</i>&nbsp;                    _state = State.S_BEFORE_FIELD;</b>
+<i>328</i>&nbsp;                }
+<i>329</i>&nbsp;                else {
+<b class="fc"><i>330</i>&nbsp;                    _state = State.S_BEFORE_TID;</b>
+<i>331</i>&nbsp;                }
+<b class="fc"><i>332</i>&nbsp;                break;</b>
+<i>333</i>&nbsp;            case S_EOF:
+<b class="nc"><i>334</i>&nbsp;                break;</b>
+<i>335</i>&nbsp;            default:
+<b class="nc"><i>336</i>&nbsp;                error(&quot;internal error: raw binary reader in invalid state!&quot;);</b>
+<i>337</i>&nbsp;            }
+<i>338</i>&nbsp;        }
+<i>339</i>&nbsp;        // we always want to exit here
+<b class="fc"><i>340</i>&nbsp;        _has_next_needed = false;</b>
+<b class="fc"><i>341</i>&nbsp;        return;</b>
+<i>342</i>&nbsp;    }
+<i>343</i>&nbsp;    private final void load_version_marker() throws IOException
+<i>344</i>&nbsp;    {
+<b class="fc"><i>345</i>&nbsp;        for (int ii=1; ii&lt;_Private_IonConstants.BINARY_VERSION_MARKER_1_0.length; ii++) {</b>
+<b class="fc"><i>346</i>&nbsp;            int b = read();</b>
+<b class="fc"><i>347</i>&nbsp;            if (b != (_Private_IonConstants.BINARY_VERSION_MARKER_1_0[ii] &amp; 0xff)) {</b>
+<b class="fc"><i>348</i>&nbsp;                throwErrorAt(&quot;invalid binary image&quot;);</b>
+<i>349</i>&nbsp;            }
+<i>350</i>&nbsp;        }
+<i>351</i>&nbsp;        // so it&#39;s a 4 byte version marker - make it look like
+<i>352</i>&nbsp;        // the symbol $ion_1_0 ...
+<b class="fc"><i>353</i>&nbsp;        _value_tid = _Private_IonConstants.tidSymbol;</b>
+<b class="fc"><i>354</i>&nbsp;        _value_len = 0; // so skip will go the right place - here</b>
+<b class="fc"><i>355</i>&nbsp;        _value_start = 0;</b>
+<b class="fc"><i>356</i>&nbsp;        _v.setValue(ION_1_0_SID);</b>
+<b class="fc"><i>357</i>&nbsp;        _v.setAuthoritativeType(AS_TYPE.int_value);</b>
+<i>358</i>&nbsp;        // _value_type = IonType.SYMBOL;  we do this in the caller so it&#39;s easier to see
+<b class="fc"><i>359</i>&nbsp;        _value_is_null = false;</b>
+<b class="fc"><i>360</i>&nbsp;        _value_lob_is_ready = false;</b>
+<b class="fc"><i>361</i>&nbsp;        _annotations.clear();</b>
+<b class="fc"><i>362</i>&nbsp;        _value_field_id = SymbolTable.UNKNOWN_SYMBOL_ID;</b>
+<b class="fc"><i>363</i>&nbsp;        _state = State.S_AFTER_VALUE;</b>
+<b class="fc"><i>364</i>&nbsp;    }</b>
+<i>365</i>&nbsp;    private final IonType load_annotation_start_with_value_type() throws IOException
+<i>366</i>&nbsp;    {
+<i>367</i>&nbsp;        IonType value_type;
+<i>368</i>&nbsp;
+<i>369</i>&nbsp;        // we need to skip over the annotations to read
+<i>370</i>&nbsp;        // the actual type id byte for the value.  We&#39;ll
+<i>371</i>&nbsp;        // save the annotations using a save point, which
+<i>372</i>&nbsp;        // will pin the input buffers until we free this,
+<i>373</i>&nbsp;        // not later than the next call to hasNext().
+<i>374</i>&nbsp;
+<b class="fc"><i>375</i>&nbsp;        int alen = readVarUInt();</b>
+<b class="fc"><i>376</i>&nbsp;        _annotations.start(getPosition(), 0);</b>
+<b class="fc"><i>377</i>&nbsp;        skip(alen);</b>
+<b class="fc"><i>378</i>&nbsp;        _annotations.markEnd();</b>
+<i>379</i>&nbsp;
+<i>380</i>&nbsp;        // this will both get the type id and it will reset the
+<i>381</i>&nbsp;        // length as well (over-writing the len + annotations value
+<i>382</i>&nbsp;        // that is there now, before the call)
+<b class="fc"><i>383</i>&nbsp;        _value_tid = read_type_id();</b>
+<b class="fc"><i>384</i>&nbsp;        if (_value_tid == _Private_IonConstants.tidNopPad) {</b>
+<b class="fc"><i>385</i>&nbsp;            throwErrorAt(&quot;NOP padding is not allowed within annotation wrappers.&quot;);</b>
+<i>386</i>&nbsp;        }
+<b class="fc"><i>387</i>&nbsp;        if (_value_tid == UnifiedInputStreamX.EOF) {</b>
+<b class="fc"><i>388</i>&nbsp;            throwErrorAt(&quot;unexpected EOF encountered where a type descriptor byte was expected&quot;);</b>
+<i>389</i>&nbsp;        }
+<b class="fc"><i>390</i>&nbsp;        if (_value_tid == _Private_IonConstants.tidTypedecl) {</b>
+<b class="fc"><i>391</i>&nbsp;            throwErrorAt(&quot;An annotation wrapper may not contain another annotation wrapper.&quot;);</b>
+<i>392</i>&nbsp;        }
+<i>393</i>&nbsp;
+<b class="fc"><i>394</i>&nbsp;        value_type = get_iontype_from_tid(_value_tid);</b>
+<b class="fc"><i>395</i>&nbsp;        assert( value_type != null );</b>
+<i>396</i>&nbsp;
+<b class="fc"><i>397</i>&nbsp;        return value_type;</b>
+<i>398</i>&nbsp;    }
+<i>399</i>&nbsp;
+<i>400</i>&nbsp;    protected final int load_annotations() {
+<b class="fc"><i>401</i>&nbsp;        switch (_state) {</b>
+<i>402</i>&nbsp;        case S_BEFORE_VALUE:
+<i>403</i>&nbsp;        case S_AFTER_VALUE:
+<b class="fc"><i>404</i>&nbsp;            if (_annotations.isDefined()) {</b>
+<b class="fc"><i>405</i>&nbsp;                int local_remaining_save = _local_remaining;</b>
+<b class="fc"><i>406</i>&nbsp;                _input._save_points.savePointPushActive(_annotations, getPosition(), 0);</b>
+<b class="fc"><i>407</i>&nbsp;                _local_remaining =  NO_LIMIT; // limit will be handled by the save point</b>
+<b class="fc"><i>408</i>&nbsp;                _annotation_count = 0;</b>
+<i>409</i>&nbsp;
+<i>410</i>&nbsp;                try {
+<i>411</i>&nbsp;                    do {
+<b class="fc"><i>412</i>&nbsp;                        int a = readVarUIntOrEOF();</b>
+<b class="fc"><i>413</i>&nbsp;                        if (a == UnifiedInputStreamX.EOF) {</b>
+<b class="fc"><i>414</i>&nbsp;                            break;</b>
+<i>415</i>&nbsp;                        }
+<b class="fc"><i>416</i>&nbsp;                        load_annotation_append(a);</b>
+<b class="fc"><i>417</i>&nbsp;                    } while (!isEOF());</b>
+<i>418</i>&nbsp;                }
+<b class="nc"><i>419</i>&nbsp;                catch (IOException e) {</b>
+<b class="nc"><i>420</i>&nbsp;                    error(e);</b>
+<b class="fc"><i>421</i>&nbsp;                }</b>
+<i>422</i>&nbsp;
+<b class="fc"><i>423</i>&nbsp;                _input._save_points.savePointPopActive(_annotations);</b>
+<b class="fc"><i>424</i>&nbsp;                _local_remaining = local_remaining_save;</b>
+<b class="fc"><i>425</i>&nbsp;                _annotations.clear();</b>
+<b class="fc"><i>426</i>&nbsp;            }</b>
+<i>427</i>&nbsp;            // else the count stays zero (or it was previously set)
+<i>428</i>&nbsp;            break;
+<i>429</i>&nbsp;        default:
+<b class="fc"><i>430</i>&nbsp;            throw new IllegalStateException(&quot;annotations require the value to be ready&quot;);</b>
+<i>431</i>&nbsp;        }
+<b class="fc"><i>432</i>&nbsp;        return _annotation_count;</b>
+<i>433</i>&nbsp;    }
+<i>434</i>&nbsp;
+<i>435</i>&nbsp;    private final void load_annotation_append(int a)
+<i>436</i>&nbsp;    {
+<b class="fc"><i>437</i>&nbsp;        int oldlen = _annotation_ids.length;</b>
+<b class="fc"><i>438</i>&nbsp;        if (_annotation_count &gt;= oldlen) {</b>
+<b class="fc"><i>439</i>&nbsp;            int newlen = oldlen * 2;</b>
+<b class="fc"><i>440</i>&nbsp;            int[] temp = new int[newlen];</b>
+<b class="fc"><i>441</i>&nbsp;            System.arraycopy(_annotation_ids, 0, temp, 0, oldlen);</b>
+<b class="fc"><i>442</i>&nbsp;            _annotation_ids = temp;</b>
+<i>443</i>&nbsp;        }
+<b class="fc"><i>444</i>&nbsp;        _annotation_ids[_annotation_count++] =  a;</b>
+<b class="fc"><i>445</i>&nbsp;    }</b>
+<i>446</i>&nbsp;    private final void clear_value()
+<i>447</i>&nbsp;    {
+<b class="fc"><i>448</i>&nbsp;        _value_type = null;</b>
+<b class="fc"><i>449</i>&nbsp;        _value_tid  = -1;</b>
+<b class="fc"><i>450</i>&nbsp;        _value_is_null = false;</b>
+<b class="fc"><i>451</i>&nbsp;        _value_lob_is_ready = false;</b>
+<b class="fc"><i>452</i>&nbsp;        _annotations.clear();</b>
+<b class="fc"><i>453</i>&nbsp;        _v.clear();</b>
+<b class="fc"><i>454</i>&nbsp;        _annotation_count = 0;</b>
+<b class="fc"><i>455</i>&nbsp;        _value_field_id = SymbolTable.UNKNOWN_SYMBOL_ID;</b>
+<b class="fc"><i>456</i>&nbsp;    }</b>
+<i>457</i>&nbsp;
+<i>458</i>&nbsp;    /**
+<i>459</i>&nbsp;     * @return the field SID, or -1 if at EOF.
+<i>460</i>&nbsp;     */
+<i>461</i>&nbsp;    private final int read_field_id() throws IOException
+<i>462</i>&nbsp;    {
+<b class="fc"><i>463</i>&nbsp;        int field_id = readVarUIntOrEOF();</b>
+<b class="fc"><i>464</i>&nbsp;        return field_id;</b>
+<i>465</i>&nbsp;    }
+<i>466</i>&nbsp;    private final int read_type_id() throws IOException
+<i>467</i>&nbsp;    {
+<b class="fc"><i>468</i>&nbsp;        long start_of_tid   = _input.getPosition();</b>
+<b class="fc"><i>469</i>&nbsp;        long start_of_value = start_of_tid + 1;</b>
+<i>470</i>&nbsp;
+<b class="fc"><i>471</i>&nbsp;        int td = read();</b>
+<b class="fc"><i>472</i>&nbsp;        if (td &lt; 0) {</b>
+<b class="fc"><i>473</i>&nbsp;            return UnifiedInputStreamX.EOF;</b>
+<i>474</i>&nbsp;        }
+<b class="fc"><i>475</i>&nbsp;        int tid = _Private_IonConstants.getTypeCode(td);</b>
+<b class="fc"><i>476</i>&nbsp;        int len = _Private_IonConstants.getLowNibble(td);</b>
+<i>477</i>&nbsp;
+<i>478</i>&nbsp;        // NOP Padding
+<b class="fc"><i>479</i>&nbsp;        if (tid == _Private_IonConstants.tidNull &amp;&amp; len != _Private_IonConstants.lnIsNull) {</b>
+<b class="fc"><i>480</i>&nbsp;            if (len == _Private_IonConstants.lnIsVarLen) {</b>
+<b class="fc"><i>481</i>&nbsp;                len = readVarUInt();</b>
+<i>482</i>&nbsp;            }
+<b class="fc"><i>483</i>&nbsp;            _state = _is_in_struct ? State.S_BEFORE_FIELD : State.S_BEFORE_TID;</b>
+<b class="fc"><i>484</i>&nbsp;            tid = _Private_IonConstants.tidNopPad; // override typeId to use Pad marker</b>
+<i>485</i>&nbsp;        }
+<b class="fc"><i>486</i>&nbsp;        else if (len == _Private_IonConstants.lnIsVarLen) {</b>
+<b class="fc"><i>487</i>&nbsp;            len = readVarUInt();</b>
+<b class="fc"><i>488</i>&nbsp;            start_of_value = _input.getPosition();</b>
+<i>489</i>&nbsp;        }
+<b class="fc"><i>490</i>&nbsp;        else if (tid == _Private_IonConstants.tidNull) {</b>
+<b class="fc"><i>491</i>&nbsp;            _value_is_null = true;</b>
+<b class="fc"><i>492</i>&nbsp;            len = 0;</b>
+<b class="fc"><i>493</i>&nbsp;            _state = State.S_AFTER_VALUE;</b>
+<i>494</i>&nbsp;        }
+<b class="fc"><i>495</i>&nbsp;        else if (len == _Private_IonConstants.lnIsNull) {</b>
+<b class="fc"><i>496</i>&nbsp;            _value_is_null = true;</b>
+<b class="fc"><i>497</i>&nbsp;            len = 0;</b>
+<b class="fc"><i>498</i>&nbsp;            _state = State.S_AFTER_VALUE;</b>
+<i>499</i>&nbsp;        }
+<b class="fc"><i>500</i>&nbsp;        else if (tid == _Private_IonConstants.tidBoolean) {</b>
+<b class="fc"><i>501</i>&nbsp;            switch (len) {</b>
+<i>502</i>&nbsp;                case _Private_IonConstants.lnBooleanFalse:
+<b class="fc"><i>503</i>&nbsp;                    _value_is_true = false;</b>
+<b class="fc"><i>504</i>&nbsp;                    break;</b>
+<i>505</i>&nbsp;                case _Private_IonConstants.lnBooleanTrue:
+<b class="fc"><i>506</i>&nbsp;                    _value_is_true = true;</b>
+<b class="fc"><i>507</i>&nbsp;                    break;</b>
+<i>508</i>&nbsp;                default:
+<b class="fc"><i>509</i>&nbsp;                    throwErrorAt(&quot;invalid length nibble in boolean value: &quot;+len);</b>
+<i>510</i>&nbsp;                    break;
+<i>511</i>&nbsp;            }
+<b class="fc"><i>512</i>&nbsp;            len = 0;</b>
+<b class="fc"><i>513</i>&nbsp;            _state = State.S_AFTER_VALUE;</b>
+<i>514</i>&nbsp;        }
+<b class="fc"><i>515</i>&nbsp;        else if (tid == _Private_IonConstants.tidStruct) {</b>
+<b class="fc"><i>516</i>&nbsp;            if ((_struct_is_ordered = (len == 1))) {</b>
+<i>517</i>&nbsp;                // special case of an ordered struct, it gets the
+<i>518</i>&nbsp;                // otherwise impossible to have length of 1
+<b class="fc"><i>519</i>&nbsp;                len = readVarUInt();</b>
+<b class="fc"><i>520</i>&nbsp;                if (len == 0) {</b>
+<b class="fc"><i>521</i>&nbsp;                    throwErrorAt(&quot;Structs flagged as having ordered keys must contain at least one key/value pair.&quot;);</b>
+<i>522</i>&nbsp;                }
+<b class="fc"><i>523</i>&nbsp;                start_of_value = _input.getPosition();</b>
+<i>524</i>&nbsp;            }
+<i>525</i>&nbsp;        }
+<b class="fc"><i>526</i>&nbsp;        _value_tid = tid;</b>
+<b class="fc"><i>527</i>&nbsp;        _value_len = len;</b>
+<i>528</i>&nbsp;        // TODO Keeping track of _value_start is only necessary because top-level
+<i>529</i>&nbsp;        // symbol values are treated differently than all other values: they
+<i>530</i>&nbsp;        // are read during has_next_helper_user in order to compare them
+<i>531</i>&nbsp;        // against the IVM (symbol 2). This behavior is actually contrary to
+<i>532</i>&nbsp;        // the spec, and leads to the reader position being advanced PAST
+<i>533</i>&nbsp;        // the value BEFORE a *Value() method is even called. Once that is fixed,
+<i>534</i>&nbsp;        // _value_start can be removed, and _input._pos can be used to find the
+<i>535</i>&nbsp;        // start of the value at the current valid position.
+<i>536</i>&nbsp;        // amzn/ion-java/issues/88 tracks the fix for bringing IVM handling up to
+<i>537</i>&nbsp;        // spec.
+<b class="fc"><i>538</i>&nbsp;        _value_start = start_of_value;</b>
+<b class="fc"><i>539</i>&nbsp;        _position_len = len + (start_of_value - start_of_tid);</b>
+<b class="fc"><i>540</i>&nbsp;        _position_start = start_of_tid;</b>
+<b class="fc"><i>541</i>&nbsp;        return tid;</b>
+<i>542</i>&nbsp;    }
+<i>543</i>&nbsp;    private final IonType get_iontype_from_tid(int tid)
+<i>544</i>&nbsp;    {
+<b class="fc"><i>545</i>&nbsp;        IonType t = null;</b>
+<b class="fc"><i>546</i>&nbsp;        switch (tid) {</b>
+<i>547</i>&nbsp;        case _Private_IonConstants.tidNull:      // 0
+<b class="fc"><i>548</i>&nbsp;            t = IonType.NULL;</b>
+<b class="fc"><i>549</i>&nbsp;            break;</b>
+<i>550</i>&nbsp;        case _Private_IonConstants.tidBoolean:   // 1
+<b class="fc"><i>551</i>&nbsp;            t = IonType.BOOL;</b>
+<b class="fc"><i>552</i>&nbsp;            break;</b>
+<i>553</i>&nbsp;        case _Private_IonConstants.tidPosInt:    // 2
+<i>554</i>&nbsp;        case _Private_IonConstants.tidNegInt:    // 3
+<b class="fc"><i>555</i>&nbsp;            t = IonType.INT;</b>
+<b class="fc"><i>556</i>&nbsp;            break;</b>
+<i>557</i>&nbsp;        case _Private_IonConstants.tidFloat:     // 4
+<b class="fc"><i>558</i>&nbsp;            t = IonType.FLOAT;</b>
+<b class="fc"><i>559</i>&nbsp;            break;</b>
+<i>560</i>&nbsp;        case _Private_IonConstants.tidDecimal:   // 5
+<b class="fc"><i>561</i>&nbsp;            t = IonType.DECIMAL;</b>
+<b class="fc"><i>562</i>&nbsp;            break;</b>
+<i>563</i>&nbsp;        case _Private_IonConstants.tidTimestamp: // 6
+<b class="fc"><i>564</i>&nbsp;            t = IonType.TIMESTAMP;</b>
+<b class="fc"><i>565</i>&nbsp;            break;</b>
+<i>566</i>&nbsp;        case _Private_IonConstants.tidSymbol:    // 7
+<b class="fc"><i>567</i>&nbsp;            t = IonType.SYMBOL;</b>
+<b class="fc"><i>568</i>&nbsp;            break;</b>
+<i>569</i>&nbsp;        case _Private_IonConstants.tidString:    // 8
+<b class="fc"><i>570</i>&nbsp;            t = IonType.STRING;</b>
+<b class="fc"><i>571</i>&nbsp;            break;</b>
+<i>572</i>&nbsp;        case _Private_IonConstants.tidClob:      // 9
+<b class="fc"><i>573</i>&nbsp;            t = IonType.CLOB;</b>
+<b class="fc"><i>574</i>&nbsp;            break;</b>
+<i>575</i>&nbsp;        case _Private_IonConstants.tidBlob:      // 10 A
+<b class="fc"><i>576</i>&nbsp;            t = IonType.BLOB;</b>
+<b class="fc"><i>577</i>&nbsp;            break;</b>
+<i>578</i>&nbsp;        case _Private_IonConstants.tidList:      // 11 B
+<b class="fc"><i>579</i>&nbsp;            t = IonType.LIST;</b>
+<b class="fc"><i>580</i>&nbsp;            break;</b>
+<i>581</i>&nbsp;        case _Private_IonConstants.tidSexp:      // 12 C
+<b class="fc"><i>582</i>&nbsp;            t = IonType.SEXP;</b>
+<b class="fc"><i>583</i>&nbsp;            break;</b>
+<i>584</i>&nbsp;        case _Private_IonConstants.tidStruct:    // 13 D
+<b class="fc"><i>585</i>&nbsp;            t = IonType.STRUCT;</b>
+<b class="fc"><i>586</i>&nbsp;            break;</b>
+<i>587</i>&nbsp;        case _Private_IonConstants.tidTypedecl:  // 14 E
+<b class="nc"><i>588</i>&nbsp;            t = null;  // we don&#39;t know yet</b>
+<b class="nc"><i>589</i>&nbsp;            break;</b>
+<i>590</i>&nbsp;        default:
+<b class="fc"><i>591</i>&nbsp;            throw newErrorAt(&quot;unrecognized value type encountered: &quot;+tid);</b>
+<i>592</i>&nbsp;        }
+<b class="fc"><i>593</i>&nbsp;        return t;</b>
+<i>594</i>&nbsp;    }
+<i>595</i>&nbsp;    public void stepIn()
+<i>596</i>&nbsp;    {
+<b class="fc"><i>597</i>&nbsp;        if (_value_type == null || _eof) {</b>
+<b class="nc"><i>598</i>&nbsp;            throw new IllegalStateException();</b>
+<i>599</i>&nbsp;        }
+<b class="fc"><i>600</i>&nbsp;        switch (_value_type) {</b>
+<i>601</i>&nbsp;        case STRUCT:
+<i>602</i>&nbsp;        case LIST:
+<i>603</i>&nbsp;        case SEXP:
+<b class="fc"><i>604</i>&nbsp;            break;</b>
+<i>605</i>&nbsp;        default:
+<b class="nc"><i>606</i>&nbsp;            throw new IllegalStateException();</b>
+<i>607</i>&nbsp;        }
+<b class="fc"><i>608</i>&nbsp;        if (_value_is_null) {</b>
+<b class="fc"><i>609</i>&nbsp;            if (_state != State.S_AFTER_VALUE) {</b>
+<b class="nc"><i>610</i>&nbsp;                assert( _state == State.S_AFTER_VALUE );</b>
+<i>611</i>&nbsp;            }
+<i>612</i>&nbsp;        }
+<i>613</i>&nbsp;        else {
+<b class="fc"><i>614</i>&nbsp;            if (_state != State.S_BEFORE_VALUE) {</b>
+<b class="nc"><i>615</i>&nbsp;                assert( _state == State.S_BEFORE_VALUE );</b>
+<i>616</i>&nbsp;            }
+<i>617</i>&nbsp;        }
+<i>618</i>&nbsp;        // first push place where we&#39;ll take up our next
+<i>619</i>&nbsp;        // value processing when we step out
+<b class="fc"><i>620</i>&nbsp;        long curr_position = getPosition();</b>
+<b class="fc"><i>621</i>&nbsp;        long next_position = curr_position + _value_len;</b>
+<b class="fc"><i>622</i>&nbsp;        int  next_remaining = _local_remaining;</b>
+<b class="fc"><i>623</i>&nbsp;        if (next_remaining != NO_LIMIT) {</b>
+<b class="fc"><i>624</i>&nbsp;            next_remaining -= _value_len;</b>
+<b class="fc"><i>625</i>&nbsp;            if (next_remaining &lt; 0) {</b>
+<b class="nc"><i>626</i>&nbsp;                next_remaining = 0; // we&#39;ll see and EOF down the road  TODO: should we error now?</b>
+<i>627</i>&nbsp;            }
+<i>628</i>&nbsp;        }
+<b class="fc"><i>629</i>&nbsp;        push(_parent_tid, next_position, next_remaining);</b>
+<b class="fc"><i>630</i>&nbsp;        _is_in_struct = (_value_tid == _Private_IonConstants.tidStruct);</b>
+<b class="fc"><i>631</i>&nbsp;        _local_remaining = _value_len;</b>
+<b class="fc"><i>632</i>&nbsp;        _state = _is_in_struct ? State.S_BEFORE_FIELD : State.S_BEFORE_TID;</b>
+<b class="fc"><i>633</i>&nbsp;        _parent_tid = _value_tid;</b>
+<b class="fc"><i>634</i>&nbsp;        clear_value();</b>
+<b class="fc"><i>635</i>&nbsp;        _has_next_needed = true;</b>
+<b class="fc"><i>636</i>&nbsp;    }</b>
+<i>637</i>&nbsp;    public void stepOut()
+<i>638</i>&nbsp;    {
+<b class="fc"><i>639</i>&nbsp;        if (getDepth() &lt; 1) {</b>
+<b class="fc"><i>640</i>&nbsp;            throw new IllegalStateException(IonMessages.CANNOT_STEP_OUT);</b>
+<i>641</i>&nbsp;        }
+<i>642</i>&nbsp;        // first we get the top values, then we
+<i>643</i>&nbsp;        // pop them all off in one fell swoop.
+<b class="fc"><i>644</i>&nbsp;        long next_position   = get_top_position();</b>
+<b class="fc"><i>645</i>&nbsp;        int  local_remaining = get_top_local_remaining();</b>
+<b class="fc"><i>646</i>&nbsp;        int  parent_tid      = get_top_type();</b>
+<b class="fc"><i>647</i>&nbsp;        pop();</b>
+<b class="fc"><i>648</i>&nbsp;        _eof = false;</b>
+<b class="fc"><i>649</i>&nbsp;        _parent_tid = parent_tid;</b>
+<i>650</i>&nbsp;        // later, only after we&#39;ve skipped to our new location: _local_remaining = local_remaining;
+<b class="fc"><i>651</i>&nbsp;        if (_parent_tid == _Private_IonConstants.tidStruct) {</b>
+<b class="fc"><i>652</i>&nbsp;            _is_in_struct = true;</b>
+<b class="fc"><i>653</i>&nbsp;            _state = State.S_BEFORE_FIELD;</b>
+<i>654</i>&nbsp;        }
+<i>655</i>&nbsp;        else {
+<b class="fc"><i>656</i>&nbsp;            _is_in_struct = false;</b>
+<b class="fc"><i>657</i>&nbsp;            _state = State.S_BEFORE_TID;</b>
+<i>658</i>&nbsp;        }
+<b class="fc"><i>659</i>&nbsp;        _has_next_needed = true;</b>
+<i>660</i>&nbsp;
+<b class="fc"><i>661</i>&nbsp;        clear_value();</b>
+<i>662</i>&nbsp;
+<b class="fc"><i>663</i>&nbsp;        long curr_position = getPosition();</b>
+<b class="fc"><i>664</i>&nbsp;        if (next_position &gt; curr_position) {</b>
+<i>665</i>&nbsp;            try {
+<b class="fc"><i>666</i>&nbsp;                long distance = next_position - curr_position;</b>
+<b class="fc"><i>667</i>&nbsp;                int  max_skip = Integer.MAX_VALUE - 1; // -1 just in case</b>
+<b class="fc"><i>668</i>&nbsp;                while (distance &gt; max_skip) {</b>
+<b class="nc"><i>669</i>&nbsp;                    skip(max_skip);</b>
+<b class="nc"><i>670</i>&nbsp;                    distance -= max_skip;</b>
+<i>671</i>&nbsp;                }
+<b class="fc"><i>672</i>&nbsp;                if (distance &gt; 0) {</b>
+<b class="fc"><i>673</i>&nbsp;                    assert( distance &lt; Integer.MAX_VALUE );</b>
+<b class="fc"><i>674</i>&nbsp;                    skip((int)distance);</b>
+<i>675</i>&nbsp;                }
+<i>676</i>&nbsp;            }
+<b class="nc"><i>677</i>&nbsp;            catch (IOException e) {</b>
+<b class="nc"><i>678</i>&nbsp;                error(e);</b>
+<b class="fc"><i>679</i>&nbsp;            }</b>
+<i>680</i>&nbsp;        }
+<b class="fc"><i>681</i>&nbsp;        else if (next_position &lt; curr_position) {</b>
+<b class="nc"><i>682</i>&nbsp;            String message = &quot;invalid position during stepOut, current position &quot;</b>
+<i>683</i>&nbsp;                           + curr_position
+<i>684</i>&nbsp;                           + &quot; next value at &quot;
+<i>685</i>&nbsp;                           + next_position;
+<b class="nc"><i>686</i>&nbsp;            error(message);</b>
+<i>687</i>&nbsp;        }
+<b class="fc"><i>688</i>&nbsp;        assert(next_position == getPosition());</b>
+<b class="fc"><i>689</i>&nbsp;        _local_remaining = local_remaining;</b>
+<b class="fc"><i>690</i>&nbsp;    }</b>
+<i>691</i>&nbsp;    public int byteSize()
+<i>692</i>&nbsp;    {
+<i>693</i>&nbsp;        int len;
+<b class="fc"><i>694</i>&nbsp;        switch (_value_type) {</b>
+<i>695</i>&nbsp;        case BLOB:
+<i>696</i>&nbsp;        case CLOB:
+<b class="fc"><i>697</i>&nbsp;            break;</b>
+<i>698</i>&nbsp;        default:
+<b class="nc"><i>699</i>&nbsp;            throw new IllegalStateException(&quot;only valid for LOB values&quot;);</b>
+<i>700</i>&nbsp;        }
+<b class="fc"><i>701</i>&nbsp;        if (!_value_lob_is_ready) {</b>
+<b class="fc"><i>702</i>&nbsp;            if (_value_is_null) {</b>
+<b class="nc"><i>703</i>&nbsp;                len = 0;</b>
+<i>704</i>&nbsp;            }
+<i>705</i>&nbsp;            else {
+<b class="fc"><i>706</i>&nbsp;                len = _value_len;</b>
+<i>707</i>&nbsp;            }
+<b class="fc"><i>708</i>&nbsp;            _value_lob_remaining = len;</b>
+<b class="fc"><i>709</i>&nbsp;            _value_lob_is_ready = true;</b>
+<i>710</i>&nbsp;        }
+<b class="fc"><i>711</i>&nbsp;        return _value_lob_remaining;</b>
+<i>712</i>&nbsp;    }
+<i>713</i>&nbsp;    public byte[] newBytes()
+<i>714</i>&nbsp;    {
+<b class="fc"><i>715</i>&nbsp;        int len = byteSize(); // does out validation for us</b>
+<i>716</i>&nbsp;        byte[] bytes;
+<b class="fc"><i>717</i>&nbsp;        if (_value_is_null) {</b>
+<b class="nc"><i>718</i>&nbsp;            bytes = null;</b>
+<i>719</i>&nbsp;        }
+<i>720</i>&nbsp;        else {
+<b class="fc"><i>721</i>&nbsp;            bytes = new byte[len];</b>
+<b class="fc"><i>722</i>&nbsp;            getBytes(bytes, 0, len);</b>
+<i>723</i>&nbsp;        }
+<b class="fc"><i>724</i>&nbsp;        return bytes;</b>
+<i>725</i>&nbsp;    }
+<i>726</i>&nbsp;    public int getBytes(byte[] buffer, int offset, int len)
+<i>727</i>&nbsp;    {
+<b class="fc"><i>728</i>&nbsp;        int value_len = byteSize(); // again validation</b>
+<b class="fc"><i>729</i>&nbsp;        if (value_len &gt; len) {</b>
+<b class="fc"><i>730</i>&nbsp;            value_len = len;</b>
+<i>731</i>&nbsp;        }
+<b class="fc"><i>732</i>&nbsp;        int read_len = readBytes(buffer, offset, value_len);</b>
+<b class="fc"><i>733</i>&nbsp;        return read_len;</b>
+<i>734</i>&nbsp;    }
+<i>735</i>&nbsp;    public int readBytes(byte[] buffer, int offset, int len)
+<i>736</i>&nbsp;    {
+<b class="fc"><i>737</i>&nbsp;        if (offset &lt; 0 || len &lt; 0) {</b>
+<b class="nc"><i>738</i>&nbsp;            throw new IllegalArgumentException();</b>
+<i>739</i>&nbsp;        }
+<b class="fc"><i>740</i>&nbsp;        if (len &lt; 1) {</b>
+<b class="fc"><i>741</i>&nbsp;            return 0;</b>
+<i>742</i>&nbsp;        }
+<i>743</i>&nbsp;        int read_len;
+<i>744</i>&nbsp;        try {
+<b class="fc"><i>745</i>&nbsp;            read_len = read(buffer, offset, len);</b>
+<b class="fc"><i>746</i>&nbsp;            _value_lob_remaining -= read_len;</b>
+<i>747</i>&nbsp;        }
+<b class="nc"><i>748</i>&nbsp;        catch (IOException e) {</b>
+<b class="nc"><i>749</i>&nbsp;            read_len = -1;</b>
+<b class="nc"><i>750</i>&nbsp;            error(e);</b>
+<b class="fc"><i>751</i>&nbsp;        }</b>
+<b class="fc"><i>752</i>&nbsp;        if (_value_lob_remaining == 0) {</b>
+<b class="fc"><i>753</i>&nbsp;            _state = State.S_AFTER_VALUE;</b>
+<i>754</i>&nbsp;        }
+<i>755</i>&nbsp;        else {
+<b class="fc"><i>756</i>&nbsp;            _value_len = _value_lob_remaining;</b>
+<i>757</i>&nbsp;        }
+<b class="fc"><i>758</i>&nbsp;        return read_len;</b>
+<i>759</i>&nbsp;    }
+<i>760</i>&nbsp;    public int getDepth()
+<i>761</i>&nbsp;    {
+<b class="fc"><i>762</i>&nbsp;        return (_container_top / POS_STACK_STEP);</b>
+<i>763</i>&nbsp;    }
+<i>764</i>&nbsp;    public IonType getType()
+<i>765</i>&nbsp;    {
+<i>766</i>&nbsp;        //if (_has_next_needed) {
+<i>767</i>&nbsp;        //    throw new IllegalStateException(&quot;getType() isn&#39;t valid until you have called next()&quot;);
+<i>768</i>&nbsp;        //}
+<b class="fc"><i>769</i>&nbsp;        return _value_type;</b>
+<i>770</i>&nbsp;    }
+<i>771</i>&nbsp;    public boolean isInStruct()
+<i>772</i>&nbsp;    {
+<b class="fc"><i>773</i>&nbsp;        return _is_in_struct;</b>
+<i>774</i>&nbsp;    }
+<i>775</i>&nbsp;    public boolean isNullValue()
+<i>776</i>&nbsp;    {
+<b class="nc"><i>777</i>&nbsp;        return _value_is_null;</b>
+<i>778</i>&nbsp;    }
+<i>779</i>&nbsp;    //
+<i>780</i>&nbsp;    //  helper read routines - these were lifted
+<i>781</i>&nbsp;    //  from SimpleByteBuffer.SimpleByteReader
+<i>782</i>&nbsp;    //
+<i>783</i>&nbsp;    private final int read() throws IOException
+<i>784</i>&nbsp;    {
+<b class="fc"><i>785</i>&nbsp;        if (_local_remaining != NO_LIMIT) {</b>
+<b class="fc"><i>786</i>&nbsp;            if (_local_remaining &lt; 1) {</b>
+<b class="fc"><i>787</i>&nbsp;                return UnifiedInputStreamX.EOF;</b>
+<i>788</i>&nbsp;            }
+<b class="fc"><i>789</i>&nbsp;            _local_remaining--;</b>
+<i>790</i>&nbsp;        }
+<b class="fc"><i>791</i>&nbsp;        return _input.read();</b>
+<i>792</i>&nbsp;    }
+<i>793</i>&nbsp;    private final int read(byte[] dst, int start, int len) throws IOException
+<i>794</i>&nbsp;    {
+<b class="fc"><i>795</i>&nbsp;        if (dst == null || start &lt; 0 || len &lt; 0 || start + len &gt; dst.length) {</b>
+<i>796</i>&nbsp;            // no need to test this start &gt;= dst.length ||
+<i>797</i>&nbsp;            // since we test start+len &gt; dst.length which is the correct test
+<b class="nc"><i>798</i>&nbsp;            throw new IllegalArgumentException();</b>
+<i>799</i>&nbsp;        }
+<i>800</i>&nbsp;        int read;
+<b class="fc"><i>801</i>&nbsp;        if (_local_remaining == NO_LIMIT) {</b>
+<b class="fc"><i>802</i>&nbsp;            read = _input.read(dst, start, len);</b>
+<i>803</i>&nbsp;        }
+<i>804</i>&nbsp;        else {
+<b class="fc"><i>805</i>&nbsp;            if (len &gt; _local_remaining) {</b>
+<b class="nc"><i>806</i>&nbsp;                if (_local_remaining &lt; 1) {</b>
+<b class="nc"><i>807</i>&nbsp;                    throwUnexpectedEOFException();</b>
+<i>808</i>&nbsp;                }
+<b class="nc"><i>809</i>&nbsp;                len = _local_remaining;</b>
+<i>810</i>&nbsp;            }
+<b class="fc"><i>811</i>&nbsp;            read = _input.read(dst, start, len);</b>
+<b class="fc"><i>812</i>&nbsp;            _local_remaining -= read;</b>
+<i>813</i>&nbsp;        }
+<b class="fc"><i>814</i>&nbsp;        return read;</b>
+<i>815</i>&nbsp;    }
+<i>816</i>&nbsp;    /**
+<i>817</i>&nbsp;     * Uses {@link #read(byte[], int, int)} until the entire length is read.
+<i>818</i>&nbsp;     * This method will block until the request is satisfied.
+<i>819</i>&nbsp;     *
+<i>820</i>&nbsp;     * @param buf       The buffer to read to.
+<i>821</i>&nbsp;     * @param offset    The offset of the buffer to read from.
+<i>822</i>&nbsp;     * @param len       The length of the data to read.
+<i>823</i>&nbsp;     */
+<i>824</i>&nbsp;    public void readAll(byte[] buf, int offset, int len) throws IOException
+<i>825</i>&nbsp;    {
+<b class="fc"><i>826</i>&nbsp;        int rem = len;</b>
+<b class="fc"><i>827</i>&nbsp;        while (rem &gt; 0)</b>
+<i>828</i>&nbsp;        {
+<b class="fc"><i>829</i>&nbsp;            int amount = read(buf, offset, rem);</b>
+<b class="fc"><i>830</i>&nbsp;            if (amount &lt;= 0)</b>
+<i>831</i>&nbsp;            {
+<b class="fc"><i>832</i>&nbsp;                throwUnexpectedEOFException();</b>
+<i>833</i>&nbsp;            }
+<b class="fc"><i>834</i>&nbsp;            rem -= amount;</b>
+<b class="fc"><i>835</i>&nbsp;            offset += amount;</b>
+<b class="fc"><i>836</i>&nbsp;        }</b>
+<b class="fc"><i>837</i>&nbsp;    }</b>
+<i>838</i>&nbsp;    private final boolean isEOF() {
+<b class="fc"><i>839</i>&nbsp;        if (_local_remaining &gt; 0) return false;</b>
+<b class="fc"><i>840</i>&nbsp;        if (_local_remaining == NO_LIMIT) {</b>
+<b class="fc"><i>841</i>&nbsp;            return _input.isEOF();</b>
+<i>842</i>&nbsp;        }
+<b class="nc"><i>843</i>&nbsp;        return true;</b>
+<i>844</i>&nbsp;    }
+<i>845</i>&nbsp;    private final long getPosition() {
+<b class="fc"><i>846</i>&nbsp;        long pos = _input.getPosition();</b>
+<b class="fc"><i>847</i>&nbsp;        return pos;</b>
+<i>848</i>&nbsp;    }
+<i>849</i>&nbsp;    private final void skip(int len) throws IOException
+<i>850</i>&nbsp;    {
+<b class="fc"><i>851</i>&nbsp;        if (len &lt; 0) {</b>
+<i>852</i>&nbsp;            // no need to test this start &gt;= dst.length ||
+<i>853</i>&nbsp;            // since we test start+len &gt; dst.length which is the correct test
+<b class="nc"><i>854</i>&nbsp;            throw new IllegalArgumentException();</b>
+<i>855</i>&nbsp;        }
+<b class="fc"><i>856</i>&nbsp;        if (_local_remaining == NO_LIMIT) {</b>
+<b class="fc"><i>857</i>&nbsp;            _input.skip(len);</b>
+<i>858</i>&nbsp;        }
+<i>859</i>&nbsp;        else {
+<b class="fc"><i>860</i>&nbsp;            if (len &gt; _local_remaining) {</b>
+<b class="nc"><i>861</i>&nbsp;                if (_local_remaining &lt; 1) {</b>
+<b class="nc"><i>862</i>&nbsp;                    throwUnexpectedEOFException();</b>
+<i>863</i>&nbsp;                }
+<b class="nc"><i>864</i>&nbsp;                len = _local_remaining;</b>
+<i>865</i>&nbsp;            }
+<b class="fc"><i>866</i>&nbsp;            _input.skip(len);</b>
+<b class="fc"><i>867</i>&nbsp;            _local_remaining -= len;</b>
+<i>868</i>&nbsp;        }
+<b class="fc"><i>869</i>&nbsp;        return;</b>
+<i>870</i>&nbsp;    }
+<i>871</i>&nbsp;    protected final long readULong(int len) throws IOException
+<i>872</i>&nbsp;    {
+<b class="fc"><i>873</i>&nbsp;        long    retvalue = 0;</b>
+<i>874</i>&nbsp;        int b;
+<b class="fc"><i>875</i>&nbsp;        switch (len) {</b>
+<i>876</i>&nbsp;        default:
+<b class="fc"><i>877</i>&nbsp;            throw new IonException(&quot;value too large for Java long&quot;);</b>
+<i>878</i>&nbsp;        case 8:
+<b class="fc"><i>879</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>880</i>&nbsp;            retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>881</i>&nbsp;        case 7:
+<b class="fc"><i>882</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>883</i>&nbsp;            retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>884</i>&nbsp;        case 6:
+<b class="fc"><i>885</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>886</i>&nbsp;            retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>887</i>&nbsp;        case 5:
+<b class="fc"><i>888</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>889</i>&nbsp;            retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>890</i>&nbsp;        case 4:
+<b class="fc"><i>891</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>892</i>&nbsp;            retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>893</i>&nbsp;        case 3:
+<b class="fc"><i>894</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>895</i>&nbsp;            retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>896</i>&nbsp;        case 2:
+<b class="fc"><i>897</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>898</i>&nbsp;            retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>899</i>&nbsp;        case 1:
+<b class="fc"><i>900</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>901</i>&nbsp;            retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>902</i>&nbsp;        case 0:
+<i>903</i>&nbsp;            // do nothing, it&#39;s just a 0 length is a 0 value
+<i>904</i>&nbsp;        }
+<b class="fc"><i>905</i>&nbsp;        return retvalue;</b>
+<i>906</i>&nbsp;    }
+<i>907</i>&nbsp;    protected final BigInteger readBigInteger(int len, boolean is_negative) throws IOException
+<i>908</i>&nbsp;    {
+<i>909</i>&nbsp;        BigInteger value;
+<b class="fc"><i>910</i>&nbsp;        if (len &gt; 0) {</b>
+<b class="fc"><i>911</i>&nbsp;            byte[] bits = new byte[len];</b>
+<b class="fc"><i>912</i>&nbsp;            readAll(bits, 0, len);</b>
+<b class="fc"><i>913</i>&nbsp;            int signum = is_negative ? -1 : 1;</b>
+<b class="fc"><i>914</i>&nbsp;            value = new BigInteger(signum, bits);</b>
+<b class="fc"><i>915</i>&nbsp;        }</b>
+<i>916</i>&nbsp;        else {
+<b class="nc"><i>917</i>&nbsp;            value = BigInteger.ZERO;</b>
+<i>918</i>&nbsp;        }
+<b class="fc"><i>919</i>&nbsp;        return value;</b>
+<i>920</i>&nbsp;    }
+<i>921</i>&nbsp;    protected final int readVarInt() throws IOException
+<i>922</i>&nbsp;    {
+<b class="fc"><i>923</i>&nbsp;        return readVarInt(read());</b>
+<i>924</i>&nbsp;    }
+<i>925</i>&nbsp;    /**
+<i>926</i>&nbsp;     * Reads an integer value, returning null to mean -0.
+<i>927</i>&nbsp;     * @throws IOException
+<i>928</i>&nbsp;     */
+<i>929</i>&nbsp;    protected final Integer readVarInteger() throws IOException
+<i>930</i>&nbsp;    {
+<b class="fc"><i>931</i>&nbsp;        int firstByte = read();</b>
+<i>932</i>&nbsp;
+<i>933</i>&nbsp;        // if byte represents -0 returns null
+<b class="fc"><i>934</i>&nbsp;        if (firstByte == 0xC0) {</b>
+<b class="fc"><i>935</i>&nbsp;            return null;</b>
+<i>936</i>&nbsp;        }
+<i>937</i>&nbsp;
+<b class="fc"><i>938</i>&nbsp;        return readVarInt(firstByte);</b>
+<i>939</i>&nbsp;    }
+<i>940</i>&nbsp;    /**
+<i>941</i>&nbsp;     * reads a varInt after the first byte was read. The first byte is used to specify the sign and -0 has different
+<i>942</i>&nbsp;     * representation on the protected API that was called
+<i>943</i>&nbsp;     *
+<i>944</i>&nbsp;     * @param firstByte last varInt octet
+<i>945</i>&nbsp;     */
+<i>946</i>&nbsp;    private int readVarInt(int firstByte) throws IOException {
+<i>947</i>&nbsp;        // VarInt uses the high-order bit of the last octet as a marker; some (but not all) 5-byte VarInts can fit
+<i>948</i>&nbsp;        // into a Java int.
+<i>949</i>&nbsp;        // To validate overflows we accumulate the VarInt in a long and then check if it can be represented by an int
+<i>950</i>&nbsp;        //
+<i>951</i>&nbsp;        // see http://amzn.github.io/ion-docs/docs/binary.html#varuint-and-varint-fields
+<i>952</i>&nbsp;
+<b class="fc"><i>953</i>&nbsp;        long retValue = 0;</b>
+<b class="fc"><i>954</i>&nbsp;        int b = firstByte;</b>
+<b class="fc"><i>955</i>&nbsp;        boolean isNegative = false;</b>
+<i>956</i>&nbsp;
+<i>957</i>&nbsp;        for (;;) {
+<b class="fc"><i>958</i>&nbsp;            if (b &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>959</i>&nbsp;            if ((b &amp; 0x40) != 0) {</b>
+<b class="fc"><i>960</i>&nbsp;                isNegative = true;</b>
+<i>961</i>&nbsp;            }
+<i>962</i>&nbsp;
+<b class="fc"><i>963</i>&nbsp;            retValue = (b &amp; 0x3F);</b>
+<b class="fc"><i>964</i>&nbsp;            if ((b &amp; 0x80) != 0) break;</b>
+<i>965</i>&nbsp;
+<b class="fc"><i>966</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>967</i>&nbsp;            retValue = (retValue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="fc"><i>968</i>&nbsp;            if ((b &amp; 0x80) != 0) break;</b>
+<i>969</i>&nbsp;            // for the rest, they&#39;re all the same
+<i>970</i>&nbsp;
+<i>971</i>&nbsp;
+<b class="fc"><i>972</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>973</i>&nbsp;            retValue = (retValue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="fc"><i>974</i>&nbsp;            if ((b &amp; 0x80) != 0) break;</b>
+<i>975</i>&nbsp;            // for the rest, they&#39;re all the same
+<i>976</i>&nbsp;
+<b class="fc"><i>977</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>978</i>&nbsp;            retValue = (retValue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="fc"><i>979</i>&nbsp;            if ((b &amp; 0x80) != 0) break;</b>
+<i>980</i>&nbsp;            // for the rest, they&#39;re all the same
+<i>981</i>&nbsp;
+<b class="fc"><i>982</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>983</i>&nbsp;            retValue = (retValue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="fc"><i>984</i>&nbsp;            if ((b &amp; 0x80) != 0) break;</b>
+<i>985</i>&nbsp;
+<i>986</i>&nbsp;            // Don&#39;t support anything above a 5-byte VarInt for now, see https://github.com/amzn/ion-java/issues/146
+<b class="fc"><i>987</i>&nbsp;            throwVarIntOverflowException();</b>
+<i>988</i>&nbsp;        }
+<i>989</i>&nbsp;
+<b class="fc"><i>990</i>&nbsp;        if (isNegative) {</b>
+<b class="fc"><i>991</i>&nbsp;            retValue = -retValue;</b>
+<i>992</i>&nbsp;        }
+<i>993</i>&nbsp;
+<b class="fc"><i>994</i>&nbsp;        int retValueAsInt = (int) retValue;</b>
+<b class="fc"><i>995</i>&nbsp;        if (retValue != ((long) retValueAsInt)) {</b>
+<b class="fc"><i>996</i>&nbsp;            throwVarIntOverflowException();</b>
+<i>997</i>&nbsp;        }
+<i>998</i>&nbsp;
+<b class="fc"><i>999</i>&nbsp;        return retValueAsInt;</b>
+<i>1000</i>&nbsp;    }
+<i>1001</i>&nbsp;
+<i>1002</i>&nbsp;    protected final int readVarUIntOrEOF() throws IOException
+<i>1003</i>&nbsp;    {
+<i>1004</i>&nbsp;// VarUInt uses the high-order bit of the last octet as a marker; some (but not all) 5-byte VarUInt can fit
+<i>1005</i>&nbsp;        // into a Java int.
+<i>1006</i>&nbsp;        // To validate overflows we accumulate the VarInt in a long and then check if it can be represented by an int
+<i>1007</i>&nbsp;        //
+<i>1008</i>&nbsp;        // see http://amzn.github.io/ion-docs/docs/binary.html#varuint-and-varint-fields
+<i>1009</i>&nbsp;
+<b class="fc"><i>1010</i>&nbsp;        long retvalue = 0;</b>
+<i>1011</i>&nbsp;        int  b;
+<i>1012</i>&nbsp;        for (;;) { // fake loop to create a &quot;goto done&quot;
+<b class="fc"><i>1013</i>&nbsp;            if ((b = read()) &lt; 0) {</b>
+<b class="fc"><i>1014</i>&nbsp;                return UnifiedInputStreamX.EOF;</b>
+<i>1015</i>&nbsp;            }
+<b class="fc"><i>1016</i>&nbsp;            retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="fc"><i>1017</i>&nbsp;            if ((b &amp; 0x80) != 0) break;</b>
+<i>1018</i>&nbsp;
+<b class="fc"><i>1019</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>1020</i>&nbsp;            retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="fc"><i>1021</i>&nbsp;            if ((b &amp; 0x80) != 0) break;</b>
+<i>1022</i>&nbsp;
+<b class="fc"><i>1023</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>1024</i>&nbsp;            retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="fc"><i>1025</i>&nbsp;            if ((b &amp; 0x80) != 0) break;</b>
+<i>1026</i>&nbsp;
+<b class="fc"><i>1027</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>1028</i>&nbsp;            retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="fc"><i>1029</i>&nbsp;            if ((b &amp; 0x80) != 0) break;</b>
+<i>1030</i>&nbsp;
+<b class="fc"><i>1031</i>&nbsp;            if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="fc"><i>1032</i>&nbsp;            retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="fc"><i>1033</i>&nbsp;            if ((b &amp; 0x80) != 0) break;</b>
+<i>1034</i>&nbsp;
+<i>1035</i>&nbsp;            // Don&#39;t support anything above a 5-byte VarUInt for now, see https://github.com/amzn/ion-java/issues/146
+<b class="fc"><i>1036</i>&nbsp;            throwVarIntOverflowException();</b>
+<i>1037</i>&nbsp;        }
+<i>1038</i>&nbsp;
+<b class="fc"><i>1039</i>&nbsp;        int retValueAsInt = (int) retvalue;</b>
+<b class="fc"><i>1040</i>&nbsp;        if (retvalue != ((long) retValueAsInt)) {</b>
+<b class="fc"><i>1041</i>&nbsp;            throwVarIntOverflowException();</b>
+<i>1042</i>&nbsp;        }
+<i>1043</i>&nbsp;
+<b class="fc"><i>1044</i>&nbsp;        return retValueAsInt;</b>
+<i>1045</i>&nbsp;    }
+<i>1046</i>&nbsp;    protected final int readVarUInt() throws IOException
+<i>1047</i>&nbsp;    {
+<b class="fc"><i>1048</i>&nbsp;        int varUInt = readVarUIntOrEOF();</b>
+<b class="fc"><i>1049</i>&nbsp;        if (varUInt == UnifiedInputStreamX.EOF) {</b>
+<b class="fc"><i>1050</i>&nbsp;            throwUnexpectedEOFException();</b>
+<i>1051</i>&nbsp;        }
+<i>1052</i>&nbsp;
+<b class="fc"><i>1053</i>&nbsp;        return varUInt;</b>
+<i>1054</i>&nbsp;    }
+<i>1055</i>&nbsp;    protected final double readFloat(int len) throws IOException
+<i>1056</i>&nbsp;    {
+<b class="fc"><i>1057</i>&nbsp;        if (len == 0)</b>
+<i>1058</i>&nbsp;        {
+<i>1059</i>&nbsp;            // special case, return pos zero
+<b class="nc"><i>1060</i>&nbsp;            return 0.0d;</b>
+<i>1061</i>&nbsp;        }
+<b class="fc"><i>1062</i>&nbsp;        if (len != 4 &amp;&amp; len != 8)</b>
+<i>1063</i>&nbsp;        {
+<b class="fc"><i>1064</i>&nbsp;            throw new IOException(&quot;Length of float read must be 0, 4, or 8&quot;);</b>
+<i>1065</i>&nbsp;        }
+<i>1066</i>&nbsp;
+<b class="fc"><i>1067</i>&nbsp;        long dBits = this.readULong(len);</b>
+<i>1068</i>&nbsp;
+<b class="fc"><i>1069</i>&nbsp;        return len == 4</b>
+<b class="fc"><i>1070</i>&nbsp;            ? (double) Float.intBitsToFloat((int) (dBits &amp; 0xffffffffL))</b>
+<b class="fc"><i>1071</i>&nbsp;            : Double.longBitsToDouble(dBits);</b>
+<i>1072</i>&nbsp;    }
+<i>1073</i>&nbsp;
+<i>1074</i>&nbsp;    protected final Decimal readDecimal(int len) throws IOException
+<i>1075</i>&nbsp;    {
+<b class="fc"><i>1076</i>&nbsp;        MathContext mathContext = MathContext.UNLIMITED;</b>
+<i>1077</i>&nbsp;        Decimal bd;
+<i>1078</i>&nbsp;        // we only write out the &#39;0&#39; value as the nibble 0
+<b class="fc"><i>1079</i>&nbsp;        if (len == 0) {</b>
+<b class="fc"><i>1080</i>&nbsp;            bd = Decimal.valueOf(0, mathContext);</b>
+<i>1081</i>&nbsp;        }
+<i>1082</i>&nbsp;        else {
+<i>1083</i>&nbsp;            // otherwise we to it the hard way ....
+<b class="fc"><i>1084</i>&nbsp;            int save_limit = NO_LIMIT;</b>
+<b class="fc"><i>1085</i>&nbsp;            if (_local_remaining != NO_LIMIT) {</b>
+<b class="fc"><i>1086</i>&nbsp;                save_limit = _local_remaining - len;</b>
+<i>1087</i>&nbsp;            }
+<b class="fc"><i>1088</i>&nbsp;            _local_remaining = len;</b>
+<b class="fc"><i>1089</i>&nbsp;            int  exponent = readVarInt();</b>
+<i>1090</i>&nbsp;            BigInteger value;
+<i>1091</i>&nbsp;            int signum;
+<b class="fc"><i>1092</i>&nbsp;            if (_local_remaining &gt; 0)</b>
+<i>1093</i>&nbsp;            {
+<b class="fc"><i>1094</i>&nbsp;                byte[] bits = new byte[_local_remaining];</b>
+<b class="fc"><i>1095</i>&nbsp;                readAll(bits, 0, _local_remaining);</b>
+<b class="fc"><i>1096</i>&nbsp;                signum = 1;</b>
+<b class="fc"><i>1097</i>&nbsp;                if (bits[0] &lt; 0)</b>
+<i>1098</i>&nbsp;                {
+<i>1099</i>&nbsp;                    // value is negative, clear the sign
+<b class="fc"><i>1100</i>&nbsp;                    bits[0] &amp;= 0x7F;</b>
+<b class="fc"><i>1101</i>&nbsp;                    signum = -1;</b>
+<i>1102</i>&nbsp;                }
+<b class="fc"><i>1103</i>&nbsp;                value = new BigInteger(signum, bits);</b>
+<b class="fc"><i>1104</i>&nbsp;            }</b>
+<i>1105</i>&nbsp;            else {
+<b class="fc"><i>1106</i>&nbsp;                signum = 0;</b>
+<b class="fc"><i>1107</i>&nbsp;                value = BigInteger.ZERO;</b>
+<i>1108</i>&nbsp;            }
+<i>1109</i>&nbsp;            // Ion stores exponent, BigDecimal uses the negation &quot;scale&quot;
+<b class="fc"><i>1110</i>&nbsp;            int scale = -exponent;</b>
+<b class="fc"><i>1111</i>&nbsp;            if (value.signum() == 0 &amp;&amp; signum == -1)</b>
+<i>1112</i>&nbsp;            {
+<b class="fc"><i>1113</i>&nbsp;                assert value.equals(BigInteger.ZERO);</b>
+<b class="fc"><i>1114</i>&nbsp;                bd = Decimal.negativeZero(scale, mathContext);</b>
+<i>1115</i>&nbsp;            }
+<i>1116</i>&nbsp;            else
+<i>1117</i>&nbsp;            {
+<b class="fc"><i>1118</i>&nbsp;                bd = Decimal.valueOf(value, scale, mathContext);</b>
+<i>1119</i>&nbsp;            }
+<b class="fc"><i>1120</i>&nbsp;            _local_remaining = save_limit;</b>
+<i>1121</i>&nbsp;        }
+<b class="fc"><i>1122</i>&nbsp;        return bd;</b>
+<i>1123</i>&nbsp;    }
+<i>1124</i>&nbsp;
+<i>1125</i>&nbsp;    /**
+<i>1126</i>&nbsp;     * @see IonBinary.Reader#readTimestampValue
+<i>1127</i>&nbsp;     */
+<i>1128</i>&nbsp;    protected final Timestamp readTimestamp(int len) throws IOException
+<i>1129</i>&nbsp;    {
+<b class="fc"><i>1130</i>&nbsp;        if (len &lt; 1) {</b>
+<i>1131</i>&nbsp;            // nothing to do here - and the timestamp will be NULL
+<b class="fc"><i>1132</i>&nbsp;            return null;</b>
+<i>1133</i>&nbsp;        }
+<i>1134</i>&nbsp;
+<b class="fc"><i>1135</i>&nbsp;        int         year = 0, month = 0, day = 0, hour = 0, minute = 0, second = 0;</b>
+<b class="fc"><i>1136</i>&nbsp;        BigDecimal  frac = null;</b>
+<b class="fc"><i>1137</i>&nbsp;        int         save_limit = NO_LIMIT;</b>
+<b class="fc"><i>1138</i>&nbsp;        if (_local_remaining != NO_LIMIT) {</b>
+<b class="fc"><i>1139</i>&nbsp;            save_limit = _local_remaining - len;</b>
+<i>1140</i>&nbsp;        }
+<b class="fc"><i>1141</i>&nbsp;        _local_remaining = len;  // &gt; 0</b>
+<i>1142</i>&nbsp;
+<i>1143</i>&nbsp;        // first up is the offset, which requires a special int reader
+<i>1144</i>&nbsp;        // to return the -0 as a null Integer
+<b class="fc"><i>1145</i>&nbsp;        Integer offset = readVarInteger();</b>
+<i>1146</i>&nbsp;        // now we&#39;ll read the struct values from the input stream
+<i>1147</i>&nbsp;
+<i>1148</i>&nbsp;        // year is from 0001 to 9999
+<i>1149</i>&nbsp;        // or 0x1 to 0x270F or 14 bits - 1 or 2 bytes
+<b class="fc"><i>1150</i>&nbsp;        year  = readVarUInt();</b>
+<b class="fc"><i>1151</i>&nbsp;        Precision p = Precision.YEAR; // our lowest significant option</b>
+<i>1152</i>&nbsp;
+<i>1153</i>&nbsp;        // now we look for months
+<b class="fc"><i>1154</i>&nbsp;        if (_local_remaining &gt; 0) {</b>
+<b class="fc"><i>1155</i>&nbsp;            month = readVarUInt();</b>
+<b class="fc"><i>1156</i>&nbsp;            p = Precision.MONTH;</b>
+<i>1157</i>&nbsp;
+<i>1158</i>&nbsp;            // now we look for days
+<b class="fc"><i>1159</i>&nbsp;            if (_local_remaining &gt; 0) {</b>
+<b class="fc"><i>1160</i>&nbsp;                day   = readVarUInt();</b>
+<b class="fc"><i>1161</i>&nbsp;                p = Precision.DAY; // our lowest significant option</b>
+<i>1162</i>&nbsp;
+<i>1163</i>&nbsp;                // now we look for hours and minutes
+<b class="fc"><i>1164</i>&nbsp;                if (_local_remaining &gt; 0) {</b>
+<b class="fc"><i>1165</i>&nbsp;                    hour   = readVarUInt();</b>
+<b class="fc"><i>1166</i>&nbsp;                    minute = readVarUInt();</b>
+<b class="fc"><i>1167</i>&nbsp;                    p = Precision.MINUTE;</b>
+<b class="fc"><i>1168</i>&nbsp;                    if (_local_remaining &gt; 0) {</b>
+<b class="fc"><i>1169</i>&nbsp;                        second = readVarUInt();</b>
+<b class="fc"><i>1170</i>&nbsp;                        p = Precision.SECOND;</b>
+<b class="fc"><i>1171</i>&nbsp;                        if (_local_remaining &gt; 0) {</b>
+<i>1172</i>&nbsp;                            // now we read in our actual &quot;milliseconds since the epoch&quot;
+<b class="fc"><i>1173</i>&nbsp;                            frac = readDecimal(_local_remaining);</b>
+<b class="fc"><i>1174</i>&nbsp;                            if (frac.compareTo(BigDecimal.ZERO) &lt; 0 || frac.compareTo(BigDecimal.ONE) &gt;= 0) {</b>
+<b class="fc"><i>1175</i>&nbsp;                                throwErrorAt(</b>
+<i>1176</i>&nbsp;                                        &quot;The fractional seconds value in a timestamp must be greater than or &quot;
+<i>1177</i>&nbsp;                                              + &quot;equal to zero and less than one.&quot;
+<i>1178</i>&nbsp;                                );
+<i>1179</i>&nbsp;                            }
+<i>1180</i>&nbsp;                        }
+<i>1181</i>&nbsp;                    }
+<i>1182</i>&nbsp;                }
+<i>1183</i>&nbsp;            }
+<i>1184</i>&nbsp;        }
+<i>1185</i>&nbsp;        // restore out outer limit(s)
+<b class="fc"><i>1186</i>&nbsp;        _local_remaining  = save_limit;</b>
+<i>1187</i>&nbsp;        // now we let timestamp put it all together
+<i>1188</i>&nbsp;        try {
+<b class="fc"><i>1189</i>&nbsp;            Timestamp val =</b>
+<b class="fc"><i>1190</i>&nbsp;                Timestamp.createFromUtcFields(p, year, month, day, hour,</b>
+<i>1191</i>&nbsp;                                              minute, second, frac, offset);
+<b class="fc"><i>1192</i>&nbsp;            return val;</b>
+<i>1193</i>&nbsp;        }
+<b class="fc"><i>1194</i>&nbsp;        catch (IllegalArgumentException e)</b>
+<i>1195</i>&nbsp;        {
+<i>1196</i>&nbsp;            // Rewrap to the expected type.
+<b class="fc"><i>1197</i>&nbsp;            throw newErrorAt(&quot;Invalid timestamp encoding: &quot; + e.getMessage());</b>
+<i>1198</i>&nbsp;        }
+<i>1199</i>&nbsp;    }
+<i>1200</i>&nbsp;
+<i>1201</i>&nbsp;    protected final String readString(int numberOfBytes) throws IOException
+<i>1202</i>&nbsp;    {
+<i>1203</i>&nbsp;        // If the string we&#39;re reading is small enough to fit in our reusable buffer, we can avoid the overhead
+<i>1204</i>&nbsp;        // of looping and bounds checking.
+<b class="fc"><i>1205</i>&nbsp;        if (numberOfBytes &lt;= utf8InputBuffer.capacity()) {</b>
+<b class="fc"><i>1206</i>&nbsp;            return readStringWithReusableBuffer(numberOfBytes);</b>
+<i>1207</i>&nbsp;        }
+<i>1208</i>&nbsp;
+<i>1209</i>&nbsp;        // Otherwise, allocate a one-off decoding buffer that&#39;s large enough to hold the string
+<i>1210</i>&nbsp;        // and prepare to decode the string in chunks.
+<b class="fc"><i>1211</i>&nbsp;        CharBuffer decodingBuffer = CharBuffer.allocate(numberOfBytes);</b>
+<b class="fc"><i>1212</i>&nbsp;        utf8CharsetDecoder.reset();</b>
+<i>1213</i>&nbsp;
+<b class="fc"><i>1214</i>&nbsp;        int save_limit = NO_LIMIT;</b>
+<b class="fc"><i>1215</i>&nbsp;        if (_local_remaining != NO_LIMIT) {</b>
+<b class="nc"><i>1216</i>&nbsp;            save_limit = _local_remaining - numberOfBytes;</b>
+<i>1217</i>&nbsp;        }
+<b class="fc"><i>1218</i>&nbsp;        _local_remaining = numberOfBytes;</b>
+<i>1219</i>&nbsp;
+<i>1220</i>&nbsp;        // The following loop will:
+<i>1221</i>&nbsp;        // * Fill the input buffer with utf8 bytes
+<i>1222</i>&nbsp;        // * Write decoded chars to the decoding buffer
+<i>1223</i>&nbsp;        // * Move any remaining partial character bytes to the front of the buffer
+<i>1224</i>&nbsp;        // * Repeat until the requested number of bytes have been decoded.
+<i>1225</i>&nbsp;        // * Create a new String object from the contents of the decoding buffer.
+<b class="fc"><i>1226</i>&nbsp;        int totalBytesRead = 0;</b>
+<b class="fc"><i>1227</i>&nbsp;        int carryoverBytes = 0;</b>
+<b class="fc"><i>1228</i>&nbsp;        while (totalBytesRead &lt; numberOfBytes) {</b>
+<i>1229</i>&nbsp;
+<b class="fc"><i>1230</i>&nbsp;            int bytesRemaining = numberOfBytes - totalBytesRead;</b>
+<i>1231</i>&nbsp;            // When decoding, it&#39;s possible to have &#39;carryover&#39; bytes left in the buffer which represent
+<i>1232</i>&nbsp;            // a partial unicode character. We need to leave these in the buffer so that we can complete the
+<i>1233</i>&nbsp;            // partial character in the next call to read().
+<b class="fc"><i>1234</i>&nbsp;            int capacityRemaining = utf8InputBuffer.array().length - carryoverBytes;</b>
+<b class="fc"><i>1235</i>&nbsp;            int bytesToRead = Math.min(bytesRemaining, capacityRemaining);</b>
+<i>1236</i>&nbsp;
+<b class="fc"><i>1237</i>&nbsp;            int bytesRead = read(utf8InputBuffer.array(), carryoverBytes, bytesToRead);</b>
+<b class="fc"><i>1238</i>&nbsp;            if (bytesRead &lt;= 0) {</b>
+<i>1239</i>&nbsp;                // UnifiedInputStreamX doesn&#39;t adhere to InputStream&#39;s API. See the comments on
+<i>1240</i>&nbsp;                // UnifiedInputStreamX#read() for more information.
+<b class="nc"><i>1241</i>&nbsp;                throwUnexpectedEOFException();</b>
+<i>1242</i>&nbsp;            }
+<i>1243</i>&nbsp;
+<b class="fc"><i>1244</i>&nbsp;            totalBytesRead += bytesRead;</b>
+<i>1245</i>&nbsp;
+<b class="fc"><i>1246</i>&nbsp;            utf8InputBuffer.position(0);</b>
+<b class="fc"><i>1247</i>&nbsp;            utf8InputBuffer.limit(carryoverBytes + bytesRead);</b>
+<i>1248</i>&nbsp;
+<b class="fc"><i>1249</i>&nbsp;            CoderResult coderResult = utf8CharsetDecoder.decode(</b>
+<i>1250</i>&nbsp;                    utf8InputBuffer,
+<i>1251</i>&nbsp;                    decodingBuffer,
+<i>1252</i>&nbsp;                    totalBytesRead &gt;= numberOfBytes
+<i>1253</i>&nbsp;            );
+<b class="fc"><i>1254</i>&nbsp;            if (coderResult.isError()) {</b>
+<b class="nc"><i>1255</i>&nbsp;                throw new IonException(&quot;Illegal value encountered while validating UTF-8 data in input stream. &quot; + coderResult.toString());</b>
+<i>1256</i>&nbsp;            }
+<i>1257</i>&nbsp;
+<i>1258</i>&nbsp;            // Shift leftover partial character bytes (if any) to the beginning of the buffer
+<b class="fc"><i>1259</i>&nbsp;            carryoverBytes = utf8InputBuffer.remaining();</b>
+<b class="fc"><i>1260</i>&nbsp;            if (carryoverBytes &gt; 0) {</b>
+<b class="fc"><i>1261</i>&nbsp;                System.arraycopy(</b>
+<b class="fc"><i>1262</i>&nbsp;                        utf8InputBuffer.array(),</b>
+<b class="fc"><i>1263</i>&nbsp;                        utf8InputBuffer.position(),</b>
+<b class="fc"><i>1264</i>&nbsp;                        utf8InputBuffer.array(),</b>
+<i>1265</i>&nbsp;                        0,
+<i>1266</i>&nbsp;                        carryoverBytes
+<i>1267</i>&nbsp;                );
+<i>1268</i>&nbsp;            }
+<b class="fc"><i>1269</i>&nbsp;        }</b>
+<i>1270</i>&nbsp;
+<b class="fc"><i>1271</i>&nbsp;        _local_remaining = save_limit;</b>
+<i>1272</i>&nbsp;
+<b class="fc"><i>1273</i>&nbsp;        decodingBuffer.flip();</b>
+<b class="fc"><i>1274</i>&nbsp;        return decodingBuffer.toString();</b>
+<i>1275</i>&nbsp;    }
+<i>1276</i>&nbsp;
+<i>1277</i>&nbsp;    private String readStringWithReusableBuffer(int numberOfBytes) throws IOException {
+<b class="fc"><i>1278</i>&nbsp;        int save_limit = NO_LIMIT;</b>
+<b class="fc"><i>1279</i>&nbsp;        if (_local_remaining != NO_LIMIT) {</b>
+<b class="fc"><i>1280</i>&nbsp;            save_limit = _local_remaining - numberOfBytes;</b>
+<i>1281</i>&nbsp;        }
+<b class="fc"><i>1282</i>&nbsp;        _local_remaining = numberOfBytes;</b>
+<b class="fc"><i>1283</i>&nbsp;        readAll(utf8InputBuffer.array(), 0, numberOfBytes);</b>
+<b class="fc"><i>1284</i>&nbsp;        _local_remaining = save_limit;</b>
+<i>1285</i>&nbsp;
+<b class="fc"><i>1286</i>&nbsp;        utf8InputBuffer.position(0);</b>
+<b class="fc"><i>1287</i>&nbsp;        utf8InputBuffer.limit(numberOfBytes);</b>
+<i>1288</i>&nbsp;
+<b class="fc"><i>1289</i>&nbsp;        utf8DecodingBuffer.position(0);</b>
+<b class="fc"><i>1290</i>&nbsp;        utf8DecodingBuffer.limit(utf8DecodingBuffer.capacity());</b>
+<i>1291</i>&nbsp;
+<b class="fc"><i>1292</i>&nbsp;        utf8CharsetDecoder.reset();</b>
+<b class="fc"><i>1293</i>&nbsp;        CoderResult coderResult = utf8CharsetDecoder.decode(utf8InputBuffer, utf8DecodingBuffer, true);</b>
+<b class="fc"><i>1294</i>&nbsp;        if (coderResult.isError()) {</b>
+<b class="fc"><i>1295</i>&nbsp;            throw new IonException(&quot;Illegal value encountered while validating UTF-8 data in input stream. &quot; + coderResult.toString());</b>
+<i>1296</i>&nbsp;        }
+<b class="fc"><i>1297</i>&nbsp;        utf8DecodingBuffer.flip();</b>
+<b class="fc"><i>1298</i>&nbsp;        return utf8DecodingBuffer.toString();</b>
+<i>1299</i>&nbsp;    }
+<i>1300</i>&nbsp;
+<i>1301</i>&nbsp;    private final void throwUnexpectedEOFException() throws IOException {
+<b class="fc"><i>1302</i>&nbsp;        throwErrorAt(&quot;unexpected EOF in value&quot;);</b>
+<b class="nc"><i>1303</i>&nbsp;    }</b>
+<i>1304</i>&nbsp;    private final void throwVarIntOverflowException() throws IOException {
+<b class="fc"><i>1305</i>&nbsp;        throwErrorAt(&quot;int in stream is too long for a Java int 32&quot;);</b>
+<b class="nc"><i>1306</i>&nbsp;    }</b>
+<i>1307</i>&nbsp;
+<i>1308</i>&nbsp;    protected IonException newErrorAt(String msg) {
+<b class="fc"><i>1309</i>&nbsp;        String msg2 = msg + &quot; at position &quot; + getPosition();</b>
+<b class="fc"><i>1310</i>&nbsp;        return new IonException(msg2);</b>
+<i>1311</i>&nbsp;    }
+<i>1312</i>&nbsp;    protected void throwErrorAt(String msg) {
+<b class="fc"><i>1313</i>&nbsp;        throw newErrorAt(msg);</b>
+<i>1314</i>&nbsp;    }
+<i>1315</i>&nbsp;    protected void error(String msg) {
+<b class="nc"><i>1316</i>&nbsp;        throw new IonException(msg);</b>
+<i>1317</i>&nbsp;    }
+<i>1318</i>&nbsp;    protected void error(Exception e) {
+<b class="fc"><i>1319</i>&nbsp;        throw new IonException(e);</b>
+<i>1320</i>&nbsp;    }
+<i>1321</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1191 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonReaderTextSystemX</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonReaderTextSystemX (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IonReaderTextSystemX</td>
+<td class="coverageStat">
+  <span class="percent">
+    87.2%
+  </span>
+  <span class="absValue">
+    (34/ 39)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    65.3%
+  </span>
+  <span class="absValue">
+    (273/ 418)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">IonReaderTextSystemX$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonReaderTextSystemX$Radix</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (25/ 25)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonReaderTextSystemX$Radix$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/ 3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/ 3)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonReaderTextSystemX$Radix$2</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/ 3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/ 3)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonReaderTextSystemX$Radix$3</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/ 3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/ 3)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    90.6%
+  </span>
+  <span class="absValue">
+    (48/ 53)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    68%
+  </span>
+  <span class="absValue">
+    (308/ 453)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.impl._Private_ScalarConversions.getValueTypeName;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;import com.amazon.ion.Decimal;
+<i>21</i>&nbsp;import com.amazon.ion.IntegerSize;
+<i>22</i>&nbsp;import com.amazon.ion.IonBlob;
+<i>23</i>&nbsp;import com.amazon.ion.IonClob;
+<i>24</i>&nbsp;import com.amazon.ion.IonException;
+<i>25</i>&nbsp;import com.amazon.ion.IonList;
+<i>26</i>&nbsp;import com.amazon.ion.IonSequence;
+<i>27</i>&nbsp;import com.amazon.ion.IonSexp;
+<i>28</i>&nbsp;import com.amazon.ion.IonStruct;
+<i>29</i>&nbsp;import com.amazon.ion.IonSystem;
+<i>30</i>&nbsp;import com.amazon.ion.IonTimestamp;
+<i>31</i>&nbsp;import com.amazon.ion.IonType;
+<i>32</i>&nbsp;import com.amazon.ion.IonValue;
+<i>33</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>34</i>&nbsp;import com.amazon.ion.SymbolToken;
+<i>35</i>&nbsp;import com.amazon.ion.Timestamp;
+<i>36</i>&nbsp;import com.amazon.ion.UnknownSymbolException;
+<i>37</i>&nbsp;import com.amazon.ion.impl.IonReaderTextRawTokensX.IonReaderTextTokenException;
+<i>38</i>&nbsp;import com.amazon.ion.impl.IonTokenConstsX.CharacterSequence;
+<i>39</i>&nbsp;import com.amazon.ion.impl._Private_ScalarConversions.AS_TYPE;
+<i>40</i>&nbsp;import com.amazon.ion.impl._Private_ScalarConversions.CantConvertException;
+<i>41</i>&nbsp;import java.io.IOException;
+<i>42</i>&nbsp;import java.math.BigDecimal;
+<i>43</i>&nbsp;import java.math.BigInteger;
+<i>44</i>&nbsp;import java.util.Date;
+<i>45</i>&nbsp;import java.lang.Character;
+<i>46</i>&nbsp;
+<i>47</i>&nbsp;/**
+<i>48</i>&nbsp; * This reader calls the {@link IonReaderTextRawX} for low level events.
+<i>49</i>&nbsp; * It surfaces the reader functions that construct instances
+<i>50</i>&nbsp; * of various sorts (numbers, java strings, etc). It also
+<i>51</i>&nbsp; * caches the fieldname and annotations of the current value.
+<i>52</i>&nbsp; *
+<i>53</i>&nbsp; *  It does not understand symbol tables nor care about them
+<i>54</i>&nbsp; *  the IonTextUserReader is responsible for that.
+<i>55</i>&nbsp; *
+<i>56</i>&nbsp; */
+<b class="fc"><i>57</i>&nbsp;class IonReaderTextSystemX</b>
+<i>58</i>&nbsp;    extends IonReaderTextRawX
+<i>59</i>&nbsp;    implements _Private_ReaderWriter
+<i>60</i>&nbsp;{
+<b class="fc"><i>61</i>&nbsp;    private static int UNSIGNED_BYTE_MAX_VALUE = 255;</b>
+<i>62</i>&nbsp;
+<i>63</i>&nbsp;    SymbolTable _system_symtab;
+<i>64</i>&nbsp;
+<i>65</i>&nbsp;    protected IonReaderTextSystemX(UnifiedInputStreamX iis)
+<b class="fc"><i>66</i>&nbsp;    {</b>
+<b class="fc"><i>67</i>&nbsp;        _system_symtab = _Private_Utils.systemSymtab(1); // TODO check IVM to determine version: amzn/ion-java/issues/19</b>
+<b class="fc"><i>68</i>&nbsp;        init_once();</b>
+<b class="fc"><i>69</i>&nbsp;        init(iis, IonType.DATAGRAM);</b>
+<b class="fc"><i>70</i>&nbsp;    }</b>
+<i>71</i>&nbsp;
+<i>72</i>&nbsp;    // TODO getIntegerType() is duplicated in IonReaderBinarySystemX. It could
+<i>73</i>&nbsp;    // be consolidated into a single location, but that would have to be part
+<i>74</i>&nbsp;    // of a larger refactor of common logic from both IonReader*SystemX classes
+<i>75</i>&nbsp;    // into a base class (the *Value() methods also share a lot of similarity).
+<i>76</i>&nbsp;    public IntegerSize getIntegerSize()
+<i>77</i>&nbsp;    {
+<b class="fc"><i>78</i>&nbsp;        load_once();</b>
+<b class="fc"><i>79</i>&nbsp;        if (_value_type != IonType.INT || _v.isNull())</b>
+<i>80</i>&nbsp;        {
+<b class="fc"><i>81</i>&nbsp;            return null;</b>
+<i>82</i>&nbsp;        }
+<b class="fc"><i>83</i>&nbsp;        return _Private_ScalarConversions.getIntegerSize(_v.getAuthoritativeType());</b>
+<i>84</i>&nbsp;    }
+<i>85</i>&nbsp;
+<i>86</i>&nbsp;    private void load_once()
+<i>87</i>&nbsp;    {
+<b class="fc"><i>88</i>&nbsp;        if (_v.isEmpty()) {</b>
+<i>89</i>&nbsp;            try {
+<b class="fc"><i>90</i>&nbsp;                load_scalar_value();</b>
+<i>91</i>&nbsp;            }
+<b class="nc"><i>92</i>&nbsp;            catch (IOException e) {</b>
+<b class="nc"><i>93</i>&nbsp;                throw new IonException(e);</b>
+<b class="fc"><i>94</i>&nbsp;            }</b>
+<i>95</i>&nbsp;        }
+<b class="fc"><i>96</i>&nbsp;    }</b>
+<i>97</i>&nbsp;
+<i>98</i>&nbsp;    /**
+<i>99</i>&nbsp;     * this checks the state of the raw reader to make sure
+<i>100</i>&nbsp;     * this is valid.  It also checks for an existing cached
+<i>101</i>&nbsp;     * value of the correct type.  It will either cast the
+<i>102</i>&nbsp;     * current value from an existing type to the type desired
+<i>103</i>&nbsp;     * or it will construct the desired type from the raw
+<i>104</i>&nbsp;     * input in the raw reader
+<i>105</i>&nbsp;     *
+<i>106</i>&nbsp;     * @param value_type desired value type (in local type terms)
+<i>107</i>&nbsp;     * @throws IOException
+<i>108</i>&nbsp;     */
+<i>109</i>&nbsp;    private final void load_or_cast_cached_value(int value_type) {
+<b class="fc"><i>110</i>&nbsp;        load_once();</b>
+<b class="fc"><i>111</i>&nbsp;        if (value_type != 0 &amp;&amp; !_v.hasValueOfType(value_type)) {</b>
+<b class="fc"><i>112</i>&nbsp;            cast_cached_value(value_type);</b>
+<i>113</i>&nbsp;        }
+<b class="fc"><i>114</i>&nbsp;    }</b>
+<i>115</i>&nbsp;
+<b class="fc"><i>116</i>&nbsp;    enum Radix</b>
+<i>117</i>&nbsp;    {
+<b class="fc"><i>118</i>&nbsp;        DECIMAL</b>
+<i>119</i>&nbsp;        {
+<i>120</i>&nbsp;
+<i>121</i>&nbsp;            @Override
+<i>122</i>&nbsp;            boolean isInt(String image, int len)
+<i>123</i>&nbsp;            {
+<b class="fc"><i>124</i>&nbsp;                return valueWithinBounds(image, len, MIN_INT_IMAGE, MAX_INT_IMAGE);</b>
+<i>125</i>&nbsp;            }
+<i>126</i>&nbsp;
+<i>127</i>&nbsp;            @Override
+<i>128</i>&nbsp;            boolean isLong(String image, int len)
+<i>129</i>&nbsp;            {
+<b class="fc"><i>130</i>&nbsp;                return valueWithinBounds(image, len, MIN_LONG_IMAGE, MAX_LONG_IMAGE);</b>
+<i>131</i>&nbsp;            }
+<i>132</i>&nbsp;
+<i>133</i>&nbsp;        },
+<b class="fc"><i>134</i>&nbsp;        HEX</b>
+<i>135</i>&nbsp;        {
+<i>136</i>&nbsp;
+<i>137</i>&nbsp;            @Override
+<i>138</i>&nbsp;            boolean isInt(String image, int len)
+<i>139</i>&nbsp;            {
+<b class="fc"><i>140</i>&nbsp;                return valueWithinBounds(image, len, MIN_HEX_INT_IMAGE, MAX_HEX_INT_IMAGE);</b>
+<i>141</i>&nbsp;            }
+<i>142</i>&nbsp;
+<i>143</i>&nbsp;            @Override
+<i>144</i>&nbsp;            boolean isLong(String image, int len)
+<i>145</i>&nbsp;            {
+<b class="fc"><i>146</i>&nbsp;                return valueWithinBounds(image, len, MIN_HEX_LONG_IMAGE, MAX_HEX_LONG_IMAGE);</b>
+<i>147</i>&nbsp;            }
+<i>148</i>&nbsp;
+<i>149</i>&nbsp;        },
+<b class="fc"><i>150</i>&nbsp;        BINARY</b>
+<i>151</i>&nbsp;        {
+<i>152</i>&nbsp;
+<i>153</i>&nbsp;            @Override
+<i>154</i>&nbsp;            boolean isInt(String image, int len)
+<i>155</i>&nbsp;            {
+<b class="fc"><i>156</i>&nbsp;                return valueWithinBounds(image, len, MIN_BINARY_INT_IMAGE, MAX_BINARY_INT_IMAGE);</b>
+<i>157</i>&nbsp;            }
+<i>158</i>&nbsp;
+<i>159</i>&nbsp;            @Override
+<i>160</i>&nbsp;            boolean isLong(String image, int len)
+<i>161</i>&nbsp;            {
+<b class="fc"><i>162</i>&nbsp;                return valueWithinBounds(image, len, MIN_BINARY_LONG_IMAGE, MAX_BINARY_LONG_IMAGE);</b>
+<i>163</i>&nbsp;            }
+<i>164</i>&nbsp;
+<i>165</i>&nbsp;        };
+<i>166</i>&nbsp;
+<b class="fc"><i>167</i>&nbsp;        private static final char[] MAX_INT_IMAGE = Integer.toString(Integer.MAX_VALUE).toCharArray();</b>
+<b class="fc"><i>168</i>&nbsp;        private static final char[] MIN_INT_IMAGE = Integer.toString(Integer.MIN_VALUE).toCharArray();</b>
+<b class="fc"><i>169</i>&nbsp;        private static final char[] MAX_LONG_IMAGE = Long.toString(Long.MAX_VALUE).toCharArray();</b>
+<b class="fc"><i>170</i>&nbsp;        private static final char[] MIN_LONG_IMAGE = Long.toString(Long.MIN_VALUE).toCharArray();</b>
+<b class="fc"><i>171</i>&nbsp;        private static final char[] MAX_BINARY_INT_IMAGE = Integer.toBinaryString(Integer.MAX_VALUE).toCharArray();</b>
+<b class="fc"><i>172</i>&nbsp;        private static final char[] MIN_BINARY_INT_IMAGE = (&quot;-&quot; + Integer.toBinaryString(Integer.MIN_VALUE)).toCharArray();</b>
+<b class="fc"><i>173</i>&nbsp;        private static final char[] MAX_BINARY_LONG_IMAGE = Long.toBinaryString(Long.MAX_VALUE).toCharArray();</b>
+<b class="fc"><i>174</i>&nbsp;        private static final char[] MIN_BINARY_LONG_IMAGE = (&quot;-&quot; + Long.toBinaryString(Long.MIN_VALUE)).toCharArray();</b>
+<b class="fc"><i>175</i>&nbsp;        private static final char[] MAX_HEX_INT_IMAGE = Integer.toHexString(Integer.MAX_VALUE).toCharArray();</b>
+<b class="fc"><i>176</i>&nbsp;        private static final char[] MIN_HEX_INT_IMAGE = (&quot;-&quot; + Integer.toHexString(Integer.MIN_VALUE)).toCharArray();</b>
+<b class="fc"><i>177</i>&nbsp;        private static final char[] MAX_HEX_LONG_IMAGE = Long.toHexString(Long.MAX_VALUE).toCharArray();</b>
+<b class="fc"><i>178</i>&nbsp;        private static final char[] MIN_HEX_LONG_IMAGE = (&quot;-&quot; + Long.toHexString(Long.MIN_VALUE)).toCharArray();</b>
+<i>179</i>&nbsp;
+<i>180</i>&nbsp;        abstract boolean isInt(String image, int len);
+<i>181</i>&nbsp;        abstract boolean isLong(String image, int len);
+<i>182</i>&nbsp;
+<i>183</i>&nbsp;        private static boolean valueWithinBounds(String value, int len, char[] minImage, char[] maxImage)
+<i>184</i>&nbsp;        {
+<b class="fc"><i>185</i>&nbsp;            boolean negative = value.charAt(0) == &#39;-&#39;;</b>
+<b class="fc"><i>186</i>&nbsp;            char[] boundaryImage = negative ? minImage : maxImage;</b>
+<b class="fc"><i>187</i>&nbsp;            int maxImageLength = boundaryImage.length;</b>
+<b class="fc"><i>188</i>&nbsp;            return len &lt; maxImageLength || (len == maxImageLength &amp;&amp; magnitudeLessThanOrEqualTo(value, len, boundaryImage));</b>
+<i>189</i>&nbsp;        }
+<i>190</i>&nbsp;
+<i>191</i>&nbsp;        private static boolean magnitudeLessThanOrEqualTo(String lhs, int lhsLen, char[] rhs)
+<i>192</i>&nbsp;        {
+<b class="fc"><i>193</i>&nbsp;            assert lhsLen == rhs.length;</b>
+<b class="fc"><i>194</i>&nbsp;            for (int i = lhsLen - 1; i &gt;= 0; i--)</b>
+<i>195</i>&nbsp;            {
+<b class="fc"><i>196</i>&nbsp;                if (lhs.charAt(i) &gt; rhs[i])</b>
+<i>197</i>&nbsp;                {
+<b class="fc"><i>198</i>&nbsp;                    return false;</b>
+<i>199</i>&nbsp;                }
+<i>200</i>&nbsp;            }
+<b class="fc"><i>201</i>&nbsp;            return true;</b>
+<i>202</i>&nbsp;        }
+<i>203</i>&nbsp;    }
+<i>204</i>&nbsp;
+<i>205</i>&nbsp;    private final void load_scalar_value() throws IOException {
+<i>206</i>&nbsp;        // make sure we&#39;re trying to load a scalar value here
+<b class="fc"><i>207</i>&nbsp;        switch(_value_type) {</b>
+<i>208</i>&nbsp;        case NULL:
+<b class="nc"><i>209</i>&nbsp;            _v.setValueToNull(_null_type);</b>
+<b class="nc"><i>210</i>&nbsp;            _v.setAuthoritativeType(AS_TYPE.null_value);</b>
+<b class="nc"><i>211</i>&nbsp;            return;</b>
+<i>212</i>&nbsp;        case BOOL:
+<i>213</i>&nbsp;        case INT:
+<i>214</i>&nbsp;        case FLOAT:
+<i>215</i>&nbsp;        case DECIMAL:
+<i>216</i>&nbsp;        case TIMESTAMP:
+<i>217</i>&nbsp;        case SYMBOL:
+<i>218</i>&nbsp;        case STRING:
+<b class="fc"><i>219</i>&nbsp;            break;</b>
+<i>220</i>&nbsp;        default:
+<b class="fc"><i>221</i>&nbsp;            return;</b>
+<i>222</i>&nbsp;        }
+<i>223</i>&nbsp;
+<b class="fc"><i>224</i>&nbsp;        StringBuilder cs = token_contents_load(_scanner.getToken());</b>
+<i>225</i>&nbsp;
+<b class="fc"><i>226</i>&nbsp;        int token_type = _scanner.getToken();</b>
+<i>227</i>&nbsp;
+<b class="fc"><i>228</i>&nbsp;        if (_value_type == IonType.DECIMAL) {</b>
+<i>229</i>&nbsp;            // we do this here (instead of in the case below
+<i>230</i>&nbsp;            // so that we can modify the value while it&#39;s not
+<i>231</i>&nbsp;            // a string, but still in the StringBuilder
+<b class="fc"><i>232</i>&nbsp;            for (int ii=0; ii&lt;cs.length(); ii++) {</b>
+<b class="fc"><i>233</i>&nbsp;                int c = cs.charAt(ii);</b>
+<b class="fc"><i>234</i>&nbsp;                if (c == &#39;d&#39; || c == &#39;D&#39;) {</b>
+<b class="fc"><i>235</i>&nbsp;                    cs.setCharAt(ii, &#39;e&#39;);</b>
+<b class="fc"><i>236</i>&nbsp;                    break;</b>
+<i>237</i>&nbsp;                }
+<i>238</i>&nbsp;            }
+<b class="fc"><i>239</i>&nbsp;        } else if (token_type == IonTokenConstsX.TOKEN_HEX || token_type == IonTokenConstsX.TOKEN_BINARY) {</b>
+<b class="fc"><i>240</i>&nbsp;            boolean isNegative = (cs.charAt(0) == &#39;-&#39;);</b>
+<i>241</i>&nbsp;            // prefix = is_negative ? &quot;-0x&quot; : &quot;0x&quot;;
+<b class="fc"><i>242</i>&nbsp;            int pos = isNegative ? 1 : 0;</b>
+<b class="fc"><i>243</i>&nbsp;            char caseChar = token_type == IonTokenConstsX.TOKEN_HEX ? &#39;x&#39; : &#39;b&#39;;</b>
+<b class="fc"><i>244</i>&nbsp;            if (cs.length() &lt;= (isNegative ? 3 : 2) || Character.toLowerCase(cs.charAt(pos + 1)) != caseChar) {</b>
+<b class="fc"><i>245</i>&nbsp;                parse_error(&quot;Invalid &quot; + (caseChar == &#39;x&#39; ? &quot;hexadecimal&quot; : &quot;binary&quot;) + &quot; int value.&quot;);</b>
+<i>246</i>&nbsp;            }
+<b class="fc"><i>247</i>&nbsp;            cs.deleteCharAt(pos);</b>
+<b class="fc"><i>248</i>&nbsp;            cs.deleteCharAt(pos);</b>
+<i>249</i>&nbsp;        }
+<i>250</i>&nbsp;
+<i>251</i>&nbsp;
+<b class="fc"><i>252</i>&nbsp;        int          len = cs.length();</b>
+<b class="fc"><i>253</i>&nbsp;        String       s  = cs.toString();</b>
+<i>254</i>&nbsp;
+<b class="fc"><i>255</i>&nbsp;        clear_current_value_buffer();</b>
+<i>256</i>&nbsp;
+<b class="fc"><i>257</i>&nbsp;        switch (token_type) {</b>
+<i>258</i>&nbsp;        case IonTokenConstsX.TOKEN_UNKNOWN_NUMERIC:
+<b class="fc"><i>259</i>&nbsp;            switch (_value_type) {</b>
+<i>260</i>&nbsp;            case INT:
+<b class="fc"><i>261</i>&nbsp;                if (Radix.DECIMAL.isInt(s, len)) {</b>
+<b class="fc"><i>262</i>&nbsp;                    _v.setValue(Integer.parseInt(s));</b>
+<i>263</i>&nbsp;                }
+<b class="fc"><i>264</i>&nbsp;                else if (Radix.DECIMAL.isLong(s, len)) {</b>
+<b class="fc"><i>265</i>&nbsp;                    _v.setValue(Long.parseLong(s));</b>
+<i>266</i>&nbsp;                }
+<i>267</i>&nbsp;                else {
+<b class="fc"><i>268</i>&nbsp;                    _v.setValue(new BigInteger(s));</b>
+<i>269</i>&nbsp;                }
+<b class="fc"><i>270</i>&nbsp;                break;</b>
+<i>271</i>&nbsp;            case DECIMAL:
+<i>272</i>&nbsp;                // note that the string was modified above when it was a charsequence
+<i>273</i>&nbsp;                try {
+<b class="fc"><i>274</i>&nbsp;                _v.setValue(Decimal.valueOf(s));</b>
+<i>275</i>&nbsp;                }
+<b class="fc"><i>276</i>&nbsp;                catch (NumberFormatException e) {</b>
+<b class="fc"><i>277</i>&nbsp;                    parse_error(e);</b>
+<b class="fc"><i>278</i>&nbsp;                }</b>
+<b class="nc"><i>279</i>&nbsp;                break;</b>
+<i>280</i>&nbsp;            case FLOAT:
+<i>281</i>&nbsp;                try {
+<b class="fc"><i>282</i>&nbsp;                    _v.setValue(Double.parseDouble(s));</b>
+<i>283</i>&nbsp;                }
+<b class="fc"><i>284</i>&nbsp;                catch (NumberFormatException e) {</b>
+<b class="fc"><i>285</i>&nbsp;                    parse_error(e);</b>
+<b class="fc"><i>286</i>&nbsp;                }</b>
+<b class="nc"><i>287</i>&nbsp;                break;</b>
+<i>288</i>&nbsp;            case TIMESTAMP:
+<b class="nc"><i>289</i>&nbsp;                _v.setValue(Timestamp.valueOf(s));</b>
+<b class="nc"><i>290</i>&nbsp;                break;</b>
+<i>291</i>&nbsp;            default:
+<b class="nc"><i>292</i>&nbsp;                String message = &quot;unexpected prefectched value type &quot;</b>
+<b class="nc"><i>293</i>&nbsp;                               + getType().toString()</b>
+<i>294</i>&nbsp;                               + &quot; encountered handling an unquoted symbol&quot;;
+<b class="nc"><i>295</i>&nbsp;                parse_error(message);</b>
+<i>296</i>&nbsp;            }
+<b class="fc"><i>297</i>&nbsp;            break;</b>
+<i>298</i>&nbsp;        case IonTokenConstsX.TOKEN_INT:
+<b class="fc"><i>299</i>&nbsp;            if (Radix.DECIMAL.isInt(s, len)) {</b>
+<b class="fc"><i>300</i>&nbsp;                _v.setValue(Integer.parseInt(s));</b>
+<i>301</i>&nbsp;            }
+<b class="nc"><i>302</i>&nbsp;            else if (Radix.DECIMAL.isLong(s, len)) {</b>
+<b class="nc"><i>303</i>&nbsp;                _v.setValue(Long.parseLong(s));</b>
+<i>304</i>&nbsp;            }
+<i>305</i>&nbsp;            else {
+<b class="nc"><i>306</i>&nbsp;                _v.setValue(new BigInteger(s));</b>
+<i>307</i>&nbsp;            }
+<b class="nc"><i>308</i>&nbsp;            break;</b>
+<i>309</i>&nbsp;        case IonTokenConstsX.TOKEN_BINARY:
+<b class="fc"><i>310</i>&nbsp;            if (Radix.BINARY.isInt(s, len)) {</b>
+<b class="fc"><i>311</i>&nbsp;                _v.setValue(Integer.parseInt(s, 2));</b>
+<i>312</i>&nbsp;            }
+<b class="fc"><i>313</i>&nbsp;            else if (Radix.BINARY.isLong(s, len)) {</b>
+<b class="fc"><i>314</i>&nbsp;                _v.setValue(Long.parseLong(s, 2));</b>
+<i>315</i>&nbsp;            }
+<i>316</i>&nbsp;            else {
+<b class="fc"><i>317</i>&nbsp;                _v.setValue(new BigInteger(s, 2));</b>
+<i>318</i>&nbsp;            }
+<b class="fc"><i>319</i>&nbsp;            break;</b>
+<i>320</i>&nbsp;        case IonTokenConstsX.TOKEN_HEX:
+<b class="fc"><i>321</i>&nbsp;            if (Radix.HEX.isInt(s, len)) {</b>
+<b class="fc"><i>322</i>&nbsp;                int v_int = Integer.parseInt(s, 16);</b>
+<b class="fc"><i>323</i>&nbsp;                _v.setValue(v_int);</b>
+<b class="fc"><i>324</i>&nbsp;            }</b>
+<b class="fc"><i>325</i>&nbsp;            else if (Radix.HEX.isLong(s, len)) {</b>
+<b class="fc"><i>326</i>&nbsp;                long v_long = Long.parseLong(s, 16);</b>
+<b class="fc"><i>327</i>&nbsp;                _v.setValue(v_long);</b>
+<b class="fc"><i>328</i>&nbsp;            }</b>
+<i>329</i>&nbsp;            else {
+<b class="fc"><i>330</i>&nbsp;                BigInteger v_big_int = new BigInteger(s, 16);</b>
+<b class="fc"><i>331</i>&nbsp;                _v.setValue(v_big_int);</b>
+<i>332</i>&nbsp;            }
+<b class="fc"><i>333</i>&nbsp;            break;</b>
+<i>334</i>&nbsp;        case IonTokenConstsX.TOKEN_DECIMAL:
+<i>335</i>&nbsp;            try {
+<b class="fc"><i>336</i>&nbsp;            _v.setValue(Decimal.valueOf(s));</b>
+<i>337</i>&nbsp;            }
+<b class="fc"><i>338</i>&nbsp;            catch (NumberFormatException e) {</b>
+<b class="fc"><i>339</i>&nbsp;                parse_error(e);</b>
+<b class="fc"><i>340</i>&nbsp;            }</b>
+<b class="nc"><i>341</i>&nbsp;            break;</b>
+<i>342</i>&nbsp;        case IonTokenConstsX.TOKEN_FLOAT:
+<i>343</i>&nbsp;            try {
+<b class="fc"><i>344</i>&nbsp;                _v.setValue(Double.parseDouble(s));</b>
+<i>345</i>&nbsp;            }
+<b class="fc"><i>346</i>&nbsp;            catch (NumberFormatException e) {</b>
+<b class="fc"><i>347</i>&nbsp;                parse_error(e);</b>
+<b class="fc"><i>348</i>&nbsp;            }</b>
+<i>349</i>&nbsp;
+<b class="nc"><i>350</i>&nbsp;            break;</b>
+<i>351</i>&nbsp;        case IonTokenConstsX.TOKEN_TIMESTAMP:
+<b class="fc"><i>352</i>&nbsp;            Timestamp t = null;</b>
+<i>353</i>&nbsp;            try {
+<b class="fc"><i>354</i>&nbsp;                t = Timestamp.valueOf(s);</b>
+<i>355</i>&nbsp;            }
+<b class="fc"><i>356</i>&nbsp;            catch (IllegalArgumentException e) {</b>
+<b class="fc"><i>357</i>&nbsp;                parse_error(e);</b>
+<b class="fc"><i>358</i>&nbsp;            }</b>
+<b class="fc"><i>359</i>&nbsp;            _v.setValue(t);</b>
+<b class="fc"><i>360</i>&nbsp;            break;</b>
+<i>361</i>&nbsp;        case IonTokenConstsX.TOKEN_SYMBOL_IDENTIFIER:
+<i>362</i>&nbsp;            // this includes the various value keywords like true
+<i>363</i>&nbsp;            // and nan, in addition to &quot;normal&quot; unquoted symbols
+<i>364</i>&nbsp;
+<i>365</i>&nbsp;            // we check to make sure it&#39;s not null first
+<i>366</i>&nbsp;            // since it could be null.symbol (which would
+<i>367</i>&nbsp;            // have the getType() of SYMBOL and would confuse
+<i>368</i>&nbsp;            // us as to what the saved type is)
+<b class="fc"><i>369</i>&nbsp;            if (isNullValue()) {</b>
+<i>370</i>&nbsp;                // the raw parser set _null_type when it
+<i>371</i>&nbsp;                // detected the unquoted symbol null in the
+<i>372</i>&nbsp;                // input (which is what isNullValue looks at)
+<b class="nc"><i>373</i>&nbsp;                _v.setValueToNull(_null_type);</b>
+<i>374</i>&nbsp;            }
+<i>375</i>&nbsp;            else {
+<b class="fc"><i>376</i>&nbsp;                switch(getType()) {</b>
+<i>377</i>&nbsp;                case SYMBOL:
+<i>378</i>&nbsp;                    // TODO this is catching SIDs too, using wrong text.
+<b class="fc"><i>379</i>&nbsp;                    _v.setValue(s);</b>
+<b class="fc"><i>380</i>&nbsp;                    break;</b>
+<i>381</i>&nbsp;                case FLOAT:
+<b class="nc"><i>382</i>&nbsp;                    switch (_value_keyword) {</b>
+<i>383</i>&nbsp;                    case IonTokenConstsX.KEYWORD_NAN:
+<b class="nc"><i>384</i>&nbsp;                        _v.setValue(Double.NaN);</b>
+<b class="nc"><i>385</i>&nbsp;                        break;</b>
+<i>386</i>&nbsp;                    default:
+<b class="nc"><i>387</i>&nbsp;                        String message = &quot;unexpected keyword &quot;</b>
+<i>388</i>&nbsp;                                       + s
+<i>389</i>&nbsp;                                       + &quot; identified as a FLOAT&quot;;
+<b class="nc"><i>390</i>&nbsp;                        parse_error(message);</b>
+<i>391</i>&nbsp;                    }
+<b class="nc"><i>392</i>&nbsp;                    break;</b>
+<i>393</i>&nbsp;                case BOOL:
+<b class="nc"><i>394</i>&nbsp;                    switch (_value_keyword) {</b>
+<i>395</i>&nbsp;                    case IonTokenConstsX.KEYWORD_TRUE:
+<b class="nc"><i>396</i>&nbsp;                        _v.setValue(true);</b>
+<b class="nc"><i>397</i>&nbsp;                        break;</b>
+<i>398</i>&nbsp;                    case IonTokenConstsX.KEYWORD_FALSE:
+<b class="nc"><i>399</i>&nbsp;                        _v.setValue(false);</b>
+<b class="nc"><i>400</i>&nbsp;                        break;</b>
+<i>401</i>&nbsp;                    default:
+<b class="nc"><i>402</i>&nbsp;                        String message = &quot;unexpected keyword &quot;</b>
+<i>403</i>&nbsp;                            + s
+<i>404</i>&nbsp;                            + &quot; identified as a BOOL&quot;;
+<b class="nc"><i>405</i>&nbsp;                        parse_error(message);</b>
+<i>406</i>&nbsp;                    }
+<b class="nc"><i>407</i>&nbsp;                    break;</b>
+<i>408</i>&nbsp;                default:
+<b class="nc"><i>409</i>&nbsp;                    String message = &quot;unexpected prefectched value type &quot;</b>
+<b class="nc"><i>410</i>&nbsp;                                   + getType().toString()</b>
+<i>411</i>&nbsp;                                   + &quot; encountered handling an unquoted symbol&quot;;
+<b class="nc"><i>412</i>&nbsp;                    parse_error(message);</b>
+<i>413</i>&nbsp;                }
+<i>414</i>&nbsp;            }
+<b class="fc"><i>415</i>&nbsp;            break;</b>
+<i>416</i>&nbsp;        case IonTokenConstsX.TOKEN_SYMBOL_QUOTED:
+<i>417</i>&nbsp;        case IonTokenConstsX.TOKEN_SYMBOL_OPERATOR:
+<i>418</i>&nbsp;        case IonTokenConstsX.TOKEN_STRING_DOUBLE_QUOTE:
+<b class="fc"><i>419</i>&nbsp;            _v.setValue(s);</b>
+<b class="fc"><i>420</i>&nbsp;            break;</b>
+<i>421</i>&nbsp;        case IonTokenConstsX.TOKEN_STRING_TRIPLE_QUOTE:
+<i>422</i>&nbsp;            // long strings (triple quoted strings) are never
+<i>423</i>&nbsp;            // finished by the raw parser.  At most it reads
+<i>424</i>&nbsp;            // the first triple quoted string.
+<b class="fc"><i>425</i>&nbsp;            _v.setValue(s);</b>
+<b class="fc"><i>426</i>&nbsp;            break;</b>
+<i>427</i>&nbsp;        default:
+<b class="nc"><i>428</i>&nbsp;            parse_error(&quot;scalar token &quot;+IonTokenConstsX.getTokenName(_scanner.getToken())+&quot;isn&#39;t a recognized type&quot;);</b>
+<i>429</i>&nbsp;        }
+<b class="fc"><i>430</i>&nbsp;    }</b>
+<i>431</i>&nbsp;    private final void cast_cached_value(int new_type)
+<i>432</i>&nbsp;    {
+<i>433</i>&nbsp;        // this should only be called when it actually has to do some work
+<b class="fc"><i>434</i>&nbsp;        assert !_v.hasValueOfType(new_type);</b>
+<i>435</i>&nbsp;
+<b class="fc"><i>436</i>&nbsp;        if (_v.isNull()) {</b>
+<b class="fc"><i>437</i>&nbsp;            return;</b>
+<i>438</i>&nbsp;        }
+<i>439</i>&nbsp;
+<b class="fc"><i>440</i>&nbsp;        if (IonType.SYMBOL.equals(_value_type)) {</b>
+<b class="fc"><i>441</i>&nbsp;            switch(new_type) {</b>
+<i>442</i>&nbsp;                case AS_TYPE.string_value:
+<b class="fc"><i>443</i>&nbsp;                    int sid = _v.getInt();</b>
+<b class="fc"><i>444</i>&nbsp;                    String sym = getSymbolTable().findKnownSymbol(sid);</b>
+<b class="fc"><i>445</i>&nbsp;                    _v.addValue(sym);</b>
+<b class="fc"><i>446</i>&nbsp;                    break;</b>
+<i>447</i>&nbsp;                case AS_TYPE.int_value:
+<b class="fc"><i>448</i>&nbsp;                    sym = _v.getString();</b>
+<b class="fc"><i>449</i>&nbsp;                    sid = getSymbolTable().findSymbol(sym);</b>
+<b class="fc"><i>450</i>&nbsp;                    _v.addValue(sid);</b>
+<b class="fc"><i>451</i>&nbsp;                    break;</b>
+<i>452</i>&nbsp;                default:
+<b class="nc"><i>453</i>&nbsp;                {   String message = &quot;can&#39;t cast symbol from &quot;</b>
+<b class="nc"><i>454</i>&nbsp;                        +getValueTypeName(_v.getAuthoritativeType())</b>
+<i>455</i>&nbsp;                        +&quot; to &quot;
+<b class="nc"><i>456</i>&nbsp;                        +getValueTypeName(new_type);</b>
+<b class="nc"><i>457</i>&nbsp;                    throw new CantConvertException(message);</b>
+<i>458</i>&nbsp;                }
+<i>459</i>&nbsp;            }
+<i>460</i>&nbsp;        }
+<i>461</i>&nbsp;        else {
+<b class="fc"><i>462</i>&nbsp;            if (!_v.can_convert(new_type)) {</b>
+<b class="nc"><i>463</i>&nbsp;                String message = &quot;can&#39;t cast from &quot;</b>
+<b class="nc"><i>464</i>&nbsp;                    +getValueTypeName(_v.getAuthoritativeType())</b>
+<i>465</i>&nbsp;                    +&quot; to &quot;
+<b class="nc"><i>466</i>&nbsp;                    +getValueTypeName(new_type);</b>
+<b class="nc"><i>467</i>&nbsp;                throw new CantConvertException(message);</b>
+<i>468</i>&nbsp;            }
+<b class="fc"><i>469</i>&nbsp;            int fnid = _v.get_conversion_fnid(new_type);</b>
+<b class="fc"><i>470</i>&nbsp;            _v.cast(fnid);</b>
+<i>471</i>&nbsp;        }
+<b class="fc"><i>472</i>&nbsp;    }</b>
+<i>473</i>&nbsp;
+<i>474</i>&nbsp;    //
+<i>475</i>&nbsp;    // public value routines
+<i>476</i>&nbsp;    //
+<i>477</i>&nbsp;
+<i>478</i>&nbsp;    public SymbolToken[] getTypeAnnotationSymbols()
+<i>479</i>&nbsp;    {
+<b class="fc"><i>480</i>&nbsp;        final int count = _annotation_count;</b>
+<b class="fc"><i>481</i>&nbsp;        if (count == 0) return SymbolToken.EMPTY_ARRAY;</b>
+<i>482</i>&nbsp;
+<b class="fc"><i>483</i>&nbsp;        resolveAnnotationSymbols(count);</b>
+<i>484</i>&nbsp;
+<b class="fc"><i>485</i>&nbsp;        SymbolToken[] result = new SymbolToken[count];</b>
+<b class="fc"><i>486</i>&nbsp;        System.arraycopy(_annotations, 0, result, 0, count);</b>
+<i>487</i>&nbsp;
+<b class="fc"><i>488</i>&nbsp;        return result;</b>
+<i>489</i>&nbsp;    }
+<i>490</i>&nbsp;
+<i>491</i>&nbsp;    public String[] getTypeAnnotations()
+<i>492</i>&nbsp;    {
+<b class="fc"><i>493</i>&nbsp;        resolveAnnotationSymbols(_annotation_count);</b>
+<b class="fc"><i>494</i>&nbsp;        return _Private_Utils.toStrings(_annotations, _annotation_count);</b>
+<i>495</i>&nbsp;    }
+<i>496</i>&nbsp;
+<i>497</i>&nbsp;    /**
+<i>498</i>&nbsp;     * Resolve annotations with the current symbol table.
+<i>499</i>&nbsp;     */
+<i>500</i>&nbsp;    private void resolveAnnotationSymbols(int count) {
+<b class="fc"><i>501</i>&nbsp;        SymbolTable symbols = getSymbolTable();</b>
+<b class="fc"><i>502</i>&nbsp;        for (int i = 0; i &lt; count; i++) {</b>
+<b class="fc"><i>503</i>&nbsp;            SymbolToken sym = _annotations[i];</b>
+<b class="fc"><i>504</i>&nbsp;            SymbolToken updated = _Private_Utils.localize(symbols, sym);</b>
+<b class="fc"><i>505</i>&nbsp;            if (updated != sym) {</b>
+<b class="fc"><i>506</i>&nbsp;                _annotations[i] = updated;</b>
+<i>507</i>&nbsp;            }
+<i>508</i>&nbsp;        }
+<b class="fc"><i>509</i>&nbsp;    }</b>
+<i>510</i>&nbsp;
+<i>511</i>&nbsp;    public boolean isNullValue()
+<i>512</i>&nbsp;    {
+<b class="fc"><i>513</i>&nbsp;        return _v.isNull();</b>
+<i>514</i>&nbsp;    }
+<i>515</i>&nbsp;
+<i>516</i>&nbsp;    public boolean booleanValue()
+<i>517</i>&nbsp;    {
+<b class="fc"><i>518</i>&nbsp;        load_or_cast_cached_value(AS_TYPE.boolean_value);</b>
+<b class="fc"><i>519</i>&nbsp;        return _v.getBoolean();</b>
+<i>520</i>&nbsp;    }
+<i>521</i>&nbsp;
+<i>522</i>&nbsp;    public double doubleValue()
+<i>523</i>&nbsp;    {
+<b class="fc"><i>524</i>&nbsp;        load_or_cast_cached_value(AS_TYPE.double_value);</b>
+<b class="fc"><i>525</i>&nbsp;        return _v.getDouble();</b>
+<i>526</i>&nbsp;    }
+<i>527</i>&nbsp;
+<i>528</i>&nbsp;    private void checkIsIntApplicableType()
+<i>529</i>&nbsp;    {
+<b class="fc"><i>530</i>&nbsp;        if (_value_type != IonType.INT &amp;&amp;</b>
+<i>531</i>&nbsp;          _value_type != IonType.DECIMAL &amp;&amp;
+<i>532</i>&nbsp;          _value_type != IonType.FLOAT)
+<i>533</i>&nbsp;        {
+<b class="fc"><i>534</i>&nbsp;          throw new IllegalStateException(&quot;Unexpected value type: &quot; + _value_type);</b>
+<i>535</i>&nbsp;        }
+<b class="fc"><i>536</i>&nbsp;    }</b>
+<i>537</i>&nbsp;
+<i>538</i>&nbsp;    public int intValue()
+<i>539</i>&nbsp;    {
+<b class="fc"><i>540</i>&nbsp;        checkIsIntApplicableType();</b>
+<i>541</i>&nbsp;
+<b class="fc"><i>542</i>&nbsp;        load_or_cast_cached_value(AS_TYPE.int_value);</b>
+<b class="fc"><i>543</i>&nbsp;        return _v.getInt();</b>
+<i>544</i>&nbsp;    }
+<i>545</i>&nbsp;
+<i>546</i>&nbsp;    public long longValue()
+<i>547</i>&nbsp;    {
+<b class="fc"><i>548</i>&nbsp;        checkIsIntApplicableType();</b>
+<i>549</i>&nbsp;
+<b class="fc"><i>550</i>&nbsp;        load_or_cast_cached_value(AS_TYPE.long_value);</b>
+<b class="fc"><i>551</i>&nbsp;        return _v.getLong();</b>
+<i>552</i>&nbsp;    }
+<i>553</i>&nbsp;
+<i>554</i>&nbsp;    @Override
+<i>555</i>&nbsp;    public BigInteger bigIntegerValue()
+<i>556</i>&nbsp;    {
+<b class="fc"><i>557</i>&nbsp;        checkIsIntApplicableType();</b>
+<i>558</i>&nbsp;
+<b class="fc"><i>559</i>&nbsp;        load_or_cast_cached_value(AS_TYPE.bigInteger_value);</b>
+<b class="fc"><i>560</i>&nbsp;        if (_v.isNull()) return null;</b>
+<b class="fc"><i>561</i>&nbsp;        return _v.getBigInteger();</b>
+<i>562</i>&nbsp;    }
+<i>563</i>&nbsp;
+<i>564</i>&nbsp;    public BigDecimal bigDecimalValue()
+<i>565</i>&nbsp;    {
+<b class="fc"><i>566</i>&nbsp;        load_or_cast_cached_value(AS_TYPE.decimal_value);</b>
+<b class="fc"><i>567</i>&nbsp;        if (_v.isNull()) return null;</b>
+<b class="fc"><i>568</i>&nbsp;        return _v.getBigDecimal();</b>
+<i>569</i>&nbsp;    }
+<i>570</i>&nbsp;
+<i>571</i>&nbsp;    public Decimal decimalValue()
+<i>572</i>&nbsp;    {
+<b class="fc"><i>573</i>&nbsp;        load_or_cast_cached_value(AS_TYPE.decimal_value);</b>
+<b class="fc"><i>574</i>&nbsp;        if (_v.isNull()) return null;</b>
+<b class="fc"><i>575</i>&nbsp;        return _v.getDecimal();</b>
+<i>576</i>&nbsp;    }
+<i>577</i>&nbsp;
+<i>578</i>&nbsp;    public Date dateValue()
+<i>579</i>&nbsp;    {
+<b class="fc"><i>580</i>&nbsp;        load_or_cast_cached_value(AS_TYPE.date_value);</b>
+<b class="fc"><i>581</i>&nbsp;        if (_v.isNull()) return null;</b>
+<b class="fc"><i>582</i>&nbsp;        return _v.getDate();</b>
+<i>583</i>&nbsp;    }
+<i>584</i>&nbsp;
+<i>585</i>&nbsp;    public Timestamp timestampValue()
+<i>586</i>&nbsp;    {
+<b class="fc"><i>587</i>&nbsp;        load_or_cast_cached_value(AS_TYPE.timestamp_value);</b>
+<b class="fc"><i>588</i>&nbsp;        if (_v.isNull()) return null;</b>
+<b class="fc"><i>589</i>&nbsp;        return _v.getTimestamp();</b>
+<i>590</i>&nbsp;    }
+<i>591</i>&nbsp;
+<i>592</i>&nbsp;    public final String stringValue()
+<i>593</i>&nbsp;    {
+<b class="fc"><i>594</i>&nbsp;        if (! IonType.isText(_value_type)) throw new IllegalStateException(&quot;Unexpected value type: &quot; + _value_type);</b>
+<b class="fc"><i>595</i>&nbsp;        if (_v.isNull()) return null;</b>
+<i>596</i>&nbsp;
+<b class="fc"><i>597</i>&nbsp;        load_or_cast_cached_value(AS_TYPE.string_value);</b>
+<b class="fc"><i>598</i>&nbsp;        String text = _v.getString();</b>
+<b class="fc"><i>599</i>&nbsp;        if (text == null) {</b>
+<b class="fc"><i>600</i>&nbsp;            assert _value_type == IonType.SYMBOL;</b>
+<b class="fc"><i>601</i>&nbsp;            int sid = _v.getInt();</b>
+<b class="fc"><i>602</i>&nbsp;            assert sid &gt; 0;</b>
+<b class="fc"><i>603</i>&nbsp;            throw new UnknownSymbolException(sid);</b>
+<i>604</i>&nbsp;        }
+<b class="fc"><i>605</i>&nbsp;        return text;</b>
+<i>606</i>&nbsp;    }
+<i>607</i>&nbsp;
+<i>608</i>&nbsp;    /**
+<i>609</i>&nbsp;     * Horrible temporary hack.
+<i>610</i>&nbsp;     *
+<i>611</i>&nbsp;     * @return not null.
+<i>612</i>&nbsp;     */
+<i>613</i>&nbsp;    @Override
+<i>614</i>&nbsp;    public SymbolTable getSymbolTable()
+<i>615</i>&nbsp;    {
+<b class="fc"><i>616</i>&nbsp;        SymbolTable symtab = super.getSymbolTable();</b>
+<b class="fc"><i>617</i>&nbsp;        if (symtab == null)</b>
+<i>618</i>&nbsp;        {
+<b class="fc"><i>619</i>&nbsp;            symtab = _system_symtab;</b>
+<i>620</i>&nbsp;        }
+<b class="fc"><i>621</i>&nbsp;        return symtab;</b>
+<i>622</i>&nbsp;    }
+<i>623</i>&nbsp;
+<i>624</i>&nbsp;
+<i>625</i>&nbsp;    @Override
+<i>626</i>&nbsp;    public final int getFieldId()
+<i>627</i>&nbsp;    {
+<i>628</i>&nbsp;        // Superclass handles hoisting logic
+<b class="fc"><i>629</i>&nbsp;        int id = super.getFieldId();</b>
+<b class="fc"><i>630</i>&nbsp;        if (id == SymbolTable.UNKNOWN_SYMBOL_ID)</b>
+<i>631</i>&nbsp;        {
+<b class="fc"><i>632</i>&nbsp;            String fieldname = getRawFieldName();</b>
+<b class="fc"><i>633</i>&nbsp;            if (fieldname != null)</b>
+<i>634</i>&nbsp;            {
+<b class="fc"><i>635</i>&nbsp;                SymbolTable symbols = getSymbolTable();</b>
+<b class="fc"><i>636</i>&nbsp;                id = symbols.findSymbol(fieldname);</b>
+<i>637</i>&nbsp;            }
+<i>638</i>&nbsp;        }
+<b class="fc"><i>639</i>&nbsp;        return id;</b>
+<i>640</i>&nbsp;    }
+<i>641</i>&nbsp;
+<i>642</i>&nbsp;    @Override
+<i>643</i>&nbsp;    public final String getFieldName()
+<i>644</i>&nbsp;    {
+<i>645</i>&nbsp;        // Superclass handles hoisting logic
+<b class="fc"><i>646</i>&nbsp;        String text = getRawFieldName();</b>
+<b class="fc"><i>647</i>&nbsp;        if (text == null)</b>
+<i>648</i>&nbsp;        {
+<b class="fc"><i>649</i>&nbsp;            int id = getFieldId();</b>
+<b class="fc"><i>650</i>&nbsp;            if (id != SymbolTable.UNKNOWN_SYMBOL_ID)</b>
+<i>651</i>&nbsp;            {
+<b class="fc"><i>652</i>&nbsp;                SymbolTable symbols = getSymbolTable();</b>
+<b class="fc"><i>653</i>&nbsp;                text = symbols.findKnownSymbol(id);</b>
+<b class="fc"><i>654</i>&nbsp;                if (text == null)</b>
+<i>655</i>&nbsp;                {
+<b class="fc"><i>656</i>&nbsp;                    throw new UnknownSymbolException(id);</b>
+<i>657</i>&nbsp;                }
+<i>658</i>&nbsp;            }
+<i>659</i>&nbsp;        }
+<b class="fc"><i>660</i>&nbsp;        return text;</b>
+<i>661</i>&nbsp;    }
+<i>662</i>&nbsp;
+<i>663</i>&nbsp;    @Override
+<i>664</i>&nbsp;    public SymbolToken getFieldNameSymbol()
+<i>665</i>&nbsp;    {
+<b class="fc"><i>666</i>&nbsp;        SymbolToken sym = super.getFieldNameSymbol();</b>
+<b class="fc"><i>667</i>&nbsp;        if (sym != null)</b>
+<i>668</i>&nbsp;        {
+<b class="fc"><i>669</i>&nbsp;            sym = _Private_Utils.localize(getSymbolTable(), sym);</b>
+<i>670</i>&nbsp;        }
+<b class="fc"><i>671</i>&nbsp;        return sym;</b>
+<i>672</i>&nbsp;    }
+<i>673</i>&nbsp;
+<i>674</i>&nbsp;    public SymbolToken symbolValue()
+<i>675</i>&nbsp;    {
+<b class="fc"><i>676</i>&nbsp;        if (_value_type != IonType.SYMBOL) throw new IllegalStateException(&quot;Unexpected value type: &quot; + _value_type);</b>
+<b class="fc"><i>677</i>&nbsp;        if (_v.isNull()) return null;</b>
+<i>678</i>&nbsp;
+<b class="fc"><i>679</i>&nbsp;        load_or_cast_cached_value(AS_TYPE.string_value);</b>
+<b class="fc"><i>680</i>&nbsp;        if (! _v.hasValueOfType(AS_TYPE.int_value))</b>
+<i>681</i>&nbsp;        {
+<b class="fc"><i>682</i>&nbsp;            cast_cached_value(AS_TYPE.int_value);</b>
+<i>683</i>&nbsp;        }
+<i>684</i>&nbsp;
+<b class="fc"><i>685</i>&nbsp;        String text = _v.getString();</b>
+<b class="fc"><i>686</i>&nbsp;        int    sid  = _v.getInt();</b>
+<b class="fc"><i>687</i>&nbsp;        return new SymbolTokenImpl(text, sid);</b>
+<i>688</i>&nbsp;    }
+<i>689</i>&nbsp;
+<i>690</i>&nbsp;    //
+<i>691</i>&nbsp;    // blob and clob support routines
+<i>692</i>&nbsp;    //
+<i>693</i>&nbsp;
+<i>694</i>&nbsp;    public int byteSize()
+<i>695</i>&nbsp;    {
+<b class="fc"><i>696</i>&nbsp;        ensureLob(&quot;byteSize&quot;);</b>
+<i>697</i>&nbsp;
+<i>698</i>&nbsp;        long len;
+<i>699</i>&nbsp;        try {
+<b class="fc"><i>700</i>&nbsp;            len = load_lob_contents();</b>
+<i>701</i>&nbsp;        }
+<b class="nc"><i>702</i>&nbsp;        catch (IOException e) {</b>
+<b class="nc"><i>703</i>&nbsp;            throw new IonException(e);</b>
+<b class="fc"><i>704</i>&nbsp;        }</b>
+<b class="fc"><i>705</i>&nbsp;        if (len &lt; 0 || len &gt; Integer.MAX_VALUE) {</b>
+<b class="nc"><i>706</i>&nbsp;            load_lob_length_overflow_error(len);</b>
+<i>707</i>&nbsp;        }
+<b class="fc"><i>708</i>&nbsp;        return (int)len;</b>
+<i>709</i>&nbsp;    }
+<i>710</i>&nbsp;    private final void load_lob_length_overflow_error(long len) {
+<b class="nc"><i>711</i>&nbsp;        String message = &quot;Size overflow: &quot;</b>
+<b class="nc"><i>712</i>&nbsp;            + _value_type.toString()</b>
+<i>713</i>&nbsp;            + &quot; size (&quot;
+<b class="nc"><i>714</i>&nbsp;            + Long.toString(len)</b>
+<i>715</i>&nbsp;            + &quot;) exceeds int &quot;;
+<b class="nc"><i>716</i>&nbsp;        throw new IonException(message);</b>
+<i>717</i>&nbsp;    }
+<i>718</i>&nbsp;
+<i>719</i>&nbsp;    private final long load_lob_save_point() throws IOException
+<i>720</i>&nbsp;    {
+<b class="fc"><i>721</i>&nbsp;        if (_lob_loaded == LOB_STATE.EMPTY) {</b>
+<b class="fc"><i>722</i>&nbsp;            assert(!_current_value_save_point_loaded &amp;&amp; _current_value_save_point.isClear());</b>
+<b class="fc"><i>723</i>&nbsp;            _scanner.save_point_start(_current_value_save_point);</b>
+<b class="fc"><i>724</i>&nbsp;            _scanner.skip_over_lob(_lob_token, _current_value_save_point);</b>
+<b class="fc"><i>725</i>&nbsp;            _current_value_save_point_loaded = true;</b>
+<b class="fc"><i>726</i>&nbsp;            tokenValueIsFinished();</b>
+<b class="fc"><i>727</i>&nbsp;            _lob_loaded = LOB_STATE.READ;</b>
+<i>728</i>&nbsp;        }
+<i>729</i>&nbsp;
+<b class="fc"><i>730</i>&nbsp;        long size = _current_value_save_point.length();</b>
+<b class="fc"><i>731</i>&nbsp;        return size;</b>
+<i>732</i>&nbsp;    }
+<i>733</i>&nbsp;    private int load_lob_contents() throws IOException
+<i>734</i>&nbsp;    {
+<b class="fc"><i>735</i>&nbsp;        if (_lob_loaded == LOB_STATE.EMPTY) {</b>
+<b class="fc"><i>736</i>&nbsp;            load_lob_save_point();</b>
+<i>737</i>&nbsp;        }
+<b class="fc"><i>738</i>&nbsp;        if (_lob_loaded == LOB_STATE.READ) {</b>
+<b class="fc"><i>739</i>&nbsp;            long raw_size =  _current_value_save_point.length();</b>
+<b class="fc"><i>740</i>&nbsp;            if (raw_size &lt; 0 || raw_size &gt; Integer.MAX_VALUE) {</b>
+<b class="nc"><i>741</i>&nbsp;                load_lob_length_overflow_error(raw_size);</b>
+<i>742</i>&nbsp;            }
+<b class="fc"><i>743</i>&nbsp;            _lob_bytes = new byte[(int)raw_size];</b>
+<i>744</i>&nbsp;
+<i>745</i>&nbsp;            try {
+<b class="fc"><i>746</i>&nbsp;                assert(_current_value_save_point_loaded &amp;&amp; _current_value_save_point.isDefined());</b>
+<b class="fc"><i>747</i>&nbsp;                _scanner.save_point_activate(_current_value_save_point);</b>
+<b class="fc"><i>748</i>&nbsp;                _lob_actual_len = readBytes(_lob_bytes, 0, (int)raw_size);</b>
+<b class="fc"><i>749</i>&nbsp;                _scanner.save_point_deactivate(_current_value_save_point);</b>
+<i>750</i>&nbsp;            }
+<b class="nc"><i>751</i>&nbsp;            catch (IOException e) {</b>
+<b class="nc"><i>752</i>&nbsp;                throw new IonException(e);</b>
+<b class="fc"><i>753</i>&nbsp;            }</b>
+<b class="fc"><i>754</i>&nbsp;            assert(_lob_actual_len &lt;= raw_size);</b>
+<i>755</i>&nbsp;
+<b class="fc"><i>756</i>&nbsp;            _lob_loaded = LOB_STATE.FINISHED;</b>
+<i>757</i>&nbsp;        }
+<b class="fc"><i>758</i>&nbsp;        assert( _lob_loaded == LOB_STATE.FINISHED);</b>
+<b class="fc"><i>759</i>&nbsp;        return _lob_actual_len;</b>
+<i>760</i>&nbsp;    }
+<i>761</i>&nbsp;
+<i>762</i>&nbsp;    private void ensureLob(String apiName)
+<i>763</i>&nbsp;    {
+<b class="fc"><i>764</i>&nbsp;        switch (_value_type) {</b>
+<i>765</i>&nbsp;            case CLOB:
+<i>766</i>&nbsp;            case BLOB:
+<b class="fc"><i>767</i>&nbsp;                break;</b>
+<i>768</i>&nbsp;            default:
+<i>769</i>&nbsp;            {
+<b class="nc"><i>770</i>&nbsp;                String msg =</b>
+<i>771</i>&nbsp;                    apiName +
+<i>772</i>&nbsp;                    &quot; is only valid if the reader is on a lob value, not a &quot; +
+<i>773</i>&nbsp;                    _value_type +
+<i>774</i>&nbsp;                    &quot; value&quot;;
+<b class="nc"><i>775</i>&nbsp;                throw new IllegalStateException(msg);</b>
+<i>776</i>&nbsp;            }
+<i>777</i>&nbsp;        }
+<b class="fc"><i>778</i>&nbsp;    }</b>
+<i>779</i>&nbsp;
+<i>780</i>&nbsp;    public byte[] newBytes()
+<i>781</i>&nbsp;    {
+<b class="fc"><i>782</i>&nbsp;        ensureLob(&quot;newBytes&quot;);</b>
+<i>783</i>&nbsp;
+<i>784</i>&nbsp;        byte[] bytes;
+<i>785</i>&nbsp;        int    len;
+<i>786</i>&nbsp;
+<i>787</i>&nbsp;        try {
+<b class="fc"><i>788</i>&nbsp;            len = load_lob_contents();</b>
+<i>789</i>&nbsp;        }
+<b class="nc"><i>790</i>&nbsp;        catch (IOException e) {</b>
+<b class="nc"><i>791</i>&nbsp;            throw new IonException(e);</b>
+<b class="fc"><i>792</i>&nbsp;        }</b>
+<b class="fc"><i>793</i>&nbsp;        bytes = new byte[len];</b>
+<b class="fc"><i>794</i>&nbsp;        System.arraycopy(_lob_bytes, 0, bytes, 0, len);</b>
+<i>795</i>&nbsp;
+<b class="fc"><i>796</i>&nbsp;        return bytes;</b>
+<i>797</i>&nbsp;    }
+<i>798</i>&nbsp;
+<i>799</i>&nbsp;    public int getBytes(byte[] buffer, int offset, int len)
+<i>800</i>&nbsp;    {
+<b class="nc"><i>801</i>&nbsp;        ensureLob(&quot;getBytes&quot;);</b>
+<i>802</i>&nbsp;
+<b class="nc"><i>803</i>&nbsp;        if (_lob_loaded == LOB_STATE.READ) {</b>
+<i>804</i>&nbsp;            // if we&#39;ve already read through the lob
+<i>805</i>&nbsp;            // (and therefore have it&#39;s length and the
+<i>806</i>&nbsp;            // bytes cached in our input buffer) anyway
+<i>807</i>&nbsp;            // just finish the job of converting the
+<i>808</i>&nbsp;            // data to something useful
+<i>809</i>&nbsp;            try {
+<b class="nc"><i>810</i>&nbsp;                load_lob_contents();</b>
+<i>811</i>&nbsp;            }
+<b class="nc"><i>812</i>&nbsp;            catch (IOException e) {</b>
+<b class="nc"><i>813</i>&nbsp;                throw new IonException(e);</b>
+<b class="nc"><i>814</i>&nbsp;            }</b>
+<i>815</i>&nbsp;        }
+<i>816</i>&nbsp;
+<i>817</i>&nbsp;        int len_read;
+<b class="nc"><i>818</i>&nbsp;        if (_lob_loaded == LOB_STATE.FINISHED) {</b>
+<i>819</i>&nbsp;            // if we have loaded data, just copy it
+<b class="nc"><i>820</i>&nbsp;            len_read = len;</b>
+<b class="nc"><i>821</i>&nbsp;            if (len_read &gt; _lob_actual_len) {</b>
+<b class="nc"><i>822</i>&nbsp;                len_read = _lob_actual_len;</b>
+<i>823</i>&nbsp;            }
+<b class="nc"><i>824</i>&nbsp;            System.arraycopy(_lob_bytes, 0, buffer, offset, len_read);</b>
+<i>825</i>&nbsp;        }
+<i>826</i>&nbsp;        else {
+<i>827</i>&nbsp;            // if we haven&#39;t loaded it, the we also haven&#39;t
+<i>828</i>&nbsp;            // even read over the data - so we&#39;ll read if from
+<i>829</i>&nbsp;            // the input source
+<i>830</i>&nbsp;            try {
+<b class="nc"><i>831</i>&nbsp;                if (_current_value_save_point_loaded &amp;&amp; _lob_value_position &gt; 0) {</b>
+<b class="nc"><i>832</i>&nbsp;                    if (_current_value_save_point.isActive()) {</b>
+<b class="nc"><i>833</i>&nbsp;                        _scanner.save_point_deactivate(_current_value_save_point);</b>
+<i>834</i>&nbsp;                    }
+<b class="nc"><i>835</i>&nbsp;                    _scanner.save_point_activate(_current_value_save_point);</b>
+<b class="nc"><i>836</i>&nbsp;                    _lob_value_position = 0;</b>
+<i>837</i>&nbsp;                }
+<i>838</i>&nbsp;
+<b class="nc"><i>839</i>&nbsp;                assert(_current_value_save_point_loaded &amp;&amp; _current_value_save_point.isDefined());</b>
+<b class="nc"><i>840</i>&nbsp;                _scanner.save_point_activate(_current_value_save_point);</b>
+<i>841</i>&nbsp;
+<b class="nc"><i>842</i>&nbsp;                len_read = readBytes(buffer, offset, len);</b>
+<b class="nc"><i>843</i>&nbsp;                _scanner.save_point_deactivate(_current_value_save_point);</b>
+<i>844</i>&nbsp;
+<i>845</i>&nbsp;            }
+<b class="nc"><i>846</i>&nbsp;            catch (IOException e) {</b>
+<b class="nc"><i>847</i>&nbsp;                throw new IonException(e);</b>
+<b class="nc"><i>848</i>&nbsp;            }</b>
+<i>849</i>&nbsp;        }
+<b class="nc"><i>850</i>&nbsp;        return len_read;</b>
+<i>851</i>&nbsp;    }
+<i>852</i>&nbsp;
+<i>853</i>&nbsp;    private int readBytes(byte[] buffer, int offset, int len)
+<i>854</i>&nbsp;        throws IOException
+<i>855</i>&nbsp;    {
+<b class="fc"><i>856</i>&nbsp;        int starting_offset = offset;</b>
+<b class="fc"><i>857</i>&nbsp;        int c = -1;</b>
+<i>858</i>&nbsp;
+<b class="fc"><i>859</i>&nbsp;        switch (_lob_token) {</b>
+<i>860</i>&nbsp;        // BLOB
+<i>861</i>&nbsp;        case IonTokenConstsX.TOKEN_OPEN_DOUBLE_BRACE:
+<b class="fc"><i>862</i>&nbsp;            while (len-- &gt; 0) {</b>
+<b class="fc"><i>863</i>&nbsp;                c = _scanner.read_base64_byte();</b>
+<b class="fc"><i>864</i>&nbsp;                if (c &lt; 0) break;</b>
+<b class="fc"><i>865</i>&nbsp;                buffer[offset++] = (byte)c;</b>
+<i>866</i>&nbsp;            }
+<i>867</i>&nbsp;            break;
+<i>868</i>&nbsp;        // CLOB
+<i>869</i>&nbsp;        case IonTokenConstsX.TOKEN_STRING_DOUBLE_QUOTE:
+<b class="fc"><i>870</i>&nbsp;            while (len-- &gt; 0) {</b>
+<b class="fc"><i>871</i>&nbsp;                c = _scanner.read_double_quoted_char(true);</b>
+<b class="fc"><i>872</i>&nbsp;                if (c &lt; 0) {</b>
+<b class="fc"><i>873</i>&nbsp;                    if (c == CharacterSequence.CHAR_SEQ_ESCAPED_NEWLINE_SEQUENCE_1</b>
+<i>874</i>&nbsp;                     || c == CharacterSequence.CHAR_SEQ_ESCAPED_NEWLINE_SEQUENCE_2
+<i>875</i>&nbsp;                     || c == CharacterSequence.CHAR_SEQ_ESCAPED_NEWLINE_SEQUENCE_3
+<i>876</i>&nbsp;                    ) {
+<b class="nc"><i>877</i>&nbsp;                        continue;</b>
+<i>878</i>&nbsp;                    }
+<i>879</i>&nbsp;                    break;
+<i>880</i>&nbsp;                }
+<b class="fc"><i>881</i>&nbsp;                assert(c &lt;= UNSIGNED_BYTE_MAX_VALUE);</b>
+<b class="fc"><i>882</i>&nbsp;                buffer[offset++] = (byte)c;</b>
+<i>883</i>&nbsp;            }
+<i>884</i>&nbsp;            break;
+<i>885</i>&nbsp;        // CLOB
+<i>886</i>&nbsp;        case IonTokenConstsX.TOKEN_STRING_TRIPLE_QUOTE:
+<b class="fc"><i>887</i>&nbsp;            while (len-- &gt; 0) {</b>
+<b class="fc"><i>888</i>&nbsp;                c = _scanner.read_triple_quoted_char(true);</b>
+<b class="fc"><i>889</i>&nbsp;                if (c &lt; 0) {</b>
+<b class="fc"><i>890</i>&nbsp;                    if (c == CharacterSequence.CHAR_SEQ_ESCAPED_NEWLINE_SEQUENCE_1</b>
+<i>891</i>&nbsp;                     || c == CharacterSequence.CHAR_SEQ_ESCAPED_NEWLINE_SEQUENCE_2
+<i>892</i>&nbsp;                     || c == CharacterSequence.CHAR_SEQ_ESCAPED_NEWLINE_SEQUENCE_3
+<i>893</i>&nbsp;                     || c == CharacterSequence.CHAR_SEQ_STRING_NON_TERMINATOR
+<i>894</i>&nbsp;                    ) {
+<b class="fc"><i>895</i>&nbsp;                        continue;</b>
+<i>896</i>&nbsp;                    }
+<b class="fc"><i>897</i>&nbsp;                    if (c == CharacterSequence.CHAR_SEQ_NEWLINE_SEQUENCE_1</b>
+<i>898</i>&nbsp;                     || c == CharacterSequence.CHAR_SEQ_NEWLINE_SEQUENCE_2
+<i>899</i>&nbsp;                     || c == CharacterSequence.CHAR_SEQ_NEWLINE_SEQUENCE_3
+<i>900</i>&nbsp;                    ) {
+<b class="fc"><i>901</i>&nbsp;                        buffer[offset++] = (byte)&#39;\n&#39;;</b>
+<b class="fc"><i>902</i>&nbsp;                        continue;</b>
+<i>903</i>&nbsp;                    }
+<i>904</i>&nbsp;                    break;
+<i>905</i>&nbsp;                }
+<b class="fc"><i>906</i>&nbsp;                assert(c &gt;= 0 &amp;&amp; c &lt;= UNSIGNED_BYTE_MAX_VALUE);</b>
+<b class="fc"><i>907</i>&nbsp;                buffer[offset++] = (byte)c;</b>
+<i>908</i>&nbsp;            }
+<i>909</i>&nbsp;            break;
+<i>910</i>&nbsp;        default:
+<b class="nc"><i>911</i>&nbsp;            String message = &quot;invalid type [&quot;+_value_type.toString()+&quot;] for lob handling&quot;;</b>
+<b class="nc"><i>912</i>&nbsp;            throw new IonReaderTextTokenException(message);</b>
+<i>913</i>&nbsp;        }
+<b class="fc"><i>914</i>&nbsp;        if (c == -1) {</b>
+<b class="fc"><i>915</i>&nbsp;            _scanner.tokenIsFinished();</b>
+<i>916</i>&nbsp;        }
+<b class="fc"><i>917</i>&nbsp;        int read = offset - starting_offset;</b>
+<b class="fc"><i>918</i>&nbsp;        _lob_value_position += read;   // TODO: is _lob_value_position really needed?</b>
+<b class="fc"><i>919</i>&nbsp;        return read;</b>
+<i>920</i>&nbsp;    }
+<i>921</i>&nbsp;
+<i>922</i>&nbsp;    public IonValue getIonValue(IonSystem sys)
+<i>923</i>&nbsp;    {
+<b class="nc"><i>924</i>&nbsp;        if (isNullValue()) {</b>
+<b class="nc"><i>925</i>&nbsp;            switch (_value_type) {</b>
+<b class="nc"><i>926</i>&nbsp;            case NULL:      return sys.newNull();</b>
+<b class="nc"><i>927</i>&nbsp;            case BOOL:      return sys.newNullBool();</b>
+<b class="nc"><i>928</i>&nbsp;            case INT:       return sys.newNullInt();</b>
+<b class="nc"><i>929</i>&nbsp;            case FLOAT:     return sys.newNullFloat();</b>
+<b class="nc"><i>930</i>&nbsp;            case DECIMAL:   return sys.newNullDecimal();</b>
+<b class="nc"><i>931</i>&nbsp;            case TIMESTAMP: return sys.newNullTimestamp();</b>
+<b class="nc"><i>932</i>&nbsp;            case SYMBOL:    return sys.newNullSymbol();</b>
+<b class="nc"><i>933</i>&nbsp;            case STRING:    return sys.newNullString();</b>
+<b class="nc"><i>934</i>&nbsp;            case CLOB:      return sys.newNullClob();</b>
+<b class="nc"><i>935</i>&nbsp;            case BLOB:      return sys.newNullBlob();</b>
+<b class="nc"><i>936</i>&nbsp;            case LIST:      return sys.newNullList();</b>
+<b class="nc"><i>937</i>&nbsp;            case SEXP:      return sys.newNullSexp();</b>
+<b class="nc"><i>938</i>&nbsp;            case STRUCT:    return sys.newNullString();</b>
+<i>939</i>&nbsp;            default:
+<b class="nc"><i>940</i>&nbsp;                throw new IonException(&quot;unrecognized type encountered&quot;);</b>
+<i>941</i>&nbsp;            }
+<i>942</i>&nbsp;        }
+<i>943</i>&nbsp;
+<b class="nc"><i>944</i>&nbsp;        switch (_value_type) {</b>
+<b class="nc"><i>945</i>&nbsp;        case NULL:      return sys.newNull();</b>
+<b class="nc"><i>946</i>&nbsp;        case BOOL:      return sys.newBool(booleanValue());</b>
+<b class="nc"><i>947</i>&nbsp;        case INT:       return sys.newInt(longValue());</b>
+<b class="nc"><i>948</i>&nbsp;        case FLOAT:     return sys.newFloat(doubleValue());</b>
+<b class="nc"><i>949</i>&nbsp;        case DECIMAL:   return sys.newDecimal(decimalValue());</b>
+<i>950</i>&nbsp;        case TIMESTAMP:
+<b class="nc"><i>951</i>&nbsp;            IonTimestamp t = sys.newNullTimestamp();</b>
+<b class="nc"><i>952</i>&nbsp;            Timestamp ti = timestampValue();</b>
+<b class="nc"><i>953</i>&nbsp;            t.setValue(ti);</b>
+<b class="nc"><i>954</i>&nbsp;            return t;</b>
+<b class="nc"><i>955</i>&nbsp;        case SYMBOL:    return sys.newSymbol(stringValue());</b>
+<b class="nc"><i>956</i>&nbsp;        case STRING:    return sys.newString(stringValue());</b>
+<i>957</i>&nbsp;        case CLOB:
+<b class="nc"><i>958</i>&nbsp;            IonClob clob = sys.newNullClob();</b>
+<i>959</i>&nbsp;            // FIXME inefficient: both newBytes and setBytes copy the data
+<b class="nc"><i>960</i>&nbsp;            clob.setBytes(newBytes());</b>
+<b class="nc"><i>961</i>&nbsp;            return clob;</b>
+<i>962</i>&nbsp;        case BLOB:
+<b class="nc"><i>963</i>&nbsp;            IonBlob blob = sys.newNullBlob();</b>
+<i>964</i>&nbsp;            // FIXME inefficient: both newBytes and setBytes copy the data
+<b class="nc"><i>965</i>&nbsp;            blob.setBytes(newBytes());</b>
+<b class="nc"><i>966</i>&nbsp;            return blob;</b>
+<i>967</i>&nbsp;        case LIST:
+<b class="nc"><i>968</i>&nbsp;            IonList list = sys.newNullList();</b>
+<b class="nc"><i>969</i>&nbsp;            fillContainerList(sys, list);</b>
+<b class="nc"><i>970</i>&nbsp;            return list;</b>
+<i>971</i>&nbsp;        case SEXP:
+<b class="nc"><i>972</i>&nbsp;            IonSexp sexp = sys.newNullSexp();</b>
+<b class="nc"><i>973</i>&nbsp;            fillContainerList(sys, sexp);</b>
+<b class="nc"><i>974</i>&nbsp;            return sexp;</b>
+<i>975</i>&nbsp;        case STRUCT:
+<b class="nc"><i>976</i>&nbsp;            IonStruct struct = sys.newNullStruct();</b>
+<b class="nc"><i>977</i>&nbsp;            fillContainerStruct(sys, struct);</b>
+<b class="nc"><i>978</i>&nbsp;            return struct;</b>
+<i>979</i>&nbsp;        default:
+<b class="nc"><i>980</i>&nbsp;            throw new IonException(&quot;unrecognized type encountered&quot;);</b>
+<i>981</i>&nbsp;        }
+<i>982</i>&nbsp;    }
+<i>983</i>&nbsp;    private final void fillContainerList(IonSystem sys, IonSequence list) {
+<b class="nc"><i>984</i>&nbsp;        this.stepIn();</b>
+<b class="nc"><i>985</i>&nbsp;        while (this.next() != null) {</b>
+<b class="nc"><i>986</i>&nbsp;            IonValue v = this.getIonValue(sys);</b>
+<b class="nc"><i>987</i>&nbsp;            list.add(v);</b>
+<b class="nc"><i>988</i>&nbsp;        }</b>
+<b class="nc"><i>989</i>&nbsp;        this.stepOut();</b>
+<b class="nc"><i>990</i>&nbsp;    }</b>
+<i>991</i>&nbsp;    private final void fillContainerStruct(IonSystem sys, IonStruct struct) {
+<b class="nc"><i>992</i>&nbsp;        this.stepIn();</b>
+<b class="nc"><i>993</i>&nbsp;        while (this.next() != null) {</b>
+<b class="nc"><i>994</i>&nbsp;            String name = this.getFieldName();</b>
+<b class="nc"><i>995</i>&nbsp;            IonValue v = this.getIonValue(sys);</b>
+<b class="nc"><i>996</i>&nbsp;            struct.add(name, v);</b>
+<b class="nc"><i>997</i>&nbsp;        }</b>
+<b class="nc"><i>998</i>&nbsp;        this.stepOut();</b>
+<b class="nc"><i>999</i>&nbsp;    }</b>
+<i>1000</i>&nbsp;
+<i>1001</i>&nbsp;    // system readers don&#39;t skip any symbol tables
+<i>1002</i>&nbsp;    public SymbolTable pop_passed_symbol_table()
+<i>1003</i>&nbsp;    {
+<b class="fc"><i>1004</i>&nbsp;        return null;</b>
+<i>1005</i>&nbsp;    }
+<i>1006</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

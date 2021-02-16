@@ -1,0 +1,118 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonContext</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl.lite</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonContext (com.amazon.ion.impl.lite)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonContext</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl.lite;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import com.amazon.ion.IonContainer;
+<i>19</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;/**
+<i>22</i>&nbsp; * Provides the parent, system and symbol table definitions that are shared
+<i>23</i>&nbsp; * by one or more hierarchies of IonValues.
+<i>24</i>&nbsp; * &lt;p&gt;
+<i>25</i>&nbsp; * The type of context used by a value depends on its position.
+<i>26</i>&nbsp; * &lt;ul&gt;
+<i>27</i>&nbsp; *   &lt;li&gt;Top-level values have either a {@link TopLevelContext} or an
+<i>28</i>&nbsp; *   {@link IonSystemLite} for a context.
+<i>29</i>&nbsp; *   &lt;li&gt;Non-top-level values have their {@link IonContainer} for a context.
+<i>30</i>&nbsp; *   &lt;li&gt;Datagrams have their {@link IonSystemLite} for a context.
+<i>31</i>&nbsp; * &lt;/ul&gt;
+<i>32</i>&nbsp; * &lt;p&gt;
+<i>33</i>&nbsp; *  Concrete
+<i>34</i>&nbsp; *  contexts simply return the correct values (and
+<i>35</i>&nbsp; *  own them).  Containers return themselves as the
+<i>36</i>&nbsp; *  parent and delegate to their parent for the
+<i>37</i>&nbsp; *  system and symbol table values.  Note that values
+<i>38</i>&nbsp; *  contained directly by a datagram may store a
+<i>39</i>&nbsp; *  symbol table locally as there may be more than
+<i>40</i>&nbsp; *  one symbol table in a datagram.
+<i>41</i>&nbsp; */
+<i>42</i>&nbsp;interface IonContext
+<i>43</i>&nbsp;{
+<i>44</i>&nbsp;    /**
+<i>45</i>&nbsp;     * Return the container of values associated with this context.
+<i>46</i>&nbsp;     * If this context is an {@link IonContainerLite} it returns itself.
+<i>47</i>&nbsp;     *
+<i>48</i>&nbsp;     * @return the container of the value;
+<i>49</i>&nbsp;     *  null for stand-alone top level values.
+<i>50</i>&nbsp;     */
+<i>51</i>&nbsp;    abstract IonContainerLite getContextContainer();
+<i>52</i>&nbsp;
+<i>53</i>&nbsp;    /**
+<i>54</i>&nbsp;     * Get the IonSystem concrete object that created
+<i>55</i>&nbsp;     * the IonValue that is associated with this context.
+<i>56</i>&nbsp;     * Generally this delegates to the parent.
+<i>57</i>&nbsp;     *
+<i>58</i>&nbsp;     * @return not null
+<i>59</i>&nbsp;     */
+<i>60</i>&nbsp;    abstract IonSystemLite getSystem();
+<i>61</i>&nbsp;
+<i>62</i>&nbsp;
+<i>63</i>&nbsp;    /**
+<i>64</i>&nbsp;     * Returns the symbol table that is directly assigned to this context.
+<i>65</i>&nbsp;     * For {@link TopLevelContext} it is the symbol table member.
+<i>66</i>&nbsp;     * For {@link IonContainerLite} and {@link IonSystemLite} it is null.
+<i>67</i>&nbsp;     *
+<i>68</i>&nbsp;     * @return the directly assigned symbol table, with no recursive lookup.
+<i>69</i>&nbsp;     */
+<i>70</i>&nbsp;    abstract SymbolTable getContextSymbolTable();
+<i>71</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

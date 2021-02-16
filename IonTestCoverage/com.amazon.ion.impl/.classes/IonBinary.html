@@ -1,0 +1,3146 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonBinary</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonBinary (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IonBinary</td>
+<td class="coverageStat">
+  <span class="percent">
+    30%
+  </span>
+  <span class="absValue">
+    (12/ 40)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    21%
+  </span>
+  <span class="absValue">
+    (74/ 353)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">IonBinary$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonBinary$BufferManager</td>
+<td class="coverageStat">
+  <span class="percent">
+    28.6%
+  </span>
+  <span class="absValue">
+    (4/ 14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    26.7%
+  </span>
+  <span class="absValue">
+    (12/ 45)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonBinary$PositionMarker</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 8)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonBinary$Reader</td>
+<td class="coverageStat">
+  <span class="percent">
+    7.4%
+  </span>
+  <span class="absValue">
+    (2/ 27)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0.8%
+  </span>
+  <span class="absValue">
+    (3/ 376)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonBinary$Writer</td>
+<td class="coverageStat">
+  <span class="percent">
+    34.2%
+  </span>
+  <span class="absValue">
+    (13/ 38)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    37.8%
+  </span>
+  <span class="absValue">
+    (165/ 437)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonBinary$Writer$lhNode</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 4)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    24.4%
+  </span>
+  <span class="absValue">
+    (31/ 127)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    20.8%
+  </span>
+  <span class="absValue">
+    (254/ 1224)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.impl._Private_IonConstants.BINARY_VERSION_MARKER_SIZE;
+<i>19</i>&nbsp;import static com.amazon.ion.impl._Private_Utils.EMPTY_BYTE_ARRAY;
+<i>20</i>&nbsp;import static com.amazon.ion.impl._Private_Utils.readFully;
+<i>21</i>&nbsp;import static com.amazon.ion.util.IonStreamUtils.isIonBinary;
+<i>22</i>&nbsp;
+<i>23</i>&nbsp;import com.amazon.ion.Decimal;
+<i>24</i>&nbsp;import com.amazon.ion.IonException;
+<i>25</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>26</i>&nbsp;import com.amazon.ion.SymbolToken;
+<i>27</i>&nbsp;import com.amazon.ion.Timestamp;
+<i>28</i>&nbsp;import com.amazon.ion.Timestamp.Precision;
+<i>29</i>&nbsp;import com.amazon.ion.UnexpectedEofException;
+<i>30</i>&nbsp;import com.amazon.ion.impl._Private_IonConstants.HighNibble;
+<i>31</i>&nbsp;import com.amazon.ion.util.IonTextUtils;
+<i>32</i>&nbsp;import java.io.IOException;
+<i>33</i>&nbsp;import java.io.InputStream;
+<i>34</i>&nbsp;import java.io.OutputStream;
+<i>35</i>&nbsp;import java.io.PushbackReader;
+<i>36</i>&nbsp;import java.math.BigDecimal;
+<i>37</i>&nbsp;import java.math.BigInteger;
+<i>38</i>&nbsp;import java.math.MathContext;
+<i>39</i>&nbsp;import java.util.ArrayList;
+<i>40</i>&nbsp;import java.util.Stack;
+<i>41</i>&nbsp;
+<b class="fc"><i>42</i>&nbsp;final class IonBinary</b>
+<i>43</i>&nbsp;{
+<b class="fc"><i>44</i>&nbsp;    static boolean debugValidation = false;</b>
+<i>45</i>&nbsp;
+<b class="fc"><i>46</i>&nbsp;    private static final BigInteger MAX_LONG_VALUE = new BigInteger(Long.toString(Long.MAX_VALUE));</b>
+<i>47</i>&nbsp;    private static final int SIZE_OF_LONG = 8;
+<i>48</i>&nbsp;
+<i>49</i>&nbsp;    final static int _ib_TOKEN_LEN           =    1;
+<i>50</i>&nbsp;    final static int _ib_VAR_INT32_LEN_MAX   =    5; // 31 bits (java limit) / 7 bits per byte =  5 bytes
+<i>51</i>&nbsp;    final static int _ib_VAR_INT64_LEN_MAX   =   10; // 63 bits (java limit) / 7 bits per byte = 10 bytes
+<i>52</i>&nbsp;    final static int _ib_INT64_LEN_MAX       =    8;
+<i>53</i>&nbsp;    final static int _ib_FLOAT64_LEN         =    8;
+<i>54</i>&nbsp;
+<b class="fc"><i>55</i>&nbsp;    private static final Double DOUBLE_POS_ZERO = Double.valueOf(0.0);</b>
+<i>56</i>&nbsp;
+<b class="fc"><i>57</i>&nbsp;    static final int ZERO_DECIMAL_TYPEDESC =</b>
+<b class="fc"><i>58</i>&nbsp;        _Private_IonConstants.makeTypeDescriptor(_Private_IonConstants.tidDecimal,</b>
+<i>59</i>&nbsp;            _Private_IonConstants.lnNumericZero);
+<i>60</i>&nbsp;
+<b class="fc"><i>61</i>&nbsp;    static final int NULL_DECIMAL_TYPEDESC =</b>
+<b class="fc"><i>62</i>&nbsp;        _Private_IonConstants.makeTypeDescriptor(_Private_IonConstants.tidDecimal,</b>
+<i>63</i>&nbsp;            _Private_IonConstants.lnIsNullAtom);
+<i>64</i>&nbsp;
+<b class="nc"><i>65</i>&nbsp;    private IonBinary() { }</b>
+<i>66</i>&nbsp;
+<i>67</i>&nbsp;
+<i>68</i>&nbsp;    /**
+<i>69</i>&nbsp;     * Verifies that a reader starts with a valid Ion cookie, throwing an
+<i>70</i>&nbsp;     * exception if it does not.
+<i>71</i>&nbsp;     *
+<i>72</i>&nbsp;     * @param reader must not be null.
+<i>73</i>&nbsp;     * @throws IonException if there&#39;s a problem reading the cookie, or if the
+<i>74</i>&nbsp;     * data does not start with {@link _Private_IonConstants#BINARY_VERSION_MARKER_1_0}.
+<i>75</i>&nbsp;     */
+<i>76</i>&nbsp;    public static void verifyBinaryVersionMarker(Reader reader)
+<i>77</i>&nbsp;        throws IonException
+<i>78</i>&nbsp;    {
+<i>79</i>&nbsp;        try
+<i>80</i>&nbsp;        {
+<b class="nc"><i>81</i>&nbsp;            int pos = reader.position();</b>
+<i>82</i>&nbsp;            //reader.sync();
+<i>83</i>&nbsp;            //reader.setPosition(0);
+<b class="nc"><i>84</i>&nbsp;            byte[] bvm = new byte[BINARY_VERSION_MARKER_SIZE];</b>
+<b class="nc"><i>85</i>&nbsp;            int len = readFully(reader, bvm);</b>
+<b class="nc"><i>86</i>&nbsp;            if (len &lt; BINARY_VERSION_MARKER_SIZE)</b>
+<i>87</i>&nbsp;            {
+<b class="nc"><i>88</i>&nbsp;                String message =</b>
+<i>89</i>&nbsp;                    &quot;Binary data is too short: at least &quot; +
+<i>90</i>&nbsp;                    BINARY_VERSION_MARKER_SIZE +
+<i>91</i>&nbsp;                    &quot; bytes are required, but only &quot; + len + &quot; were found.&quot;;
+<b class="nc"><i>92</i>&nbsp;                throw new IonException(message);</b>
+<i>93</i>&nbsp;
+<i>94</i>&nbsp;            }
+<i>95</i>&nbsp;
+<b class="nc"><i>96</i>&nbsp;            if (! isIonBinary(bvm))</b>
+<i>97</i>&nbsp;            {
+<b class="nc"><i>98</i>&nbsp;                StringBuilder buf = new StringBuilder();</b>
+<b class="nc"><i>99</i>&nbsp;                buf.append(&quot;Binary data has unrecognized header&quot;);</b>
+<b class="nc"><i>100</i>&nbsp;                for (int i = 0; i &lt; bvm.length; i++)</b>
+<i>101</i>&nbsp;                {
+<b class="nc"><i>102</i>&nbsp;                    int b = bvm[i] &amp; 0xFF;</b>
+<b class="nc"><i>103</i>&nbsp;                    buf.append(&quot; 0x&quot;);</b>
+<b class="nc"><i>104</i>&nbsp;                    buf.append(Integer.toHexString(b).toUpperCase());</b>
+<i>105</i>&nbsp;                }
+<b class="nc"><i>106</i>&nbsp;                throw new IonException(buf.toString());</b>
+<i>107</i>&nbsp;            }
+<i>108</i>&nbsp;
+<i>109</i>&nbsp;            //reader.setPosition(0); // cas 19 apr 2008
+<b class="nc"><i>110</i>&nbsp;            reader.setPosition(pos); // cas 5 may 2009 :)</b>
+<i>111</i>&nbsp;        }
+<b class="nc"><i>112</i>&nbsp;        catch (IOException e)</b>
+<i>113</i>&nbsp;        {
+<b class="nc"><i>114</i>&nbsp;            throw new IonException(e);</b>
+<b class="nc"><i>115</i>&nbsp;        }</b>
+<b class="nc"><i>116</i>&nbsp;    }</b>
+<i>117</i>&nbsp;
+<i>118</i>&nbsp;    /* imported from SimpleByteBuffer.SimpleByteWriter */
+<i>119</i>&nbsp;
+<i>120</i>&nbsp;    static public int writeTypeDescWithLength(OutputStream userstream, int typeid, int lenOfLength, int valueLength) throws IOException
+<i>121</i>&nbsp;    {
+<b class="nc"><i>122</i>&nbsp;        int written_len = 1;</b>
+<i>123</i>&nbsp;
+<b class="nc"><i>124</i>&nbsp;        int td = ((typeid &amp; 0xf) &lt;&lt; 4);</b>
+<b class="nc"><i>125</i>&nbsp;        if (valueLength &gt;= _Private_IonConstants.lnIsVarLen) {</b>
+<b class="nc"><i>126</i>&nbsp;            td |= _Private_IonConstants.lnIsVarLen;</b>
+<b class="nc"><i>127</i>&nbsp;            userstream.write((byte)(td &amp; 0xff));</b>
+<b class="nc"><i>128</i>&nbsp;            written_len += writeVarUInt(userstream, (long)valueLength, lenOfLength, true);</b>
+<i>129</i>&nbsp;        }
+<i>130</i>&nbsp;        else {
+<b class="nc"><i>131</i>&nbsp;            td |= (valueLength &amp; 0xf);</b>
+<b class="nc"><i>132</i>&nbsp;            userstream.write((byte)(td &amp; 0xff));</b>
+<i>133</i>&nbsp;        }
+<b class="nc"><i>134</i>&nbsp;        return written_len;</b>
+<i>135</i>&nbsp;    }
+<i>136</i>&nbsp;
+<i>137</i>&nbsp;    static public int writeTypeDescWithLength(OutputStream userstream, int typeid, int valueLength) throws IOException
+<i>138</i>&nbsp;    {
+<b class="nc"><i>139</i>&nbsp;        int written_len = 1;</b>
+<b class="nc"><i>140</i>&nbsp;        int td = ((typeid &amp; 0xf) &lt;&lt; 4);</b>
+<i>141</i>&nbsp;
+<b class="nc"><i>142</i>&nbsp;        if (valueLength &gt;= _Private_IonConstants.lnIsVarLen) {</b>
+<b class="nc"><i>143</i>&nbsp;            td |= _Private_IonConstants.lnIsVarLen;</b>
+<b class="nc"><i>144</i>&nbsp;            userstream.write((byte)(td &amp; 0xff));</b>
+<b class="nc"><i>145</i>&nbsp;            int lenOfLength = IonBinary.lenVarUInt(valueLength);</b>
+<b class="nc"><i>146</i>&nbsp;            written_len += writeVarUInt(userstream, (long)valueLength, lenOfLength, true);</b>
+<b class="nc"><i>147</i>&nbsp;        }</b>
+<i>148</i>&nbsp;        else {
+<b class="nc"><i>149</i>&nbsp;            td |= (valueLength &amp; 0xf);</b>
+<b class="nc"><i>150</i>&nbsp;            userstream.write((byte)(td &amp; 0xff));</b>
+<i>151</i>&nbsp;        }
+<b class="nc"><i>152</i>&nbsp;        return written_len;</b>
+<i>153</i>&nbsp;    }
+<i>154</i>&nbsp;
+<i>155</i>&nbsp;    static public int writeIonInt(OutputStream userstream, long value, int len) throws IOException
+<i>156</i>&nbsp;    {
+<i>157</i>&nbsp;        // we shouldn&#39;t be writing out 0&#39;s as an Ion int value
+<b class="nc"><i>158</i>&nbsp;        if (value == 0) {</b>
+<b class="nc"><i>159</i>&nbsp;            assert len == 0;</b>
+<b class="nc"><i>160</i>&nbsp;            return len;  // aka 0</b>
+<i>161</i>&nbsp;        }
+<i>162</i>&nbsp;
+<i>163</i>&nbsp;        // figure out how many we have bytes we have to write out
+<b class="nc"><i>164</i>&nbsp;        long mask = 0xffL;</b>
+<b class="nc"><i>165</i>&nbsp;        boolean is_negative = (value &lt; 0);</b>
+<i>166</i>&nbsp;
+<b class="nc"><i>167</i>&nbsp;        assert len == IonBinary.lenIonInt(value);</b>
+<i>168</i>&nbsp;
+<b class="nc"><i>169</i>&nbsp;        if (is_negative) {</b>
+<b class="nc"><i>170</i>&nbsp;            value = -value;</b>
+<i>171</i>&nbsp;            // note for Long.MIN_VALUE the negation returns
+<i>172</i>&nbsp;            // itself as a value, but that&#39;s also the correct
+<i>173</i>&nbsp;            // &quot;positive&quot; value to write out anyway, so it
+<i>174</i>&nbsp;            // all works out
+<i>175</i>&nbsp;        }
+<i>176</i>&nbsp;
+<i>177</i>&nbsp;        // write the rest
+<b class="nc"><i>178</i>&nbsp;        switch (len) {  // we already wrote 1 byte</b>
+<b class="nc"><i>179</i>&nbsp;        case 8: userstream.write((byte)((value &gt;&gt; (8*7)) &amp; mask));</b>
+<b class="nc"><i>180</i>&nbsp;        case 7: userstream.write((byte)((value &gt;&gt; (8*6)) &amp; mask));</b>
+<b class="nc"><i>181</i>&nbsp;        case 6: userstream.write((byte)((value &gt;&gt; (8*5)) &amp; mask));</b>
+<b class="nc"><i>182</i>&nbsp;        case 5: userstream.write((byte)((value &gt;&gt; (8*4)) &amp; mask));</b>
+<b class="nc"><i>183</i>&nbsp;        case 4: userstream.write((byte)((value &gt;&gt; (8*3)) &amp; mask));</b>
+<b class="nc"><i>184</i>&nbsp;        case 3: userstream.write((byte)((value &gt;&gt; (8*2)) &amp; mask));</b>
+<b class="nc"><i>185</i>&nbsp;        case 2: userstream.write((byte)((value &gt;&gt; (8*1)) &amp; mask));</b>
+<b class="nc"><i>186</i>&nbsp;        case 1: userstream.write((byte)(value &amp; mask));</b>
+<i>187</i>&nbsp;        }
+<i>188</i>&nbsp;
+<b class="nc"><i>189</i>&nbsp;        return len;</b>
+<i>190</i>&nbsp;    }
+<i>191</i>&nbsp;
+<i>192</i>&nbsp;    static public int writeVarUInt(OutputStream userstream, long value)
+<i>193</i>&nbsp;        throws IOException
+<i>194</i>&nbsp;    {
+<b class="fc"><i>195</i>&nbsp;        int len = IonBinary.lenVarUInt(value);</b>
+<b class="fc"><i>196</i>&nbsp;        writeVarUInt(userstream, value, len, false);</b>
+<b class="fc"><i>197</i>&nbsp;        return len;</b>
+<i>198</i>&nbsp;    }
+<i>199</i>&nbsp;
+<i>200</i>&nbsp;    static public int writeVarUInt(OutputStream userstream, long value, int len,
+<i>201</i>&nbsp;                                   boolean force_zero_write)
+<i>202</i>&nbsp;        throws IOException
+<i>203</i>&nbsp;    {
+<b class="fc"><i>204</i>&nbsp;        int mask = 0x7F;</b>
+<b class="fc"><i>205</i>&nbsp;        assert len == IonBinary.lenVarUInt(value);</b>
+<b class="fc"><i>206</i>&nbsp;        assert value &gt;= 0;</b>
+<i>207</i>&nbsp;
+<b class="fc"><i>208</i>&nbsp;        switch (len - 1) {</b>
+<b class="nc"><i>209</i>&nbsp;        case 9: userstream.write((byte)((value &gt;&gt; (7*9)) &amp; mask));</b>
+<b class="nc"><i>210</i>&nbsp;        case 8: userstream.write((byte)((value &gt;&gt; (7*8)) &amp; mask));</b>
+<b class="nc"><i>211</i>&nbsp;        case 7: userstream.write((byte)((value &gt;&gt; (7*7)) &amp; mask));</b>
+<b class="nc"><i>212</i>&nbsp;        case 6: userstream.write((byte)((value &gt;&gt; (7*6)) &amp; mask));</b>
+<b class="nc"><i>213</i>&nbsp;        case 5: userstream.write((byte)((value &gt;&gt; (7*5)) &amp; mask));</b>
+<b class="nc"><i>214</i>&nbsp;        case 4: userstream.write((byte)((value &gt;&gt; (7*4)) &amp; mask));</b>
+<b class="nc"><i>215</i>&nbsp;        case 3: userstream.write((byte)((value &gt;&gt; (7*3)) &amp; mask));</b>
+<b class="fc"><i>216</i>&nbsp;        case 2: userstream.write((byte)((value &gt;&gt; (7*2)) &amp; mask));</b>
+<b class="fc"><i>217</i>&nbsp;        case 1: userstream.write((byte)((value &gt;&gt; (7*1)) &amp; mask));</b>
+<b class="fc"><i>218</i>&nbsp;        case 0: userstream.write((byte)((value &amp; mask) | 0x80L));</b>
+<b class="fc"><i>219</i>&nbsp;                break;</b>
+<i>220</i>&nbsp;        case -1: // or len == 0
+<b class="nc"><i>221</i>&nbsp;            if (force_zero_write) {</b>
+<b class="nc"><i>222</i>&nbsp;                userstream.write((byte)0x80);</b>
+<b class="nc"><i>223</i>&nbsp;                assert len == 1;</b>
+<i>224</i>&nbsp;            }
+<i>225</i>&nbsp;            else {
+<b class="nc"><i>226</i>&nbsp;                assert len == 0;</b>
+<i>227</i>&nbsp;            }
+<i>228</i>&nbsp;            break;
+<i>229</i>&nbsp;        }
+<b class="fc"><i>230</i>&nbsp;        return len;</b>
+<i>231</i>&nbsp;    }
+<i>232</i>&nbsp;
+<i>233</i>&nbsp;    static public int writeString(OutputStream userstream, String value)
+<i>234</i>&nbsp;        throws IOException
+<i>235</i>&nbsp;    {
+<b class="fc"><i>236</i>&nbsp;        int len = 0;</b>
+<b class="fc"><i>237</i>&nbsp;        for (int ii=0; ii&lt;value.length(); ii++) {</b>
+<b class="fc"><i>238</i>&nbsp;            int c = value.charAt(ii);</b>
+<b class="fc"><i>239</i>&nbsp;            if (c &lt; 128) {</b>
+<b class="nc"><i>240</i>&nbsp;                userstream.write((byte)c);</b>
+<b class="nc"><i>241</i>&nbsp;                ++len;</b>
+<b class="nc"><i>242</i>&nbsp;                continue;</b>
+<i>243</i>&nbsp;            }
+<i>244</i>&nbsp;            // multi-byte utf8
+<b class="fc"><i>245</i>&nbsp;            if (c &gt;= 0xD800 &amp;&amp; c &lt;= 0xDFFF) {</b>
+<b class="fc"><i>246</i>&nbsp;                if (_Private_IonConstants.isHighSurrogate(c)) {</b>
+<i>247</i>&nbsp;                    // houston we have a high surrogate (let&#39;s hope it has a partner
+<b class="fc"><i>248</i>&nbsp;                    if (++ii &gt;= value.length()) {</b>
+<b class="fc"><i>249</i>&nbsp;                        throw new IllegalArgumentException(&quot;invalid string, unpaired high surrogate character&quot;);</b>
+<i>250</i>&nbsp;                    }
+<b class="fc"><i>251</i>&nbsp;                    int c2 = value.charAt(ii);</b>
+<b class="fc"><i>252</i>&nbsp;                    if (!_Private_IonConstants.isLowSurrogate(c2)) {</b>
+<b class="nc"><i>253</i>&nbsp;                        throw new IllegalArgumentException(&quot;invalid string, unpaired high surrogate character&quot;);</b>
+<i>254</i>&nbsp;                    }
+<b class="fc"><i>255</i>&nbsp;                    c = _Private_IonConstants.makeUnicodeScalar(c, c2);</b>
+<b class="fc"><i>256</i>&nbsp;                }</b>
+<b class="fc"><i>257</i>&nbsp;                else if (_Private_IonConstants.isLowSurrogate(c)) {</b>
+<i>258</i>&nbsp;                    // it&#39;s a loner low surrogate - that&#39;s an error
+<b class="fc"><i>259</i>&nbsp;                    throw new IllegalArgumentException(&quot;invalid string, unpaired low surrogate character&quot;);</b>
+<i>260</i>&nbsp;                }
+<i>261</i>&nbsp;            }
+<i>262</i>&nbsp;
+<b class="fc"><i>263</i>&nbsp;            for (c = makeUTF8IntFromScalar(c); (c &amp; 0xffffff00) != 0; ++len) {</b>
+<b class="fc"><i>264</i>&nbsp;                userstream.write((byte)(c &amp; 0xff));</b>
+<b class="fc"><i>265</i>&nbsp;                c = c &gt;&gt;&gt; 8;</b>
+<i>266</i>&nbsp;            }
+<i>267</i>&nbsp;        }
+<b class="fc"><i>268</i>&nbsp;        return len;</b>
+<i>269</i>&nbsp;    }
+<i>270</i>&nbsp;
+<i>271</i>&nbsp;    // TODO: move this to IonConstants or IonUTF8
+<i>272</i>&nbsp;    static final public int makeUTF8IntFromScalar(int c) throws IOException
+<i>273</i>&nbsp;    {
+<i>274</i>&nbsp;        // TO DO: check this encoding, it is from:
+<i>275</i>&nbsp;        //      http://en.wikipedia.org/wiki/UTF-8
+<i>276</i>&nbsp;        // we probably should use some sort of Java supported
+<i>277</i>&nbsp;        // library for this.  this class might be of interest:
+<i>278</i>&nbsp;        //     CharsetDecoder(Charset cs, float averageCharsPerByte, float maxCharsPerByte)
+<i>279</i>&nbsp;        // in: java.nio.charset.CharsetDecoder
+<i>280</i>&nbsp;
+<b class="fc"><i>281</i>&nbsp;        int value = 0;</b>
+<i>282</i>&nbsp;
+<i>283</i>&nbsp;        // first the quick, easy and common case - ascii
+<b class="fc"><i>284</i>&nbsp;        if (c &lt; 0x80) {</b>
+<b class="nc"><i>285</i>&nbsp;            value = (0xff &amp; c );</b>
+<i>286</i>&nbsp;        }
+<b class="fc"><i>287</i>&nbsp;        else if (c &lt; 0x800) {</b>
+<i>288</i>&nbsp;            // 2 bytes characters from 0x000080 to 0x0007FF
+<b class="nc"><i>289</i>&nbsp;            value  = ( 0xff &amp; (0xC0 | (c &gt;&gt; 6)        ) );</b>
+<b class="nc"><i>290</i>&nbsp;            value |= ( 0xff &amp; (0x80 | (c       &amp; 0x3F)) ) &lt;&lt;  8;</b>
+<i>291</i>&nbsp;        }
+<b class="fc"><i>292</i>&nbsp;        else if (c &lt; 0x10000) {</b>
+<i>293</i>&nbsp;            // 3 byte characters from 0x800 to 0xFFFF
+<i>294</i>&nbsp;            // but only 0x800...0xD7FF and 0xE000...0xFFFF are valid
+<b class="fc"><i>295</i>&nbsp;            if (c &gt; 0xD7FF &amp;&amp; c &lt; 0xE000) {</b>
+<b class="nc"><i>296</i>&nbsp;                throwUTF8Exception();</b>
+<i>297</i>&nbsp;            }
+<b class="fc"><i>298</i>&nbsp;            value  = ( 0xff &amp; (0xE0 |  (c &gt;&gt; 12)       ) );</b>
+<b class="fc"><i>299</i>&nbsp;            value |= ( 0xff &amp; (0x80 | ((c &gt;&gt;  6) &amp; 0x3F)) ) &lt;&lt;  8;</b>
+<b class="fc"><i>300</i>&nbsp;            value |= ( 0xff &amp; (0x80 |  (c        &amp; 0x3F)) ) &lt;&lt; 16;</b>
+<i>301</i>&nbsp;
+<i>302</i>&nbsp;        }
+<b class="fc"><i>303</i>&nbsp;        else if (c &lt;= 0x10FFFF) {</b>
+<i>304</i>&nbsp;            // 4 byte characters 0x010000 to 0x10FFFF
+<i>305</i>&nbsp;            // these are are valid
+<b class="fc"><i>306</i>&nbsp;            value  = ( 0xff &amp; (0xF0 |  (c &gt;&gt; 18)) );</b>
+<b class="fc"><i>307</i>&nbsp;            value |= ( 0xff &amp; (0x80 | ((c &gt;&gt; 12) &amp; 0x3F)) ) &lt;&lt;  8;</b>
+<b class="fc"><i>308</i>&nbsp;            value |= ( 0xff &amp; (0x80 | ((c &gt;&gt;  6) &amp; 0x3F)) ) &lt;&lt; 16;</b>
+<b class="fc"><i>309</i>&nbsp;            value |= ( 0xff &amp; (0x80 |  (c        &amp; 0x3F)) ) &lt;&lt; 24;</b>
+<i>310</i>&nbsp;        }
+<i>311</i>&nbsp;        else {
+<b class="nc"><i>312</i>&nbsp;            throwUTF8Exception();</b>
+<i>313</i>&nbsp;        }
+<b class="fc"><i>314</i>&nbsp;        return value;</b>
+<i>315</i>&nbsp;    }
+<i>316</i>&nbsp;    static void throwUTF8Exception() throws IOException
+<i>317</i>&nbsp;    {
+<b class="nc"><i>318</i>&nbsp;        throw new IOException(&quot;Invalid UTF-8 character encountered&quot;);</b>
+<i>319</i>&nbsp;    }
+<i>320</i>&nbsp;
+<i>321</i>&nbsp;
+<i>322</i>&nbsp;    public static class BufferManager
+<i>323</i>&nbsp;    {
+<i>324</i>&nbsp;        BlockedBuffer    _buf;
+<i>325</i>&nbsp;        IonBinary.Reader _reader;
+<i>326</i>&nbsp;        IonBinary.Writer _writer;
+<i>327</i>&nbsp;
+<b class="fc"><i>328</i>&nbsp;        public BufferManager() {</b>
+<b class="fc"><i>329</i>&nbsp;            _buf = new BlockedBuffer();</b>
+<b class="fc"><i>330</i>&nbsp;            this.openReader();</b>
+<b class="fc"><i>331</i>&nbsp;            this.openWriter();</b>
+<b class="fc"><i>332</i>&nbsp;        }</b>
+<b class="nc"><i>333</i>&nbsp;        public BufferManager(BlockedBuffer buf) {</b>
+<b class="nc"><i>334</i>&nbsp;            _buf = buf;</b>
+<b class="nc"><i>335</i>&nbsp;            this.openReader();</b>
+<b class="nc"><i>336</i>&nbsp;            this.openWriter();</b>
+<b class="nc"><i>337</i>&nbsp;        }</b>
+<i>338</i>&nbsp;
+<i>339</i>&nbsp;        /**
+<i>340</i>&nbsp;         * Creates a new buffer containing the entire content of an
+<i>341</i>&nbsp;         * {@link InputStream}.
+<i>342</i>&nbsp;         *
+<i>343</i>&nbsp;         * @param bytestream a stream interface the byte image to buffer
+<i>344</i>&nbsp;         *
+<i>345</i>&nbsp;         * @throws IonException wrapping any {@link IOException}s thrown by the
+<i>346</i>&nbsp;         * stream.
+<i>347</i>&nbsp;         */
+<i>348</i>&nbsp;        public BufferManager(InputStream bytestream)
+<i>349</i>&nbsp;        {
+<b class="nc"><i>350</i>&nbsp;            this(); // this will create a fresh buffer</b>
+<i>351</i>&nbsp;                    // as well as a reader and writer
+<i>352</i>&nbsp;
+<i>353</i>&nbsp;            // now we move the data from the input stream to the buffer
+<i>354</i>&nbsp;            // more or less as fast as we can.  I am (perhaps foolishly)
+<i>355</i>&nbsp;            // assuming the &quot;available()&quot; is a useful size.
+<i>356</i>&nbsp;            try
+<i>357</i>&nbsp;            {
+<b class="nc"><i>358</i>&nbsp;                _writer.write(bytestream);</b>
+<i>359</i>&nbsp;            }
+<b class="nc"><i>360</i>&nbsp;            catch (IOException e)</b>
+<i>361</i>&nbsp;            {
+<b class="nc"><i>362</i>&nbsp;                throw new IonException(e);</b>
+<b class="nc"><i>363</i>&nbsp;            }</b>
+<b class="nc"><i>364</i>&nbsp;        }</b>
+<i>365</i>&nbsp;
+<i>366</i>&nbsp;        /**
+<i>367</i>&nbsp;         * Creates a new buffer containing the entire content of an
+<i>368</i>&nbsp;         * {@link InputStream}.
+<i>369</i>&nbsp;         *
+<i>370</i>&nbsp;         * @param bytestream a stream interface the byte image to buffer
+<i>371</i>&nbsp;         *
+<i>372</i>&nbsp;         * @throws IonException wrapping any {@link IOException}s thrown by the
+<i>373</i>&nbsp;         * stream.
+<i>374</i>&nbsp;         */
+<i>375</i>&nbsp;        public BufferManager(InputStream bytestream, int len)
+<i>376</i>&nbsp;        {
+<b class="nc"><i>377</i>&nbsp;            this(); // this will create a fresh buffer</b>
+<i>378</i>&nbsp;                    // as well as a reader and writer
+<i>379</i>&nbsp;
+<i>380</i>&nbsp;            // now we move the data from the input stream to the buffer
+<i>381</i>&nbsp;            // more or less as fast as we can.  I am (perhaps foolishly)
+<i>382</i>&nbsp;            // assuming the &quot;available()&quot; is a useful size.
+<i>383</i>&nbsp;            try
+<i>384</i>&nbsp;            {
+<b class="nc"><i>385</i>&nbsp;                _writer.write(bytestream, len);</b>
+<i>386</i>&nbsp;            }
+<b class="nc"><i>387</i>&nbsp;            catch (IOException e)</b>
+<i>388</i>&nbsp;            {
+<b class="nc"><i>389</i>&nbsp;                throw new IonException(e);</b>
+<b class="nc"><i>390</i>&nbsp;            }</b>
+<b class="nc"><i>391</i>&nbsp;        }</b>
+<i>392</i>&nbsp;
+<i>393</i>&nbsp;        @Override
+<i>394</i>&nbsp;        public BufferManager clone() throws CloneNotSupportedException
+<i>395</i>&nbsp;        {
+<b class="nc"><i>396</i>&nbsp;            BlockedBuffer buffer_clone = this._buf.clone();</b>
+<b class="nc"><i>397</i>&nbsp;            BufferManager clone = new BufferManager(buffer_clone);</b>
+<b class="nc"><i>398</i>&nbsp;            return clone;</b>
+<i>399</i>&nbsp;        }
+<i>400</i>&nbsp;
+<i>401</i>&nbsp;        public IonBinary.Reader openReader() {
+<b class="fc"><i>402</i>&nbsp;            if (_reader == null) {</b>
+<b class="fc"><i>403</i>&nbsp;                _reader = new IonBinary.Reader(_buf);</b>
+<i>404</i>&nbsp;            }
+<b class="fc"><i>405</i>&nbsp;            return _reader;</b>
+<i>406</i>&nbsp;        }
+<i>407</i>&nbsp;        public IonBinary.Writer openWriter() {
+<b class="fc"><i>408</i>&nbsp;            if (_writer == null) {</b>
+<b class="fc"><i>409</i>&nbsp;                _writer = new IonBinary.Writer(_buf);</b>
+<i>410</i>&nbsp;            }
+<b class="fc"><i>411</i>&nbsp;            return _writer;</b>
+<i>412</i>&nbsp;        }
+<i>413</i>&nbsp;
+<b class="fc"><i>414</i>&nbsp;        public BlockedBuffer    buffer() { return _buf; }</b>
+<b class="nc"><i>415</i>&nbsp;        public IonBinary.Reader reader() { return _reader; }</b>
+<b class="nc"><i>416</i>&nbsp;        public IonBinary.Writer writer() { return _writer; }</b>
+<i>417</i>&nbsp;
+<i>418</i>&nbsp;        public IonBinary.Reader reader(int pos) throws IOException
+<i>419</i>&nbsp;        {
+<b class="nc"><i>420</i>&nbsp;            _reader.setPosition(pos);</b>
+<b class="nc"><i>421</i>&nbsp;            return _reader;</b>
+<i>422</i>&nbsp;        }
+<i>423</i>&nbsp;        public IonBinary.Writer writer(int pos) throws IOException
+<i>424</i>&nbsp;        {
+<b class="nc"><i>425</i>&nbsp;            _writer.setPosition(pos);</b>
+<b class="nc"><i>426</i>&nbsp;            return _writer;</b>
+<i>427</i>&nbsp;        }
+<i>428</i>&nbsp;        public static BufferManager makeReadManager(BlockedBuffer buf) {
+<b class="nc"><i>429</i>&nbsp;            BufferManager bufmngr = new BufferManager(buf);</b>
+<b class="nc"><i>430</i>&nbsp;            bufmngr.openReader();</b>
+<b class="nc"><i>431</i>&nbsp;            return bufmngr;</b>
+<i>432</i>&nbsp;        }
+<i>433</i>&nbsp;        public static BufferManager makeReadWriteManager(BlockedBuffer buf) {
+<b class="nc"><i>434</i>&nbsp;            BufferManager bufmngr = new BufferManager(buf);</b>
+<b class="nc"><i>435</i>&nbsp;            bufmngr.openReader();</b>
+<b class="nc"><i>436</i>&nbsp;            bufmngr.openWriter();</b>
+<b class="nc"><i>437</i>&nbsp;            return bufmngr;</b>
+<i>438</i>&nbsp;        }
+<i>439</i>&nbsp;    }
+<i>440</i>&nbsp;
+<i>441</i>&nbsp;    /**
+<i>442</i>&nbsp;     * Variable-length, high-bit-terminating integer, 7 data bits per byte.
+<i>443</i>&nbsp;     */
+<i>444</i>&nbsp;    public static int lenVarUInt(long longVal) {
+<b class="fc"><i>445</i>&nbsp;        assert longVal &gt;= 0;</b>
+<b class="fc"><i>446</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 1))) return 1;  // 7  bits</b>
+<b class="fc"><i>447</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 2))) return 2;  // 14 bits</b>
+<b class="fc"><i>448</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 3))) return 3;  // 21 bits</b>
+<b class="nc"><i>449</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 4))) return 4;  // 28 bits</b>
+<b class="nc"><i>450</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 5))) return 5;  // 35 bits</b>
+<b class="nc"><i>451</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 6))) return 6;  // 42 bits</b>
+<b class="nc"><i>452</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 7))) return 7;  // 49 bits</b>
+<b class="nc"><i>453</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 8))) return 8;  // 56 bits</b>
+<b class="nc"><i>454</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 9))) return 9;  // 63 bits</b>
+<b class="nc"><i>455</i>&nbsp;        return 10;</b>
+<i>456</i>&nbsp;    }
+<i>457</i>&nbsp;
+<i>458</i>&nbsp;    // TODO maybe add lenVarInt(int) to micro-optimize, or?
+<i>459</i>&nbsp;
+<i>460</i>&nbsp;    public static int lenVarInt(long longVal) {
+<b class="nc"><i>461</i>&nbsp;        if (longVal == 0) {</b>
+<b class="nc"><i>462</i>&nbsp;            return 0;</b>
+<i>463</i>&nbsp;        }
+<b class="nc"><i>464</i>&nbsp;        if (longVal &lt;  0) longVal = -longVal;</b>
+<b class="nc"><i>465</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 1 - 1))) return 1;  // 6  bits</b>
+<b class="nc"><i>466</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 2 - 1))) return 2;  // 13 bits</b>
+<b class="nc"><i>467</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 3 - 1))) return 3;  // 20 bits</b>
+<b class="nc"><i>468</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 4 - 1))) return 4;  // 27 bits</b>
+<b class="nc"><i>469</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 5 - 1))) return 5;  // 34 bits</b>
+<b class="nc"><i>470</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 6 - 1))) return 6;  // 41 bits</b>
+<b class="nc"><i>471</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 7 - 1))) return 7;  // 48 bits</b>
+<b class="nc"><i>472</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 8 - 1))) return 8;  // 55 bits</b>
+<b class="nc"><i>473</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (7 * 9 - 1))) return 9;  // 62 bits</b>
+<b class="nc"><i>474</i>&nbsp;        return 10;</b>
+<i>475</i>&nbsp;    }
+<i>476</i>&nbsp;
+<i>477</i>&nbsp;    /**
+<i>478</i>&nbsp;     * @return zero if input is zero
+<i>479</i>&nbsp;     */
+<i>480</i>&nbsp;    public static int lenUInt(long longVal) {
+<b class="nc"><i>481</i>&nbsp;        if (longVal == 0) {</b>
+<b class="nc"><i>482</i>&nbsp;            return 0;</b>
+<i>483</i>&nbsp;        }
+<b class="nc"><i>484</i>&nbsp;        if (longVal &lt; 0) {</b>
+<b class="nc"><i>485</i>&nbsp;            throw new BlockedBuffer.BlockedBufferException(&quot;fatal signed long where unsigned was promised&quot;);</b>
+<i>486</i>&nbsp;        }
+<b class="nc"><i>487</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 1))) return 1;  // 8  bits</b>
+<b class="nc"><i>488</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 2))) return 2;  // 16 bits</b>
+<b class="nc"><i>489</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 3))) return 3;  // 24 bits</b>
+<b class="nc"><i>490</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 4))) return 4;  // 32 bits</b>
+<b class="nc"><i>491</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 5))) return 5;  // 40 bits</b>
+<b class="nc"><i>492</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 6))) return 6;  // 48 bits</b>
+<b class="nc"><i>493</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 7))) return 7;  // 56 bits</b>
+<b class="nc"><i>494</i>&nbsp;        return 8;</b>
+<i>495</i>&nbsp;    }
+<i>496</i>&nbsp;
+<i>497</i>&nbsp;    public static int lenUInt(BigInteger bigVal)
+<i>498</i>&nbsp;    {
+<b class="fc"><i>499</i>&nbsp;        if (bigVal.signum() &lt; 0) {</b>
+<b class="nc"><i>500</i>&nbsp;            throw new IllegalArgumentException(&quot;lenUInt expects a non-negative a value&quot;);</b>
+<i>501</i>&nbsp;        }
+<b class="fc"><i>502</i>&nbsp;        final int bits = bigVal.bitLength();</b>
+<i>503</i>&nbsp;        // determine the number of octets needed to represent this bit pattern
+<i>504</i>&nbsp;        // (div 8)
+<b class="fc"><i>505</i>&nbsp;        int bytes = bits &gt;&gt; 3;</b>
+<i>506</i>&nbsp;        // if we have a bit more than what can fit in an octet, we need to add
+<i>507</i>&nbsp;        // an extra octet (mod 8)
+<b class="fc"><i>508</i>&nbsp;        if ((bits &amp; 0x7) != 0)</b>
+<i>509</i>&nbsp;        {
+<b class="fc"><i>510</i>&nbsp;            bytes++;</b>
+<i>511</i>&nbsp;        }
+<b class="fc"><i>512</i>&nbsp;        return bytes;</b>
+<i>513</i>&nbsp;    }
+<i>514</i>&nbsp;
+<i>515</i>&nbsp;    // TODO maybe add lenInt(int) to micro-optimize, or?
+<i>516</i>&nbsp;
+<i>517</i>&nbsp;    public static int lenInt(long longVal) {
+<b class="nc"><i>518</i>&nbsp;        if (longVal != 0) {</b>
+<b class="nc"><i>519</i>&nbsp;            return 0;</b>
+<i>520</i>&nbsp;        }
+<b class="nc"><i>521</i>&nbsp;        if (longVal &lt; 0) longVal = -longVal;</b>
+<b class="nc"><i>522</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 1 - 1))) return 1;   // 7  bits</b>
+<b class="nc"><i>523</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 2 - 1))) return 2;   // 15 bits</b>
+<b class="nc"><i>524</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 3 - 1))) return 3;   // 23 bits</b>
+<b class="nc"><i>525</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 4 - 1))) return 4;   // 31 bits</b>
+<b class="nc"><i>526</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 5 - 1))) return 5;   // 39 bits</b>
+<b class="nc"><i>527</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 6 - 1))) return 6;   // 47 bits</b>
+<b class="nc"><i>528</i>&nbsp;        if (longVal &lt; (1L &lt;&lt; (8 * 7 - 1))) return 7;   // 55 bits</b>
+<b class="nc"><i>529</i>&nbsp;        if (longVal == Long.MIN_VALUE) return 9;</b>
+<b class="nc"><i>530</i>&nbsp;        return 8;</b>
+<i>531</i>&nbsp;    }
+<i>532</i>&nbsp;
+<i>533</i>&nbsp;    public static int lenInt(BigInteger bi, boolean force_zero_writes)
+<i>534</i>&nbsp;    {
+<b class="nc"><i>535</i>&nbsp;        int len = bi.abs().bitLength() + 1; // add 1 for the sign bit (which must always be present)</b>
+<b class="nc"><i>536</i>&nbsp;        int bytelen = 0;</b>
+<i>537</i>&nbsp;
+<b class="nc"><i>538</i>&nbsp;        switch (bi.signum()) {</b>
+<i>539</i>&nbsp;        case 0:
+<b class="nc"><i>540</i>&nbsp;            bytelen = force_zero_writes ? 1 : 0;</b>
+<b class="nc"><i>541</i>&nbsp;            break;</b>
+<i>542</i>&nbsp;        case 1:
+<i>543</i>&nbsp;        case -1:
+<b class="nc"><i>544</i>&nbsp;            bytelen = ((len-1) / 8) + 1;</b>
+<i>545</i>&nbsp;            break;
+<i>546</i>&nbsp;        }
+<i>547</i>&nbsp;
+<b class="nc"><i>548</i>&nbsp;        return bytelen;</b>
+<i>549</i>&nbsp;    }
+<i>550</i>&nbsp;
+<i>551</i>&nbsp;    public static int lenIonInt(long v) {
+<b class="nc"><i>552</i>&nbsp;        if (v &lt; 0) {</b>
+<i>553</i>&nbsp;            // note that for Long.MIN_VALUE (0x8000000000000000) the negative
+<i>554</i>&nbsp;            //      is the same, but that&#39;s also the bit pattern we need to
+<i>555</i>&nbsp;            //      write out, but the UInt method won&#39;t like it, so we just
+<i>556</i>&nbsp;            //      return then value that we actually know.
+<b class="nc"><i>557</i>&nbsp;            if (v == Long.MIN_VALUE) return SIZE_OF_LONG;</b>
+<b class="nc"><i>558</i>&nbsp;            return IonBinary.lenUInt(-v);</b>
+<i>559</i>&nbsp;        }
+<b class="nc"><i>560</i>&nbsp;        else if (v &gt; 0) {</b>
+<b class="nc"><i>561</i>&nbsp;            return IonBinary.lenUInt(v);</b>
+<i>562</i>&nbsp;        }
+<b class="nc"><i>563</i>&nbsp;        return 0; // CAS UPDATE, was 1</b>
+<i>564</i>&nbsp;    }
+<i>565</i>&nbsp;
+<i>566</i>&nbsp;    public static int lenIonInt(BigInteger v)
+<i>567</i>&nbsp;    {
+<b class="fc"><i>568</i>&nbsp;        if (v.signum() &lt; 0)</b>
+<i>569</i>&nbsp;        {
+<b class="nc"><i>570</i>&nbsp;            v = v.negate();</b>
+<i>571</i>&nbsp;        }
+<b class="fc"><i>572</i>&nbsp;        int len = lenUInt(v);</b>
+<b class="fc"><i>573</i>&nbsp;        return len;</b>
+<i>574</i>&nbsp;    }
+<i>575</i>&nbsp;
+<i>576</i>&nbsp;    /**
+<i>577</i>&nbsp;     * The size of length value when short lengths are recorded in the
+<i>578</i>&nbsp;     * typedesc low-nibble.
+<i>579</i>&nbsp;     * @param valuelen
+<i>580</i>&nbsp;     * @return zero if valuelen &lt; 14
+<i>581</i>&nbsp;     */
+<i>582</i>&nbsp;    public static int lenLenFieldWithOptionalNibble(int valuelen) {
+<b class="nc"><i>583</i>&nbsp;        if (valuelen &lt; _Private_IonConstants.lnIsVarLen) {</b>
+<b class="nc"><i>584</i>&nbsp;            return 0;</b>
+<i>585</i>&nbsp;        }
+<b class="nc"><i>586</i>&nbsp;        return lenVarUInt(valuelen);</b>
+<i>587</i>&nbsp;    }
+<i>588</i>&nbsp;
+<i>589</i>&nbsp;    public static int lenTypeDescWithAppropriateLenField(int type, int valuelen)
+<i>590</i>&nbsp;    {
+<b class="nc"><i>591</i>&nbsp;        switch (type) {</b>
+<i>592</i>&nbsp;        case _Private_IonConstants.tidNull: // null(0)
+<i>593</i>&nbsp;        case _Private_IonConstants.tidBoolean: // boolean(1)
+<b class="nc"><i>594</i>&nbsp;            return _Private_IonConstants.BB_TOKEN_LEN;</b>
+<i>595</i>&nbsp;
+<i>596</i>&nbsp;        case _Private_IonConstants.tidPosInt: // 2
+<i>597</i>&nbsp;        case _Private_IonConstants.tidNegInt: // 3
+<i>598</i>&nbsp;        case _Private_IonConstants.tidFloat: // float(4)
+<i>599</i>&nbsp;        case _Private_IonConstants.tidDecimal: // decimal(5)
+<i>600</i>&nbsp;        case _Private_IonConstants.tidTimestamp: // timestamp(6)
+<i>601</i>&nbsp;        case _Private_IonConstants.tidSymbol: // symbol(7)
+<i>602</i>&nbsp;        case _Private_IonConstants.tidString: // string (8)
+<i>603</i>&nbsp;        case _Private_IonConstants.tidClob: // clob(9)
+<i>604</i>&nbsp;        case _Private_IonConstants.tidBlob: // blob(10)
+<i>605</i>&nbsp;        case _Private_IonConstants.tidList:   // 11        -- cas mar 6 2008, moved containers
+<i>606</i>&nbsp;        case _Private_IonConstants.tidSexp:   // 12        -- up heresince they now use the same
+<i>607</i>&nbsp;        case _Private_IonConstants.tidStruct: // 13        -- length encodings as scalars
+<i>608</i>&nbsp;        case _Private_IonConstants.tidTypedecl: // 14
+<b class="nc"><i>609</i>&nbsp;            if (valuelen &lt; _Private_IonConstants.lnIsVarLen) {</b>
+<b class="nc"><i>610</i>&nbsp;                return _Private_IonConstants.BB_TOKEN_LEN;</b>
+<i>611</i>&nbsp;            }
+<b class="nc"><i>612</i>&nbsp;            return _Private_IonConstants.BB_TOKEN_LEN + lenVarUInt(valuelen);</b>
+<i>613</i>&nbsp;
+<i>614</i>&nbsp;        case _Private_IonConstants.tidUnused: // unused(15)
+<i>615</i>&nbsp;        default:
+<b class="nc"><i>616</i>&nbsp;            throw new IonException(&quot;invalid type&quot;);</b>
+<i>617</i>&nbsp;        }
+<i>618</i>&nbsp;    }
+<i>619</i>&nbsp;
+<i>620</i>&nbsp;    public static int lenIonFloat(double value) {
+<b class="fc"><i>621</i>&nbsp;        if (Double.valueOf(value).equals(DOUBLE_POS_ZERO))</b>
+<i>622</i>&nbsp;        {
+<i>623</i>&nbsp;            // pos zero special case
+<b class="fc"><i>624</i>&nbsp;            return 0;</b>
+<i>625</i>&nbsp;        }
+<i>626</i>&nbsp;
+<i>627</i>&nbsp;        // always 8-bytes for IEEE-754 64-bit
+<b class="fc"><i>628</i>&nbsp;        return _ib_FLOAT64_LEN;</b>
+<i>629</i>&nbsp;    }
+<i>630</i>&nbsp;
+<i>631</i>&nbsp;    /**
+<i>632</i>&nbsp;     * Would this value have a zero length-nibble?  That is: is it 0d0 ?
+<i>633</i>&nbsp;     */
+<i>634</i>&nbsp;    public static boolean isNibbleZero(BigDecimal bd)
+<i>635</i>&nbsp;    {
+<b class="fc"><i>636</i>&nbsp;        if (Decimal.isNegativeZero(bd)) return false;</b>
+<b class="fc"><i>637</i>&nbsp;        if (bd.signum() != 0) return false;</b>
+<b class="fc"><i>638</i>&nbsp;        int scale = bd.scale();</b>
+<b class="fc"><i>639</i>&nbsp;        return (scale == 0);</b>
+<i>640</i>&nbsp;    }
+<i>641</i>&nbsp;
+<i>642</i>&nbsp;    /**
+<i>643</i>&nbsp;     * @param bd must not be null.
+<i>644</i>&nbsp;     */
+<i>645</i>&nbsp;    public static int lenIonDecimal(BigDecimal bd)
+<i>646</i>&nbsp;    {
+<i>647</i>&nbsp;        // first check for the special cases of null
+<i>648</i>&nbsp;        // and 0d0 which are encoded in the nibble
+<b class="nc"><i>649</i>&nbsp;        if (bd == null) return 0;</b>
+<b class="nc"><i>650</i>&nbsp;        if (isNibbleZero(bd)) return 0;</b>
+<i>651</i>&nbsp;
+<i>652</i>&nbsp;        // otherwise do this the hard way
+<b class="nc"><i>653</i>&nbsp;        BigInteger mantissa = bd.unscaledValue();</b>
+<i>654</i>&nbsp;
+<i>655</i>&nbsp;        // negative zero mantissa must be written, positive zero does not
+<b class="nc"><i>656</i>&nbsp;        boolean forceMantissa = Decimal.isNegativeZero(bd);</b>
+<b class="nc"><i>657</i>&nbsp;        int mantissaByteCount = lenInt(mantissa, forceMantissa);</b>
+<i>658</i>&nbsp;
+<i>659</i>&nbsp;        // We really need the length of the exponent (-scale) but in our
+<i>660</i>&nbsp;        // representation the length is the same regardless of sign.
+<b class="nc"><i>661</i>&nbsp;        int scale = bd.scale();</b>
+<b class="nc"><i>662</i>&nbsp;        int exponentByteCount = lenVarInt(scale);</b>
+<i>663</i>&nbsp;
+<i>664</i>&nbsp;        // Exponent is always at least one byte.
+<b class="nc"><i>665</i>&nbsp;        if (exponentByteCount == 0) exponentByteCount = 1;</b>
+<i>666</i>&nbsp;
+<b class="nc"><i>667</i>&nbsp;        return exponentByteCount + mantissaByteCount;</b>
+<i>668</i>&nbsp;    }
+<i>669</i>&nbsp;
+<i>670</i>&nbsp;
+<i>671</i>&nbsp;    /**
+<i>672</i>&nbsp;     * this method computes the output length of this timestamp value
+<i>673</i>&nbsp;     * in the Ion binary format.  It does not include the length of
+<i>674</i>&nbsp;     * the typedesc byte that preceeds the actual value.  The output
+<i>675</i>&nbsp;     * length of a null value is 0, as a result this this.
+<i>676</i>&nbsp;     * @param di may be null
+<i>677</i>&nbsp;     */
+<i>678</i>&nbsp;    public static int lenIonTimestamp(Timestamp di)
+<i>679</i>&nbsp;    {
+<b class="nc"><i>680</i>&nbsp;        if (di == null) return 0;</b>
+<i>681</i>&nbsp;
+<b class="nc"><i>682</i>&nbsp;        int len = 0;</b>
+<b class="nc"><i>683</i>&nbsp;        switch (di.getPrecision()) {</b>
+<i>684</i>&nbsp;        case FRACTION:
+<i>685</i>&nbsp;        case SECOND:
+<i>686</i>&nbsp;        {
+<b class="nc"><i>687</i>&nbsp;            BigDecimal fraction = di.getFractionalSecond();</b>
+<b class="nc"><i>688</i>&nbsp;            if (fraction != null)</b>
+<i>689</i>&nbsp;            {
+<b class="nc"><i>690</i>&nbsp;                assert fraction.signum() &gt;=0 &amp;&amp; ! fraction.equals(BigDecimal.ZERO)</b>
+<i>691</i>&nbsp;                    : &quot;Bad timestamp fraction: &quot; + fraction;
+<i>692</i>&nbsp;
+<i>693</i>&nbsp;                // Since the fraction is not 0d0, at least one subfield of the
+<i>694</i>&nbsp;                // exponent and mantissa is non-zero, so this will always write at
+<i>695</i>&nbsp;                // least one byte.
+<b class="nc"><i>696</i>&nbsp;                int fracLen = IonBinary.lenIonDecimal(fraction);</b>
+<b class="nc"><i>697</i>&nbsp;                assert fracLen &gt; 0;</b>
+<b class="nc"><i>698</i>&nbsp;                len += fracLen;</b>
+<i>699</i>&nbsp;            }
+<i>700</i>&nbsp;
+<b class="nc"><i>701</i>&nbsp;            len++; // len of seconds &lt; 60</b>
+<i>702</i>&nbsp;        }
+<i>703</i>&nbsp;        case MINUTE:
+<b class="nc"><i>704</i>&nbsp;            len += 2; // len of hour and minutes (both &lt; 127)</b>
+<i>705</i>&nbsp;        case DAY:
+<b class="nc"><i>706</i>&nbsp;            len += 1; // len of month and day (both &lt; 127)</b>
+<i>707</i>&nbsp;        case MONTH:
+<b class="nc"><i>708</i>&nbsp;            len += 1; // len of month and day (both &lt; 127)</b>
+<i>709</i>&nbsp;        case YEAR:
+<b class="nc"><i>710</i>&nbsp;            len += IonBinary.lenVarUInt(di.getZYear());</b>
+<i>711</i>&nbsp;        }
+<b class="nc"><i>712</i>&nbsp;        Integer offset = di.getLocalOffset();</b>
+<b class="nc"><i>713</i>&nbsp;        if (offset == null) {</b>
+<b class="nc"><i>714</i>&nbsp;            len++; // room for the -0 (i.e. offset is &quot;no specified offset&quot;)</b>
+<i>715</i>&nbsp;        }
+<b class="nc"><i>716</i>&nbsp;        else if (offset == 0) {</b>
+<b class="nc"><i>717</i>&nbsp;            len++;</b>
+<i>718</i>&nbsp;        }
+<i>719</i>&nbsp;        else {
+<b class="nc"><i>720</i>&nbsp;            len += IonBinary.lenVarInt(offset.longValue());</b>
+<i>721</i>&nbsp;        }
+<b class="nc"><i>722</i>&nbsp;        return len;</b>
+<i>723</i>&nbsp;    }
+<i>724</i>&nbsp;
+<i>725</i>&nbsp;    /**
+<i>726</i>&nbsp;     * @param v may be null.
+<i>727</i>&nbsp;     * @throws IllegalArgumentException if the text contains bad UTF-16 data.
+<i>728</i>&nbsp;     */
+<i>729</i>&nbsp;    public static int lenIonString(String v)
+<i>730</i>&nbsp;    {
+<b class="nc"><i>731</i>&nbsp;        if (v == null) return 0;</b>
+<b class="nc"><i>732</i>&nbsp;        int len = 0;</b>
+<i>733</i>&nbsp;
+<b class="nc"><i>734</i>&nbsp;        for (int ii=0; ii&lt;v.length(); ii++) {</b>
+<b class="nc"><i>735</i>&nbsp;            int c = v.charAt(ii);</b>
+<i>736</i>&nbsp;
+<i>737</i>&nbsp;            // handle the cheap characters quickly
+<b class="nc"><i>738</i>&nbsp;            if (c &lt; 128) {</b>
+<b class="nc"><i>739</i>&nbsp;                len++;</b>
+<b class="nc"><i>740</i>&nbsp;                continue;</b>
+<i>741</i>&nbsp;            }
+<i>742</i>&nbsp;            // multi-byte utf8
+<b class="nc"><i>743</i>&nbsp;            if (c &gt;= 0xD800 &amp;&amp; c &lt;= 0xDFFF) {</b>
+<i>744</i>&nbsp;                // look for surrogate pairs and merge them (and throw on bad data)
+<b class="nc"><i>745</i>&nbsp;                if (_Private_IonConstants.isHighSurrogate(c)) {</b>
+<b class="nc"><i>746</i>&nbsp;                    ii++;</b>
+<b class="nc"><i>747</i>&nbsp;                    if (ii &gt;= v.length()) {</b>
+<b class="nc"><i>748</i>&nbsp;                        String message =</b>
+<i>749</i>&nbsp;                            &quot;Text ends with unmatched UTF-16 surrogate &quot; +
+<b class="nc"><i>750</i>&nbsp;                            IonTextUtils.printCodePointAsString(c);</b>
+<b class="nc"><i>751</i>&nbsp;                        throw new IllegalArgumentException(message);</b>
+<i>752</i>&nbsp;                    }
+<b class="nc"><i>753</i>&nbsp;                    int c2 = v.charAt(ii);</b>
+<b class="nc"><i>754</i>&nbsp;                    if (!_Private_IonConstants.isLowSurrogate(c2)) {</b>
+<b class="nc"><i>755</i>&nbsp;                        String message =</b>
+<i>756</i>&nbsp;                            &quot;Text contains unmatched UTF-16 high surrogate &quot; +
+<b class="nc"><i>757</i>&nbsp;                            IonTextUtils.printCodePointAsString(c) +</b>
+<i>758</i>&nbsp;                            &quot; at index &quot; + (ii-1);
+<b class="nc"><i>759</i>&nbsp;                        throw new IllegalArgumentException(message);</b>
+<i>760</i>&nbsp;                    }
+<b class="nc"><i>761</i>&nbsp;                    c = _Private_IonConstants.makeUnicodeScalar(c, c2);</b>
+<b class="nc"><i>762</i>&nbsp;                }</b>
+<b class="nc"><i>763</i>&nbsp;                else if (_Private_IonConstants.isLowSurrogate(c)) {</b>
+<b class="nc"><i>764</i>&nbsp;                    String message =</b>
+<i>765</i>&nbsp;                        &quot;Text contains unmatched UTF-16 low surrogate &quot; +
+<b class="nc"><i>766</i>&nbsp;                        IonTextUtils.printCodePointAsString(c) +</b>
+<i>767</i>&nbsp;                        &quot; at index &quot; + ii;
+<b class="nc"><i>768</i>&nbsp;                    throw new IllegalArgumentException(message);</b>
+<i>769</i>&nbsp;                }
+<i>770</i>&nbsp;            }
+<i>771</i>&nbsp;            // no need to check the 0x10FFFF overflow as it is checked in lenUnicodeScalarAsUTF8
+<i>772</i>&nbsp;
+<i>773</i>&nbsp;            // and now figure out how long this &quot;complicated&quot; (non-ascii) character is
+<b class="nc"><i>774</i>&nbsp;            if (c &lt; 0x80) {</b>
+<b class="nc"><i>775</i>&nbsp;                ++len;</b>
+<i>776</i>&nbsp;            }
+<b class="nc"><i>777</i>&nbsp;            else if (c &lt; 0x800) {</b>
+<b class="nc"><i>778</i>&nbsp;                len += 2;</b>
+<i>779</i>&nbsp;            }
+<b class="nc"><i>780</i>&nbsp;            else if (c &lt; 0x10000) {</b>
+<b class="nc"><i>781</i>&nbsp;                len += 3;</b>
+<i>782</i>&nbsp;            }
+<b class="nc"><i>783</i>&nbsp;            else if (c &lt;= 0x10FFFF) { // just about as cheap as &amp; == 0 and checks for some out of range values</b>
+<b class="nc"><i>784</i>&nbsp;                len += 4;</b>
+<i>785</i>&nbsp;            } else {
+<i>786</i>&nbsp;                // TODO how is this possible?
+<b class="nc"><i>787</i>&nbsp;                throw new IllegalArgumentException(&quot;invalid string, illegal Unicode scalar (character) encountered&quot;);</b>
+<i>788</i>&nbsp;            }
+<i>789</i>&nbsp;        }
+<i>790</i>&nbsp;
+<b class="nc"><i>791</i>&nbsp;        return len;</b>
+<i>792</i>&nbsp;    }
+<i>793</i>&nbsp;
+<i>794</i>&nbsp;    public static int lenAnnotationListWithLen(String[] annotations,
+<i>795</i>&nbsp;                                               SymbolTable symbolTable)
+<i>796</i>&nbsp;    {
+<b class="nc"><i>797</i>&nbsp;        int annotationLen = 0;</b>
+<i>798</i>&nbsp;
+<b class="nc"><i>799</i>&nbsp;        if (annotations != null) {</b>
+<i>800</i>&nbsp;            // add up the length of the encoded symbols
+<b class="nc"><i>801</i>&nbsp;            for (int ii=0; ii&lt;annotations.length; ii++) {</b>
+<b class="nc"><i>802</i>&nbsp;                int symid = symbolTable.findSymbol(annotations[ii]);</b>
+<b class="nc"><i>803</i>&nbsp;                assert symid &gt; 0; // TODO amzn/ion-java/issues/12</b>
+<b class="nc"><i>804</i>&nbsp;                annotationLen += IonBinary.lenVarUInt(symid);</b>
+<i>805</i>&nbsp;            }
+<i>806</i>&nbsp;
+<i>807</i>&nbsp;            // now the len of the list
+<b class="nc"><i>808</i>&nbsp;            annotationLen += IonBinary.lenVarUInt(annotationLen);</b>
+<i>809</i>&nbsp;        }
+<b class="nc"><i>810</i>&nbsp;        return annotationLen;</b>
+<i>811</i>&nbsp;    }
+<i>812</i>&nbsp;
+<i>813</i>&nbsp;    public static int lenAnnotationListWithLen(ArrayList&lt;Integer&gt; annotations)
+<i>814</i>&nbsp;    {
+<b class="nc"><i>815</i>&nbsp;        int annotationLen = 0;</b>
+<i>816</i>&nbsp;
+<i>817</i>&nbsp;        // add up the length of the encoded symbols
+<b class="nc"><i>818</i>&nbsp;        for (Integer ii : annotations) {</b>
+<b class="nc"><i>819</i>&nbsp;            int symid = ii.intValue();</b>
+<b class="nc"><i>820</i>&nbsp;            annotationLen += IonBinary.lenVarUInt(symid);</b>
+<b class="nc"><i>821</i>&nbsp;        }</b>
+<i>822</i>&nbsp;
+<i>823</i>&nbsp;        // now the len of the list
+<b class="nc"><i>824</i>&nbsp;        annotationLen += IonBinary.lenVarUInt(annotationLen);</b>
+<i>825</i>&nbsp;
+<b class="nc"><i>826</i>&nbsp;        return annotationLen;</b>
+<i>827</i>&nbsp;    }
+<i>828</i>&nbsp;
+<i>829</i>&nbsp;    public static int lenIonNullWithTypeDesc() {
+<b class="nc"><i>830</i>&nbsp;        return _ib_TOKEN_LEN;</b>
+<i>831</i>&nbsp;    }
+<i>832</i>&nbsp;    public static int lenIonBooleanWithTypeDesc(Boolean v) {
+<b class="nc"><i>833</i>&nbsp;        return _ib_TOKEN_LEN;</b>
+<i>834</i>&nbsp;    }
+<i>835</i>&nbsp;    public static int lenIonIntWithTypeDesc(Long v) {
+<b class="nc"><i>836</i>&nbsp;        int len = 0;</b>
+<b class="nc"><i>837</i>&nbsp;        if (v != null) {</b>
+<b class="nc"><i>838</i>&nbsp;            long vl = v.longValue();</b>
+<b class="nc"><i>839</i>&nbsp;            int vlen = lenIonInt(vl);</b>
+<b class="nc"><i>840</i>&nbsp;            len += vlen;</b>
+<b class="nc"><i>841</i>&nbsp;            len += lenLenFieldWithOptionalNibble(vlen);</b>
+<i>842</i>&nbsp;        }
+<b class="nc"><i>843</i>&nbsp;        return len + _ib_TOKEN_LEN;</b>
+<i>844</i>&nbsp;    }
+<i>845</i>&nbsp;    public static int lenIonFloatWithTypeDesc(Double v) {
+<b class="nc"><i>846</i>&nbsp;        int len = 0;</b>
+<b class="nc"><i>847</i>&nbsp;        if (v != null) {</b>
+<b class="nc"><i>848</i>&nbsp;            int vlen = lenIonFloat(v);</b>
+<b class="nc"><i>849</i>&nbsp;            len += vlen;</b>
+<b class="nc"><i>850</i>&nbsp;            len += lenLenFieldWithOptionalNibble(vlen);</b>
+<i>851</i>&nbsp;        }
+<b class="nc"><i>852</i>&nbsp;        return len + _ib_TOKEN_LEN;</b>
+<i>853</i>&nbsp;    }
+<i>854</i>&nbsp;    public static int lenIonDecimalWithTypeDesc(BigDecimal v) {
+<b class="nc"><i>855</i>&nbsp;        int len = 0;</b>
+<b class="nc"><i>856</i>&nbsp;        if (v != null) {</b>
+<b class="nc"><i>857</i>&nbsp;            int vlen = lenIonDecimal(v);</b>
+<b class="nc"><i>858</i>&nbsp;            len += vlen;</b>
+<b class="nc"><i>859</i>&nbsp;            len += lenLenFieldWithOptionalNibble(vlen);</b>
+<i>860</i>&nbsp;        }
+<b class="nc"><i>861</i>&nbsp;        return len + _ib_TOKEN_LEN;</b>
+<i>862</i>&nbsp;    }
+<i>863</i>&nbsp;    public static int lenIonTimestampWithTypeDesc(Timestamp di) {
+<b class="nc"><i>864</i>&nbsp;        int len = 0;</b>
+<b class="nc"><i>865</i>&nbsp;        if (di != null) {</b>
+<b class="nc"><i>866</i>&nbsp;            int vlen = IonBinary.lenIonTimestamp(di);</b>
+<b class="nc"><i>867</i>&nbsp;            len += vlen;</b>
+<b class="nc"><i>868</i>&nbsp;            len += lenLenFieldWithOptionalNibble(vlen);</b>
+<i>869</i>&nbsp;        }
+<b class="nc"><i>870</i>&nbsp;        return len + _ib_TOKEN_LEN;</b>
+<i>871</i>&nbsp;    }
+<i>872</i>&nbsp;    public static int lenIonStringWithTypeDesc(String v) {
+<b class="nc"><i>873</i>&nbsp;        int len = 0;</b>
+<b class="nc"><i>874</i>&nbsp;        if (v != null) {</b>
+<b class="nc"><i>875</i>&nbsp;            int vlen = lenIonString(v);</b>
+<b class="nc"><i>876</i>&nbsp;            if (vlen &lt; 0) return -1;</b>
+<b class="nc"><i>877</i>&nbsp;            len += vlen;</b>
+<b class="nc"><i>878</i>&nbsp;            len += lenLenFieldWithOptionalNibble(vlen);</b>
+<i>879</i>&nbsp;        }
+<b class="nc"><i>880</i>&nbsp;        return len + _ib_TOKEN_LEN;</b>
+<i>881</i>&nbsp;    }
+<i>882</i>&nbsp;    public static int lenIonClobWithTypeDesc(String v) {
+<b class="nc"><i>883</i>&nbsp;        return lenIonStringWithTypeDesc(v);</b>
+<i>884</i>&nbsp;    }
+<i>885</i>&nbsp;    public static int lenIonBlobWithTypeDesc(byte[] v) {
+<b class="nc"><i>886</i>&nbsp;        int len = 0;</b>
+<b class="nc"><i>887</i>&nbsp;        if (v != null) {</b>
+<b class="nc"><i>888</i>&nbsp;            int vlen = v.length;</b>
+<b class="nc"><i>889</i>&nbsp;            len += vlen;</b>
+<b class="nc"><i>890</i>&nbsp;            len += lenLenFieldWithOptionalNibble(vlen);</b>
+<i>891</i>&nbsp;        }
+<b class="nc"><i>892</i>&nbsp;        return len + _ib_TOKEN_LEN;</b>
+<i>893</i>&nbsp;    }
+<i>894</i>&nbsp;
+<i>895</i>&nbsp;
+<i>896</i>&nbsp;    /** Utility method to convert an unsigned magnitude stored as a long to a {@link BigInteger}. */
+<i>897</i>&nbsp;    public static BigInteger unsignedLongToBigInteger(int signum, long val)
+<i>898</i>&nbsp;    {
+<b class="fc"><i>899</i>&nbsp;        byte[] magnitude = {</b>
+<i>900</i>&nbsp;            (byte) ((val &gt;&gt; 56) &amp; 0xFF),
+<i>901</i>&nbsp;            (byte) ((val &gt;&gt; 48) &amp; 0xFF),
+<i>902</i>&nbsp;            (byte) ((val &gt;&gt; 40) &amp; 0xFF),
+<i>903</i>&nbsp;            (byte) ((val &gt;&gt; 32) &amp; 0xFF),
+<i>904</i>&nbsp;            (byte) ((val &gt;&gt; 24) &amp; 0xFF),
+<i>905</i>&nbsp;            (byte) ((val &gt;&gt; 16) &amp; 0xFF),
+<i>906</i>&nbsp;            (byte) ((val &gt;&gt;  8) &amp; 0xFF),
+<i>907</i>&nbsp;            (byte) (val &amp; 0xFF),
+<i>908</i>&nbsp;        };
+<b class="fc"><i>909</i>&nbsp;        return new BigInteger(signum, magnitude);</b>
+<i>910</i>&nbsp;    }
+<i>911</i>&nbsp;
+<i>912</i>&nbsp;    /**
+<i>913</i>&nbsp;     * Uses {@link InputStream#read(byte[], int, int)} until the entire length is read.
+<i>914</i>&nbsp;     * This method will block until the request is satisfied.
+<i>915</i>&nbsp;     *
+<i>916</i>&nbsp;     * @param in        The stream to read from.
+<i>917</i>&nbsp;     * @param buf       The buffer to read to.
+<i>918</i>&nbsp;     * @param offset    The offset of the buffer to read from.
+<i>919</i>&nbsp;     * @param len       The length of the data to read.
+<i>920</i>&nbsp;     */
+<i>921</i>&nbsp;    public static void readAll(InputStream in, byte[] buf, int offset, int len) throws IOException
+<i>922</i>&nbsp;    {
+<b class="nc"><i>923</i>&nbsp;        int rem = len;</b>
+<b class="nc"><i>924</i>&nbsp;        while (rem &gt; 0)</b>
+<i>925</i>&nbsp;        {
+<b class="nc"><i>926</i>&nbsp;            int amount = in.read(buf, offset, rem);</b>
+<b class="nc"><i>927</i>&nbsp;            if (amount &lt;= 0)</b>
+<i>928</i>&nbsp;            {
+<i>929</i>&nbsp;                // try to throw a useful exception
+<b class="nc"><i>930</i>&nbsp;                if (in instanceof Reader)</b>
+<i>931</i>&nbsp;                {
+<b class="nc"><i>932</i>&nbsp;                    ((Reader) in).throwUnexpectedEOFException();</b>
+<i>933</i>&nbsp;                }
+<i>934</i>&nbsp;                // defer to a plain exception
+<b class="nc"><i>935</i>&nbsp;                throw new IonException(&quot;Unexpected EOF&quot;);</b>
+<i>936</i>&nbsp;            }
+<b class="nc"><i>937</i>&nbsp;            rem -= amount;</b>
+<b class="nc"><i>938</i>&nbsp;            offset += amount;</b>
+<b class="nc"><i>939</i>&nbsp;        }</b>
+<b class="nc"><i>940</i>&nbsp;    }</b>
+<i>941</i>&nbsp;
+<b class="fc"><i>942</i>&nbsp;    public static final class Reader</b>
+<i>943</i>&nbsp;        extends BlockedBuffer.BlockedByteInputStream
+<i>944</i>&nbsp;    {
+<i>945</i>&nbsp;        /**
+<i>946</i>&nbsp;         * @param bb blocked buffer to read from
+<i>947</i>&nbsp;         */
+<i>948</i>&nbsp;        public Reader(BlockedBuffer bb)
+<i>949</i>&nbsp;        {
+<b class="fc"><i>950</i>&nbsp;            super(bb);</b>
+<b class="fc"><i>951</i>&nbsp;        }</b>
+<i>952</i>&nbsp;        /**
+<i>953</i>&nbsp;         * @param bb blocked buffer to read from
+<i>954</i>&nbsp;         * @param pos initial offset to read
+<i>955</i>&nbsp;         */
+<i>956</i>&nbsp;        public Reader(BlockedBuffer bb, int pos)
+<i>957</i>&nbsp;        {
+<b class="nc"><i>958</i>&nbsp;            super(bb, pos);</b>
+<b class="nc"><i>959</i>&nbsp;        }</b>
+<i>960</i>&nbsp;
+<i>961</i>&nbsp;        /**
+<i>962</i>&nbsp;         * return the underlying bytes as a single buffer
+<i>963</i>&nbsp;         *
+<i>964</i>&nbsp;         * @return bytes[]
+<i>965</i>&nbsp;         * @throws IOException
+<i>966</i>&nbsp;         * @throws UnexpectedEofException if end of file is hit.
+<i>967</i>&nbsp;         * @throws IOException if there&#39;s other problems reading input.
+<i>968</i>&nbsp;         */
+<i>969</i>&nbsp;        public byte[] getBytes() throws IOException {
+<b class="nc"><i>970</i>&nbsp;            if (this._buf == null) return null;</b>
+<b class="nc"><i>971</i>&nbsp;            this.sync();</b>
+<b class="nc"><i>972</i>&nbsp;            this.setPosition(0);</b>
+<b class="nc"><i>973</i>&nbsp;            int len = _buf.size();</b>
+<b class="nc"><i>974</i>&nbsp;            byte[] buf = new byte[len];</b>
+<b class="nc"><i>975</i>&nbsp;            if (readFully(this, buf) != len) {</b>
+<b class="nc"><i>976</i>&nbsp;                throw new UnexpectedEofException();</b>
+<i>977</i>&nbsp;            }
+<b class="nc"><i>978</i>&nbsp;            return buf;</b>
+<i>979</i>&nbsp;        }
+<i>980</i>&nbsp;
+<i>981</i>&nbsp;
+<i>982</i>&nbsp;        /**
+<i>983</i>&nbsp;         * Read exactly one byte of input.
+<i>984</i>&nbsp;         *
+<i>985</i>&nbsp;         * @return 0x00 through 0xFF as a positive int.
+<i>986</i>&nbsp;         * @throws UnexpectedEofException if end of file is hit.
+<i>987</i>&nbsp;         * @throws IOException if there&#39;s other problems reading input.
+<i>988</i>&nbsp;         */
+<i>989</i>&nbsp;        public int readToken() throws UnexpectedEofException, IOException
+<i>990</i>&nbsp;        {
+<b class="nc"><i>991</i>&nbsp;            int c = read();</b>
+<b class="nc"><i>992</i>&nbsp;            if (c &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>993</i>&nbsp;            return c;</b>
+<i>994</i>&nbsp;        }
+<i>995</i>&nbsp;
+<i>996</i>&nbsp;        public int readActualTypeDesc() throws IOException
+<i>997</i>&nbsp;        {
+<b class="nc"><i>998</i>&nbsp;            int c = read();</b>
+<b class="nc"><i>999</i>&nbsp;            if (c &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1000</i>&nbsp;            int typeid = _Private_IonConstants.getTypeCode(c);</b>
+<b class="nc"><i>1001</i>&nbsp;            if (typeid == _Private_IonConstants.tidTypedecl) {</b>
+<b class="nc"><i>1002</i>&nbsp;                int lownibble = _Private_IonConstants.getLowNibble(c);</b>
+<b class="nc"><i>1003</i>&nbsp;                if (lownibble == 0) {</b>
+<i>1004</i>&nbsp;                    // 0xE0 is the first byte of the IonVersionMarker
+<i>1005</i>&nbsp;                    // so we&#39;ll return it as is, the caller has to
+<i>1006</i>&nbsp;                    // verify the remaining bytes and handle them
+<i>1007</i>&nbsp;                    // appropriately - so here we do nothing
+<i>1008</i>&nbsp;                }
+<i>1009</i>&nbsp;                else {
+<b class="nc"><i>1010</i>&nbsp;                    this.readLength(typeid, lownibble);</b>
+<b class="nc"><i>1011</i>&nbsp;                    int alen = this.readVarIntAsInt();</b>
+<i>1012</i>&nbsp;                    // TODO add skip(int) method instead of this loop.
+<b class="nc"><i>1013</i>&nbsp;                    while (alen &gt; 0) {</b>
+<b class="nc"><i>1014</i>&nbsp;                        if (this.read() &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1015</i>&nbsp;                        alen--;</b>
+<i>1016</i>&nbsp;                    }
+<b class="nc"><i>1017</i>&nbsp;                    c = read();</b>
+<b class="nc"><i>1018</i>&nbsp;                    if (c &lt; 0) throwUnexpectedEOFException();</b>
+<i>1019</i>&nbsp;                }
+<i>1020</i>&nbsp;            }
+<b class="nc"><i>1021</i>&nbsp;            return c;</b>
+<i>1022</i>&nbsp;        }
+<i>1023</i>&nbsp;
+<i>1024</i>&nbsp;        public int[] readAnnotations() throws IOException
+<i>1025</i>&nbsp;        {
+<b class="nc"><i>1026</i>&nbsp;            int[] annotations = null;</b>
+<i>1027</i>&nbsp;
+<b class="nc"><i>1028</i>&nbsp;            int annotationLen = this.readVarUIntAsInt();</b>
+<b class="nc"><i>1029</i>&nbsp;            int annotationPos = this.position(); // pos at the first ann sid</b>
+<b class="nc"><i>1030</i>&nbsp;            int annotationEnd = annotationPos + annotationLen;</b>
+<b class="nc"><i>1031</i>&nbsp;            int annotationCount = 0;</b>
+<i>1032</i>&nbsp;
+<i>1033</i>&nbsp;            // first we read through and count
+<b class="nc"><i>1034</i>&nbsp;            while(this.position() &lt; annotationEnd) {</b>
+<i>1035</i>&nbsp;                // read the annotation symbol id itself
+<i>1036</i>&nbsp;                // and for this first pass we just throw that
+<i>1037</i>&nbsp;                // value away, since we&#39;re just counting
+<b class="nc"><i>1038</i>&nbsp;                this.readVarUIntAsInt();</b>
+<b class="nc"><i>1039</i>&nbsp;                annotationCount++;</b>
+<i>1040</i>&nbsp;            }
+<b class="nc"><i>1041</i>&nbsp;            if (annotationCount &gt; 0) {</b>
+<i>1042</i>&nbsp;                // then, if there are any there, we
+<i>1043</i>&nbsp;                // allocate the array, and re-read the sids
+<i>1044</i>&nbsp;                // look them up and fill in the array
+<b class="nc"><i>1045</i>&nbsp;                annotations = new int[annotationCount];</b>
+<b class="nc"><i>1046</i>&nbsp;                int annotationIdx = 0;</b>
+<b class="nc"><i>1047</i>&nbsp;                this.setPosition(annotationPos);</b>
+<b class="nc"><i>1048</i>&nbsp;                while(this.position() &lt; annotationEnd) {</b>
+<i>1049</i>&nbsp;                    // read the annotation symbol id itself
+<b class="nc"><i>1050</i>&nbsp;                    int sid = this.readVarUIntAsInt();</b>
+<b class="nc"><i>1051</i>&nbsp;                    annotations[annotationIdx++] = sid;</b>
+<b class="nc"><i>1052</i>&nbsp;                }</b>
+<i>1053</i>&nbsp;            }
+<i>1054</i>&nbsp;
+<b class="nc"><i>1055</i>&nbsp;            return annotations;</b>
+<i>1056</i>&nbsp;        }
+<i>1057</i>&nbsp;
+<i>1058</i>&nbsp;
+<i>1059</i>&nbsp;        public int readLength(int td, int ln) throws IOException
+<i>1060</i>&nbsp;        {
+<i>1061</i>&nbsp;            // TODO check for invalid lownibbles
+<b class="nc"><i>1062</i>&nbsp;            switch (td) {</b>
+<i>1063</i>&nbsp;            case _Private_IonConstants.tidNull: // null(0)
+<i>1064</i>&nbsp;            case _Private_IonConstants.tidBoolean: // boolean(1)
+<b class="nc"><i>1065</i>&nbsp;                return 0;</b>
+<i>1066</i>&nbsp;            case _Private_IonConstants.tidPosInt: // 2
+<i>1067</i>&nbsp;            case _Private_IonConstants.tidNegInt: // 3
+<i>1068</i>&nbsp;            case _Private_IonConstants.tidFloat: // float(4)
+<i>1069</i>&nbsp;            case _Private_IonConstants.tidDecimal: // decimal(5)
+<i>1070</i>&nbsp;            case _Private_IonConstants.tidTimestamp: // timestamp(6)
+<i>1071</i>&nbsp;            case _Private_IonConstants.tidSymbol: // symbol(7)
+<i>1072</i>&nbsp;            case _Private_IonConstants.tidString: // string (8)
+<i>1073</i>&nbsp;            case _Private_IonConstants.tidClob: // clob(9)
+<i>1074</i>&nbsp;            case _Private_IonConstants.tidBlob: // blob(10)
+<i>1075</i>&nbsp;            case _Private_IonConstants.tidList:     // 11
+<i>1076</i>&nbsp;            case _Private_IonConstants.tidSexp:     // 12
+<i>1077</i>&nbsp;            case _Private_IonConstants.tidTypedecl: // 14
+<b class="nc"><i>1078</i>&nbsp;                switch (ln) {</b>
+<i>1079</i>&nbsp;                case 0:
+<i>1080</i>&nbsp;                case _Private_IonConstants.lnIsNullAtom:
+<b class="nc"><i>1081</i>&nbsp;                    return 0;</b>
+<i>1082</i>&nbsp;                case _Private_IonConstants.lnIsVarLen:
+<b class="nc"><i>1083</i>&nbsp;                    return readVarUIntAsInt();</b>
+<i>1084</i>&nbsp;                default:
+<b class="nc"><i>1085</i>&nbsp;                    return ln;</b>
+<i>1086</i>&nbsp;                }
+<i>1087</i>&nbsp;            case _Private_IonConstants.tidNopPad:   // 99
+<b class="nc"><i>1088</i>&nbsp;                switch (ln) {</b>
+<i>1089</i>&nbsp;                    case _Private_IonConstants.lnIsVarLen:
+<b class="nc"><i>1090</i>&nbsp;                        return readVarUIntAsInt();</b>
+<i>1091</i>&nbsp;                    default:
+<b class="nc"><i>1092</i>&nbsp;                        return ln;</b>
+<i>1093</i>&nbsp;                }
+<i>1094</i>&nbsp;            case _Private_IonConstants.tidStruct: // 13
+<b class="nc"><i>1095</i>&nbsp;                switch (ln) {</b>
+<i>1096</i>&nbsp;                case _Private_IonConstants.lnIsEmptyContainer:
+<i>1097</i>&nbsp;                case _Private_IonConstants.lnIsNullStruct:
+<b class="nc"><i>1098</i>&nbsp;                    return 0;</b>
+<i>1099</i>&nbsp;                case _Private_IonConstants.lnIsOrderedStruct:
+<i>1100</i>&nbsp;                case _Private_IonConstants.lnIsVarLen:
+<b class="nc"><i>1101</i>&nbsp;                    return readVarUIntAsInt();</b>
+<i>1102</i>&nbsp;                default:
+<b class="nc"><i>1103</i>&nbsp;                    return ln;</b>
+<i>1104</i>&nbsp;                }
+<i>1105</i>&nbsp;            case _Private_IonConstants.tidUnused: // unused(15)
+<i>1106</i>&nbsp;            default:
+<i>1107</i>&nbsp;                // TODO use InvalidBinaryDataException
+<b class="nc"><i>1108</i>&nbsp;                throw new BlockedBuffer.BlockedBufferException(&quot;invalid type id encountered: &quot; + td);</b>
+<i>1109</i>&nbsp;            }
+<i>1110</i>&nbsp;        }
+<i>1111</i>&nbsp;
+<i>1112</i>&nbsp;        /*
+<i>1113</i>&nbsp;        public long readFixedIntLongValue(int len) throws IOException {
+<i>1114</i>&nbsp;            long retvalue = 0;
+<i>1115</i>&nbsp;            int b;
+<i>1116</i>&nbsp;
+<i>1117</i>&nbsp;            switch (len) {
+<i>1118</i>&nbsp;            case 8:
+<i>1119</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();
+<i>1120</i>&nbsp;                retvalue |= b &lt;&lt; (7*8);
+<i>1121</i>&nbsp;            case 7:
+<i>1122</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();
+<i>1123</i>&nbsp;                retvalue |= b &lt;&lt; (6*8);
+<i>1124</i>&nbsp;            case 6:
+<i>1125</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();
+<i>1126</i>&nbsp;                retvalue |= b &lt;&lt; (5*8);
+<i>1127</i>&nbsp;            case 5:
+<i>1128</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();
+<i>1129</i>&nbsp;                retvalue |= b &lt;&lt; (4*8);
+<i>1130</i>&nbsp;            case 4:
+<i>1131</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();
+<i>1132</i>&nbsp;                retvalue |= b &lt;&lt; (3*8);
+<i>1133</i>&nbsp;            case 3:
+<i>1134</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();
+<i>1135</i>&nbsp;                retvalue |= b &lt;&lt; (2*8);
+<i>1136</i>&nbsp;            case 2:
+<i>1137</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();
+<i>1138</i>&nbsp;                retvalue |= b &lt;&lt; (1*8);
+<i>1139</i>&nbsp;            case 1:
+<i>1140</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();
+<i>1141</i>&nbsp;                retvalue |= b &lt;&lt; (0*8);
+<i>1142</i>&nbsp;            }
+<i>1143</i>&nbsp;            return retvalue;
+<i>1144</i>&nbsp;        }
+<i>1145</i>&nbsp;        public int readFixedIntIntValue(int len) throws IOException {
+<i>1146</i>&nbsp;            int retvalue = 0;
+<i>1147</i>&nbsp;            int b;
+<i>1148</i>&nbsp;
+<i>1149</i>&nbsp;            switch (len) {
+<i>1150</i>&nbsp;            case 4:
+<i>1151</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();
+<i>1152</i>&nbsp;                retvalue |= b &lt;&lt; (3*8);
+<i>1153</i>&nbsp;            case 3:
+<i>1154</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();
+<i>1155</i>&nbsp;                retvalue |= b &lt;&lt; (2*8);
+<i>1156</i>&nbsp;            case 2:
+<i>1157</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();
+<i>1158</i>&nbsp;                retvalue |= b &lt;&lt; (1*8);
+<i>1159</i>&nbsp;            case 1:
+<i>1160</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();
+<i>1161</i>&nbsp;                retvalue |= b &lt;&lt; (0*8);
+<i>1162</i>&nbsp;            }
+<i>1163</i>&nbsp;            return retvalue;
+<i>1164</i>&nbsp;        }
+<i>1165</i>&nbsp;        */
+<i>1166</i>&nbsp;        public long readIntAsLong(int len) throws IOException {
+<b class="nc"><i>1167</i>&nbsp;            long    retvalue = 0;</b>
+<b class="nc"><i>1168</i>&nbsp;            boolean is_negative = false;</b>
+<i>1169</i>&nbsp;            int     b;
+<i>1170</i>&nbsp;
+<b class="nc"><i>1171</i>&nbsp;            if (len &gt; 0) {</b>
+<i>1172</i>&nbsp;                // read the first byte
+<b class="nc"><i>1173</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1174</i>&nbsp;                retvalue = (b &amp; 0x7F);</b>
+<b class="nc"><i>1175</i>&nbsp;                is_negative = ((b &amp; 0x80) != 0);</b>
+<i>1176</i>&nbsp;
+<b class="nc"><i>1177</i>&nbsp;                switch (len - 1) {  // we read 1 already</b>
+<i>1178</i>&nbsp;                case 8: // even after reading the 1st byte we may have 8 remaining
+<i>1179</i>&nbsp;                        // bytes of value when the value is Long.MIN_VALUE since it
+<i>1180</i>&nbsp;                        // has all 8 bytes for data and the ninth for the sign bit
+<i>1181</i>&nbsp;                        // all by itself (which we read above)
+<b class="nc"><i>1182</i>&nbsp;                    if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1183</i>&nbsp;                    retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1184</i>&nbsp;                case 7:
+<b class="nc"><i>1185</i>&nbsp;                    if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1186</i>&nbsp;                    retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1187</i>&nbsp;                case 6:
+<b class="nc"><i>1188</i>&nbsp;                    if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1189</i>&nbsp;                    retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1190</i>&nbsp;                case 5:
+<b class="nc"><i>1191</i>&nbsp;                    if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1192</i>&nbsp;                    retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1193</i>&nbsp;                case 4:
+<b class="nc"><i>1194</i>&nbsp;                    if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1195</i>&nbsp;                    retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1196</i>&nbsp;                case 3:
+<b class="nc"><i>1197</i>&nbsp;                    if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1198</i>&nbsp;                    retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1199</i>&nbsp;                case 2:
+<b class="nc"><i>1200</i>&nbsp;                    if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1201</i>&nbsp;                    retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1202</i>&nbsp;                case 1:
+<b class="nc"><i>1203</i>&nbsp;                    if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1204</i>&nbsp;                    retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1205</i>&nbsp;                default:
+<i>1206</i>&nbsp;                }
+<b class="nc"><i>1207</i>&nbsp;                if (is_negative) {</b>
+<i>1208</i>&nbsp;                    // this is correct even when retvalue == Long.MIN_VALUE
+<b class="nc"><i>1209</i>&nbsp;                    retvalue = -retvalue;</b>
+<i>1210</i>&nbsp;                }
+<i>1211</i>&nbsp;            }
+<b class="nc"><i>1212</i>&nbsp;            return retvalue;</b>
+<i>1213</i>&nbsp;        }
+<i>1214</i>&nbsp;        /** @throws IOException
+<i>1215</i>&nbsp;         * @deprecated */
+<i>1216</i>&nbsp;        @Deprecated
+<i>1217</i>&nbsp;        public int readIntAsInt(int len) throws IOException {
+<b class="nc"><i>1218</i>&nbsp;            int retvalue = 0;</b>
+<b class="nc"><i>1219</i>&nbsp;            boolean is_negative = false;</b>
+<i>1220</i>&nbsp;            int b;
+<i>1221</i>&nbsp;
+<b class="nc"><i>1222</i>&nbsp;            if (len &gt; 0) {</b>
+<i>1223</i>&nbsp;                // read the first byte
+<b class="nc"><i>1224</i>&nbsp;                b = read();</b>
+<b class="nc"><i>1225</i>&nbsp;                if (b &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1226</i>&nbsp;                retvalue = (b &amp; 0x7F);</b>
+<b class="nc"><i>1227</i>&nbsp;                is_negative = ((b &amp; 0x80) != 0);</b>
+<i>1228</i>&nbsp;
+<b class="nc"><i>1229</i>&nbsp;                switch (len - 1) {  // we read 1 already</b>
+<i>1230</i>&nbsp;                case 7:
+<i>1231</i>&nbsp;                case 6:
+<i>1232</i>&nbsp;                case 5:
+<i>1233</i>&nbsp;                case 4:
+<b class="nc"><i>1234</i>&nbsp;                    throw new IonException(&quot;overflow attempt to read long value into an int&quot;);</b>
+<i>1235</i>&nbsp;                case 3:
+<b class="nc"><i>1236</i>&nbsp;                    if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1237</i>&nbsp;                    retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1238</i>&nbsp;                case 2:
+<b class="nc"><i>1239</i>&nbsp;                    if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1240</i>&nbsp;                    retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1241</i>&nbsp;
+<b class="nc"><i>1242</i>&nbsp;                    if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1243</i>&nbsp;                    retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1244</i>&nbsp;                }
+<b class="nc"><i>1245</i>&nbsp;                if (is_negative) {</b>
+<i>1246</i>&nbsp;                    // this is correct even when retvalue == Integer.MIN_VALUE
+<b class="nc"><i>1247</i>&nbsp;                    retvalue = -retvalue;</b>
+<i>1248</i>&nbsp;                }
+<i>1249</i>&nbsp;            }
+<b class="nc"><i>1250</i>&nbsp;            return retvalue;</b>
+<i>1251</i>&nbsp;        }
+<i>1252</i>&nbsp;
+<i>1253</i>&nbsp;        /**
+<i>1254</i>&nbsp;         * Reads the specified magnitude as a {@link BigInteger}.
+<i>1255</i>&nbsp;         *
+<i>1256</i>&nbsp;         * @param len           The length of the UInt octets to read.
+<i>1257</i>&nbsp;         * @param signum        The sign as per {@link BigInteger#BigInteger(int, byte[])}.
+<i>1258</i>&nbsp;         * @return              The signed {@link BigInteger}.
+<i>1259</i>&nbsp;         *
+<i>1260</i>&nbsp;         * @throws IOException  Thrown if there are an I/O errors on the underlying stream.
+<i>1261</i>&nbsp;         */
+<i>1262</i>&nbsp;        public BigInteger readUIntAsBigInteger(int len, int signum) throws IOException {
+<b class="nc"><i>1263</i>&nbsp;            byte[] magnitude = new byte[len];</b>
+<b class="nc"><i>1264</i>&nbsp;            for (int i = 0; i &lt; len; i++) {</b>
+<b class="nc"><i>1265</i>&nbsp;                int octet = read();</b>
+<b class="nc"><i>1266</i>&nbsp;                if (octet &lt; 0) {</b>
+<b class="nc"><i>1267</i>&nbsp;                    throwUnexpectedEOFException();</b>
+<i>1268</i>&nbsp;                }
+<b class="nc"><i>1269</i>&nbsp;                magnitude[i] = (byte) octet;</b>
+<i>1270</i>&nbsp;            }
+<i>1271</i>&nbsp;
+<i>1272</i>&nbsp;            // both BigInteger and ion store this magnitude as big-endian
+<b class="nc"><i>1273</i>&nbsp;            return new BigInteger(signum, magnitude);</b>
+<i>1274</i>&nbsp;        }
+<i>1275</i>&nbsp;
+<i>1276</i>&nbsp;        public long readUIntAsLong(int len) throws IOException {
+<b class="nc"><i>1277</i>&nbsp;            long    retvalue = 0;</b>
+<i>1278</i>&nbsp;            int b;
+<i>1279</i>&nbsp;
+<b class="nc"><i>1280</i>&nbsp;            switch (len) {</b>
+<i>1281</i>&nbsp;            default:
+<b class="nc"><i>1282</i>&nbsp;                throw new IonException(&quot;overflow attempt to read long value into an int&quot;);</b>
+<i>1283</i>&nbsp;            case 8:
+<b class="nc"><i>1284</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1285</i>&nbsp;                retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1286</i>&nbsp;            case 7:
+<b class="nc"><i>1287</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1288</i>&nbsp;                retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1289</i>&nbsp;            case 6:
+<b class="nc"><i>1290</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1291</i>&nbsp;                retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1292</i>&nbsp;            case 5:
+<b class="nc"><i>1293</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1294</i>&nbsp;                retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1295</i>&nbsp;            case 4:
+<b class="nc"><i>1296</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1297</i>&nbsp;                retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1298</i>&nbsp;            case 3:
+<b class="nc"><i>1299</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1300</i>&nbsp;                retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1301</i>&nbsp;            case 2:
+<b class="nc"><i>1302</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1303</i>&nbsp;                retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1304</i>&nbsp;            case 1:
+<b class="nc"><i>1305</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1306</i>&nbsp;                retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1307</i>&nbsp;            case 0:
+<i>1308</i>&nbsp;            }
+<b class="nc"><i>1309</i>&nbsp;            return retvalue;</b>
+<i>1310</i>&nbsp;        }
+<i>1311</i>&nbsp;        public int readUIntAsInt(int len) throws IOException {
+<b class="nc"><i>1312</i>&nbsp;            int retvalue = 0;</b>
+<i>1313</i>&nbsp;            int b;
+<i>1314</i>&nbsp;
+<b class="nc"><i>1315</i>&nbsp;            switch (len) {</b>
+<i>1316</i>&nbsp;            default:
+<b class="nc"><i>1317</i>&nbsp;                throw new IonException(&quot;overflow attempt to read long value into an int&quot;);</b>
+<i>1318</i>&nbsp;            case 4:
+<b class="nc"><i>1319</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1320</i>&nbsp;                retvalue = b;</b>
+<i>1321</i>&nbsp;            case 3:
+<b class="nc"><i>1322</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1323</i>&nbsp;                retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1324</i>&nbsp;            case 2:
+<b class="nc"><i>1325</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1326</i>&nbsp;                retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1327</i>&nbsp;            case 1:
+<b class="nc"><i>1328</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1329</i>&nbsp;                retvalue = (retvalue &lt;&lt; 8) | b;</b>
+<i>1330</i>&nbsp;            case 0:
+<i>1331</i>&nbsp;            }
+<b class="nc"><i>1332</i>&nbsp;            return retvalue;</b>
+<i>1333</i>&nbsp;        }
+<i>1334</i>&nbsp;        public long readVarUIntAsLong() throws IOException {
+<b class="nc"><i>1335</i>&nbsp;            long retvalue = 0;</b>
+<i>1336</i>&nbsp;            int  b;
+<i>1337</i>&nbsp;
+<i>1338</i>&nbsp;            for (;;) {
+<b class="nc"><i>1339</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1340</i>&nbsp;                if ((retvalue &amp; 0xFE00000000000000L) != 0) {</b>
+<i>1341</i>&nbsp;                    // if any of the top 7 bits are set at this point there&#39;s
+<i>1342</i>&nbsp;                    // a problem, because we&#39;ll be shifting the into oblivian
+<i>1343</i>&nbsp;                    // just below, so ...
+<b class="nc"><i>1344</i>&nbsp;                    throw new IonException(&quot;overflow attempt to read long value into a long&quot;);</b>
+<i>1345</i>&nbsp;                }
+<b class="nc"><i>1346</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1347</i>&nbsp;                if ((b &amp; 0x80) != 0) break;</b>
+<i>1348</i>&nbsp;            }
+<b class="nc"><i>1349</i>&nbsp;            return retvalue;</b>
+<i>1350</i>&nbsp;        }
+<i>1351</i>&nbsp;        public int readVarUIntAsInt() throws IOException {
+<b class="nc"><i>1352</i>&nbsp;            int retvalue = 0;</b>
+<i>1353</i>&nbsp;            int  b;
+<i>1354</i>&nbsp;
+<i>1355</i>&nbsp;            for (;;) { // fake loop to create a &quot;goto done&quot;
+<b class="nc"><i>1356</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1357</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1358</i>&nbsp;                if ((b &amp; 0x80) != 0) break;</b>
+<i>1359</i>&nbsp;
+<b class="nc"><i>1360</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1361</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1362</i>&nbsp;                if ((b &amp; 0x80) != 0) break;</b>
+<i>1363</i>&nbsp;
+<b class="nc"><i>1364</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1365</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1366</i>&nbsp;                if ((b &amp; 0x80) != 0) break;</b>
+<i>1367</i>&nbsp;
+<b class="nc"><i>1368</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1369</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1370</i>&nbsp;                if ((b &amp; 0x80) != 0) break;</b>
+<i>1371</i>&nbsp;
+<b class="nc"><i>1372</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1373</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1374</i>&nbsp;                if ((b &amp; 0x80) != 0) break;</b>
+<i>1375</i>&nbsp;
+<i>1376</i>&nbsp;                // if we get here we have more bits than we have room for :(
+<b class="nc"><i>1377</i>&nbsp;                throw new IonException(&quot;var int overflow at: &quot;+this.position());</b>
+<i>1378</i>&nbsp;            }
+<b class="nc"><i>1379</i>&nbsp;            return retvalue;</b>
+<i>1380</i>&nbsp;        }
+<i>1381</i>&nbsp;        public long readVarIntAsLong() throws IOException
+<i>1382</i>&nbsp;        {
+<b class="nc"><i>1383</i>&nbsp;            long    retvalue = 0;</b>
+<b class="nc"><i>1384</i>&nbsp;            boolean is_negative = false;</b>
+<i>1385</i>&nbsp;            int     b;
+<i>1386</i>&nbsp;
+<i>1387</i>&nbsp;            // synthetic label &quot;done&quot; (yuck)
+<i>1388</i>&nbsp;done:       for (;;) {
+<i>1389</i>&nbsp;                // read the first byte - it has the sign bit
+<b class="nc"><i>1390</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1391</i>&nbsp;                if ((b &amp; 0x40) != 0) {</b>
+<b class="nc"><i>1392</i>&nbsp;                    is_negative = true;</b>
+<i>1393</i>&nbsp;                }
+<b class="nc"><i>1394</i>&nbsp;                retvalue = (b &amp; 0x3F);</b>
+<b class="nc"><i>1395</i>&nbsp;                if ((b &amp; 0x80) != 0) break done;</b>
+<i>1396</i>&nbsp;
+<i>1397</i>&nbsp;                // for the second byte we shift our eariler bits just as much,
+<i>1398</i>&nbsp;                // but there are fewer of them there to shift
+<b class="nc"><i>1399</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1400</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1401</i>&nbsp;                if ((b &amp; 0x80) != 0) break done;</b>
+<i>1402</i>&nbsp;
+<i>1403</i>&nbsp;                // for the rest, they&#39;re all the same
+<i>1404</i>&nbsp;                for (;;) {
+<b class="nc"><i>1405</i>&nbsp;                    if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1406</i>&nbsp;                    if ((retvalue &amp; 0xFE00000000000000L) != 0) {</b>
+<i>1407</i>&nbsp;                        // if any of the top 7 bits are set at this point there&#39;s
+<i>1408</i>&nbsp;                        // a problem, because we&#39;ll be shifting the into oblivian
+<i>1409</i>&nbsp;                        // just below, so ...
+<b class="nc"><i>1410</i>&nbsp;                        throw new IonException(&quot;overflow attempt to read long value into a long&quot;);</b>
+<i>1411</i>&nbsp;                    }
+<b class="nc"><i>1412</i>&nbsp;                    retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1413</i>&nbsp;                    if ((b &amp; 0x80) != 0) break done;</b>
+<i>1414</i>&nbsp;                }
+<i>1415</i>&nbsp;            }
+<b class="nc"><i>1416</i>&nbsp;            if (is_negative) {</b>
+<i>1417</i>&nbsp;                // this is correct even when retvalue == Long.MIN_VALUE
+<b class="nc"><i>1418</i>&nbsp;                retvalue = -retvalue;</b>
+<i>1419</i>&nbsp;            }
+<b class="nc"><i>1420</i>&nbsp;            return retvalue;</b>
+<i>1421</i>&nbsp;        }
+<i>1422</i>&nbsp;        public int readVarIntAsInt() throws IOException
+<i>1423</i>&nbsp;        {
+<b class="nc"><i>1424</i>&nbsp;            int     retvalue = 0;</b>
+<b class="nc"><i>1425</i>&nbsp;            boolean is_negative = false;</b>
+<i>1426</i>&nbsp;            int     b;
+<i>1427</i>&nbsp;
+<i>1428</i>&nbsp;            // synthetic label &quot;done&quot; (yuck)
+<i>1429</i>&nbsp;done:       for (;;) {
+<i>1430</i>&nbsp;                // read the first byte - it has the sign bit
+<b class="nc"><i>1431</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1432</i>&nbsp;                if ((b &amp; 0x40) != 0) {</b>
+<b class="nc"><i>1433</i>&nbsp;                    is_negative = true;</b>
+<i>1434</i>&nbsp;                }
+<b class="nc"><i>1435</i>&nbsp;                retvalue = (b &amp; 0x3F);</b>
+<b class="nc"><i>1436</i>&nbsp;                if ((b &amp; 0x80) != 0) break done;</b>
+<i>1437</i>&nbsp;
+<i>1438</i>&nbsp;                // for the second byte we shift our eariler bits just as much,
+<i>1439</i>&nbsp;                // but there are fewer of them there to shift
+<b class="nc"><i>1440</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1441</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1442</i>&nbsp;                if ((b &amp; 0x80) != 0) break done;</b>
+<i>1443</i>&nbsp;
+<i>1444</i>&nbsp;                // for the rest, they&#39;re all the same
+<b class="nc"><i>1445</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1446</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1447</i>&nbsp;                if ((b &amp; 0x80) != 0) break done;</b>
+<i>1448</i>&nbsp;
+<i>1449</i>&nbsp;                // for the rest, they&#39;re all the same
+<b class="nc"><i>1450</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1451</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1452</i>&nbsp;                if ((b &amp; 0x80) != 0) break done;</b>
+<i>1453</i>&nbsp;
+<i>1454</i>&nbsp;                // for the rest, they&#39;re all the same
+<b class="nc"><i>1455</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1456</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1457</i>&nbsp;                if ((b &amp; 0x80) != 0) break done;</b>
+<i>1458</i>&nbsp;
+<i>1459</i>&nbsp;                // if we get here we have more bits than we have room for :(
+<b class="nc"><i>1460</i>&nbsp;                throw new IonException(&quot;var int overflow at: &quot;+this.position());</b>
+<i>1461</i>&nbsp;            }
+<b class="nc"><i>1462</i>&nbsp;            if (is_negative) {</b>
+<i>1463</i>&nbsp;                // this is correct even when retvalue == Integer.MIN_VALUE
+<b class="nc"><i>1464</i>&nbsp;                retvalue = -retvalue;</b>
+<i>1465</i>&nbsp;            }
+<b class="nc"><i>1466</i>&nbsp;            return retvalue;</b>
+<i>1467</i>&nbsp;        }
+<i>1468</i>&nbsp;
+<i>1469</i>&nbsp;        /**
+<i>1470</i>&nbsp;         * Reads an integer value, returning null to mean -0.
+<i>1471</i>&nbsp;         * @throws IOException
+<i>1472</i>&nbsp;         */
+<i>1473</i>&nbsp;        public Integer readVarIntWithNegativeZero() throws IOException
+<i>1474</i>&nbsp;        {
+<b class="nc"><i>1475</i>&nbsp;            int     retvalue = 0;</b>
+<b class="nc"><i>1476</i>&nbsp;            boolean is_negative = false;</b>
+<i>1477</i>&nbsp;            int     b;
+<i>1478</i>&nbsp;
+<i>1479</i>&nbsp;            // sythetic label &quot;done&quot; (yuck)
+<i>1480</i>&nbsp;done:       for (;;) {
+<i>1481</i>&nbsp;                // read the first byte - it has the sign bit
+<b class="nc"><i>1482</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1483</i>&nbsp;                if ((b &amp; 0x40) != 0) {</b>
+<b class="nc"><i>1484</i>&nbsp;                    is_negative = true;</b>
+<i>1485</i>&nbsp;                }
+<b class="nc"><i>1486</i>&nbsp;                retvalue = (b &amp; 0x3F);</b>
+<b class="nc"><i>1487</i>&nbsp;                if ((b &amp; 0x80) != 0) break done;</b>
+<i>1488</i>&nbsp;
+<i>1489</i>&nbsp;                // for the second byte we shift our eariler bits just as much,
+<i>1490</i>&nbsp;                // but there are fewer of them there to shift
+<b class="nc"><i>1491</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1492</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1493</i>&nbsp;                if ((b &amp; 0x80) != 0) break done;</b>
+<i>1494</i>&nbsp;
+<i>1495</i>&nbsp;                // for the rest, they&#39;re all the same
+<b class="nc"><i>1496</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1497</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1498</i>&nbsp;                if ((b &amp; 0x80) != 0) break done;</b>
+<i>1499</i>&nbsp;
+<i>1500</i>&nbsp;                // for the rest, they&#39;re all the same
+<b class="nc"><i>1501</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1502</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1503</i>&nbsp;                if ((b &amp; 0x80) != 0) break done;</b>
+<i>1504</i>&nbsp;
+<i>1505</i>&nbsp;                // for the rest, they&#39;re all the same
+<b class="nc"><i>1506</i>&nbsp;                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</b>
+<b class="nc"><i>1507</i>&nbsp;                retvalue = (retvalue &lt;&lt; 7) | (b &amp; 0x7F);</b>
+<b class="nc"><i>1508</i>&nbsp;                if ((b &amp; 0x80) != 0) break done;</b>
+<i>1509</i>&nbsp;
+<i>1510</i>&nbsp;                // if we get here we have more bits than we have room for :(
+<b class="nc"><i>1511</i>&nbsp;                throw new IonException(&quot;var int overflow at: &quot;+this.position());</b>
+<i>1512</i>&nbsp;            }
+<i>1513</i>&nbsp;
+<b class="nc"><i>1514</i>&nbsp;            Integer retInteger = null;</b>
+<b class="nc"><i>1515</i>&nbsp;            if (is_negative) {</b>
+<b class="nc"><i>1516</i>&nbsp;                if (retvalue != 0) {</b>
+<i>1517</i>&nbsp;                    // this is correct even when retvalue == Long.MIN_VALUE
+<b class="nc"><i>1518</i>&nbsp;                    retvalue = -retvalue;</b>
+<b class="nc"><i>1519</i>&nbsp;                    retInteger = new Integer(retvalue);</b>
+<i>1520</i>&nbsp;                }
+<i>1521</i>&nbsp;            }
+<i>1522</i>&nbsp;            else {
+<b class="nc"><i>1523</i>&nbsp;                retInteger = new Integer(retvalue);</b>
+<i>1524</i>&nbsp;            }
+<b class="nc"><i>1525</i>&nbsp;            return retInteger;</b>
+<i>1526</i>&nbsp;        }
+<i>1527</i>&nbsp;
+<i>1528</i>&nbsp;        public double readFloatValue(int len) throws IOException
+<i>1529</i>&nbsp;        {
+<b class="nc"><i>1530</i>&nbsp;            if (len == 0)</b>
+<i>1531</i>&nbsp;            {
+<i>1532</i>&nbsp;                // special case, return pos zero
+<b class="nc"><i>1533</i>&nbsp;                return 0.0d;</b>
+<i>1534</i>&nbsp;            }
+<i>1535</i>&nbsp;
+<b class="nc"><i>1536</i>&nbsp;            if (len != 8)</b>
+<i>1537</i>&nbsp;            {
+<b class="nc"><i>1538</i>&nbsp;                throw new IonException(&quot;Length of float read must be 0 or 8&quot;);</b>
+<i>1539</i>&nbsp;            }
+<i>1540</i>&nbsp;
+<b class="nc"><i>1541</i>&nbsp;            long dBits = readUIntAsLong(len);</b>
+<b class="nc"><i>1542</i>&nbsp;            return Double.longBitsToDouble(dBits);</b>
+<i>1543</i>&nbsp;        }
+<i>1544</i>&nbsp;
+<i>1545</i>&nbsp;
+<i>1546</i>&nbsp;        /**
+<i>1547</i>&nbsp;         * Near clone of {@link SimpleByteBuffer.SimpleByteReader#readDecimal(int)}
+<i>1548</i>&nbsp;         * and {@link IonReaderBinaryRawX#readDecimal(int)}
+<i>1549</i>&nbsp;         * so keep them in sync!
+<i>1550</i>&nbsp;         */
+<i>1551</i>&nbsp;        public Decimal readDecimalValue(int len) throws IOException
+<i>1552</i>&nbsp;        {
+<b class="nc"><i>1553</i>&nbsp;            MathContext mathContext = MathContext.UNLIMITED;</b>
+<i>1554</i>&nbsp;
+<i>1555</i>&nbsp;            Decimal bd;
+<i>1556</i>&nbsp;
+<i>1557</i>&nbsp;            // we only write out the &#39;0&#39; value as the nibble 0
+<b class="nc"><i>1558</i>&nbsp;            if (len == 0) {</b>
+<b class="nc"><i>1559</i>&nbsp;                bd = Decimal.valueOf(0, mathContext);</b>
+<i>1560</i>&nbsp;            }
+<i>1561</i>&nbsp;            else {
+<i>1562</i>&nbsp;                // otherwise we to it the hard way ....
+<b class="nc"><i>1563</i>&nbsp;                int         startpos = this.position();</b>
+<b class="nc"><i>1564</i>&nbsp;                int         exponent = this.readVarIntAsInt();</b>
+<b class="nc"><i>1565</i>&nbsp;                int         bitlen = len - (this.position() - startpos);</b>
+<i>1566</i>&nbsp;
+<i>1567</i>&nbsp;                BigInteger value;
+<i>1568</i>&nbsp;                int        signum;
+<b class="nc"><i>1569</i>&nbsp;                if (bitlen &gt; 0)</b>
+<i>1570</i>&nbsp;                {
+<b class="nc"><i>1571</i>&nbsp;                    byte[] bits = new byte[bitlen];</b>
+<b class="nc"><i>1572</i>&nbsp;                    readAll(this, bits, 0, bitlen);</b>
+<i>1573</i>&nbsp;
+<b class="nc"><i>1574</i>&nbsp;                    signum = 1;</b>
+<b class="nc"><i>1575</i>&nbsp;                    if (bits[0] &lt; 0)</b>
+<i>1576</i>&nbsp;                    {
+<i>1577</i>&nbsp;                        // value is negative, clear the sign
+<b class="nc"><i>1578</i>&nbsp;                        bits[0] &amp;= 0x7F;</b>
+<b class="nc"><i>1579</i>&nbsp;                        signum = -1;</b>
+<i>1580</i>&nbsp;                    }
+<b class="nc"><i>1581</i>&nbsp;                    value = new BigInteger(signum, bits);</b>
+<b class="nc"><i>1582</i>&nbsp;                }</b>
+<i>1583</i>&nbsp;                else {
+<b class="nc"><i>1584</i>&nbsp;                    signum = 0;</b>
+<b class="nc"><i>1585</i>&nbsp;                    value = BigInteger.ZERO;</b>
+<i>1586</i>&nbsp;                }
+<i>1587</i>&nbsp;
+<i>1588</i>&nbsp;                // Ion stores exponent, BigDecimal uses the negation &quot;scale&quot;
+<b class="nc"><i>1589</i>&nbsp;                int scale = -exponent;</b>
+<b class="nc"><i>1590</i>&nbsp;                if (value.signum() == 0 &amp;&amp; signum == -1)</b>
+<i>1591</i>&nbsp;                {
+<b class="nc"><i>1592</i>&nbsp;                    assert value.equals(BigInteger.ZERO);</b>
+<b class="nc"><i>1593</i>&nbsp;                    bd = Decimal.negativeZero(scale, mathContext);</b>
+<i>1594</i>&nbsp;                }
+<i>1595</i>&nbsp;                else
+<i>1596</i>&nbsp;                {
+<b class="nc"><i>1597</i>&nbsp;                    bd = Decimal.valueOf(value, scale, mathContext);</b>
+<i>1598</i>&nbsp;                }
+<i>1599</i>&nbsp;            }
+<i>1600</i>&nbsp;
+<b class="nc"><i>1601</i>&nbsp;            return bd;</b>
+<i>1602</i>&nbsp;        }
+<i>1603</i>&nbsp;
+<i>1604</i>&nbsp;        /**
+<i>1605</i>&nbsp;         * @see IonReaderBinaryRawX#readTimestamp
+<i>1606</i>&nbsp;         */
+<i>1607</i>&nbsp;        public Timestamp readTimestampValue(int len) throws IOException
+<i>1608</i>&nbsp;        {
+<b class="nc"><i>1609</i>&nbsp;            if (len &lt; 1) {</b>
+<i>1610</i>&nbsp;                // nothing to do here - and the timestamp will be NULL
+<b class="nc"><i>1611</i>&nbsp;                return null;</b>
+<i>1612</i>&nbsp;            }
+<i>1613</i>&nbsp;
+<b class="nc"><i>1614</i>&nbsp;            int        year = 0, month = 0, day = 0, hour = 0, minute = 0, second = 0;</b>
+<b class="nc"><i>1615</i>&nbsp;            Decimal    frac = null;</b>
+<b class="nc"><i>1616</i>&nbsp;            int        end = this.position() + len;</b>
+<i>1617</i>&nbsp;
+<i>1618</i>&nbsp;            // first up is the offset, which requires a special int reader
+<i>1619</i>&nbsp;            // to return the -0 as a null Integer
+<b class="nc"><i>1620</i>&nbsp;            Integer offset = this.readVarIntWithNegativeZero();</b>
+<i>1621</i>&nbsp;
+<i>1622</i>&nbsp;            // now we&#39;ll read the struct values from the input stream
+<i>1623</i>&nbsp;
+<i>1624</i>&nbsp;            // year is from 0001 to 9999
+<i>1625</i>&nbsp;            // or 0x1 to 0x270F or 14 bits - 1 or 2 bytes
+<b class="nc"><i>1626</i>&nbsp;            year  = readVarUIntAsInt();</b>
+<b class="nc"><i>1627</i>&nbsp;            Precision p = Precision.YEAR; // our lowest significant option</b>
+<i>1628</i>&nbsp;
+<b class="nc"><i>1629</i>&nbsp;            if (position() &lt; end) {</b>
+<b class="nc"><i>1630</i>&nbsp;                month = readVarUIntAsInt();</b>
+<b class="nc"><i>1631</i>&nbsp;                p = Precision.MONTH; // our lowest significant option</b>
+<i>1632</i>&nbsp;
+<b class="nc"><i>1633</i>&nbsp;                if (position() &lt; end) {</b>
+<b class="nc"><i>1634</i>&nbsp;                    day   = readVarUIntAsInt();</b>
+<b class="nc"><i>1635</i>&nbsp;                    p = Precision.DAY; // our lowest significant option</b>
+<i>1636</i>&nbsp;
+<i>1637</i>&nbsp;                    // now we look for hours and minutes
+<b class="nc"><i>1638</i>&nbsp;                    if (position() &lt; end) {</b>
+<b class="nc"><i>1639</i>&nbsp;                        hour   = readVarUIntAsInt();</b>
+<b class="nc"><i>1640</i>&nbsp;                        minute = readVarUIntAsInt();</b>
+<b class="nc"><i>1641</i>&nbsp;                        p = Precision.MINUTE;</b>
+<i>1642</i>&nbsp;
+<b class="nc"><i>1643</i>&nbsp;                        if (position() &lt; end) {</b>
+<b class="nc"><i>1644</i>&nbsp;                            second = readVarUIntAsInt();</b>
+<b class="nc"><i>1645</i>&nbsp;                            p = Precision.SECOND;</b>
+<i>1646</i>&nbsp;
+<b class="nc"><i>1647</i>&nbsp;                            int remaining = end - position();</b>
+<b class="nc"><i>1648</i>&nbsp;                            if (remaining &gt; 0) {</b>
+<i>1649</i>&nbsp;                                // now we read in our actual &quot;milliseconds since the epoch&quot;
+<b class="nc"><i>1650</i>&nbsp;                                frac = this.readDecimalValue(remaining);</b>
+<i>1651</i>&nbsp;                            }
+<i>1652</i>&nbsp;                        }
+<i>1653</i>&nbsp;                    }
+<i>1654</i>&nbsp;                }
+<i>1655</i>&nbsp;            }
+<i>1656</i>&nbsp;
+<i>1657</i>&nbsp;            // now we let timestamp put it all together
+<i>1658</i>&nbsp;            try {
+<b class="nc"><i>1659</i>&nbsp;                Timestamp val =</b>
+<b class="nc"><i>1660</i>&nbsp;                    Timestamp.createFromUtcFields(p, year, month, day,</b>
+<i>1661</i>&nbsp;                                                  hour, minute, second,
+<i>1662</i>&nbsp;                                                  frac, offset);
+<b class="nc"><i>1663</i>&nbsp;                return val;</b>
+<i>1664</i>&nbsp;            }
+<b class="nc"><i>1665</i>&nbsp;            catch (IllegalArgumentException e) {</b>
+<b class="nc"><i>1666</i>&nbsp;                throw new IonException(e.getMessage() + &quot; at: &quot; + position());</b>
+<i>1667</i>&nbsp;            }
+<i>1668</i>&nbsp;        }
+<i>1669</i>&nbsp;
+<i>1670</i>&nbsp;        public String readString(int len) throws IOException
+<i>1671</i>&nbsp;        {
+<b class="nc"><i>1672</i>&nbsp;            char[] cb = new char[len]; // since we know the length in bytes (which must be</b>
+<i>1673</i>&nbsp;                                    // greater than or equal to chars) there&#39;s no need
+<i>1674</i>&nbsp;                                    // for a stringbuffer (even surrgated char&#39;s are ok)
+<b class="nc"><i>1675</i>&nbsp;            int ii=0;</b>
+<i>1676</i>&nbsp;            int c;
+<b class="nc"><i>1677</i>&nbsp;            int endPosition = this.position() + len;</b>
+<i>1678</i>&nbsp;
+<b class="nc"><i>1679</i>&nbsp;            while (this.position() &lt; endPosition) {</b>
+<b class="nc"><i>1680</i>&nbsp;                c = readUnicodeScalar();</b>
+<b class="nc"><i>1681</i>&nbsp;                if (c &lt; 0) throwUnexpectedEOFException();</b>
+<i>1682</i>&nbsp;                //sb.append((char)c);
+<b class="nc"><i>1683</i>&nbsp;                if (c &lt; 0x10000) {</b>
+<b class="nc"><i>1684</i>&nbsp;                    cb[ii++] = (char)c;</b>
+<i>1685</i>&nbsp;                }
+<i>1686</i>&nbsp;                else {
+<b class="nc"><i>1687</i>&nbsp;                    cb[ii++] = (char)_Private_IonConstants.makeHighSurrogate(c);</b>
+<b class="nc"><i>1688</i>&nbsp;                    cb[ii++] = (char)_Private_IonConstants.makeLowSurrogate(c);</b>
+<i>1689</i>&nbsp;                }
+<i>1690</i>&nbsp;            }
+<i>1691</i>&nbsp;
+<b class="nc"><i>1692</i>&nbsp;            if (this.position() &lt; endPosition) throwUnexpectedEOFException();</b>
+<i>1693</i>&nbsp;
+<b class="nc"><i>1694</i>&nbsp;            return new String(cb, 0, ii); // sb.toString();</b>
+<i>1695</i>&nbsp;        }
+<i>1696</i>&nbsp;        public int readUnicodeScalar() throws IOException {
+<b class="nc"><i>1697</i>&nbsp;            int c = -1, b;</b>
+<i>1698</i>&nbsp;
+<b class="nc"><i>1699</i>&nbsp;            b = read();</b>
+<b class="nc"><i>1700</i>&nbsp;            if (b &lt; 0) return -1;</b>
+<i>1701</i>&nbsp;
+<i>1702</i>&nbsp;            // ascii is all good
+<b class="nc"><i>1703</i>&nbsp;            if ((b &amp; 0x80) == 0) {</b>
+<b class="nc"><i>1704</i>&nbsp;                return b;</b>
+<i>1705</i>&nbsp;            }
+<i>1706</i>&nbsp;
+<i>1707</i>&nbsp;            // now we start gluing the multi-byte value together
+<b class="nc"><i>1708</i>&nbsp;            if ((b &amp; 0xe0) == 0xc0) {</b>
+<i>1709</i>&nbsp;                // for values from 0x80 to 0x7FF (all legal)
+<b class="nc"><i>1710</i>&nbsp;                c = (b &amp; ~0xe0);</b>
+<b class="nc"><i>1711</i>&nbsp;                b = read();</b>
+<b class="nc"><i>1712</i>&nbsp;                if ((b &amp; 0xc0) != 0x80) throwUTF8Exception();</b>
+<b class="nc"><i>1713</i>&nbsp;                c &lt;&lt;= 6;</b>
+<b class="nc"><i>1714</i>&nbsp;                c |= (b &amp; ~0x80);</b>
+<i>1715</i>&nbsp;            }
+<b class="nc"><i>1716</i>&nbsp;            else if ((b &amp; 0xf0) == 0xe0) {</b>
+<i>1717</i>&nbsp;                // for values from 0x800 to 0xFFFFF (NOT all legal)
+<b class="nc"><i>1718</i>&nbsp;                c = (b &amp; ~0xf0);</b>
+<b class="nc"><i>1719</i>&nbsp;                b = read();</b>
+<b class="nc"><i>1720</i>&nbsp;                if ((b &amp; 0xc0) != 0x80) throwUTF8Exception();</b>
+<b class="nc"><i>1721</i>&nbsp;                c &lt;&lt;= 6;</b>
+<b class="nc"><i>1722</i>&nbsp;                c |= (b &amp; ~0x80);</b>
+<b class="nc"><i>1723</i>&nbsp;                b = read();</b>
+<b class="nc"><i>1724</i>&nbsp;                if ((b &amp; 0xc0) != 0x80) throwUTF8Exception();</b>
+<b class="nc"><i>1725</i>&nbsp;                c &lt;&lt;= 6;</b>
+<b class="nc"><i>1726</i>&nbsp;                c |= (b &amp; ~0x80);</b>
+<b class="nc"><i>1727</i>&nbsp;                if (c &gt; 0x00D7FF &amp;&amp; c &lt; 0x00E000) {</b>
+<b class="nc"><i>1728</i>&nbsp;                    throw new IonException(&quot;illegal surrgate value encountered in input utf-8 stream&quot;);</b>
+<i>1729</i>&nbsp;                }
+<i>1730</i>&nbsp;            }
+<b class="nc"><i>1731</i>&nbsp;            else if ((b &amp; 0xf8) == 0xf0) {</b>
+<i>1732</i>&nbsp;                // for values from 0x010000 to 0x1FFFFF (NOT all legal)
+<b class="nc"><i>1733</i>&nbsp;                c = (b &amp; ~0xf8);</b>
+<b class="nc"><i>1734</i>&nbsp;                b = read();</b>
+<b class="nc"><i>1735</i>&nbsp;                if ((b &amp; 0xc0) != 0x80) throwUTF8Exception();</b>
+<b class="nc"><i>1736</i>&nbsp;                c &lt;&lt;= 6;</b>
+<b class="nc"><i>1737</i>&nbsp;                c |= (b &amp; ~0x80);</b>
+<b class="nc"><i>1738</i>&nbsp;                b = read();</b>
+<b class="nc"><i>1739</i>&nbsp;                if ((b &amp; 0xc0) != 0x80) throwUTF8Exception();</b>
+<b class="nc"><i>1740</i>&nbsp;                c &lt;&lt;= 6;</b>
+<b class="nc"><i>1741</i>&nbsp;                c |= (b &amp; ~0x80);</b>
+<b class="nc"><i>1742</i>&nbsp;                b = read();</b>
+<b class="nc"><i>1743</i>&nbsp;                if ((b &amp; 0xc0) != 0x80) throwUTF8Exception();</b>
+<b class="nc"><i>1744</i>&nbsp;                c &lt;&lt;= 6;</b>
+<b class="nc"><i>1745</i>&nbsp;                c |= (b &amp; ~0x80);</b>
+<b class="nc"><i>1746</i>&nbsp;                if (c &gt; 0x10FFFF) {</b>
+<b class="nc"><i>1747</i>&nbsp;                    throw new IonException(&quot;illegal surrgate value encountered in input utf-8 stream&quot;);</b>
+<i>1748</i>&nbsp;                }
+<i>1749</i>&nbsp;            }
+<i>1750</i>&nbsp;            else {
+<b class="nc"><i>1751</i>&nbsp;                throwUTF8Exception();</b>
+<i>1752</i>&nbsp;            }
+<b class="nc"><i>1753</i>&nbsp;            return c;</b>
+<i>1754</i>&nbsp;        }
+<i>1755</i>&nbsp;        void throwUTF8Exception()
+<i>1756</i>&nbsp;        {
+<b class="nc"><i>1757</i>&nbsp;            throw new IonException(&quot;Invalid UTF-8 character encounter in a string at pos &quot; + this.position());</b>
+<i>1758</i>&nbsp;        }
+<i>1759</i>&nbsp;        void throwUnexpectedEOFException() {
+<b class="nc"><i>1760</i>&nbsp;            throw new BlockedBuffer.BlockedBufferException(&quot;unexpected EOF in value at offset &quot; + this.position());</b>
+<i>1761</i>&nbsp;        }
+<i>1762</i>&nbsp;
+<i>1763</i>&nbsp;        public String readString() throws IOException {
+<b class="nc"><i>1764</i>&nbsp;            int td = read();</b>
+<b class="nc"><i>1765</i>&nbsp;            if (_Private_IonConstants.getTypeCode(td) != _Private_IonConstants.tidString) {</b>
+<b class="nc"><i>1766</i>&nbsp;                throw new IonException(&quot;readString helper only works for string(7) not &quot;+((td &gt;&gt; 4 &amp; 0xf)));</b>
+<i>1767</i>&nbsp;            }
+<b class="nc"><i>1768</i>&nbsp;            int len = (td &amp; 0xf);</b>
+<b class="nc"><i>1769</i>&nbsp;            if (len == _Private_IonConstants.lnIsNullAtom) {</b>
+<b class="nc"><i>1770</i>&nbsp;                return null;</b>
+<i>1771</i>&nbsp;            }
+<b class="nc"><i>1772</i>&nbsp;            else if (len == _Private_IonConstants.lnIsVarLen) {</b>
+<b class="nc"><i>1773</i>&nbsp;                len = this.readVarUIntAsInt();</b>
+<i>1774</i>&nbsp;            }
+<b class="nc"><i>1775</i>&nbsp;            return readString(len);</b>
+<i>1776</i>&nbsp;        }
+<i>1777</i>&nbsp;
+<i>1778</i>&nbsp;        /**
+<i>1779</i>&nbsp;         * Skips through a NOP pad if there is one. Must be called at the beginning of type description
+<i>1780</i>&nbsp;         *
+<i>1781</i>&nbsp;         * It&#39;s no-op if there is no Nop pad to skip through at the current position
+<i>1782</i>&nbsp;         *
+<i>1783</i>&nbsp;         * @return true if it skipped through a nop pad
+<i>1784</i>&nbsp;         */
+<i>1785</i>&nbsp;        boolean skipThroughNopPad() throws IOException
+<i>1786</i>&nbsp;        {
+<b class="nc"><i>1787</i>&nbsp;            int originalPosition = this._pos;</b>
+<i>1788</i>&nbsp;
+<i>1789</i>&nbsp;            // check to see if there is a type declaration as it&#39;s not valid to annotate nop pads
+<b class="nc"><i>1790</i>&nbsp;            int c = this.read();</b>
+<b class="nc"><i>1791</i>&nbsp;            boolean hasTypedecl = _Private_IonConstants.getTypeCode(c) == _Private_IonConstants.tidTypedecl;</b>
+<b class="nc"><i>1792</i>&nbsp;            this.setPosition(originalPosition);</b>
+<i>1793</i>&nbsp;
+<b class="nc"><i>1794</i>&nbsp;            int typeDesc = this.readActualTypeDesc();</b>
+<b class="nc"><i>1795</i>&nbsp;            int tid = _Private_IonConstants.getTypeCode(typeDesc);</b>
+<b class="nc"><i>1796</i>&nbsp;            int len = _Private_IonConstants.getLowNibble(typeDesc);</b>
+<i>1797</i>&nbsp;
+<b class="nc"><i>1798</i>&nbsp;            if(tid == _Private_IonConstants.tidNull &amp;&amp; len != _Private_IonConstants.lnIsNull){</b>
+<b class="nc"><i>1799</i>&nbsp;                if(hasTypedecl) {</b>
+<b class="nc"><i>1800</i>&nbsp;                    throw new IonException(&quot;NOP padding is not allowed within annotation wrappers.&quot;);</b>
+<i>1801</i>&nbsp;                }
+<i>1802</i>&nbsp;
+<b class="nc"><i>1803</i>&nbsp;                int toSkip = this.readLength(_Private_IonConstants.tidNopPad, len);</b>
+<b class="nc"><i>1804</i>&nbsp;                long skipped = this.skip(toSkip);</b>
+<b class="nc"><i>1805</i>&nbsp;                if(toSkip &gt; 0 &amp;&amp; toSkip != skipped) {</b>
+<b class="nc"><i>1806</i>&nbsp;                    throw new IonException(&quot;Nop pad too short declared length: &quot; + toSkip + &quot; pad actual size: &quot; + skipped);</b>
+<i>1807</i>&nbsp;                }
+<i>1808</i>&nbsp;
+<b class="nc"><i>1809</i>&nbsp;                return true;</b>
+<i>1810</i>&nbsp;            }
+<i>1811</i>&nbsp;
+<i>1812</i>&nbsp;            // resets the reader if it wasn&#39;t a NOP pad
+<b class="nc"><i>1813</i>&nbsp;            this.setPosition(originalPosition);</b>
+<i>1814</i>&nbsp;
+<b class="nc"><i>1815</i>&nbsp;            return false;</b>
+<i>1816</i>&nbsp;        }
+<i>1817</i>&nbsp;    }
+<i>1818</i>&nbsp;
+<b class="fc"><i>1819</i>&nbsp;    public static final class Writer</b>
+<i>1820</i>&nbsp;        extends BlockedBuffer.BlockedByteOutputStream
+<i>1821</i>&nbsp;    {
+<i>1822</i>&nbsp;        /**
+<i>1823</i>&nbsp;         * creates writable stream (OutputStream) that writes
+<i>1824</i>&nbsp;         * to a fresh blocked buffer.  The stream is initially
+<i>1825</i>&nbsp;         * position at offset 0.
+<i>1826</i>&nbsp;         */
+<b class="nc"><i>1827</i>&nbsp;        public Writer() { super(); }</b>
+<i>1828</i>&nbsp;        /**
+<i>1829</i>&nbsp;         * creates writable stream (OutputStream) that writes
+<i>1830</i>&nbsp;         * to the supplied byte buffer.  The stream is initially
+<i>1831</i>&nbsp;         * position at offset 0.
+<i>1832</i>&nbsp;         * @param bb blocked buffer to write to
+<i>1833</i>&nbsp;         */
+<b class="fc"><i>1834</i>&nbsp;        public Writer(BlockedBuffer bb) { super(bb); }</b>
+<i>1835</i>&nbsp;        /**
+<i>1836</i>&nbsp;         * creates writable stream (OutputStream) that can write
+<i>1837</i>&nbsp;         * to the supplied byte buffer.  The stream is initially
+<i>1838</i>&nbsp;         * position at offset off.
+<i>1839</i>&nbsp;         * @param bb blocked buffer to write to
+<i>1840</i>&nbsp;         * @param off initial offset to write to
+<i>1841</i>&nbsp;         */
+<b class="nc"><i>1842</i>&nbsp;        public Writer(BlockedBuffer bb, int off) { super(bb, off); }</b>
+<i>1843</i>&nbsp;
+<i>1844</i>&nbsp;        Stack&lt;PositionMarker&gt; _pos_stack;
+<i>1845</i>&nbsp;        Stack&lt;Integer&gt;        _pending_high_surrogate_stack;
+<i>1846</i>&nbsp;        int                   _pending_high_surrogate;
+<i>1847</i>&nbsp;        public void pushPosition(Object o)
+<i>1848</i>&nbsp;        {
+<b class="nc"><i>1849</i>&nbsp;            PositionMarker pm = new PositionMarker(this.position(), o);</b>
+<b class="nc"><i>1850</i>&nbsp;            if (_pos_stack == null) {</b>
+<b class="nc"><i>1851</i>&nbsp;                _pos_stack = new Stack&lt;PositionMarker&gt;();</b>
+<b class="nc"><i>1852</i>&nbsp;                _pending_high_surrogate_stack = new Stack&lt;Integer&gt;();</b>
+<i>1853</i>&nbsp;            }
+<b class="nc"><i>1854</i>&nbsp;            _pos_stack.push(pm);</b>
+<b class="nc"><i>1855</i>&nbsp;            _pending_high_surrogate_stack.push(_pending_high_surrogate);</b>
+<b class="nc"><i>1856</i>&nbsp;            _pending_high_surrogate = 0;</b>
+<b class="nc"><i>1857</i>&nbsp;        }</b>
+<i>1858</i>&nbsp;        public PositionMarker popPosition()
+<i>1859</i>&nbsp;        {
+<b class="nc"><i>1860</i>&nbsp;            if (_pending_high_surrogate != 0) {</b>
+<b class="nc"><i>1861</i>&nbsp;                throw new IonException(&quot;unmatched high surrogate encountered in input, illegal utf-16 character sequence&quot;);</b>
+<i>1862</i>&nbsp;            }
+<b class="nc"><i>1863</i>&nbsp;            PositionMarker pm = _pos_stack.pop();</b>
+<b class="nc"><i>1864</i>&nbsp;            _pending_high_surrogate = _pending_high_surrogate_stack.pop();</b>
+<b class="nc"><i>1865</i>&nbsp;            return pm;</b>
+<i>1866</i>&nbsp;        }
+<i>1867</i>&nbsp;
+<i>1868</i>&nbsp;        /*****************************************************************************
+<i>1869</i>&nbsp;        *
+<i>1870</i>&nbsp;        * These routines work together to write very long values from an input
+<i>1871</i>&nbsp;        * reader where we don&#39;t know how long the value is going to be in advance.
+<i>1872</i>&nbsp;        *
+<i>1873</i>&nbsp;        * Basically it tries to write a short value (len &lt;= BB_SHORT_LEN_MAX) and if
+<i>1874</i>&nbsp;        * that fails it moves the data around in the buffers and moves buffers worth
+<i>1875</i>&nbsp;        * of data at a time.
+<i>1876</i>&nbsp;        *
+<i>1877</i>&nbsp;        */
+<i>1878</i>&nbsp;        static class lhNode
+<i>1879</i>&nbsp;        {
+<i>1880</i>&nbsp;           int     _hn;
+<i>1881</i>&nbsp;           int     _lownibble;
+<i>1882</i>&nbsp;           boolean _length_follows;
+<i>1883</i>&nbsp;
+<i>1884</i>&nbsp;           lhNode(int hn
+<i>1885</i>&nbsp;                 ,int lownibble
+<i>1886</i>&nbsp;                 ,boolean length_follows
+<b class="nc"><i>1887</i>&nbsp;           ) {</b>
+<b class="nc"><i>1888</i>&nbsp;               _hn = hn;</b>
+<b class="nc"><i>1889</i>&nbsp;               _lownibble = lownibble;</b>
+<b class="nc"><i>1890</i>&nbsp;               _length_follows = length_follows;</b>
+<i>1891</i>&nbsp;           }
+<i>1892</i>&nbsp;        }
+<i>1893</i>&nbsp;
+<i>1894</i>&nbsp;        public void startLongWrite(int hn) throws IOException
+<i>1895</i>&nbsp;        {
+<b class="nc"><i>1896</i>&nbsp;            if (debugValidation) _validate();</b>
+<i>1897</i>&nbsp;
+<b class="nc"><i>1898</i>&nbsp;            pushLongHeader(hn, 0, false);</b>
+<i>1899</i>&nbsp;
+<b class="nc"><i>1900</i>&nbsp;            this.writeCommonHeader(hn, 0);</b>
+<i>1901</i>&nbsp;
+<b class="nc"><i>1902</i>&nbsp;            if (debugValidation) _validate();</b>
+<b class="nc"><i>1903</i>&nbsp;        }</b>
+<i>1904</i>&nbsp;
+<i>1905</i>&nbsp;        public void pushLongHeader(int  hn
+<i>1906</i>&nbsp;                                  ,int lownibble
+<i>1907</i>&nbsp;                                  ,boolean length_follows
+<i>1908</i>&nbsp;        ) {
+<b class="nc"><i>1909</i>&nbsp;           lhNode n = new lhNode(hn, lownibble, length_follows);</b>
+<b class="nc"><i>1910</i>&nbsp;           pushPosition(n);</b>
+<b class="nc"><i>1911</i>&nbsp;        }</b>
+<i>1912</i>&nbsp;
+<i>1913</i>&nbsp;
+<i>1914</i>&nbsp;        /**
+<i>1915</i>&nbsp;         * Update the TD/LEN header of a value.
+<i>1916</i>&nbsp;         *
+<i>1917</i>&nbsp;         * @param hn high nibble value (or type id)
+<i>1918</i>&nbsp;         * @param lownibble is the low nibble value.
+<i>1919</i>&nbsp;         * If -1, then the low nibble is pulled from the header node pushed
+<i>1920</i>&nbsp;         * previously.  If the header node had lengthFollows==false then this
+<i>1921</i>&nbsp;         * is ignored and the LN is computed from what was actually written.
+<i>1922</i>&nbsp;         */
+<i>1923</i>&nbsp;        public void patchLongHeader(int hn, int lownibble) throws IOException
+<i>1924</i>&nbsp;        {
+<b class="nc"><i>1925</i>&nbsp;           int currpos = this.position();</b>
+<i>1926</i>&nbsp;
+<b class="nc"><i>1927</i>&nbsp;           if (debugValidation) _validate();</b>
+<i>1928</i>&nbsp;
+<i>1929</i>&nbsp;           // get the header description we pushed on the stack a while ago
+<i>1930</i>&nbsp;           // pop also checks to make sure we don&#39;t have a dangling high
+<i>1931</i>&nbsp;           // surrogate pending
+<b class="nc"><i>1932</i>&nbsp;           PositionMarker pm = this.popPosition();</b>
+<b class="nc"><i>1933</i>&nbsp;           lhNode n = (lhNode)pm.getUserData();</b>
+<b class="nc"><i>1934</i>&nbsp;           int totallen = currpos - pm.getPosition();</b>
+<i>1935</i>&nbsp;
+<i>1936</i>&nbsp;           // fix up the low nibble if we need to
+<b class="nc"><i>1937</i>&nbsp;           if (lownibble == -1) {</b>
+<b class="nc"><i>1938</i>&nbsp;               lownibble = n._lownibble;</b>
+<i>1939</i>&nbsp;           }
+<i>1940</i>&nbsp;
+<i>1941</i>&nbsp;           // calculate the length just the value itself
+<i>1942</i>&nbsp;           // we don&#39;t count the type descriptor in the value len
+<b class="nc"><i>1943</i>&nbsp;           int writtenValueLen = totallen - _Private_IonConstants.BB_TOKEN_LEN;</b>
+<i>1944</i>&nbsp;
+<i>1945</i>&nbsp;           // now we can figure out how long the value is going to be
+<i>1946</i>&nbsp;
+<i>1947</i>&nbsp;           // This is the length of the length (it does NOT
+<i>1948</i>&nbsp;           // count the typedesc byte however)
+<b class="nc"><i>1949</i>&nbsp;           int len_o_len = IonBinary.lenVarUInt(writtenValueLen);</b>
+<i>1950</i>&nbsp;
+<i>1951</i>&nbsp;           // TODO cleanup this logic.  lengthFollows == is struct
+<b class="nc"><i>1952</i>&nbsp;           if (n._length_follows) {</b>
+<b class="nc"><i>1953</i>&nbsp;               assert hn == _Private_IonConstants.tidStruct;</b>
+<i>1954</i>&nbsp;
+<b class="nc"><i>1955</i>&nbsp;               if (lownibble == _Private_IonConstants.lnIsOrderedStruct)</b>
+<i>1956</i>&nbsp;               {
+<i>1957</i>&nbsp;                   // leave len_o_len alone
+<i>1958</i>&nbsp;               }
+<i>1959</i>&nbsp;               else
+<i>1960</i>&nbsp;               {
+<b class="nc"><i>1961</i>&nbsp;                   if (writtenValueLen &lt; _Private_IonConstants.lnIsVarLen) {</b>
+<b class="nc"><i>1962</i>&nbsp;                       lownibble = writtenValueLen;</b>
+<b class="nc"><i>1963</i>&nbsp;                       len_o_len = 0;</b>
+<i>1964</i>&nbsp;                   }
+<i>1965</i>&nbsp;                   else {
+<b class="nc"><i>1966</i>&nbsp;                       lownibble = _Private_IonConstants.lnIsVarLen;</b>
+<i>1967</i>&nbsp;                   }
+<b class="nc"><i>1968</i>&nbsp;                   assert lownibble != _Private_IonConstants.lnIsOrderedStruct;</b>
+<i>1969</i>&nbsp;               }
+<i>1970</i>&nbsp;           }
+<i>1971</i>&nbsp;           else {
+<b class="nc"><i>1972</i>&nbsp;               if (writtenValueLen &lt; _Private_IonConstants.lnIsVarLen) {</b>
+<b class="nc"><i>1973</i>&nbsp;                   lownibble = writtenValueLen;</b>
+<b class="nc"><i>1974</i>&nbsp;                   len_o_len = 0;</b>
+<i>1975</i>&nbsp;               }
+<i>1976</i>&nbsp;               else {
+<b class="nc"><i>1977</i>&nbsp;                   lownibble = _Private_IonConstants.lnIsVarLen;</b>
+<i>1978</i>&nbsp;               }
+<i>1979</i>&nbsp;           }
+<i>1980</i>&nbsp;
+<i>1981</i>&nbsp;           // first we go back to the beginning
+<b class="nc"><i>1982</i>&nbsp;           this.setPosition(pm.getPosition());</b>
+<i>1983</i>&nbsp;
+<i>1984</i>&nbsp;           // figure out if we need to move the trailing data to make
+<i>1985</i>&nbsp;           // room for the variable length length
+<b class="nc"><i>1986</i>&nbsp;           int needed = len_o_len;</b>
+<b class="nc"><i>1987</i>&nbsp;           if (needed &gt; 0) {</b>
+<i>1988</i>&nbsp;               // insert does the heavy lifting of making room for us
+<i>1989</i>&nbsp;               // at the current position for &quot;needed&quot; additional bytes
+<b class="nc"><i>1990</i>&nbsp;               insert(needed);</b>
+<i>1991</i>&nbsp;           }
+<i>1992</i>&nbsp;
+<i>1993</i>&nbsp;           // so, we have room (or already had enough) now we can write
+<i>1994</i>&nbsp;           // replacement type descriptor and the length and the reset the pos
+<b class="nc"><i>1995</i>&nbsp;           this.writeByte(_Private_IonConstants.makeTypeDescriptor(hn, lownibble));</b>
+<b class="nc"><i>1996</i>&nbsp;           if (len_o_len &gt; 0) {</b>
+<b class="nc"><i>1997</i>&nbsp;               this.writeVarUIntValue(writtenValueLen, true);</b>
+<i>1998</i>&nbsp;           }
+<i>1999</i>&nbsp;
+<b class="nc"><i>2000</i>&nbsp;           if (needed &lt; 0) {</b>
+<i>2001</i>&nbsp;               // in the unlikely event we wrote more than we needed, now
+<i>2002</i>&nbsp;               // is the time to remove it.  (which does happen from time to time)
+<b class="nc"><i>2003</i>&nbsp;               this.remove(-needed);</b>
+<i>2004</i>&nbsp;           }
+<i>2005</i>&nbsp;
+<i>2006</i>&nbsp;           // return the cursor to it&#39;s correct location,
+<i>2007</i>&nbsp;           // taking into account the added length data
+<b class="nc"><i>2008</i>&nbsp;           this.setPosition(currpos + needed);</b>
+<i>2009</i>&nbsp;
+<b class="nc"><i>2010</i>&nbsp;           if (debugValidation) _validate();</b>
+<i>2011</i>&nbsp;
+<b class="nc"><i>2012</i>&nbsp;        }</b>
+<i>2013</i>&nbsp;
+<i>2014</i>&nbsp;        // TODO - this may have problems with unicode utf16/utf8 conversions
+<i>2015</i>&nbsp;        // note that this reads characters that have already had the escape
+<i>2016</i>&nbsp;        // sequence processed (so we don&#39;t want to do that a second time)
+<i>2017</i>&nbsp;        // the chars here were filled by the IonTokenReader which already
+<i>2018</i>&nbsp;        // de-escaped the escaped sequences from the input, so all chars are &quot;real&quot;
+<i>2019</i>&nbsp;        public void appendToLongValue(CharSequence chars, boolean onlyByteSizedCharacters) throws IOException
+<i>2020</i>&nbsp;        {
+<b class="nc"><i>2021</i>&nbsp;            if (debugValidation) _validate();</b>
+<i>2022</i>&nbsp;
+<b class="nc"><i>2023</i>&nbsp;            int len = chars.length(); // TODO is this ever &gt;0 for clob?</b>
+<i>2024</i>&nbsp;
+<b class="nc"><i>2025</i>&nbsp;            for (int ii = 0; ii &lt; len; ii++)</b>
+<i>2026</i>&nbsp;            {
+<b class="nc"><i>2027</i>&nbsp;                int c = chars.charAt(ii);</b>
+<b class="nc"><i>2028</i>&nbsp;                if (onlyByteSizedCharacters) {</b>
+<b class="nc"><i>2029</i>&nbsp;                    if (c &gt; 255) {</b>
+<b class="nc"><i>2030</i>&nbsp;                        throw new IonException(&quot;escaped character value too large in clob (0 to 255 only)&quot;);</b>
+<i>2031</i>&nbsp;                    }
+<b class="nc"><i>2032</i>&nbsp;                    write((byte)(0xff &amp; c));</b>
+<i>2033</i>&nbsp;                }
+<i>2034</i>&nbsp;                else {
+<b class="nc"><i>2035</i>&nbsp;                    if (_pending_high_surrogate != 0) {</b>
+<b class="nc"><i>2036</i>&nbsp;                        if ((c &amp; _Private_IonConstants.surrogate_mask) != _Private_IonConstants.low_surrogate_value) {</b>
+<b class="nc"><i>2037</i>&nbsp;                            throw new IonException(&quot;unmatched high surrogate character encountered, invalid utf-16&quot;);</b>
+<i>2038</i>&nbsp;                        }
+<b class="nc"><i>2039</i>&nbsp;                        c = _Private_IonConstants.makeUnicodeScalar(_pending_high_surrogate, c);</b>
+<b class="nc"><i>2040</i>&nbsp;                        _pending_high_surrogate = 0;</b>
+<i>2041</i>&nbsp;                    }
+<b class="nc"><i>2042</i>&nbsp;                    else if ((c &amp; _Private_IonConstants.surrogate_mask) == _Private_IonConstants.high_surrogate_value) {</b>
+<b class="nc"><i>2043</i>&nbsp;                        ii++;</b>
+<b class="nc"><i>2044</i>&nbsp;                        if (ii &gt;= len) {</b>
+<i>2045</i>&nbsp;                            // a trailing high surrogate, we just remember it for later
+<i>2046</i>&nbsp;                            // and (hopefully, and usually, the low surrogate will be
+<i>2047</i>&nbsp;                            // appended shortly
+<b class="nc"><i>2048</i>&nbsp;                            _pending_high_surrogate = c;</b>
+<b class="nc"><i>2049</i>&nbsp;                            break;</b>
+<i>2050</i>&nbsp;                        }
+<b class="nc"><i>2051</i>&nbsp;                        int c2 = chars.charAt(ii);</b>
+<b class="nc"><i>2052</i>&nbsp;                        if ((c2 &amp; _Private_IonConstants.surrogate_mask) != _Private_IonConstants.low_surrogate_value) {</b>
+<b class="nc"><i>2053</i>&nbsp;                            throw new IonException(&quot;unmatched high surrogate character encountered, invalid utf-16&quot;);</b>
+<i>2054</i>&nbsp;                    }
+<b class="nc"><i>2055</i>&nbsp;                        c = _Private_IonConstants.makeUnicodeScalar(c, c2);</b>
+<b class="nc"><i>2056</i>&nbsp;                    }</b>
+<b class="nc"><i>2057</i>&nbsp;                    else if ((c &amp; _Private_IonConstants.surrogate_mask) == _Private_IonConstants.low_surrogate_value) {</b>
+<b class="nc"><i>2058</i>&nbsp;                        throw new IonException(&quot;unmatched low surrogate character encountered, invalid utf-16&quot;);</b>
+<i>2059</i>&nbsp;                    }
+<b class="nc"><i>2060</i>&nbsp;                    writeUnicodeScalarAsUTF8(c);</b>
+<i>2061</i>&nbsp;                }
+<i>2062</i>&nbsp;            }
+<i>2063</i>&nbsp;
+<b class="nc"><i>2064</i>&nbsp;            if (debugValidation) _validate();</b>
+<b class="nc"><i>2065</i>&nbsp;        }</b>
+<i>2066</i>&nbsp;
+<i>2067</i>&nbsp;        // helper for appendToLongValue below - this never cares about surrogates
+<i>2068</i>&nbsp;        // as it only consumes terminators which are ascii
+<i>2069</i>&nbsp;        final boolean isLongTerminator(int terminator, PushbackReader r) throws IOException {
+<i>2070</i>&nbsp;            int c;
+<i>2071</i>&nbsp;
+<i>2072</i>&nbsp;            // look for terminator 2 - if it&#39;s not there put back what we saw
+<b class="nc"><i>2073</i>&nbsp;            c = r.read();</b>
+<b class="nc"><i>2074</i>&nbsp;            if (c != terminator) {</b>
+<b class="nc"><i>2075</i>&nbsp;                r.unread(c);</b>
+<b class="nc"><i>2076</i>&nbsp;                return false;</b>
+<i>2077</i>&nbsp;            }
+<i>2078</i>&nbsp;
+<i>2079</i>&nbsp;            // look for terminator 3 - otherwise put back what we saw and the
+<i>2080</i>&nbsp;            // preceeding terminator we found above
+<b class="nc"><i>2081</i>&nbsp;            c = r.read();</b>
+<b class="nc"><i>2082</i>&nbsp;            if (c != terminator) {</b>
+<b class="nc"><i>2083</i>&nbsp;                r.unread(c);</b>
+<b class="nc"><i>2084</i>&nbsp;                r.unread(terminator);</b>
+<b class="nc"><i>2085</i>&nbsp;                return false;</b>
+<i>2086</i>&nbsp;            }
+<i>2087</i>&nbsp;            // we found 3 in a row - now that&#39;s a long terminator
+<b class="nc"><i>2088</i>&nbsp;            return true;</b>
+<i>2089</i>&nbsp;        }
+<i>2090</i>&nbsp;
+<i>2091</i>&nbsp;        /**
+<i>2092</i>&nbsp;        * Reads the remainder of a quoted string/symbol into this buffer.
+<i>2093</i>&nbsp;        * The closing quotes are consumed from the reader.
+<i>2094</i>&nbsp;        * &lt;p&gt;
+<i>2095</i>&nbsp;        * XXX  WARNING  XXX
+<i>2096</i>&nbsp;        * Almost identical logic is found in
+<i>2097</i>&nbsp;        * {@link IonTokenReader#finishScanString(boolean)}
+<i>2098</i>&nbsp;        *
+<i>2099</i>&nbsp;        * @param terminator the closing quote character.
+<i>2100</i>&nbsp;        * @param longstring
+<i>2101</i>&nbsp;        * @param r
+<i>2102</i>&nbsp;        * @throws IOException
+<i>2103</i>&nbsp;        */
+<i>2104</i>&nbsp;        public void appendToLongValue(int terminator
+<i>2105</i>&nbsp;                                     ,boolean longstring
+<i>2106</i>&nbsp;                                     ,boolean onlyByteSizedCharacters
+<i>2107</i>&nbsp;                                     ,boolean decodeEscapeSequences
+<i>2108</i>&nbsp;                                     ,PushbackReader r
+<i>2109</i>&nbsp;                                     )
+<i>2110</i>&nbsp;           throws IOException, UnexpectedEofException
+<i>2111</i>&nbsp;        {
+<i>2112</i>&nbsp;            int c;
+<i>2113</i>&nbsp;
+<b class="nc"><i>2114</i>&nbsp;            if (debugValidation) {</b>
+<b class="nc"><i>2115</i>&nbsp;                if (terminator == -1 &amp;&amp; longstring) {</b>
+<b class="nc"><i>2116</i>&nbsp;                    throw new IllegalStateException(&quot;longstrings have to have a terminator, no eof termination&quot;);</b>
+<i>2117</i>&nbsp;                }
+<b class="nc"><i>2118</i>&nbsp;                _validate();</b>
+<i>2119</i>&nbsp;            }
+<i>2120</i>&nbsp;
+<b class="nc"><i>2121</i>&nbsp;            assert(terminator != &#39;\\&#39;);</b>
+<i>2122</i>&nbsp;            for (;;) {
+<b class="nc"><i>2123</i>&nbsp;                c = r.read();  // we put off the surrogate logic as long as possible (so not here)</b>
+<i>2124</i>&nbsp;
+<b class="nc"><i>2125</i>&nbsp;                if (c == terminator) {</b>
+<b class="nc"><i>2126</i>&nbsp;                    if (!longstring || isLongTerminator(terminator, r)) {</b>
+<i>2127</i>&nbsp;                        // if it&#39;s not a long string one quote is enough otherwise look ahead
+<b class="nc"><i>2128</i>&nbsp;                        break;</b>
+<i>2129</i>&nbsp;                    }
+<i>2130</i>&nbsp;                }
+<b class="nc"><i>2131</i>&nbsp;                else if (c == -1) {</b>
+<b class="nc"><i>2132</i>&nbsp;                    throw new UnexpectedEofException();</b>
+<i>2133</i>&nbsp;                }
+<b class="nc"><i>2134</i>&nbsp;                else if (c == &#39;\n&#39; || c == &#39;\r&#39;) {</b>
+<i>2135</i>&nbsp;                    // here we&#39;ll handle embedded new line detection and escaped characters
+<b class="nc"><i>2136</i>&nbsp;                    if ((terminator != -1) &amp;&amp; !longstring) {</b>
+<b class="nc"><i>2137</i>&nbsp;                        throw new IonException(&quot;unexpected line terminator encountered in quoted string&quot;);</b>
+<i>2138</i>&nbsp;                    }
+<i>2139</i>&nbsp;                        }
+<b class="nc"><i>2140</i>&nbsp;                else if (decodeEscapeSequences &amp;&amp; c == &#39;\\&#39;) {</b>
+<i>2141</i>&nbsp;                    // if this is an escape sequence we need to process it now
+<i>2142</i>&nbsp;                    // since we allow a surrogate to be encoded using \ u (or \ U)
+<i>2143</i>&nbsp;                    // encoding
+<b class="nc"><i>2144</i>&nbsp;                    c = IonTokenReader.readEscapedCharacter(r, onlyByteSizedCharacters);</b>
+<b class="nc"><i>2145</i>&nbsp;                    if (c == IonTokenReader.EMPTY_ESCAPE_SEQUENCE) {</b>
+<b class="nc"><i>2146</i>&nbsp;                        continue;</b>
+<i>2147</i>&nbsp;                    }
+<i>2148</i>&nbsp;                }
+<i>2149</i>&nbsp;
+<b class="nc"><i>2150</i>&nbsp;                if (onlyByteSizedCharacters) {</b>
+<b class="nc"><i>2151</i>&nbsp;                    assert(_pending_high_surrogate == 0); // if it&#39;s byte sized only, then we shouldn&#39;t have a dangling surrogate</b>
+<b class="nc"><i>2152</i>&nbsp;                    if ((c &amp; (~0xff)) != 0) {</b>
+<b class="nc"><i>2153</i>&nbsp;                        throw new IonException(&quot;escaped character value too large in clob (0 to 255 only)&quot;);</b>
+<i>2154</i>&nbsp;                    }
+<b class="nc"><i>2155</i>&nbsp;                    write((byte)(0xff &amp; c));</b>
+<i>2156</i>&nbsp;                }
+<i>2157</i>&nbsp;                else {
+<i>2158</i>&nbsp;                    // for larger characters we have to glue together surrogates, regardless
+<i>2159</i>&nbsp;                    // of how they were encoded.  If we have a high surrogate and go to peek
+<i>2160</i>&nbsp;                    // for the low surrogate and hit the end of a segment of a long string
+<i>2161</i>&nbsp;                    // (triple quoted multi-line string) we leave a dangling high surrogate
+<i>2162</i>&nbsp;                    // that will get picked up on the next call into this routine when the
+<i>2163</i>&nbsp;                    // next segment of the long string is processed
+<b class="nc"><i>2164</i>&nbsp;                    if (_pending_high_surrogate != 0) {</b>
+<b class="nc"><i>2165</i>&nbsp;                        if ((c &amp; _Private_IonConstants.surrogate_mask) != _Private_IonConstants.low_surrogate_value) {</b>
+<b class="nc"><i>2166</i>&nbsp;                            String message =</b>
+<i>2167</i>&nbsp;                                &quot;Text contains unmatched UTF-16 high surrogate &quot; +
+<b class="nc"><i>2168</i>&nbsp;                                IonTextUtils.printCodePointAsString(_pending_high_surrogate);</b>
+<b class="nc"><i>2169</i>&nbsp;                            throw new IonException(message);</b>
+<i>2170</i>&nbsp;                        }
+<b class="nc"><i>2171</i>&nbsp;                        c = _Private_IonConstants.makeUnicodeScalar(_pending_high_surrogate, c);</b>
+<b class="nc"><i>2172</i>&nbsp;                        _pending_high_surrogate = 0;</b>
+<i>2173</i>&nbsp;                    }
+<b class="nc"><i>2174</i>&nbsp;                    else if ((c &amp; _Private_IonConstants.surrogate_mask) == _Private_IonConstants.high_surrogate_value) {</b>
+<b class="nc"><i>2175</i>&nbsp;                        int c2 = r.read();</b>
+<b class="nc"><i>2176</i>&nbsp;                        if (c2 == terminator) {</b>
+<b class="nc"><i>2177</i>&nbsp;                            if (longstring &amp;&amp; isLongTerminator(terminator, r)) {</b>
+<i>2178</i>&nbsp;                                // if it&#39;s a long string termination we&#39;ll hang onto the current c as the pending surrogate
+<b class="nc"><i>2179</i>&nbsp;                                _pending_high_surrogate = c;</b>
+<b class="nc"><i>2180</i>&nbsp;                                c = terminator;</b>
+<b class="nc"><i>2181</i>&nbsp;                                break;</b>
+<i>2182</i>&nbsp;                            }
+<i>2183</i>&nbsp;                            // otherwise this is an error
+<b class="nc"><i>2184</i>&nbsp;                            String message =</b>
+<i>2185</i>&nbsp;                                &quot;Text contains unmatched UTF-16 high surrogate &quot; +
+<b class="nc"><i>2186</i>&nbsp;                                IonTextUtils.printCodePointAsString(c);</b>
+<b class="nc"><i>2187</i>&nbsp;                            throw new IonException(message);</b>
+<i>2188</i>&nbsp;                        }
+<b class="nc"><i>2189</i>&nbsp;                        else if (c2 == -1) {</b>
+<i>2190</i>&nbsp;                            // eof is also an error - really two errors
+<b class="nc"><i>2191</i>&nbsp;                            throw new UnexpectedEofException();</b>
+<i>2192</i>&nbsp;                        }
+<i>2193</i>&nbsp;                        //here we convert escape sequences into characters and continue until
+<i>2194</i>&nbsp;                        //we encounter a non-newline escape (typically immediately)
+<b class="nc"><i>2195</i>&nbsp;                        while (decodeEscapeSequences &amp;&amp; c2 == &#39;\\&#39;) {</b>
+<b class="nc"><i>2196</i>&nbsp;                            c2 = IonTokenReader.readEscapedCharacter(r, onlyByteSizedCharacters);</b>
+<b class="nc"><i>2197</i>&nbsp;                            if (c2 != IonTokenReader.EMPTY_ESCAPE_SEQUENCE) break;</b>
+<b class="nc"><i>2198</i>&nbsp;                            c2 = r.read();</b>
+<b class="nc"><i>2199</i>&nbsp;                            if (c2 == terminator) {</b>
+<b class="nc"><i>2200</i>&nbsp;                                if (longstring &amp;&amp; isLongTerminator(terminator, r)) {</b>
+<i>2201</i>&nbsp;                                    // if it&#39;s a long string termination we&#39;ll hang onto the current c as the pending surrogate
+<b class="nc"><i>2202</i>&nbsp;                                    _pending_high_surrogate = c;</b>
+<b class="nc"><i>2203</i>&nbsp;                                    c = c2; // we&#39;ll be checking this below</b>
+<b class="nc"><i>2204</i>&nbsp;                                    break;</b>
+<i>2205</i>&nbsp;                                }
+<i>2206</i>&nbsp;                                // otherwise this is an error
+<b class="nc"><i>2207</i>&nbsp;                                String message =</b>
+<i>2208</i>&nbsp;                                    &quot;Text contains unmatched UTF-16 high surrogate &quot; +
+<b class="nc"><i>2209</i>&nbsp;                                    IonTextUtils.printCodePointAsString(c);</b>
+<b class="nc"><i>2210</i>&nbsp;                                throw new IonException(message);</b>
+<i>2211</i>&nbsp;                            }
+<b class="nc"><i>2212</i>&nbsp;                            else if (c2 == -1) {</b>
+<i>2213</i>&nbsp;                                // eof is also an error - really two errors
+<b class="nc"><i>2214</i>&nbsp;                                throw new UnexpectedEofException();</b>
+<i>2215</i>&nbsp;                            }
+<i>2216</i>&nbsp;                        }
+<i>2217</i>&nbsp;                        // check to see how we broke our of the while loop above, we may be &quot;done&quot;
+<b class="nc"><i>2218</i>&nbsp;                        if (_pending_high_surrogate != 0) {</b>
+<b class="nc"><i>2219</i>&nbsp;                            break;</b>
+<i>2220</i>&nbsp;                        }
+<i>2221</i>&nbsp;
+<b class="nc"><i>2222</i>&nbsp;                        if ((c2 &amp; _Private_IonConstants.surrogate_mask) != _Private_IonConstants.low_surrogate_value) {</b>
+<b class="nc"><i>2223</i>&nbsp;                            String message =</b>
+<i>2224</i>&nbsp;                                &quot;Text contains unmatched UTF-16 high surrogate &quot; +
+<b class="nc"><i>2225</i>&nbsp;                                IonTextUtils.printCodePointAsString(c);</b>
+<b class="nc"><i>2226</i>&nbsp;                            throw new IonException(message);</b>
+<i>2227</i>&nbsp;                        }
+<b class="nc"><i>2228</i>&nbsp;                        c = _Private_IonConstants.makeUnicodeScalar(c, c2);</b>
+<b class="nc"><i>2229</i>&nbsp;                    }</b>
+<b class="nc"><i>2230</i>&nbsp;                    else if ((c &amp; _Private_IonConstants.surrogate_mask) == _Private_IonConstants.low_surrogate_value) {</b>
+<b class="nc"><i>2231</i>&nbsp;                        String message =</b>
+<i>2232</i>&nbsp;                            &quot;Text contains unmatched UTF-16 low surrogate &quot; +
+<b class="nc"><i>2233</i>&nbsp;                            IonTextUtils.printCodePointAsString(c);</b>
+<b class="nc"><i>2234</i>&nbsp;                        throw new IonException(message);</b>
+<i>2235</i>&nbsp;                    }
+<b class="nc"><i>2236</i>&nbsp;                    writeUnicodeScalarAsUTF8(c);</b>
+<i>2237</i>&nbsp;                }
+<i>2238</i>&nbsp;            }
+<i>2239</i>&nbsp;
+<b class="nc"><i>2240</i>&nbsp;            if (c != terminator) {</b>
+<i>2241</i>&nbsp;                // TODO determine if this can really happen.
+<b class="nc"><i>2242</i>&nbsp;                throw new UnexpectedEofException();</b>
+<i>2243</i>&nbsp;            }
+<b class="nc"><i>2244</i>&nbsp;            if (debugValidation) _validate();</b>
+<i>2245</i>&nbsp;
+<b class="nc"><i>2246</i>&nbsp;            return;</b>
+<i>2247</i>&nbsp;        }
+<i>2248</i>&nbsp;
+<i>2249</i>&nbsp;
+<i>2250</i>&nbsp;        /*
+<i>2251</i>&nbsp;         * this is a set of routines that put data into an Ion buffer
+<i>2252</i>&nbsp;         * using the various type encodeing techniques
+<i>2253</i>&nbsp;         *
+<i>2254</i>&nbsp;         * these are the &quot;high&quot; level write routines (and read as well,
+<i>2255</i>&nbsp;         * in the fullness of time)
+<i>2256</i>&nbsp;         *
+<i>2257</i>&nbsp;         *
+<i>2258</i>&nbsp;         * methods with names of the form:
+<i>2259</i>&nbsp;         *     void write&lt;type&gt;Value( value ... )
+<i>2260</i>&nbsp;         * only write the value portion of the data
+<i>2261</i>&nbsp;         *
+<i>2262</i>&nbsp;         * methods with name like:
+<i>2263</i>&nbsp;         *     int(len) write&lt;type&gt;WithLength( ... value ... )
+<i>2264</i>&nbsp;         * write the trailing length and the value they return the
+<i>2265</i>&nbsp;         * length written in case it is less than BB_SHORT_LEN_MAX (13)
+<i>2266</i>&nbsp;         * so that the caller can backpatch the type descriptor if they
+<i>2267</i>&nbsp;         * need to
+<i>2268</i>&nbsp;         *
+<i>2269</i>&nbsp;         * methods with names of the form:
+<i>2270</i>&nbsp;         *     void write&lt;type&gt;( nibble, ..., value )
+<i>2271</i>&nbsp;         * write the type descriptor the length if needed and the value
+<i>2272</i>&nbsp;         *
+<i>2273</i>&nbsp;         * methods with a name like:
+<i>2274</i>&nbsp;         *     int &lt;type&gt;ValueLength( ... )
+<i>2275</i>&nbsp;         * return the number of bytes that will be needed to write
+<i>2276</i>&nbsp;         * the value out
+<i>2277</i>&nbsp;         *
+<i>2278</i>&nbsp;         */
+<i>2279</i>&nbsp;
+<i>2280</i>&nbsp;
+<i>2281</i>&nbsp;        /**
+<i>2282</i>&nbsp;         * Buffer for decoding (un)signed VarInt&#39;s and Int&#39;s
+<i>2283</i>&nbsp;         */
+<b class="fc"><i>2284</i>&nbsp;        private byte[] numberBuffer = new byte[10];</b>
+<i>2285</i>&nbsp;
+<i>2286</i>&nbsp;        public int writeVarUIntValue(long value, boolean force_zero_write) throws IOException
+<i>2287</i>&nbsp;        {
+<b class="fc"><i>2288</i>&nbsp;            assert value &gt;= 0;</b>
+<b class="fc"><i>2289</i>&nbsp;            int len = 0;</b>
+<b class="fc"><i>2290</i>&nbsp;            if (value == 0) {</b>
+<b class="fc"><i>2291</i>&nbsp;                if (force_zero_write) {</b>
+<b class="fc"><i>2292</i>&nbsp;                    write((byte)0x80);</b>
+<b class="fc"><i>2293</i>&nbsp;                    len = 1;</b>
+<i>2294</i>&nbsp;                }
+<i>2295</i>&nbsp;            } else {
+<b class="fc"><i>2296</i>&nbsp;                int i = numberBuffer.length;</b>
+<i>2297</i>&nbsp;                // write every 7 bits of the value
+<b class="fc"><i>2298</i>&nbsp;                while (value &gt; 0) {</b>
+<b class="fc"><i>2299</i>&nbsp;                    numberBuffer[--i] = (byte)(value &amp; 0x7f);</b>
+<b class="fc"><i>2300</i>&nbsp;                    value = value &gt;&gt;&gt; 7;</b>
+<i>2301</i>&nbsp;                }
+<i>2302</i>&nbsp;                // set the end bit
+<b class="fc"><i>2303</i>&nbsp;                numberBuffer[numberBuffer.length - 1] |= 0x80;</b>
+<b class="fc"><i>2304</i>&nbsp;                len = numberBuffer.length - i;</b>
+<b class="fc"><i>2305</i>&nbsp;                write(numberBuffer, i, len);</b>
+<i>2306</i>&nbsp;            }
+<b class="fc"><i>2307</i>&nbsp;            return len;</b>
+<i>2308</i>&nbsp;        }
+<i>2309</i>&nbsp;
+<i>2310</i>&nbsp;        /**
+<i>2311</i>&nbsp;         * Writes a uint field of maximum length 8.
+<i>2312</i>&nbsp;         * Note that this will write from the lowest to highest
+<i>2313</i>&nbsp;         * order bits in the long value given.
+<i>2314</i>&nbsp;         */
+<i>2315</i>&nbsp;        public int writeUIntValue(long value) throws IOException
+<i>2316</i>&nbsp;        {
+<b class="fc"><i>2317</i>&nbsp;            int i = numberBuffer.length;</b>
+<i>2318</i>&nbsp;            // even if value is Long.MIN_VALUE we will still serialize it correctly :)
+<b class="fc"><i>2319</i>&nbsp;            while (value != 0) {</b>
+<b class="fc"><i>2320</i>&nbsp;                numberBuffer[--i] = (byte)(value &amp; 0xff);</b>
+<b class="fc"><i>2321</i>&nbsp;                value = value &gt;&gt;&gt; 8;</b>
+<i>2322</i>&nbsp;            }
+<b class="fc"><i>2323</i>&nbsp;            int len = numberBuffer.length - i;</b>
+<b class="fc"><i>2324</i>&nbsp;            write(numberBuffer, i, len);</b>
+<b class="fc"><i>2325</i>&nbsp;            return len;</b>
+<i>2326</i>&nbsp;        }
+<i>2327</i>&nbsp;
+<i>2328</i>&nbsp;        /**
+<i>2329</i>&nbsp;         * Writes a uint field at given length
+<i>2330</i>&nbsp;         * Note that this will write from the lowest to highest
+<i>2331</i>&nbsp;         * order bits in the long value given.
+<i>2332</i>&nbsp;         */
+<i>2333</i>&nbsp;        public int writeUIntValue(long value, int len) throws IOException
+<i>2334</i>&nbsp;        {
+<b class="fc"><i>2335</i>&nbsp;            int i = numberBuffer.length;</b>
+<b class="fc"><i>2336</i>&nbsp;            for (int j = 0; j &lt; len; ++j) {</b>
+<b class="fc"><i>2337</i>&nbsp;                numberBuffer[--i] = (byte)(value &amp; 0xff);</b>
+<b class="fc"><i>2338</i>&nbsp;                value = value &gt;&gt;&gt; 8;</b>
+<i>2339</i>&nbsp;            }
+<b class="fc"><i>2340</i>&nbsp;            write(numberBuffer, i, len);</b>
+<b class="fc"><i>2341</i>&nbsp;            return len;</b>
+<i>2342</i>&nbsp;        }
+<i>2343</i>&nbsp;
+<i>2344</i>&nbsp;        /**
+<i>2345</i>&nbsp;         * Writes a uint field of arbitary length.  It does
+<i>2346</i>&nbsp;         * check the value to see if a simpler routine can
+<i>2347</i>&nbsp;         * handle the work;
+<i>2348</i>&nbsp;         * Note that this will write from the lowest to highest
+<i>2349</i>&nbsp;         * order bits in the long value given.
+<i>2350</i>&nbsp;         */
+<i>2351</i>&nbsp;        public int writeUIntValue(BigInteger value, int len) throws IOException
+<i>2352</i>&nbsp;        {
+<b class="fc"><i>2353</i>&nbsp;            int returnlen = 0;</b>
+<b class="fc"><i>2354</i>&nbsp;            int signum = value.signum();</b>
+<i>2355</i>&nbsp;
+<b class="fc"><i>2356</i>&nbsp;            if (signum == 0) {</b>
+<i>2357</i>&nbsp;                // Zero has no bytes of data at all!  Nothing to write.
+<i>2358</i>&nbsp;            }
+<b class="fc"><i>2359</i>&nbsp;            else if (signum &lt; 0) {</b>
+<b class="nc"><i>2360</i>&nbsp;                throw new IllegalArgumentException(&quot;value must be greater than or equal to 0&quot;);</b>
+<i>2361</i>&nbsp;            }
+<b class="fc"><i>2362</i>&nbsp;            else if (value.compareTo(MAX_LONG_VALUE) == -1) {</b>
+<b class="fc"><i>2363</i>&nbsp;                long lvalue = value.longValue();</b>
+<b class="fc"><i>2364</i>&nbsp;                returnlen = writeUIntValue(lvalue, len);</b>
+<b class="fc"><i>2365</i>&nbsp;            }</b>
+<i>2366</i>&nbsp;            else {
+<b class="fc"><i>2367</i>&nbsp;                assert(signum &gt; 0);</b>
+<b class="fc"><i>2368</i>&nbsp;                byte[] bits = value.toByteArray();</b>
+<i>2369</i>&nbsp;                // BigInteger will pad this with a null byte sometimes
+<i>2370</i>&nbsp;                // for negative numbers...let&#39;s skip past any leading null bytes
+<b class="fc"><i>2371</i>&nbsp;                int offset = 0;</b>
+<b class="fc"><i>2372</i>&nbsp;                while (offset &lt; bits.length &amp;&amp; bits[offset] == 0) {</b>
+<b class="fc"><i>2373</i>&nbsp;                    offset++;</b>
+<i>2374</i>&nbsp;                }
+<b class="fc"><i>2375</i>&nbsp;                int bitlen = bits.length - offset;</b>
+<b class="fc"><i>2376</i>&nbsp;                this.write(bits, offset, bitlen);</b>
+<b class="fc"><i>2377</i>&nbsp;                returnlen += bitlen;</b>
+<i>2378</i>&nbsp;            }
+<b class="fc"><i>2379</i>&nbsp;            assert(returnlen == len);</b>
+<b class="fc"><i>2380</i>&nbsp;            return len;</b>
+<i>2381</i>&nbsp;        }
+<i>2382</i>&nbsp;
+<i>2383</i>&nbsp;
+<i>2384</i>&nbsp;        public int writeVarIntValue(long value, boolean force_zero_write) throws IOException
+<i>2385</i>&nbsp;        {
+<b class="fc"><i>2386</i>&nbsp;            int len = 0;</b>
+<b class="fc"><i>2387</i>&nbsp;            if (value == 0) {</b>
+<b class="fc"><i>2388</i>&nbsp;                if (force_zero_write) {</b>
+<b class="fc"><i>2389</i>&nbsp;                    write((byte)0x80);</b>
+<b class="fc"><i>2390</i>&nbsp;                    len = 1;</b>
+<i>2391</i>&nbsp;                }
+<i>2392</i>&nbsp;            } else {
+<b class="fc"><i>2393</i>&nbsp;                int i = numberBuffer.length;</b>
+<b class="fc"><i>2394</i>&nbsp;                boolean negative = value &lt; 0;</b>
+<b class="fc"><i>2395</i>&nbsp;                if (negative) {</b>
+<b class="fc"><i>2396</i>&nbsp;                    value = -value;</b>
+<i>2397</i>&nbsp;                }
+<i>2398</i>&nbsp;                // write every 7 bits of the value
+<b class="fc"><i>2399</i>&nbsp;                while (value &gt; 0) {</b>
+<b class="fc"><i>2400</i>&nbsp;                    numberBuffer[--i] = (byte)(value &amp; 0x7f);</b>
+<b class="fc"><i>2401</i>&nbsp;                    value = value &gt;&gt;&gt; 7;</b>
+<i>2402</i>&nbsp;                }
+<i>2403</i>&nbsp;                // set the end bit
+<b class="fc"><i>2404</i>&nbsp;                numberBuffer[numberBuffer.length - 1] |= 0x80;</b>
+<i>2405</i>&nbsp;                // increase the length of VarInt if the sign bit is &#39;occupied&#39;
+<i>2406</i>&nbsp;                // by the value to properly flag it
+<b class="fc"><i>2407</i>&nbsp;                if ((numberBuffer[i] &amp; 0x40) == 0x40) {</b>
+<b class="fc"><i>2408</i>&nbsp;                    numberBuffer[--i] = 0x00;</b>
+<i>2409</i>&nbsp;                }
+<i>2410</i>&nbsp;                // set the sign bit
+<b class="fc"><i>2411</i>&nbsp;                if (negative) {</b>
+<i>2412</i>&nbsp;                    // add the sign bit to MSB
+<b class="fc"><i>2413</i>&nbsp;                    numberBuffer[i] |= 0x40;</b>
+<i>2414</i>&nbsp;                }
+<b class="fc"><i>2415</i>&nbsp;                len = numberBuffer.length - i;</b>
+<b class="fc"><i>2416</i>&nbsp;                write(numberBuffer, i, len);</b>
+<i>2417</i>&nbsp;            }
+<b class="fc"><i>2418</i>&nbsp;            return len;</b>
+<i>2419</i>&nbsp;        }
+<i>2420</i>&nbsp;
+<i>2421</i>&nbsp;        public int writeIntValue(long value) throws IOException {
+<b class="nc"><i>2422</i>&nbsp;            int i = numberBuffer.length;</b>
+<b class="nc"><i>2423</i>&nbsp;            boolean negative = value &lt; 0;</b>
+<b class="nc"><i>2424</i>&nbsp;            if (negative) {</b>
+<b class="nc"><i>2425</i>&nbsp;                value = -value;</b>
+<i>2426</i>&nbsp;            }
+<b class="nc"><i>2427</i>&nbsp;            while (value &gt; 0) {</b>
+<b class="nc"><i>2428</i>&nbsp;                numberBuffer[--i] = (byte)(value &amp; 0xff);</b>
+<b class="nc"><i>2429</i>&nbsp;                value = value &gt;&gt;&gt; 8;</b>
+<i>2430</i>&nbsp;            }
+<i>2431</i>&nbsp;            // increase the length of Int if the sign bit is &#39;occupied&#39;
+<i>2432</i>&nbsp;            // by the value to properly flag it
+<b class="nc"><i>2433</i>&nbsp;            if ((numberBuffer[i] &amp; 0x80) == 0x40) {</b>
+<b class="nc"><i>2434</i>&nbsp;                numberBuffer[--i] = 0x00;</b>
+<i>2435</i>&nbsp;            }
+<i>2436</i>&nbsp;            // set the sign bit
+<b class="nc"><i>2437</i>&nbsp;            if (negative) {</b>
+<i>2438</i>&nbsp;                // add the sign bit to MSB
+<b class="nc"><i>2439</i>&nbsp;                numberBuffer[i] |= 0x80;</b>
+<i>2440</i>&nbsp;            }
+<b class="nc"><i>2441</i>&nbsp;            int len = numberBuffer.length - i;</b>
+<b class="nc"><i>2442</i>&nbsp;            write(numberBuffer, i, len);</b>
+<b class="nc"><i>2443</i>&nbsp;            return len;</b>
+<i>2444</i>&nbsp;        }
+<i>2445</i>&nbsp;        public int writeFloatValue(double d) throws IOException
+<i>2446</i>&nbsp;        {
+<b class="fc"><i>2447</i>&nbsp;            if (Double.valueOf(d).equals(DOUBLE_POS_ZERO))</b>
+<i>2448</i>&nbsp;            {
+<i>2449</i>&nbsp;                // pos zero special case
+<b class="fc"><i>2450</i>&nbsp;                return 0;</b>
+<i>2451</i>&nbsp;            }
+<i>2452</i>&nbsp;
+<i>2453</i>&nbsp;            // TODO write &quot;custom&quot; serialization or verify that
+<i>2454</i>&nbsp;            //      the java routine is doing the right thing
+<b class="fc"><i>2455</i>&nbsp;            long dBits = Double.doubleToRawLongBits(d);</b>
+<b class="fc"><i>2456</i>&nbsp;            return writeUIntValue(dBits, _ib_FLOAT64_LEN);</b>
+<i>2457</i>&nbsp;        }
+<i>2458</i>&nbsp;
+<b class="fc"><i>2459</i>&nbsp;        byte[] singleCodepointUtf8Buffer = new byte[4];</b>
+<i>2460</i>&nbsp;        public int writeUnicodeScalarAsUTF8(int c) throws IOException
+<i>2461</i>&nbsp;        {
+<i>2462</i>&nbsp;            int len;
+<b class="nc"><i>2463</i>&nbsp;            if (c &lt; 0x80) {</b>
+<b class="nc"><i>2464</i>&nbsp;                len = 1;</b>
+<b class="nc"><i>2465</i>&nbsp;                this.start_write();</b>
+<b class="nc"><i>2466</i>&nbsp;                _write((byte)(c &amp; 0xff));</b>
+<b class="nc"><i>2467</i>&nbsp;                this.end_write();</b>
+<i>2468</i>&nbsp;            } else {
+<b class="nc"><i>2469</i>&nbsp;                len = _writeUnicodeScalarToByteBuffer(c, singleCodepointUtf8Buffer, 0);</b>
+<b class="nc"><i>2470</i>&nbsp;                this.write(singleCodepointUtf8Buffer, 0, len);</b>
+<i>2471</i>&nbsp;            }
+<b class="nc"><i>2472</i>&nbsp;            return len;</b>
+<i>2473</i>&nbsp;        }
+<i>2474</i>&nbsp;
+<i>2475</i>&nbsp;        // this will write at least 2 byte unicode scalar to buffer
+<i>2476</i>&nbsp;        private final int _writeUnicodeScalarToByteBuffer(int c, byte[] buffer, int offset) throws IOException
+<i>2477</i>&nbsp;        {
+<b class="fc"><i>2478</i>&nbsp;            int len = -1;</b>
+<i>2479</i>&nbsp;
+<b class="fc"><i>2480</i>&nbsp;            assert offset + 4 &lt;= buffer.length;</b>
+<i>2481</i>&nbsp;
+<i>2482</i>&nbsp;            // first the quick, easy and common case - ascii
+<b class="fc"><i>2483</i>&nbsp;            if (c &lt; 0x800) {</b>
+<i>2484</i>&nbsp;                // 2 bytes characters from 0x000080 to 0x0007FF
+<b class="fc"><i>2485</i>&nbsp;                buffer[offset] = (byte)( 0xff &amp; (0xC0 | (c &gt;&gt; 6)) );</b>
+<b class="fc"><i>2486</i>&nbsp;                buffer[++offset] = (byte)( 0xff &amp; (0x80 | (c &amp; 0x3F)) );</b>
+<b class="fc"><i>2487</i>&nbsp;                len = 2;</b>
+<i>2488</i>&nbsp;            }
+<b class="fc"><i>2489</i>&nbsp;            else if (c &lt; 0x10000) {</b>
+<i>2490</i>&nbsp;                // 3 byte characters from 0x800 to 0xFFFF
+<i>2491</i>&nbsp;                // but only 0x800...0xD7FF and 0xE000...0xFFFF are valid
+<b class="fc"><i>2492</i>&nbsp;                if (c &gt; 0xD7FF &amp;&amp; c &lt; 0xE000) {</b>
+<b class="nc"><i>2493</i>&nbsp;                    this.throwUTF8Exception();</b>
+<i>2494</i>&nbsp;                }
+<b class="fc"><i>2495</i>&nbsp;                buffer[offset] = (byte)( 0xff &amp; (0xE0 |  (c &gt;&gt; 12)) );</b>
+<b class="fc"><i>2496</i>&nbsp;                buffer[++offset] = (byte)( 0xff &amp; (0x80 | ((c &gt;&gt; 6) &amp; 0x3F)) );</b>
+<b class="fc"><i>2497</i>&nbsp;                buffer[++offset] = (byte)( 0xff &amp; (0x80 |  (c &amp; 0x3F)) );</b>
+<b class="fc"><i>2498</i>&nbsp;                len = 3;</b>
+<i>2499</i>&nbsp;            }
+<b class="fc"><i>2500</i>&nbsp;            else if (c &lt;= 0x10FFFF) {</b>
+<i>2501</i>&nbsp;                // 4 byte characters 0x010000 to 0x10FFFF
+<i>2502</i>&nbsp;                // these are are valid
+<b class="fc"><i>2503</i>&nbsp;                buffer[offset] = (byte)( 0xff &amp; (0xF0 |  (c &gt;&gt; 18)) );</b>
+<b class="fc"><i>2504</i>&nbsp;                buffer[++offset] = (byte)( 0xff &amp; (0x80 | ((c &gt;&gt; 12) &amp; 0x3F)) );</b>
+<b class="fc"><i>2505</i>&nbsp;                buffer[++offset] = (byte)( 0xff &amp; (0x80 | ((c &gt;&gt; 6) &amp; 0x3F)) );</b>
+<b class="fc"><i>2506</i>&nbsp;                buffer[++offset] = (byte)( 0xff &amp; (0x80 | (c &amp; 0x3F)) );</b>
+<b class="fc"><i>2507</i>&nbsp;                len = 4;</b>
+<i>2508</i>&nbsp;            }
+<i>2509</i>&nbsp;            else {
+<b class="nc"><i>2510</i>&nbsp;                this.throwUTF8Exception();</b>
+<i>2511</i>&nbsp;            }
+<b class="fc"><i>2512</i>&nbsp;            return len;</b>
+<i>2513</i>&nbsp;        }
+<i>2514</i>&nbsp;
+<i>2515</i>&nbsp;        /******************************
+<i>2516</i>&nbsp;         *
+<i>2517</i>&nbsp;         * These are the &quot;write typed value with header&quot; routines
+<i>2518</i>&nbsp;         * they all are of the form:
+<i>2519</i>&nbsp;         *
+<i>2520</i>&nbsp;         *     void write&lt;type&gt;(nibble, ...)
+<i>2521</i>&nbsp;         */
+<i>2522</i>&nbsp;        public int writeByte(HighNibble hn, int len) throws IOException
+<i>2523</i>&nbsp;        {
+<b class="nc"><i>2524</i>&nbsp;            if (len &lt; 0) {</b>
+<b class="nc"><i>2525</i>&nbsp;                throw new IonException(&quot;negative token length encountered&quot;);</b>
+<i>2526</i>&nbsp;            }
+<b class="nc"><i>2527</i>&nbsp;            if (len &gt; 13) len = 14; // TODO remove magic numbers</b>
+<b class="nc"><i>2528</i>&nbsp;            int t = _Private_IonConstants.makeTypeDescriptor( hn.value(), len );</b>
+<b class="nc"><i>2529</i>&nbsp;            write(t);</b>
+<b class="nc"><i>2530</i>&nbsp;            return 1;</b>
+<i>2531</i>&nbsp;        }
+<i>2532</i>&nbsp;
+<i>2533</i>&nbsp;        /**
+<i>2534</i>&nbsp;         * Write one byte.
+<i>2535</i>&nbsp;         *
+<i>2536</i>&nbsp;         * @param b the byte to write.
+<i>2537</i>&nbsp;         * @return the number of bytes written (always 1).
+<i>2538</i>&nbsp;         * @throws IOException
+<i>2539</i>&nbsp;         */
+<i>2540</i>&nbsp;        public int writeByte(byte b) throws IOException
+<i>2541</i>&nbsp;        {
+<b class="nc"><i>2542</i>&nbsp;            write(b);</b>
+<b class="nc"><i>2543</i>&nbsp;            return 1;</b>
+<i>2544</i>&nbsp;        }
+<i>2545</i>&nbsp;
+<i>2546</i>&nbsp;        /**
+<i>2547</i>&nbsp;         * Write one byte.
+<i>2548</i>&nbsp;         *
+<i>2549</i>&nbsp;         * @param b integer containing the byte to write; only the 8 low-order
+<i>2550</i>&nbsp;         * bits are written.
+<i>2551</i>&nbsp;         *
+<i>2552</i>&nbsp;         * @return the number of bytes written (always 1).
+<i>2553</i>&nbsp;         * @throws IOException
+<i>2554</i>&nbsp;         */
+<i>2555</i>&nbsp;        public int writeByte(int b) throws IOException
+<i>2556</i>&nbsp;        {
+<b class="nc"><i>2557</i>&nbsp;            write(b);</b>
+<b class="nc"><i>2558</i>&nbsp;            return 1;</b>
+<i>2559</i>&nbsp;        }
+<i>2560</i>&nbsp;
+<i>2561</i>&nbsp;        public int writeAnnotations(SymbolToken[] annotations,
+<i>2562</i>&nbsp;                                    SymbolTable symbolTable) throws IOException
+<i>2563</i>&nbsp;        {
+<b class="nc"><i>2564</i>&nbsp;            int startPosition = this.position();</b>
+<i>2565</i>&nbsp;
+<b class="nc"><i>2566</i>&nbsp;            int annotationLen = 0;</b>
+<b class="nc"><i>2567</i>&nbsp;            for (int ii=0; ii&lt;annotations.length; ii++) {</b>
+<b class="nc"><i>2568</i>&nbsp;                int sid = annotations[ii].getSid();</b>
+<b class="nc"><i>2569</i>&nbsp;                assert sid != SymbolTable.UNKNOWN_SYMBOL_ID;</b>
+<b class="nc"><i>2570</i>&nbsp;                annotationLen += IonBinary.lenVarUInt(sid);</b>
+<i>2571</i>&nbsp;            }
+<i>2572</i>&nbsp;
+<i>2573</i>&nbsp;            // write the len of the list
+<b class="nc"><i>2574</i>&nbsp;            this.writeVarUIntValue(annotationLen, true);</b>
+<i>2575</i>&nbsp;
+<i>2576</i>&nbsp;            // write the symbol id&#39;s
+<b class="nc"><i>2577</i>&nbsp;            for (int ii=0; ii&lt;annotations.length; ii++) {</b>
+<b class="nc"><i>2578</i>&nbsp;                int sid = annotations[ii].getSid();</b>
+<b class="nc"><i>2579</i>&nbsp;                this.writeVarUIntValue(sid, true);</b>
+<i>2580</i>&nbsp;            }
+<i>2581</i>&nbsp;
+<b class="nc"><i>2582</i>&nbsp;            return this.position() - startPosition;</b>
+<i>2583</i>&nbsp;        }
+<i>2584</i>&nbsp;
+<i>2585</i>&nbsp;        public int writeAnnotations(ArrayList&lt;Integer&gt; annotations)
+<i>2586</i>&nbsp;            throws IOException
+<i>2587</i>&nbsp;        {
+<b class="nc"><i>2588</i>&nbsp;            int startPosition = this.position();</b>
+<i>2589</i>&nbsp;
+<b class="nc"><i>2590</i>&nbsp;            int annotationLen = 0;</b>
+<b class="nc"><i>2591</i>&nbsp;            for (Integer ii : annotations) {</b>
+<b class="nc"><i>2592</i>&nbsp;                annotationLen += IonBinary.lenVarUInt(ii.intValue());</b>
+<b class="nc"><i>2593</i>&nbsp;            }</b>
+<i>2594</i>&nbsp;
+<i>2595</i>&nbsp;            // write the len of the list
+<b class="nc"><i>2596</i>&nbsp;            this.writeVarUIntValue(annotationLen, true);</b>
+<i>2597</i>&nbsp;
+<i>2598</i>&nbsp;            // write the symbol id&#39;s
+<b class="nc"><i>2599</i>&nbsp;            for (Integer ii : annotations) {</b>
+<b class="nc"><i>2600</i>&nbsp;                this.writeVarUIntValue(ii.intValue(), true);</b>
+<b class="nc"><i>2601</i>&nbsp;            }</b>
+<i>2602</i>&nbsp;
+<b class="nc"><i>2603</i>&nbsp;            return this.position() - startPosition;</b>
+<i>2604</i>&nbsp;        }
+<i>2605</i>&nbsp;
+<i>2606</i>&nbsp;
+<i>2607</i>&nbsp;        public void writeStubStructHeader(int hn, int ln)
+<i>2608</i>&nbsp;            throws IOException
+<i>2609</i>&nbsp;        {
+<i>2610</i>&nbsp;            // write the hn and ln as the typedesc, we&#39;ll patch it later.
+<b class="nc"><i>2611</i>&nbsp;            writeByte(_Private_IonConstants.makeTypeDescriptor(hn, ln));</b>
+<b class="nc"><i>2612</i>&nbsp;        }</b>
+<i>2613</i>&nbsp;
+<i>2614</i>&nbsp;        /**
+<i>2615</i>&nbsp;         * Write typedesc and length for the common case.
+<i>2616</i>&nbsp;         */
+<i>2617</i>&nbsp;        public int writeCommonHeader(int hn, int len)
+<i>2618</i>&nbsp;            throws IOException
+<i>2619</i>&nbsp;        {
+<b class="nc"><i>2620</i>&nbsp;            int returnlen = 0;</b>
+<i>2621</i>&nbsp;
+<i>2622</i>&nbsp;            // write then len in low nibble
+<b class="nc"><i>2623</i>&nbsp;            if (len &lt; _Private_IonConstants.lnIsVarLen) {</b>
+<b class="nc"><i>2624</i>&nbsp;                returnlen += writeByte(_Private_IonConstants.makeTypeDescriptor(hn, len));</b>
+<i>2625</i>&nbsp;            }
+<i>2626</i>&nbsp;            else {
+<b class="nc"><i>2627</i>&nbsp;                returnlen += writeByte(_Private_IonConstants.makeTypeDescriptor(hn, _Private_IonConstants.lnIsVarLen));</b>
+<b class="nc"><i>2628</i>&nbsp;                returnlen += writeVarUIntValue(len, false);</b>
+<i>2629</i>&nbsp;            }
+<b class="nc"><i>2630</i>&nbsp;            return returnlen;</b>
+<i>2631</i>&nbsp;        }
+<i>2632</i>&nbsp;
+<i>2633</i>&nbsp;
+<i>2634</i>&nbsp;        /***************************************
+<i>2635</i>&nbsp;         *
+<i>2636</i>&nbsp;         * Here are the write type value with type descriptor and everything
+<i>2637</i>&nbsp;         * family of methods, these depend on the others to do much of the work
+<i>2638</i>&nbsp;         *
+<i>2639</i>&nbsp;         */
+<i>2640</i>&nbsp;
+<i>2641</i>&nbsp;        /**
+<i>2642</i>&nbsp;         * @param sid must be valid id (&gt;=1)
+<i>2643</i>&nbsp;         */
+<i>2644</i>&nbsp;        public int writeSymbolWithTD(int sid) // was: (String s, SymbolTable symtab)
+<i>2645</i>&nbsp;            throws IOException
+<i>2646</i>&nbsp;        {
+<i>2647</i>&nbsp;            // was: int sid = symtab.addSymbol(s);
+<b class="nc"><i>2648</i>&nbsp;            assert sid &gt; 0;</b>
+<i>2649</i>&nbsp;
+<b class="nc"><i>2650</i>&nbsp;            int vlen = lenUInt(sid);</b>
+<b class="nc"><i>2651</i>&nbsp;            int len = this.writeCommonHeader(</b>
+<i>2652</i>&nbsp;                                 _Private_IonConstants.tidSymbol
+<i>2653</i>&nbsp;                                ,vlen
+<i>2654</i>&nbsp;                           );
+<b class="nc"><i>2655</i>&nbsp;            len += this.writeUIntValue(sid, vlen);</b>
+<i>2656</i>&nbsp;
+<b class="nc"><i>2657</i>&nbsp;            return len;</b>
+<i>2658</i>&nbsp;        }
+<i>2659</i>&nbsp;
+<i>2660</i>&nbsp;
+<i>2661</i>&nbsp;        /**
+<i>2662</i>&nbsp;         * Writes the full string header + data.
+<i>2663</i>&nbsp;         */
+<i>2664</i>&nbsp;        public int writeStringWithTD(String s) throws IOException
+<i>2665</i>&nbsp;        {
+<i>2666</i>&nbsp;            // first we have to see how long this will be in the output
+<i>2667</i>&nbsp;            /// buffer - part of the cost of length prefixed values
+<b class="nc"><i>2668</i>&nbsp;            int len = IonBinary.lenIonString(s);</b>
+<b class="nc"><i>2669</i>&nbsp;            if (len &lt; 0) this.throwUTF8Exception();</b>
+<i>2670</i>&nbsp;
+<i>2671</i>&nbsp;            // first we write the type desc and length
+<b class="nc"><i>2672</i>&nbsp;            len += this.writeCommonHeader(_Private_IonConstants.tidString, len);</b>
+<i>2673</i>&nbsp;
+<i>2674</i>&nbsp;            // now we write just the value out
+<b class="nc"><i>2675</i>&nbsp;            writeStringData(s);</b>
+<i>2676</i>&nbsp;            //for (int ii=0; ii&lt;s.length(); ii++) {
+<i>2677</i>&nbsp;            //    char c = s.charAt(ii);
+<i>2678</i>&nbsp;            //    this.writeCharValue(c);
+<i>2679</i>&nbsp;            //}
+<i>2680</i>&nbsp;
+<b class="nc"><i>2681</i>&nbsp;            return len;</b>
+<i>2682</i>&nbsp;        }
+<i>2683</i>&nbsp;
+<i>2684</i>&nbsp;        static final int stringBufferLen = 128;
+<b class="fc"><i>2685</i>&nbsp;        byte[] stringBuffer = new byte[stringBufferLen];</b>
+<i>2686</i>&nbsp;        public int writeStringData(String s) throws IOException
+<i>2687</i>&nbsp;        {
+<b class="fc"><i>2688</i>&nbsp;            int len = 0;</b>
+<b class="fc"><i>2689</i>&nbsp;            int bufPos = 0;</b>
+<b class="fc"><i>2690</i>&nbsp;            for (int ii=0; ii&lt;s.length(); ii++) {</b>
+<b class="fc"><i>2691</i>&nbsp;                int c = s.charAt(ii);</b>
+<b class="fc"><i>2692</i>&nbsp;                if (bufPos &gt; stringBufferLen - 4) { // 4 is the max UTF-8 encoding size</b>
+<b class="fc"><i>2693</i>&nbsp;                    this.write(stringBuffer, 0, bufPos);</b>
+<b class="fc"><i>2694</i>&nbsp;                    bufPos = 0;</b>
+<i>2695</i>&nbsp;                }
+<i>2696</i>&nbsp;                // at this point stringBuffer contains enough space for UTF-8 encoded code point
+<b class="fc"><i>2697</i>&nbsp;                if (c &lt; 128) {</b>
+<i>2698</i>&nbsp;                    // don&#39;t even both to call the &quot;utf8&quot; converter for ascii
+<b class="fc"><i>2699</i>&nbsp;                    stringBuffer[bufPos++] = (byte)c;</b>
+<b class="fc"><i>2700</i>&nbsp;                    len++;</b>
+<b class="fc"><i>2701</i>&nbsp;                    continue;</b>
+<i>2702</i>&nbsp;                }
+<i>2703</i>&nbsp;                // multi-byte utf8
+<i>2704</i>&nbsp;
+<b class="fc"><i>2705</i>&nbsp;                if (c &gt;= 0xD800 &amp;&amp; c &lt;= 0xDFFF) {</b>
+<b class="fc"><i>2706</i>&nbsp;                    if (_Private_IonConstants.isHighSurrogate(c)) {</b>
+<i>2707</i>&nbsp;                        // houston we have a high surrogate (let&#39;s hope it has a partner
+<b class="fc"><i>2708</i>&nbsp;                        if (++ii &gt;= s.length()) {</b>
+<b class="fc"><i>2709</i>&nbsp;                            throw new IllegalArgumentException(&quot;invalid string, unpaired high surrogate character&quot;);</b>
+<i>2710</i>&nbsp;                        }
+<b class="fc"><i>2711</i>&nbsp;                        int c2 = s.charAt(ii);</b>
+<b class="fc"><i>2712</i>&nbsp;                        if (!_Private_IonConstants.isLowSurrogate(c2)) {</b>
+<b class="fc"><i>2713</i>&nbsp;                            throw new IllegalArgumentException(&quot;invalid string, unpaired high surrogate character&quot;);</b>
+<i>2714</i>&nbsp;                        }
+<b class="fc"><i>2715</i>&nbsp;                        c = _Private_IonConstants.makeUnicodeScalar(c, c2);</b>
+<b class="fc"><i>2716</i>&nbsp;                    }</b>
+<b class="fc"><i>2717</i>&nbsp;                    else if (_Private_IonConstants.isLowSurrogate(c)) {</b>
+<i>2718</i>&nbsp;                        // it&#39;s a loner low surrogate - that&#39;s an error
+<b class="fc"><i>2719</i>&nbsp;                        throw new IllegalArgumentException(&quot;invalid string, unpaired low surrogate character&quot;);</b>
+<i>2720</i>&nbsp;                    }
+<i>2721</i>&nbsp;                    // from 0xE000 up the _writeUnicodeScalar will check for us
+<i>2722</i>&nbsp;                }
+<b class="fc"><i>2723</i>&nbsp;                int utf8len = this._writeUnicodeScalarToByteBuffer(c, stringBuffer, bufPos);</b>
+<b class="fc"><i>2724</i>&nbsp;                bufPos += utf8len;</b>
+<b class="fc"><i>2725</i>&nbsp;                len += utf8len;</b>
+<i>2726</i>&nbsp;            }
+<b class="fc"><i>2727</i>&nbsp;            if (bufPos &gt; 0) {</b>
+<b class="fc"><i>2728</i>&nbsp;                this.write(stringBuffer, 0, bufPos);</b>
+<i>2729</i>&nbsp;            }
+<i>2730</i>&nbsp;
+<b class="fc"><i>2731</i>&nbsp;            return len;</b>
+<i>2732</i>&nbsp;        }
+<i>2733</i>&nbsp;
+<i>2734</i>&nbsp;        public int writeNullWithTD(HighNibble hn) throws IOException
+<i>2735</i>&nbsp;        {
+<b class="nc"><i>2736</i>&nbsp;            writeByte(hn, _Private_IonConstants.lnIsNullAtom);</b>
+<b class="nc"><i>2737</i>&nbsp;            return 1;</b>
+<i>2738</i>&nbsp;        }
+<i>2739</i>&nbsp;
+<i>2740</i>&nbsp;        public int writeTimestampWithTD(Timestamp di)
+<i>2741</i>&nbsp;            throws IOException
+<i>2742</i>&nbsp;        {
+<i>2743</i>&nbsp;            int  returnlen;
+<i>2744</i>&nbsp;
+<b class="nc"><i>2745</i>&nbsp;            if (di == null) {</b>
+<b class="nc"><i>2746</i>&nbsp;                returnlen = this.writeCommonHeader(</b>
+<i>2747</i>&nbsp;                                                   _Private_IonConstants.tidTimestamp
+<i>2748</i>&nbsp;                                                   ,_Private_IonConstants.lnIsNullAtom);
+<i>2749</i>&nbsp;            }
+<i>2750</i>&nbsp;            else {
+<b class="nc"><i>2751</i>&nbsp;                int vlen = IonBinary.lenIonTimestamp(di);</b>
+<i>2752</i>&nbsp;
+<b class="nc"><i>2753</i>&nbsp;                returnlen = this.writeCommonHeader(</b>
+<i>2754</i>&nbsp;                                                   _Private_IonConstants.tidTimestamp
+<i>2755</i>&nbsp;                                                   ,vlen);
+<i>2756</i>&nbsp;
+<b class="nc"><i>2757</i>&nbsp;                int wroteLen = writeTimestamp(di);</b>
+<b class="nc"><i>2758</i>&nbsp;                assert wroteLen == vlen;</b>
+<b class="nc"><i>2759</i>&nbsp;                returnlen += wroteLen;</b>
+<i>2760</i>&nbsp;            }
+<b class="nc"><i>2761</i>&nbsp;            return returnlen;</b>
+<i>2762</i>&nbsp;        }
+<i>2763</i>&nbsp;
+<i>2764</i>&nbsp;        public int writeTimestamp(Timestamp di)
+<i>2765</i>&nbsp;            throws IOException
+<i>2766</i>&nbsp;        {
+<b class="fc"><i>2767</i>&nbsp;            if (di == null) return 0;</b>
+<b class="fc"><i>2768</i>&nbsp;            int returnlen = 0;</b>
+<b class="fc"><i>2769</i>&nbsp;            Precision precision = di.getPrecision();</b>
+<i>2770</i>&nbsp;
+<b class="fc"><i>2771</i>&nbsp;            Integer offset = di.getLocalOffset();</b>
+<b class="fc"><i>2772</i>&nbsp;            if (offset == null) {</b>
+<i>2773</i>&nbsp;                // TODO don&#39;t use magic numbers!
+<b class="fc"><i>2774</i>&nbsp;                this.write((byte)(0xff &amp; (0x80 | 0x40))); // negative 0 (no timezone)</b>
+<b class="fc"><i>2775</i>&nbsp;                returnlen ++;</b>
+<i>2776</i>&nbsp;            }
+<i>2777</i>&nbsp;            else {
+<b class="fc"><i>2778</i>&nbsp;                returnlen += this.writeVarIntValue(offset.intValue(), true);</b>
+<i>2779</i>&nbsp;            }
+<i>2780</i>&nbsp;
+<i>2781</i>&nbsp;            // now the date - year, month, day as VarUInts
+<i>2782</i>&nbsp;            // if we have a non-null value we have at least the date
+<b class="fc"><i>2783</i>&nbsp;            if (precision.includes(Precision.YEAR)) {</b>
+<b class="fc"><i>2784</i>&nbsp;                returnlen += this.writeVarUIntValue(di.getZYear(), true);</b>
+<i>2785</i>&nbsp;            }
+<b class="fc"><i>2786</i>&nbsp;            if (precision.includes(Precision.MONTH)) {</b>
+<b class="fc"><i>2787</i>&nbsp;                returnlen += this.writeVarUIntValue(di.getZMonth(), true);</b>
+<i>2788</i>&nbsp;            }
+<b class="fc"><i>2789</i>&nbsp;            if (precision.includes(Precision.DAY)) {</b>
+<b class="fc"><i>2790</i>&nbsp;                returnlen += this.writeVarUIntValue(di.getZDay(), true);</b>
+<i>2791</i>&nbsp;            }
+<i>2792</i>&nbsp;
+<i>2793</i>&nbsp;            // now the time portion
+<b class="fc"><i>2794</i>&nbsp;            if (precision.includes(Precision.MINUTE)) {</b>
+<b class="fc"><i>2795</i>&nbsp;                returnlen += this.writeVarUIntValue(di.getZHour(), true);</b>
+<b class="fc"><i>2796</i>&nbsp;                returnlen += this.writeVarUIntValue(di.getZMinute(), true);</b>
+<i>2797</i>&nbsp;            }
+<b class="fc"><i>2798</i>&nbsp;            if (precision.includes(Precision.SECOND)) {</b>
+<b class="fc"><i>2799</i>&nbsp;                returnlen += this.writeVarUIntValue(di.getZSecond(), true);</b>
+<i>2800</i>&nbsp;                // and, finally, any fractional component that is known
+<b class="fc"><i>2801</i>&nbsp;                BigDecimal fraction = di.getZFractionalSecond();</b>
+<b class="fc"><i>2802</i>&nbsp;                if (fraction != null) {</b>
+<b class="fc"><i>2803</i>&nbsp;                    assert !fraction.equals(BigDecimal.ZERO);</b>
+<b class="fc"><i>2804</i>&nbsp;                    returnlen += this.writeDecimalContent(fraction);</b>
+<i>2805</i>&nbsp;                }
+<i>2806</i>&nbsp;            }
+<b class="fc"><i>2807</i>&nbsp;            return returnlen;</b>
+<i>2808</i>&nbsp;        }
+<i>2809</i>&nbsp;
+<i>2810</i>&nbsp;        public int writeDecimalWithTD(BigDecimal bd) throws IOException
+<i>2811</i>&nbsp;        {
+<i>2812</i>&nbsp;            int returnlen;
+<i>2813</i>&nbsp;
+<i>2814</i>&nbsp;            // we only write out the &#39;0&#39; value as the nibble 0
+<b class="nc"><i>2815</i>&nbsp;            if (bd == null) {</b>
+<b class="nc"><i>2816</i>&nbsp;                returnlen =</b>
+<b class="nc"><i>2817</i>&nbsp;                    this.writeByte(NULL_DECIMAL_TYPEDESC);</b>
+<i>2818</i>&nbsp;            }
+<b class="nc"><i>2819</i>&nbsp;            else if (isNibbleZero(bd)) {</b>
+<b class="nc"><i>2820</i>&nbsp;                returnlen =</b>
+<b class="nc"><i>2821</i>&nbsp;                    this.writeByte(ZERO_DECIMAL_TYPEDESC);</b>
+<i>2822</i>&nbsp;            }
+<i>2823</i>&nbsp;            else {
+<i>2824</i>&nbsp;                // otherwise we to it the hard way ....
+<b class="nc"><i>2825</i>&nbsp;                int len = IonBinary.lenIonDecimal(bd);</b>
+<i>2826</i>&nbsp;
+<b class="nc"><i>2827</i>&nbsp;                if (len &lt; _Private_IonConstants.lnIsVarLen) {</b>
+<b class="nc"><i>2828</i>&nbsp;                    returnlen = this.writeByte(</b>
+<b class="nc"><i>2829</i>&nbsp;                            _Private_IonConstants.makeTypeDescriptor(</b>
+<i>2830</i>&nbsp;                                    _Private_IonConstants.tidDecimal
+<i>2831</i>&nbsp;                                    , len
+<i>2832</i>&nbsp;                            )
+<i>2833</i>&nbsp;                        );
+<i>2834</i>&nbsp;                }
+<i>2835</i>&nbsp;                else {
+<b class="nc"><i>2836</i>&nbsp;                    returnlen = this.writeByte(</b>
+<b class="nc"><i>2837</i>&nbsp;                            _Private_IonConstants.makeTypeDescriptor(</b>
+<i>2838</i>&nbsp;                                    _Private_IonConstants.tidDecimal
+<i>2839</i>&nbsp;                                    , _Private_IonConstants.lnIsVarLen
+<i>2840</i>&nbsp;                            )
+<i>2841</i>&nbsp;                        );
+<b class="nc"><i>2842</i>&nbsp;                    this.writeVarIntValue(len, false);</b>
+<i>2843</i>&nbsp;                }
+<b class="nc"><i>2844</i>&nbsp;                int wroteDecimalLen = writeDecimalContent(bd);</b>
+<b class="nc"><i>2845</i>&nbsp;                assert wroteDecimalLen == len;</b>
+<b class="nc"><i>2846</i>&nbsp;                returnlen += wroteDecimalLen;</b>
+<i>2847</i>&nbsp;            }
+<b class="nc"><i>2848</i>&nbsp;            return returnlen;</b>
+<i>2849</i>&nbsp;        }
+<i>2850</i>&nbsp;
+<b class="fc"><i>2851</i>&nbsp;        private static final byte[] negativeZeroBitArray = new byte[] { (byte)0x80 };</b>
+<i>2852</i>&nbsp;
+<i>2853</i>&nbsp;        /** Zero-length byte array. */
+<b class="fc"><i>2854</i>&nbsp;        private static final byte[] positiveZeroBitArray = EMPTY_BYTE_ARRAY;</b>
+<i>2855</i>&nbsp;
+<i>2856</i>&nbsp;
+<i>2857</i>&nbsp;        /**
+<i>2858</i>&nbsp;         * @see com.amazon.ion.impl.lite.ReverseBinaryEncoder#writeIonDecimalContent
+<i>2859</i>&nbsp;         */
+<i>2860</i>&nbsp;        public int writeDecimalContent(BigDecimal bd)
+<i>2861</i>&nbsp;            throws IOException
+<i>2862</i>&nbsp;        {
+<i>2863</i>&nbsp;            // check for null and 0. which are encoded in the nibble itself.
+<b class="fc"><i>2864</i>&nbsp;            if (bd == null) return 0;</b>
+<i>2865</i>&nbsp;
+<b class="fc"><i>2866</i>&nbsp;            if (isNibbleZero(bd)) return 0;</b>
+<i>2867</i>&nbsp;
+<i>2868</i>&nbsp;            // Ion stores exponent, BigDecimal uses the negation &quot;scale&quot;
+<b class="fc"><i>2869</i>&nbsp;            int exponent = -bd.scale();</b>
+<i>2870</i>&nbsp;
+<i>2871</i>&nbsp;            // The exponent isn&#39;t optional (except for the 0d0 case above).
+<b class="fc"><i>2872</i>&nbsp;            int returnlen = writeVarIntValue(exponent,</b>
+<i>2873</i>&nbsp;                                             /* force_zero_write*/ true);
+<i>2874</i>&nbsp;
+<b class="fc"><i>2875</i>&nbsp;            BigInteger mantissa = bd.unscaledValue();</b>
+<i>2876</i>&nbsp;
+<i>2877</i>&nbsp;            byte[] mantissaBits;
+<b class="fc"><i>2878</i>&nbsp;            switch (mantissa.signum()) {</b>
+<i>2879</i>&nbsp;            case 0:
+<b class="fc"><i>2880</i>&nbsp;                if (Decimal.isNegativeZero(bd)) {</b>
+<b class="fc"><i>2881</i>&nbsp;                    mantissaBits = negativeZeroBitArray;</b>
+<i>2882</i>&nbsp;                }
+<i>2883</i>&nbsp;                else {
+<b class="fc"><i>2884</i>&nbsp;                    mantissaBits = positiveZeroBitArray;</b>
+<i>2885</i>&nbsp;                }
+<b class="fc"><i>2886</i>&nbsp;                break;</b>
+<i>2887</i>&nbsp;            case -1:
+<i>2888</i>&nbsp;                // Obtain the unsigned value of the BigInteger
+<i>2889</i>&nbsp;                // We cannot use the twos complement representation of a
+<i>2890</i>&nbsp;                // negative BigInteger as this is different from the encoding
+<i>2891</i>&nbsp;                // of basic field Int.
+<b class="fc"><i>2892</i>&nbsp;                mantissaBits = mantissa.negate().toByteArray();</b>
+<i>2893</i>&nbsp;                // Set the sign on the highest order bit of the first octet
+<b class="fc"><i>2894</i>&nbsp;                mantissaBits[0] |= 0x80;</b>
+<b class="fc"><i>2895</i>&nbsp;                break;</b>
+<i>2896</i>&nbsp;            case 1:
+<b class="fc"><i>2897</i>&nbsp;                mantissaBits = mantissa.toByteArray();</b>
+<b class="fc"><i>2898</i>&nbsp;                break;</b>
+<i>2899</i>&nbsp;            default:
+<b class="nc"><i>2900</i>&nbsp;                throw new IllegalStateException(&quot;mantissa signum out of range&quot;);</b>
+<i>2901</i>&nbsp;            }
+<i>2902</i>&nbsp;
+<b class="fc"><i>2903</i>&nbsp;            this.write(mantissaBits, 0, mantissaBits.length);</b>
+<b class="fc"><i>2904</i>&nbsp;            returnlen += mantissaBits.length;</b>
+<i>2905</i>&nbsp;
+<b class="fc"><i>2906</i>&nbsp;            return returnlen;</b>
+<i>2907</i>&nbsp;        }
+<i>2908</i>&nbsp;
+<i>2909</i>&nbsp;
+<i>2910</i>&nbsp;        void throwUTF8Exception()
+<i>2911</i>&nbsp;        {
+<b class="nc"><i>2912</i>&nbsp;            throwException(&quot;Invalid UTF-8 character encounter in a string at pos &quot; + this.position());</b>
+<b class="nc"><i>2913</i>&nbsp;        }</b>
+<i>2914</i>&nbsp;
+<i>2915</i>&nbsp;        void throwException(String s)
+<i>2916</i>&nbsp;        {
+<b class="nc"><i>2917</i>&nbsp;            throw new BlockedBuffer.BlockedBufferException(s);</b>
+<i>2918</i>&nbsp;        }
+<i>2919</i>&nbsp;    }
+<i>2920</i>&nbsp;
+<i>2921</i>&nbsp;    public static class PositionMarker
+<i>2922</i>&nbsp;    {
+<i>2923</i>&nbsp;        int     _pos;
+<i>2924</i>&nbsp;        Object  _userData;
+<i>2925</i>&nbsp;
+<b class="nc"><i>2926</i>&nbsp;        public PositionMarker() {}</b>
+<b class="nc"><i>2927</i>&nbsp;        public PositionMarker(int pos, Object o) {</b>
+<b class="nc"><i>2928</i>&nbsp;            _pos = pos;</b>
+<b class="nc"><i>2929</i>&nbsp;            _userData = o;</b>
+<i>2930</i>&nbsp;        }
+<i>2931</i>&nbsp;
+<b class="nc"><i>2932</i>&nbsp;        public int getPosition()       { return _pos; }</b>
+<b class="nc"><i>2933</i>&nbsp;        public Object getUserData()    { return _userData; }</b>
+<i>2934</i>&nbsp;
+<i>2935</i>&nbsp;        public void setPosition(int pos) {
+<b class="nc"><i>2936</i>&nbsp;            _pos = pos;</b>
+<i>2937</i>&nbsp;        }
+<i>2938</i>&nbsp;        public void setUserData(Object o) {
+<b class="nc"><i>2939</i>&nbsp;            _userData = o;</b>
+<i>2940</i>&nbsp;        }
+<i>2941</i>&nbsp;    }
+<i>2942</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1080 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: _Private_IonTextAppender</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: _Private_IonTextAppender (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">_Private_IonTextAppender</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    94.1%
+  </span>
+  <span class="absValue">
+    (32/ 34)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    93.7%
+  </span>
+  <span class="absValue">
+    (344/ 367)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.impl._Private_IonConstants.MAX_LONG_TEXT_SIZE;
+<i>19</i>&nbsp;import static com.amazon.ion.impl._Private_IonConstants.isHighSurrogate;
+<i>20</i>&nbsp;import static com.amazon.ion.impl._Private_IonConstants.isLowSurrogate;
+<i>21</i>&nbsp;import static com.amazon.ion.impl._Private_IonConstants.makeUnicodeScalar;
+<i>22</i>&nbsp;
+<i>23</i>&nbsp;import com.amazon.ion.Decimal;
+<i>24</i>&nbsp;import com.amazon.ion.impl.Base64Encoder.TextStream;
+<i>25</i>&nbsp;import com.amazon.ion.system.IonTextWriterBuilder;
+<i>26</i>&nbsp;import com.amazon.ion.util._Private_FastAppendable;
+<i>27</i>&nbsp;import java.io.ByteArrayInputStream;
+<i>28</i>&nbsp;import java.io.Closeable;
+<i>29</i>&nbsp;import java.io.Flushable;
+<i>30</i>&nbsp;import java.io.IOException;
+<i>31</i>&nbsp;import java.io.OutputStream;
+<i>32</i>&nbsp;import java.math.BigDecimal;
+<i>33</i>&nbsp;import java.math.BigInteger;
+<i>34</i>&nbsp;import java.nio.CharBuffer;
+<i>35</i>&nbsp;import java.nio.charset.Charset;
+<i>36</i>&nbsp;
+<i>37</i>&nbsp;
+<i>38</i>&nbsp;/**
+<i>39</i>&nbsp; * NOT FOR APPLICATION USE!
+<i>40</i>&nbsp; * &lt;p&gt;
+<i>41</i>&nbsp; * Generic text sink that enables optimized output of both ASCII and UTF-16.
+<i>42</i>&nbsp; */
+<b class="fc"><i>43</i>&nbsp;public final class _Private_IonTextAppender</b>
+<i>44</i>&nbsp;    implements Closeable, Flushable
+<i>45</i>&nbsp;{
+<i>46</i>&nbsp;    private static boolean is8bitValue(int v)
+<i>47</i>&nbsp;    {
+<b class="fc"><i>48</i>&nbsp;        return (v &amp; ~0xff) == 0;</b>
+<i>49</i>&nbsp;    }
+<i>50</i>&nbsp;
+<i>51</i>&nbsp;    private static boolean isDecimalDigit(int codePoint)
+<i>52</i>&nbsp;    {
+<b class="fc"><i>53</i>&nbsp;        return (codePoint &gt;= &#39;0&#39; &amp;&amp; codePoint &lt;= &#39;9&#39;);</b>
+<i>54</i>&nbsp;    }
+<i>55</i>&nbsp;
+<i>56</i>&nbsp;    private static final boolean[] IDENTIFIER_START_CHAR_FLAGS;
+<i>57</i>&nbsp;    private static final boolean[] IDENTIFIER_FOLLOW_CHAR_FLAGS;
+<i>58</i>&nbsp;    static
+<i>59</i>&nbsp;    {
+<b class="fc"><i>60</i>&nbsp;        IDENTIFIER_START_CHAR_FLAGS = new boolean[256];</b>
+<b class="fc"><i>61</i>&nbsp;        IDENTIFIER_FOLLOW_CHAR_FLAGS = new boolean[256];</b>
+<i>62</i>&nbsp;
+<b class="fc"><i>63</i>&nbsp;        for (int ii=&#39;a&#39;; ii&lt;=&#39;z&#39;; ii++) {</b>
+<b class="fc"><i>64</i>&nbsp;            IDENTIFIER_START_CHAR_FLAGS[ii]  = true;</b>
+<b class="fc"><i>65</i>&nbsp;            IDENTIFIER_FOLLOW_CHAR_FLAGS[ii] = true;</b>
+<i>66</i>&nbsp;        }
+<b class="fc"><i>67</i>&nbsp;        for (int ii=&#39;A&#39;; ii&lt;=&#39;Z&#39;; ii++) {</b>
+<b class="fc"><i>68</i>&nbsp;            IDENTIFIER_START_CHAR_FLAGS[ii]  = true;</b>
+<b class="fc"><i>69</i>&nbsp;            IDENTIFIER_FOLLOW_CHAR_FLAGS[ii] = true;</b>
+<i>70</i>&nbsp;        }
+<b class="fc"><i>71</i>&nbsp;        IDENTIFIER_START_CHAR_FLAGS [&#39;_&#39;] = true;</b>
+<b class="fc"><i>72</i>&nbsp;        IDENTIFIER_FOLLOW_CHAR_FLAGS[&#39;_&#39;] = true;</b>
+<i>73</i>&nbsp;
+<b class="fc"><i>74</i>&nbsp;        IDENTIFIER_START_CHAR_FLAGS [&#39;$&#39;] = true;</b>
+<b class="fc"><i>75</i>&nbsp;        IDENTIFIER_FOLLOW_CHAR_FLAGS[&#39;$&#39;] = true;</b>
+<i>76</i>&nbsp;
+<b class="fc"><i>77</i>&nbsp;        for (int ii=&#39;0&#39;; ii&lt;=&#39;9&#39;; ii++) {</b>
+<b class="fc"><i>78</i>&nbsp;            IDENTIFIER_FOLLOW_CHAR_FLAGS[ii] = true;</b>
+<i>79</i>&nbsp;        }
+<i>80</i>&nbsp;    }
+<i>81</i>&nbsp;
+<i>82</i>&nbsp;    public static boolean isIdentifierStart(int codePoint) {
+<b class="fc"><i>83</i>&nbsp;        return IDENTIFIER_START_CHAR_FLAGS[codePoint &amp; 0xff] &amp;&amp; is8bitValue(codePoint);</b>
+<i>84</i>&nbsp;    }
+<i>85</i>&nbsp;
+<i>86</i>&nbsp;    public static boolean isIdentifierPart(int codePoint) {
+<b class="fc"><i>87</i>&nbsp;        return IDENTIFIER_FOLLOW_CHAR_FLAGS[codePoint &amp; 0xff] &amp;&amp; is8bitValue(codePoint);</b>
+<i>88</i>&nbsp;    }
+<i>89</i>&nbsp;
+<i>90</i>&nbsp;    public static final boolean[] OPERATOR_CHAR_FLAGS;
+<i>91</i>&nbsp;    static
+<i>92</i>&nbsp;    {
+<b class="fc"><i>93</i>&nbsp;        final char[] operatorChars = {</b>
+<i>94</i>&nbsp;            &#39;&lt;&#39;, &#39;&gt;&#39;, &#39;=&#39;, &#39;+&#39;, &#39;-&#39;, &#39;*&#39;, &#39;&amp;&#39;, &#39;^&#39;, &#39;%&#39;,
+<i>95</i>&nbsp;            &#39;~&#39;, &#39;/&#39;, &#39;?&#39;, &#39;.&#39;, &#39;;&#39;, &#39;!&#39;, &#39;|&#39;, &#39;@&#39;, &#39;`&#39;, &#39;#&#39;
+<i>96</i>&nbsp;           };
+<i>97</i>&nbsp;
+<b class="fc"><i>98</i>&nbsp;        OPERATOR_CHAR_FLAGS = new boolean[256];</b>
+<i>99</i>&nbsp;
+<b class="fc"><i>100</i>&nbsp;        for (int ii=0; ii&lt;operatorChars.length; ii++) {</b>
+<b class="fc"><i>101</i>&nbsp;            char operator = operatorChars[ii];</b>
+<b class="fc"><i>102</i>&nbsp;            OPERATOR_CHAR_FLAGS[operator] = true;</b>
+<i>103</i>&nbsp;        }
+<i>104</i>&nbsp;    }
+<i>105</i>&nbsp;
+<i>106</i>&nbsp;    public static boolean isOperatorPart(int codePoint) {
+<b class="fc"><i>107</i>&nbsp;        return OPERATOR_CHAR_FLAGS[codePoint &amp; 0xff] &amp;&amp; is8bitValue(codePoint);</b>
+<i>108</i>&nbsp;    }
+<i>109</i>&nbsp;
+<i>110</i>&nbsp;
+<b class="fc"><i>111</i>&nbsp;    public static final String[] ZERO_PADDING =</b>
+<i>112</i>&nbsp;    {
+<i>113</i>&nbsp;        &quot;&quot;,
+<i>114</i>&nbsp;        &quot;0&quot;,
+<i>115</i>&nbsp;        &quot;00&quot;,
+<i>116</i>&nbsp;        &quot;000&quot;,
+<i>117</i>&nbsp;        &quot;0000&quot;,
+<i>118</i>&nbsp;        &quot;00000&quot;,
+<i>119</i>&nbsp;        &quot;000000&quot;,
+<i>120</i>&nbsp;        &quot;0000000&quot;,
+<i>121</i>&nbsp;    };
+<i>122</i>&nbsp;
+<i>123</i>&nbsp;
+<i>124</i>&nbsp;    /**
+<i>125</i>&nbsp;     * Escapes for U+00 through U+FF, for use in double-quoted Ion strings.
+<i>126</i>&nbsp;     * This includes escapes for all LATIN-1 code points U+80 through U+FF.
+<i>127</i>&nbsp;     */
+<i>128</i>&nbsp;    private static final String[] STRING_ESCAPE_CODES;
+<i>129</i>&nbsp;    static
+<i>130</i>&nbsp;    {
+<b class="fc"><i>131</i>&nbsp;        STRING_ESCAPE_CODES = new String[256];</b>
+<b class="fc"><i>132</i>&nbsp;        STRING_ESCAPE_CODES[0x00] = &quot;\\0&quot;;</b>
+<b class="fc"><i>133</i>&nbsp;        STRING_ESCAPE_CODES[0x07] = &quot;\\a&quot;;</b>
+<b class="fc"><i>134</i>&nbsp;        STRING_ESCAPE_CODES[0x08] = &quot;\\b&quot;;</b>
+<b class="fc"><i>135</i>&nbsp;        STRING_ESCAPE_CODES[&#39;\t&#39;] = &quot;\\t&quot;;</b>
+<b class="fc"><i>136</i>&nbsp;        STRING_ESCAPE_CODES[&#39;\n&#39;] = &quot;\\n&quot;;</b>
+<b class="fc"><i>137</i>&nbsp;        STRING_ESCAPE_CODES[0x0B] = &quot;\\v&quot;;</b>
+<b class="fc"><i>138</i>&nbsp;        STRING_ESCAPE_CODES[&#39;\f&#39;] = &quot;\\f&quot;;</b>
+<b class="fc"><i>139</i>&nbsp;        STRING_ESCAPE_CODES[&#39;\r&#39;] = &quot;\\r&quot;;</b>
+<b class="fc"><i>140</i>&nbsp;        STRING_ESCAPE_CODES[&#39;\\&#39;] = &quot;\\\\&quot;;</b>
+<b class="fc"><i>141</i>&nbsp;        STRING_ESCAPE_CODES[&#39;\&quot;&#39;] = &quot;\\\&quot;&quot;;</b>
+<b class="fc"><i>142</i>&nbsp;        for (int i = 1; i &lt; 0x20; ++i) {</b>
+<b class="fc"><i>143</i>&nbsp;            if (STRING_ESCAPE_CODES[i] == null) {</b>
+<b class="fc"><i>144</i>&nbsp;                String s = Integer.toHexString(i);</b>
+<b class="fc"><i>145</i>&nbsp;                STRING_ESCAPE_CODES[i] = &quot;\\x&quot; + ZERO_PADDING[2 - s.length()] + s;</b>
+<i>146</i>&nbsp;            }
+<i>147</i>&nbsp;        }
+<b class="fc"><i>148</i>&nbsp;        for (int i = 0x7F; i &lt; 0x100; ++i) {</b>
+<b class="fc"><i>149</i>&nbsp;            String s = Integer.toHexString(i);</b>
+<b class="fc"><i>150</i>&nbsp;            STRING_ESCAPE_CODES[i] = &quot;\\x&quot; + s;</b>
+<i>151</i>&nbsp;        }
+<i>152</i>&nbsp;    }
+<i>153</i>&nbsp;
+<i>154</i>&nbsp;    /**
+<i>155</i>&nbsp;     * Escapes for U+00 through U+FF, for use in triple-quoted Ion strings.
+<i>156</i>&nbsp;     * This includes escapes for all LATIN-1 code points U+80 through U+FF.
+<i>157</i>&nbsp;     */
+<i>158</i>&nbsp;    static final String[] LONG_STRING_ESCAPE_CODES;
+<i>159</i>&nbsp;    static
+<i>160</i>&nbsp;    {
+<b class="fc"><i>161</i>&nbsp;        LONG_STRING_ESCAPE_CODES = new String[256];</b>
+<b class="fc"><i>162</i>&nbsp;        for (int i = 0; i &lt; 256; ++i) {</b>
+<b class="fc"><i>163</i>&nbsp;            LONG_STRING_ESCAPE_CODES[i] = STRING_ESCAPE_CODES[i];</b>
+<i>164</i>&nbsp;        }
+<b class="fc"><i>165</i>&nbsp;        LONG_STRING_ESCAPE_CODES[&#39;\n&#39;] = null;</b>
+<b class="fc"><i>166</i>&nbsp;        LONG_STRING_ESCAPE_CODES[&#39;\&#39;&#39;] = &quot;\\\&#39;&quot;;</b>
+<b class="fc"><i>167</i>&nbsp;        LONG_STRING_ESCAPE_CODES[&#39;\&quot;&#39;] = null; // Treat as normal code point for long string</b>
+<i>168</i>&nbsp;    }
+<i>169</i>&nbsp;
+<i>170</i>&nbsp;    /**
+<i>171</i>&nbsp;     * Escapes for U+00 through U+FF, for use in single-quoted Ion symbols.
+<i>172</i>&nbsp;     * This includes escapes for all LATIN-1 code points U+80 through U+FF.
+<i>173</i>&nbsp;     */
+<i>174</i>&nbsp;    static final String[] SYMBOL_ESCAPE_CODES;
+<i>175</i>&nbsp;    static
+<i>176</i>&nbsp;    {
+<b class="fc"><i>177</i>&nbsp;        SYMBOL_ESCAPE_CODES = new String[256];</b>
+<b class="fc"><i>178</i>&nbsp;        for (int i = 0; i &lt; 256; ++i) {</b>
+<b class="fc"><i>179</i>&nbsp;            SYMBOL_ESCAPE_CODES[i] = STRING_ESCAPE_CODES[i];</b>
+<i>180</i>&nbsp;        }
+<b class="fc"><i>181</i>&nbsp;        SYMBOL_ESCAPE_CODES[&#39;\&#39;&#39;] = &quot;\\\&#39;&quot;;</b>
+<b class="fc"><i>182</i>&nbsp;        SYMBOL_ESCAPE_CODES[&#39;\&quot;&#39;] = null; // Treat as normal code point for symbol.</b>
+<i>183</i>&nbsp;    }
+<i>184</i>&nbsp;
+<i>185</i>&nbsp;    /**
+<i>186</i>&nbsp;     * Escapes for U+00 through U+FF, for use in double-quoted JSON strings.
+<i>187</i>&nbsp;     * This includes escapes for all LATIN-1 code points U+80 through U+FF.
+<i>188</i>&nbsp;     */
+<i>189</i>&nbsp;    static final String[] JSON_ESCAPE_CODES;
+<i>190</i>&nbsp;    static
+<i>191</i>&nbsp;    {
+<b class="fc"><i>192</i>&nbsp;        JSON_ESCAPE_CODES = new String[256];</b>
+<b class="fc"><i>193</i>&nbsp;        JSON_ESCAPE_CODES[0x08] = &quot;\\b&quot;;</b>
+<b class="fc"><i>194</i>&nbsp;        JSON_ESCAPE_CODES[&#39;\t&#39;] = &quot;\\t&quot;;</b>
+<b class="fc"><i>195</i>&nbsp;        JSON_ESCAPE_CODES[&#39;\n&#39;] = &quot;\\n&quot;;</b>
+<b class="fc"><i>196</i>&nbsp;        JSON_ESCAPE_CODES[&#39;\f&#39;] = &quot;\\f&quot;;</b>
+<b class="fc"><i>197</i>&nbsp;        JSON_ESCAPE_CODES[&#39;\r&#39;] = &quot;\\r&quot;;</b>
+<b class="fc"><i>198</i>&nbsp;        JSON_ESCAPE_CODES[&#39;\\&#39;] = &quot;\\\\&quot;;</b>
+<b class="fc"><i>199</i>&nbsp;        JSON_ESCAPE_CODES[&#39;\&quot;&#39;] = &quot;\\\&quot;&quot;;</b>
+<i>200</i>&nbsp;
+<i>201</i>&nbsp;        // JSON requires all of these characters to be escaped.
+<b class="fc"><i>202</i>&nbsp;        for (int i = 0; i &lt; 0x20; ++i) {</b>
+<b class="fc"><i>203</i>&nbsp;            if (JSON_ESCAPE_CODES[i] == null) {</b>
+<b class="fc"><i>204</i>&nbsp;                String s = Integer.toHexString(i);</b>
+<b class="fc"><i>205</i>&nbsp;                JSON_ESCAPE_CODES[i] = &quot;\\u&quot; + ZERO_PADDING[4 - s.length()] + s;</b>
+<i>206</i>&nbsp;            }
+<i>207</i>&nbsp;        }
+<i>208</i>&nbsp;
+<b class="fc"><i>209</i>&nbsp;        for (int i = 0x7F; i &lt; 0x100; ++i) {</b>
+<b class="fc"><i>210</i>&nbsp;            String s = Integer.toHexString(i);</b>
+<b class="fc"><i>211</i>&nbsp;            JSON_ESCAPE_CODES[i] = &quot;\\u00&quot; + s;</b>
+<i>212</i>&nbsp;        }
+<b class="fc"><i>213</i>&nbsp;    }</b>
+<i>214</i>&nbsp;
+<i>215</i>&nbsp;    private static final String HEX_4_PREFIX = &quot;\\u&quot;;
+<i>216</i>&nbsp;    private static final String HEX_8_PREFIX = &quot;\\U&quot;;
+<i>217</i>&nbsp;    private static final String TRIPLE_QUOTES = &quot;&#39;&#39;&#39;&quot;;
+<i>218</i>&nbsp;
+<i>219</i>&nbsp;
+<i>220</i>&nbsp;    //=========================================================================
+<i>221</i>&nbsp;
+<i>222</i>&nbsp;
+<i>223</i>&nbsp;    private final _Private_FastAppendable myAppendable;
+<i>224</i>&nbsp;    private final boolean escapeNonAscii;
+<i>225</i>&nbsp;
+<i>226</i>&nbsp;
+<i>227</i>&nbsp;    _Private_IonTextAppender(_Private_FastAppendable out, boolean escapeNonAscii)
+<b class="fc"><i>228</i>&nbsp;    {</b>
+<b class="fc"><i>229</i>&nbsp;        this.myAppendable   = out;</b>
+<b class="fc"><i>230</i>&nbsp;        this.escapeNonAscii = escapeNonAscii;</b>
+<b class="fc"><i>231</i>&nbsp;    }</b>
+<i>232</i>&nbsp;
+<i>233</i>&nbsp;
+<i>234</i>&nbsp;    public static _Private_IonTextAppender
+<i>235</i>&nbsp;    forFastAppendable(_Private_FastAppendable out, Charset charset)
+<i>236</i>&nbsp;    {
+<b class="fc"><i>237</i>&nbsp;        boolean escapeNonAscii = charset.equals(_Private_Utils.ASCII_CHARSET);</b>
+<b class="fc"><i>238</i>&nbsp;        return new _Private_IonTextAppender(out, escapeNonAscii);</b>
+<i>239</i>&nbsp;    }
+<i>240</i>&nbsp;
+<i>241</i>&nbsp;
+<i>242</i>&nbsp;    /**
+<i>243</i>&nbsp;     * @param charset must be either {@link IonTextWriterBuilder#ASCII} or
+<i>244</i>&nbsp;     * {@link IonTextWriterBuilder#UTF8}. When ASCII is used, all non-ASCII
+<i>245</i>&nbsp;     * characters will be escaped. Otherwise, only select code points will be
+<i>246</i>&nbsp;     * escaped.
+<i>247</i>&nbsp;     */
+<i>248</i>&nbsp;    public static _Private_IonTextAppender forAppendable(Appendable out,
+<i>249</i>&nbsp;                                                         Charset charset)
+<i>250</i>&nbsp;    {
+<b class="nc"><i>251</i>&nbsp;        _Private_FastAppendable fast = new AppendableFastAppendable(out);</b>
+<b class="nc"><i>252</i>&nbsp;        return forFastAppendable(fast, charset);</b>
+<i>253</i>&nbsp;    }
+<i>254</i>&nbsp;
+<i>255</i>&nbsp;
+<i>256</i>&nbsp;    /**
+<i>257</i>&nbsp;     * Doesn&#39;t escape non-ASCII characters.
+<i>258</i>&nbsp;     */
+<i>259</i>&nbsp;    public static _Private_IonTextAppender forAppendable(Appendable out)
+<i>260</i>&nbsp;    {
+<b class="fc"><i>261</i>&nbsp;        _Private_FastAppendable fast = new AppendableFastAppendable(out);</b>
+<b class="fc"><i>262</i>&nbsp;        boolean escapeNonAscii = false;</b>
+<b class="fc"><i>263</i>&nbsp;        return new _Private_IonTextAppender(fast, escapeNonAscii);</b>
+<i>264</i>&nbsp;    }
+<i>265</i>&nbsp;
+<i>266</i>&nbsp;
+<i>267</i>&nbsp;    /**
+<i>268</i>&nbsp;     * @param charset must be either {@link IonTextWriterBuilder#ASCII} or
+<i>269</i>&nbsp;     * {@link IonTextWriterBuilder#UTF8}. When ASCII is used, all non-ASCII
+<i>270</i>&nbsp;     * characters will be escaped. Otherwise, only select code points will be
+<i>271</i>&nbsp;     * escaped.
+<i>272</i>&nbsp;     */
+<i>273</i>&nbsp;    public static _Private_IonTextAppender forOutputStream(OutputStream out,
+<i>274</i>&nbsp;                                                           Charset charset)
+<i>275</i>&nbsp;    {
+<b class="nc"><i>276</i>&nbsp;        _Private_FastAppendable fast = new OutputStreamFastAppendable(out);</b>
+<b class="nc"><i>277</i>&nbsp;        return forFastAppendable(fast, charset);</b>
+<i>278</i>&nbsp;    }
+<i>279</i>&nbsp;
+<i>280</i>&nbsp;
+<i>281</i>&nbsp;    //=========================================================================
+<i>282</i>&nbsp;
+<i>283</i>&nbsp;
+<i>284</i>&nbsp;    public void flush()
+<i>285</i>&nbsp;        throws IOException
+<i>286</i>&nbsp;    {
+<b class="fc"><i>287</i>&nbsp;        if (myAppendable instanceof Flushable)</b>
+<i>288</i>&nbsp;        {
+<b class="fc"><i>289</i>&nbsp;            ((Flushable) myAppendable).flush();</b>
+<i>290</i>&nbsp;        }
+<b class="fc"><i>291</i>&nbsp;    }</b>
+<i>292</i>&nbsp;
+<i>293</i>&nbsp;    public void close()
+<i>294</i>&nbsp;        throws IOException
+<i>295</i>&nbsp;    {
+<b class="fc"><i>296</i>&nbsp;        if (myAppendable instanceof Closeable)</b>
+<i>297</i>&nbsp;        {
+<b class="fc"><i>298</i>&nbsp;            ((Closeable) myAppendable).close();</b>
+<i>299</i>&nbsp;        }
+<b class="fc"><i>300</i>&nbsp;    }</b>
+<i>301</i>&nbsp;
+<i>302</i>&nbsp;
+<i>303</i>&nbsp;    public void appendAscii(char c)
+<i>304</i>&nbsp;        throws IOException
+<i>305</i>&nbsp;    {
+<b class="fc"><i>306</i>&nbsp;        myAppendable.appendAscii(c);</b>
+<b class="fc"><i>307</i>&nbsp;    }</b>
+<i>308</i>&nbsp;
+<i>309</i>&nbsp;    public void appendAscii(CharSequence csq)
+<i>310</i>&nbsp;        throws IOException
+<i>311</i>&nbsp;    {
+<b class="fc"><i>312</i>&nbsp;        myAppendable.appendAscii(csq);</b>
+<b class="fc"><i>313</i>&nbsp;    }</b>
+<i>314</i>&nbsp;
+<i>315</i>&nbsp;    public void appendAscii(CharSequence csq, int start, int end)
+<i>316</i>&nbsp;        throws IOException
+<i>317</i>&nbsp;    {
+<b class="fc"><i>318</i>&nbsp;        myAppendable.appendAscii(csq, start, end);</b>
+<b class="fc"><i>319</i>&nbsp;    }</b>
+<i>320</i>&nbsp;
+<i>321</i>&nbsp;    public void appendUtf16(char c)
+<i>322</i>&nbsp;        throws IOException
+<i>323</i>&nbsp;    {
+<b class="fc"><i>324</i>&nbsp;        myAppendable.appendUtf16(c);</b>
+<b class="fc"><i>325</i>&nbsp;    }</b>
+<i>326</i>&nbsp;
+<i>327</i>&nbsp;    public void appendUtf16Surrogate(char leadSurrogate, char trailSurrogate)
+<i>328</i>&nbsp;        throws IOException
+<i>329</i>&nbsp;    {
+<b class="fc"><i>330</i>&nbsp;        myAppendable.appendUtf16Surrogate(leadSurrogate, trailSurrogate);</b>
+<b class="fc"><i>331</i>&nbsp;    }</b>
+<i>332</i>&nbsp;
+<i>333</i>&nbsp;
+<i>334</i>&nbsp;    //=========================================================================
+<i>335</i>&nbsp;
+<i>336</i>&nbsp;
+<i>337</i>&nbsp;    /**
+<i>338</i>&nbsp;     * Print an Ion String type
+<i>339</i>&nbsp;     * @param text
+<i>340</i>&nbsp;     * @throws IOException
+<i>341</i>&nbsp;     */
+<i>342</i>&nbsp;    public final void printString(CharSequence text)
+<i>343</i>&nbsp;        throws IOException
+<i>344</i>&nbsp;    {
+<b class="fc"><i>345</i>&nbsp;        if (text == null)</b>
+<i>346</i>&nbsp;        {
+<b class="fc"><i>347</i>&nbsp;            appendAscii(&quot;null.string&quot;);</b>
+<i>348</i>&nbsp;        }
+<i>349</i>&nbsp;        else
+<i>350</i>&nbsp;        {
+<b class="fc"><i>351</i>&nbsp;            appendAscii(&#39;&quot;&#39;);</b>
+<b class="fc"><i>352</i>&nbsp;            printCodePoints(text, STRING_ESCAPE_CODES);</b>
+<b class="fc"><i>353</i>&nbsp;            appendAscii(&#39;&quot;&#39;);</b>
+<i>354</i>&nbsp;        }
+<b class="fc"><i>355</i>&nbsp;    }</b>
+<i>356</i>&nbsp;
+<i>357</i>&nbsp;    /**
+<i>358</i>&nbsp;     * Print an Ion triple-quoted string
+<i>359</i>&nbsp;     * @param text
+<i>360</i>&nbsp;     * @throws IOException
+<i>361</i>&nbsp;     */
+<i>362</i>&nbsp;    public final void printLongString(CharSequence text)
+<i>363</i>&nbsp;        throws IOException
+<i>364</i>&nbsp;    {
+<b class="fc"><i>365</i>&nbsp;        if (text == null)</b>
+<i>366</i>&nbsp;        {
+<b class="nc"><i>367</i>&nbsp;            appendAscii(&quot;null.string&quot;);</b>
+<i>368</i>&nbsp;        }
+<i>369</i>&nbsp;        else
+<i>370</i>&nbsp;        {
+<b class="fc"><i>371</i>&nbsp;            appendAscii(TRIPLE_QUOTES);</b>
+<b class="fc"><i>372</i>&nbsp;            printCodePoints(text, LONG_STRING_ESCAPE_CODES);</b>
+<b class="fc"><i>373</i>&nbsp;            appendAscii(TRIPLE_QUOTES);</b>
+<i>374</i>&nbsp;        }
+<b class="fc"><i>375</i>&nbsp;    }</b>
+<i>376</i>&nbsp;
+<i>377</i>&nbsp;    /**
+<i>378</i>&nbsp;     * Print a JSON string
+<i>379</i>&nbsp;     * @param text
+<i>380</i>&nbsp;     * @throws IOException
+<i>381</i>&nbsp;     */
+<i>382</i>&nbsp;    public final void printJsonString(CharSequence text)
+<i>383</i>&nbsp;        throws IOException
+<i>384</i>&nbsp;    {
+<b class="fc"><i>385</i>&nbsp;        if (text == null)</b>
+<i>386</i>&nbsp;        {
+<b class="nc"><i>387</i>&nbsp;            appendAscii(&quot;null&quot;);</b>
+<i>388</i>&nbsp;        }
+<i>389</i>&nbsp;        else
+<i>390</i>&nbsp;        {
+<b class="fc"><i>391</i>&nbsp;            appendAscii(&#39;&quot;&#39;);</b>
+<b class="fc"><i>392</i>&nbsp;            printCodePoints(text, JSON_ESCAPE_CODES);</b>
+<b class="fc"><i>393</i>&nbsp;            appendAscii(&#39;&quot;&#39;);</b>
+<i>394</i>&nbsp;        }
+<b class="fc"><i>395</i>&nbsp;    }</b>
+<i>396</i>&nbsp;
+<i>397</i>&nbsp;
+<i>398</i>&nbsp;    /**
+<i>399</i>&nbsp;     * Determines whether the given text matches one of the Ion identifier
+<i>400</i>&nbsp;     * keywords &lt;code&gt;null&lt;/code&gt;, &lt;code&gt;true&lt;/code&gt;, or &lt;code&gt;false&lt;/code&gt;.
+<i>401</i>&nbsp;     * &lt;p&gt;
+<i>402</i>&nbsp;     * This does &lt;em&gt;not&lt;/em&gt; check for non-identifier keywords such as
+<i>403</i>&nbsp;     * &lt;code&gt;null.int&lt;/code&gt;.
+<i>404</i>&nbsp;     *
+<i>405</i>&nbsp;     * @param text the symbol to check.
+<i>406</i>&nbsp;     * @return &lt;code&gt;true&lt;/code&gt; if the text is an identifier keyword.
+<i>407</i>&nbsp;     */
+<i>408</i>&nbsp;    public static boolean isIdentifierKeyword(CharSequence text)
+<i>409</i>&nbsp;    {
+<b class="fc"><i>410</i>&nbsp;        int pos = 0;</b>
+<b class="fc"><i>411</i>&nbsp;        int valuelen = text.length();</b>
+<i>412</i>&nbsp;
+<b class="fc"><i>413</i>&nbsp;        if(valuelen == 0)</b>
+<i>414</i>&nbsp;        {
+<b class="nc"><i>415</i>&nbsp;            return false;</b>
+<i>416</i>&nbsp;        }
+<i>417</i>&nbsp;
+<b class="fc"><i>418</i>&nbsp;        boolean keyword = false;</b>
+<i>419</i>&nbsp;
+<i>420</i>&nbsp;        // there has to be at least 1 character or we wouldn&#39;t be here
+<b class="fc"><i>421</i>&nbsp;        switch (text.charAt(pos++)) {</b>
+<i>422</i>&nbsp;        case &#39;$&#39;:
+<b class="fc"><i>423</i>&nbsp;            if (valuelen == 1) return false;</b>
+<b class="fc"><i>424</i>&nbsp;            while (pos &lt; valuelen) {</b>
+<b class="fc"><i>425</i>&nbsp;                char c = text.charAt(pos++);</b>
+<b class="fc"><i>426</i>&nbsp;                if (! isDecimalDigit(c)) return false;</b>
+<b class="fc"><i>427</i>&nbsp;            }</b>
+<b class="fc"><i>428</i>&nbsp;            return true;</b>
+<i>429</i>&nbsp;        case &#39;f&#39;:
+<b class="fc"><i>430</i>&nbsp;            if (valuelen == 5 //      &#39;f&#39;</b>
+<b class="fc"><i>431</i>&nbsp;             &amp;&amp; text.charAt(pos++) == &#39;a&#39;</b>
+<b class="fc"><i>432</i>&nbsp;             &amp;&amp; text.charAt(pos++) == &#39;l&#39;</b>
+<b class="fc"><i>433</i>&nbsp;             &amp;&amp; text.charAt(pos++) == &#39;s&#39;</b>
+<b class="fc"><i>434</i>&nbsp;             &amp;&amp; text.charAt(pos++) == &#39;e&#39;</b>
+<i>435</i>&nbsp;            ) {
+<b class="fc"><i>436</i>&nbsp;                keyword = true;</b>
+<i>437</i>&nbsp;            }
+<i>438</i>&nbsp;            break;
+<i>439</i>&nbsp;        case &#39;n&#39;:
+<b class="fc"><i>440</i>&nbsp;            if (valuelen == 4 //      &#39;n&#39;</b>
+<b class="fc"><i>441</i>&nbsp;             &amp;&amp; text.charAt(pos++) == &#39;u&#39;</b>
+<b class="fc"><i>442</i>&nbsp;             &amp;&amp; text.charAt(pos++) == &#39;l&#39;</b>
+<b class="fc"><i>443</i>&nbsp;             &amp;&amp; text.charAt(pos++) == &#39;l&#39;</b>
+<i>444</i>&nbsp;            ) {
+<b class="fc"><i>445</i>&nbsp;                keyword = true;</b>
+<i>446</i>&nbsp;            }
+<b class="fc"><i>447</i>&nbsp;            else if (valuelen == 3 // &#39;n&#39;</b>
+<b class="fc"><i>448</i>&nbsp;             &amp;&amp; text.charAt(pos++) == &#39;a&#39;</b>
+<b class="fc"><i>449</i>&nbsp;             &amp;&amp; text.charAt(pos++) == &#39;n&#39;</b>
+<i>450</i>&nbsp;            ) {
+<b class="fc"><i>451</i>&nbsp;                keyword = true;</b>
+<i>452</i>&nbsp;            }
+<i>453</i>&nbsp;            break;
+<i>454</i>&nbsp;        case &#39;t&#39;:
+<b class="fc"><i>455</i>&nbsp;            if (valuelen == 4 //      &#39;t&#39;</b>
+<b class="fc"><i>456</i>&nbsp;             &amp;&amp; text.charAt(pos++) == &#39;r&#39;</b>
+<b class="fc"><i>457</i>&nbsp;             &amp;&amp; text.charAt(pos++) == &#39;u&#39;</b>
+<b class="fc"><i>458</i>&nbsp;             &amp;&amp; text.charAt(pos++) == &#39;e&#39;</b>
+<i>459</i>&nbsp;            ) {
+<b class="fc"><i>460</i>&nbsp;                keyword = true;</b>
+<i>461</i>&nbsp;            }
+<i>462</i>&nbsp;            break;
+<i>463</i>&nbsp;        }
+<i>464</i>&nbsp;
+<b class="fc"><i>465</i>&nbsp;        return keyword;</b>
+<i>466</i>&nbsp;    }
+<i>467</i>&nbsp;
+<i>468</i>&nbsp;
+<i>469</i>&nbsp;    /**
+<i>470</i>&nbsp;     * Determines whether the text of a symbol requires (single) quotes.
+<i>471</i>&nbsp;     *
+<i>472</i>&nbsp;     * @param symbol must be a non-empty string.
+<i>473</i>&nbsp;     * @param quoteOperators indicates whether the caller wants operators to be
+<i>474</i>&nbsp;     * quoted; if &lt;code&gt;true&lt;/code&gt; then operator symbols like &lt;code&gt;!=&lt;/code&gt;
+<i>475</i>&nbsp;     * will return &lt;code&gt;true&lt;/code&gt;.
+<i>476</i>&nbsp;     * has looser quoting requirements than other containers.
+<i>477</i>&nbsp;     * @return &lt;code&gt;true&lt;/code&gt; if the given symbol requires quoting.
+<i>478</i>&nbsp;     *
+<i>479</i>&nbsp;     * @throws NullPointerException
+<i>480</i>&nbsp;     *         if &lt;code&gt;symbol&lt;/code&gt; is &lt;code&gt;null&lt;/code&gt;.
+<i>481</i>&nbsp;     */
+<i>482</i>&nbsp;    public static boolean symbolNeedsQuoting(CharSequence symbol,
+<i>483</i>&nbsp;                                             boolean      quoteOperators)
+<i>484</i>&nbsp;    {
+<b class="fc"><i>485</i>&nbsp;        int length = symbol.length();</b>
+<i>486</i>&nbsp;
+<i>487</i>&nbsp;        // If the symbol&#39;s text matches an Ion keyword or it&#39;s an empty symbol, we must quote it.
+<i>488</i>&nbsp;        // Eg, the symbol &#39;false&#39; and &#39;&#39; must be rendered quoted.
+<b class="fc"><i>489</i>&nbsp;        if(length == 0 || isIdentifierKeyword(symbol))</b>
+<i>490</i>&nbsp;        {
+<b class="fc"><i>491</i>&nbsp;            return true;</b>
+<i>492</i>&nbsp;        }
+<i>493</i>&nbsp;
+<b class="fc"><i>494</i>&nbsp;        char c = symbol.charAt(0);</b>
+<i>495</i>&nbsp;
+<i>496</i>&nbsp;        // Surrogates are neither identifierStart nor operatorPart, so the
+<i>497</i>&nbsp;        // first one we hit will fall through and return true.
+<i>498</i>&nbsp;        // TODO test that
+<i>499</i>&nbsp;
+<b class="fc"><i>500</i>&nbsp;        if (!quoteOperators &amp;&amp; isOperatorPart(c))</b>
+<i>501</i>&nbsp;        {
+<b class="fc"><i>502</i>&nbsp;            for (int ii = 0; ii &lt; length; ii++) {</b>
+<b class="fc"><i>503</i>&nbsp;                c = symbol.charAt(ii);</b>
+<i>504</i>&nbsp;                // We don&#39;t need to look for escapes since all
+<i>505</i>&nbsp;                // operator characters are ASCII.
+<b class="fc"><i>506</i>&nbsp;                if (!isOperatorPart(c)) {</b>
+<b class="fc"><i>507</i>&nbsp;                    return true;</b>
+<i>508</i>&nbsp;                }
+<i>509</i>&nbsp;            }
+<b class="fc"><i>510</i>&nbsp;            return false;</b>
+<i>511</i>&nbsp;        }
+<b class="fc"><i>512</i>&nbsp;        else if (isIdentifierStart(c))</b>
+<i>513</i>&nbsp;        {
+<b class="fc"><i>514</i>&nbsp;            for (int ii = 0; ii &lt; length; ii++) {</b>
+<b class="fc"><i>515</i>&nbsp;                c = symbol.charAt(ii);</b>
+<b class="fc"><i>516</i>&nbsp;                if ((c == &#39;\&#39;&#39; || c &lt; 32 || c &gt; 126)</b>
+<b class="fc"><i>517</i>&nbsp;                    || !isIdentifierPart(c))</b>
+<i>518</i>&nbsp;                {
+<b class="fc"><i>519</i>&nbsp;                    return true;</b>
+<i>520</i>&nbsp;                }
+<i>521</i>&nbsp;            }
+<b class="fc"><i>522</i>&nbsp;            return false;</b>
+<i>523</i>&nbsp;        }
+<i>524</i>&nbsp;
+<i>525</i>&nbsp;        // quote by default
+<b class="fc"><i>526</i>&nbsp;        return true;</b>
+<i>527</i>&nbsp;    }
+<i>528</i>&nbsp;
+<i>529</i>&nbsp;
+<i>530</i>&nbsp;    /**
+<i>531</i>&nbsp;     * Print an Ion Symbol type. This method will check if symbol needs quoting
+<i>532</i>&nbsp;     * @param text
+<i>533</i>&nbsp;     * @throws IOException
+<i>534</i>&nbsp;     */
+<i>535</i>&nbsp;    public final void printSymbol(CharSequence text)
+<i>536</i>&nbsp;        throws IOException
+<i>537</i>&nbsp;    {
+<b class="fc"><i>538</i>&nbsp;        if (text == null)</b>
+<i>539</i>&nbsp;        {
+<b class="nc"><i>540</i>&nbsp;            appendAscii(&quot;null.symbol&quot;);</b>
+<i>541</i>&nbsp;        }
+<b class="fc"><i>542</i>&nbsp;        else if (symbolNeedsQuoting(text, true)) {</b>
+<b class="fc"><i>543</i>&nbsp;            appendAscii(&#39;\&#39;&#39;);</b>
+<b class="fc"><i>544</i>&nbsp;            printCodePoints(text, SYMBOL_ESCAPE_CODES);</b>
+<b class="fc"><i>545</i>&nbsp;            appendAscii(&#39;\&#39;&#39;);</b>
+<i>546</i>&nbsp;        }
+<i>547</i>&nbsp;        else
+<i>548</i>&nbsp;        {
+<b class="fc"><i>549</i>&nbsp;            appendAscii(text);</b>
+<i>550</i>&nbsp;        }
+<b class="fc"><i>551</i>&nbsp;    }</b>
+<i>552</i>&nbsp;
+<i>553</i>&nbsp;    /**
+<i>554</i>&nbsp;     * Print single-quoted Ion Symbol type
+<i>555</i>&nbsp;     * @param text
+<i>556</i>&nbsp;     * @throws IOException
+<i>557</i>&nbsp;     */
+<i>558</i>&nbsp;    public final void printQuotedSymbol(CharSequence text)
+<i>559</i>&nbsp;        throws IOException
+<i>560</i>&nbsp;    {
+<b class="fc"><i>561</i>&nbsp;        if (text == null)</b>
+<i>562</i>&nbsp;        {
+<b class="nc"><i>563</i>&nbsp;            appendAscii(&quot;null.symbol&quot;);</b>
+<i>564</i>&nbsp;        }
+<i>565</i>&nbsp;        else
+<i>566</i>&nbsp;        {
+<b class="fc"><i>567</i>&nbsp;            appendAscii(&#39;\&#39;&#39;);</b>
+<b class="fc"><i>568</i>&nbsp;            printCodePoints(text, SYMBOL_ESCAPE_CODES);</b>
+<b class="fc"><i>569</i>&nbsp;            appendAscii(&#39;\&#39;&#39;);</b>
+<i>570</i>&nbsp;        }
+<b class="fc"><i>571</i>&nbsp;    }</b>
+<i>572</i>&nbsp;
+<i>573</i>&nbsp;    private final void printCodePoints(CharSequence text, String[] escapes)
+<i>574</i>&nbsp;        throws IOException
+<i>575</i>&nbsp;    {
+<b class="fc"><i>576</i>&nbsp;        int len = text.length();</b>
+<b class="fc"><i>577</i>&nbsp;        for (int i = 0; i &lt; len; ++i)</b>
+<i>578</i>&nbsp;        {
+<i>579</i>&nbsp;            // Find a span of non-escaped ASCII code points so we can write
+<i>580</i>&nbsp;            // them as quickly as possible.
+<b class="fc"><i>581</i>&nbsp;            char c = 0;</b>
+<i>582</i>&nbsp;            int j;
+<b class="fc"><i>583</i>&nbsp;            for (j = i; j &lt; len; ++j) {</b>
+<b class="fc"><i>584</i>&nbsp;                c = text.charAt(j);</b>
+<i>585</i>&nbsp;                // The escapes array always includes U+80 through U+FF.
+<b class="fc"><i>586</i>&nbsp;                if (c &gt;= 0x100 || escapes[c] != null)</b>
+<i>587</i>&nbsp;                {
+<i>588</i>&nbsp;                    // c is escaped and/or outside ASCII range.
+<b class="fc"><i>589</i>&nbsp;                    if (j &gt; i) {</b>
+<b class="fc"><i>590</i>&nbsp;                        appendAscii(text, i, j);</b>
+<b class="fc"><i>591</i>&nbsp;                        i = j;</b>
+<i>592</i>&nbsp;                    }
+<i>593</i>&nbsp;                    break;
+<i>594</i>&nbsp;                }
+<i>595</i>&nbsp;            }
+<b class="fc"><i>596</i>&nbsp;            if (j == len) {</b>
+<i>597</i>&nbsp;                // we&#39;ve reached the end of sequence; append it and break
+<b class="fc"><i>598</i>&nbsp;                appendAscii(text, i, j);</b>
+<b class="fc"><i>599</i>&nbsp;                break;</b>
+<i>600</i>&nbsp;            }
+<i>601</i>&nbsp;
+<i>602</i>&nbsp;            // We&#39;ve found a code point that&#39;s escaped and/or non-ASCII.
+<i>603</i>&nbsp;
+<b class="fc"><i>604</i>&nbsp;            if (c &lt; 0x80)</b>
+<i>605</i>&nbsp;            {
+<i>606</i>&nbsp;                // An escaped ASCII character.
+<b class="fc"><i>607</i>&nbsp;                assert escapes[c] != null;</b>
+<b class="fc"><i>608</i>&nbsp;                appendAscii(escapes[c]);</b>
+<i>609</i>&nbsp;            }
+<b class="fc"><i>610</i>&nbsp;            else if (c &lt; 0x100)</b>
+<i>611</i>&nbsp;            {
+<i>612</i>&nbsp;                // Non-ASCII LATIN-1; we will have an escape sequence but may
+<i>613</i>&nbsp;                // not use it.
+<b class="fc"><i>614</i>&nbsp;                assert escapes[c] != null;</b>
+<i>615</i>&nbsp;
+<i>616</i>&nbsp;                // Always escape the C1 control codes U+80 through U+9F.
+<b class="fc"><i>617</i>&nbsp;                if (escapeNonAscii || c &lt;= 0x9F) {</b>
+<b class="fc"><i>618</i>&nbsp;                    appendAscii(escapes[c]);</b>
+<i>619</i>&nbsp;                } else {
+<b class="fc"><i>620</i>&nbsp;                    appendUtf16(c);</b>
+<i>621</i>&nbsp;                }
+<i>622</i>&nbsp;            }
+<b class="fc"><i>623</i>&nbsp;            else if (c &lt; 0xD800 || c &gt;= 0xE000)</b>
+<i>624</i>&nbsp;            {
+<i>625</i>&nbsp;                // Not LATIN-1, but still in the BMP.
+<b class="fc"><i>626</i>&nbsp;                String s = Integer.toHexString(c);</b>
+<b class="fc"><i>627</i>&nbsp;                if (escapeNonAscii) {</b>
+<b class="nc"><i>628</i>&nbsp;                    appendAscii(HEX_4_PREFIX);</b>
+<b class="nc"><i>629</i>&nbsp;                    appendAscii(ZERO_PADDING[4 - s.length()]);</b>
+<b class="nc"><i>630</i>&nbsp;                    appendAscii(s);</b>
+<i>631</i>&nbsp;                } else {
+<b class="fc"><i>632</i>&nbsp;                    appendUtf16(c);</b>
+<i>633</i>&nbsp;                }
+<b class="fc"><i>634</i>&nbsp;            }</b>
+<b class="fc"><i>635</i>&nbsp;            else if (isHighSurrogate(c))</b>
+<i>636</i>&nbsp;            {
+<i>637</i>&nbsp;                // Outside the BMP! High surrogate must be followed by low.
+<i>638</i>&nbsp;                char c2;
+<b class="fc"><i>639</i>&nbsp;                if (++i == len || !isLowSurrogate(c2 = text.charAt(i))) {</b>
+<b class="fc"><i>640</i>&nbsp;                    String message =</b>
+<i>641</i>&nbsp;                        &quot;text is invalid UTF-16. It contains an unmatched &quot; +
+<b class="fc"><i>642</i>&nbsp;                        &quot;leading surrogate 0x&quot; + Integer.toHexString(c) +</b>
+<i>643</i>&nbsp;                        &quot; at index &quot; + (i-1);
+<b class="fc"><i>644</i>&nbsp;                    throw new IllegalArgumentException(message);</b>
+<i>645</i>&nbsp;                }
+<b class="fc"><i>646</i>&nbsp;                if (escapeNonAscii) {</b>
+<b class="fc"><i>647</i>&nbsp;                    int cp = makeUnicodeScalar(c, c2);</b>
+<b class="fc"><i>648</i>&nbsp;                    String s = Integer.toHexString(cp);</b>
+<b class="fc"><i>649</i>&nbsp;                    appendAscii(HEX_8_PREFIX);</b>
+<b class="fc"><i>650</i>&nbsp;                    appendAscii(ZERO_PADDING[8 - s.length()]);</b>
+<b class="fc"><i>651</i>&nbsp;                    appendAscii(s);</b>
+<b class="fc"><i>652</i>&nbsp;                } else {</b>
+<b class="fc"><i>653</i>&nbsp;                    appendUtf16Surrogate(c, c2);</b>
+<i>654</i>&nbsp;                }
+<b class="fc"><i>655</i>&nbsp;            }</b>
+<i>656</i>&nbsp;            else
+<i>657</i>&nbsp;            {
+<i>658</i>&nbsp;                // unmatched low surrogate
+<b class="fc"><i>659</i>&nbsp;                assert isLowSurrogate(c);</b>
+<i>660</i>&nbsp;
+<b class="fc"><i>661</i>&nbsp;                String message =</b>
+<i>662</i>&nbsp;                    &quot;text is invalid UTF-16. It contains an unmatched &quot; +
+<b class="fc"><i>663</i>&nbsp;                    &quot;trailing surrogate 0x&quot; + Integer.toHexString(c) +</b>
+<i>664</i>&nbsp;                    &quot; at index &quot; + i;
+<b class="fc"><i>665</i>&nbsp;                throw new IllegalArgumentException(message);</b>
+<i>666</i>&nbsp;            }
+<i>667</i>&nbsp;        }
+<b class="fc"><i>668</i>&nbsp;    }</b>
+<i>669</i>&nbsp;
+<i>670</i>&nbsp;
+<i>671</i>&nbsp;    //=========================================================================
+<i>672</i>&nbsp;    // Numeric scalars
+<i>673</i>&nbsp;
+<i>674</i>&nbsp;
+<i>675</i>&nbsp;    /** ONLY FOR USE BY {@link #printInt(long)}. */
+<b class="fc"><i>676</i>&nbsp;    private final char[] _fixedIntBuffer = new char[MAX_LONG_TEXT_SIZE];</b>
+<i>677</i>&nbsp;
+<i>678</i>&nbsp;    public void printInt(long value)
+<i>679</i>&nbsp;        throws IOException
+<i>680</i>&nbsp;    {
+<b class="fc"><i>681</i>&nbsp;        int j = _fixedIntBuffer.length;</b>
+<b class="fc"><i>682</i>&nbsp;        if (value == 0) {</b>
+<b class="fc"><i>683</i>&nbsp;            _fixedIntBuffer[--j] = &#39;0&#39;;</b>
+<i>684</i>&nbsp;        } else {
+<b class="fc"><i>685</i>&nbsp;            if (value &lt; 0) {</b>
+<b class="fc"><i>686</i>&nbsp;                while (value != 0) {</b>
+<b class="fc"><i>687</i>&nbsp;                    _fixedIntBuffer[--j] = (char)(0x30 - value % 10);</b>
+<b class="fc"><i>688</i>&nbsp;                    value /= 10;</b>
+<i>689</i>&nbsp;                }
+<b class="fc"><i>690</i>&nbsp;                _fixedIntBuffer[--j] = &#39;-&#39;;</b>
+<i>691</i>&nbsp;            } else {
+<b class="fc"><i>692</i>&nbsp;                while (value != 0) {</b>
+<b class="fc"><i>693</i>&nbsp;                    _fixedIntBuffer[--j] = (char)(0x30 + value % 10);</b>
+<b class="fc"><i>694</i>&nbsp;                    value /= 10;</b>
+<i>695</i>&nbsp;                }
+<i>696</i>&nbsp;            }
+<i>697</i>&nbsp;        }
+<i>698</i>&nbsp;
+<i>699</i>&nbsp;        // Using CharBuffer avoids copying the _fixedIntBuffer into a String
+<b class="fc"><i>700</i>&nbsp;        appendAscii(CharBuffer.wrap(_fixedIntBuffer),</b>
+<i>701</i>&nbsp;                    j,
+<i>702</i>&nbsp;                    _fixedIntBuffer.length);
+<b class="fc"><i>703</i>&nbsp;    }</b>
+<i>704</i>&nbsp;
+<i>705</i>&nbsp;
+<i>706</i>&nbsp;    public void printInt(BigInteger value)
+<i>707</i>&nbsp;        throws IOException
+<i>708</i>&nbsp;    {
+<b class="fc"><i>709</i>&nbsp;        if (value == null)</b>
+<i>710</i>&nbsp;        {
+<b class="nc"><i>711</i>&nbsp;            appendAscii(&quot;null.int&quot;);</b>
+<b class="nc"><i>712</i>&nbsp;            return;</b>
+<i>713</i>&nbsp;        }
+<i>714</i>&nbsp;
+<b class="fc"><i>715</i>&nbsp;        appendAscii(value.toString());</b>
+<b class="fc"><i>716</i>&nbsp;    }</b>
+<i>717</i>&nbsp;
+<i>718</i>&nbsp;
+<i>719</i>&nbsp;    public void printDecimal(_Private_IonTextWriterBuilder _options,
+<i>720</i>&nbsp;                             BigDecimal                    value)
+<i>721</i>&nbsp;        throws IOException
+<i>722</i>&nbsp;    {
+<b class="fc"><i>723</i>&nbsp;        if (value == null)</b>
+<i>724</i>&nbsp;        {
+<b class="fc"><i>725</i>&nbsp;            appendAscii(&quot;null.decimal&quot;);</b>
+<b class="fc"><i>726</i>&nbsp;            return;</b>
+<i>727</i>&nbsp;        }
+<i>728</i>&nbsp;
+<b class="fc"><i>729</i>&nbsp;        BigInteger unscaled = value.unscaledValue();</b>
+<i>730</i>&nbsp;
+<b class="fc"><i>731</i>&nbsp;        int signum = value.signum();</b>
+<b class="fc"><i>732</i>&nbsp;        if (signum &lt; 0)</b>
+<i>733</i>&nbsp;        {
+<b class="fc"><i>734</i>&nbsp;            appendAscii(&#39;-&#39;);</b>
+<b class="fc"><i>735</i>&nbsp;            unscaled = unscaled.negate();</b>
+<i>736</i>&nbsp;        }
+<b class="fc"><i>737</i>&nbsp;        else if (value instanceof Decimal</b>
+<b class="fc"><i>738</i>&nbsp;             &amp;&amp; ((Decimal)value).isNegativeZero())</b>
+<i>739</i>&nbsp;        {
+<i>740</i>&nbsp;            // for the various forms of negative zero we have to
+<i>741</i>&nbsp;            // write the sign ourselves, since neither BigInteger
+<i>742</i>&nbsp;            // nor BigDecimal recognize negative zero, but Ion does.
+<b class="fc"><i>743</i>&nbsp;            appendAscii(&#39;-&#39;);</b>
+<i>744</i>&nbsp;        }
+<i>745</i>&nbsp;
+<b class="fc"><i>746</i>&nbsp;        final String unscaledText = unscaled.toString();</b>
+<b class="fc"><i>747</i>&nbsp;        final int significantDigits = unscaledText.length();</b>
+<i>748</i>&nbsp;
+<b class="fc"><i>749</i>&nbsp;        final int scale = value.scale();</b>
+<b class="fc"><i>750</i>&nbsp;        final int exponent = -scale;</b>
+<i>751</i>&nbsp;
+<b class="fc"><i>752</i>&nbsp;        if (_options._decimal_as_float)</b>
+<i>753</i>&nbsp;        {
+<b class="nc"><i>754</i>&nbsp;            appendAscii(unscaledText);</b>
+<b class="nc"><i>755</i>&nbsp;            appendAscii(&#39;e&#39;);</b>
+<b class="nc"><i>756</i>&nbsp;            appendAscii(Integer.toString(exponent));</b>
+<i>757</i>&nbsp;        }
+<b class="fc"><i>758</i>&nbsp;        else if (exponent == 0)</b>
+<i>759</i>&nbsp;        {
+<b class="fc"><i>760</i>&nbsp;            appendAscii(unscaledText);</b>
+<b class="fc"><i>761</i>&nbsp;            appendAscii(&#39;.&#39;);</b>
+<i>762</i>&nbsp;        }
+<b class="fc"><i>763</i>&nbsp;        else if (exponent &lt; 0)</b>
+<i>764</i>&nbsp;        {
+<i>765</i>&nbsp;            // Avoid printing small negative exponents using a heuristic
+<i>766</i>&nbsp;            // adapted from http://speleotrove.com/decimal/daconvs.html
+<i>767</i>&nbsp;
+<b class="fc"><i>768</i>&nbsp;            final int adjustedExponent = significantDigits - 1 - scale;</b>
+<b class="fc"><i>769</i>&nbsp;            if (adjustedExponent &gt;= 0)</b>
+<i>770</i>&nbsp;            {
+<b class="fc"><i>771</i>&nbsp;                int wholeDigits = significantDigits - scale;</b>
+<b class="fc"><i>772</i>&nbsp;                appendAscii(unscaledText, 0, wholeDigits);</b>
+<b class="fc"><i>773</i>&nbsp;                appendAscii(&#39;.&#39;);</b>
+<b class="fc"><i>774</i>&nbsp;                appendAscii(unscaledText, wholeDigits,</b>
+<i>775</i>&nbsp;                                    significantDigits);
+<b class="fc"><i>776</i>&nbsp;            }</b>
+<b class="fc"><i>777</i>&nbsp;            else if (adjustedExponent &gt;= -6)</b>
+<i>778</i>&nbsp;            {
+<b class="fc"><i>779</i>&nbsp;                appendAscii(&quot;0.&quot;);</b>
+<b class="fc"><i>780</i>&nbsp;                appendAscii(&quot;00000&quot;, 0, scale - significantDigits);</b>
+<b class="fc"><i>781</i>&nbsp;                appendAscii(unscaledText);</b>
+<i>782</i>&nbsp;            }
+<i>783</i>&nbsp;            else
+<i>784</i>&nbsp;            {
+<b class="fc"><i>785</i>&nbsp;                appendAscii(unscaledText);</b>
+<b class="fc"><i>786</i>&nbsp;                appendAscii(&quot;d-&quot;);</b>
+<b class="fc"><i>787</i>&nbsp;                appendAscii(Integer.toString(scale));</b>
+<i>788</i>&nbsp;            }
+<b class="fc"><i>789</i>&nbsp;        }</b>
+<i>790</i>&nbsp;        else // (exponent &gt; 0)
+<i>791</i>&nbsp;        {
+<i>792</i>&nbsp;            // We cannot move the decimal point to the right, adding
+<i>793</i>&nbsp;            // rightmost zeros, because that would alter the precision.
+<b class="fc"><i>794</i>&nbsp;            appendAscii(unscaledText);</b>
+<b class="fc"><i>795</i>&nbsp;            appendAscii(&#39;d&#39;);</b>
+<b class="fc"><i>796</i>&nbsp;            appendAscii(Integer.toString(exponent));</b>
+<i>797</i>&nbsp;        }
+<b class="fc"><i>798</i>&nbsp;    }</b>
+<i>799</i>&nbsp;
+<i>800</i>&nbsp;
+<i>801</i>&nbsp;    public void printFloat(double value)
+<i>802</i>&nbsp;        throws IOException
+<i>803</i>&nbsp;    {
+<i>804</i>&nbsp;        // shortcut zero cases
+<b class="fc"><i>805</i>&nbsp;        if (value == 0.0)</b>
+<i>806</i>&nbsp;        {
+<b class="fc"><i>807</i>&nbsp;            if (Double.compare(value, 0d) == 0)  // Only matches positive zero</b>
+<i>808</i>&nbsp;            {
+<b class="fc"><i>809</i>&nbsp;                appendAscii(&quot;0e0&quot;);</b>
+<i>810</i>&nbsp;            }
+<i>811</i>&nbsp;            else
+<i>812</i>&nbsp;            {
+<b class="fc"><i>813</i>&nbsp;                appendAscii(&quot;-0e0&quot;);</b>
+<i>814</i>&nbsp;            }
+<i>815</i>&nbsp;        }
+<b class="fc"><i>816</i>&nbsp;        else if (Double.isNaN(value))</b>
+<i>817</i>&nbsp;        {
+<b class="fc"><i>818</i>&nbsp;            appendAscii(&quot;nan&quot;);</b>
+<i>819</i>&nbsp;        }
+<b class="fc"><i>820</i>&nbsp;        else if (value == Double.POSITIVE_INFINITY)</b>
+<i>821</i>&nbsp;        {
+<b class="fc"><i>822</i>&nbsp;            appendAscii(&quot;+inf&quot;);</b>
+<i>823</i>&nbsp;        }
+<b class="fc"><i>824</i>&nbsp;        else if (value == Double.NEGATIVE_INFINITY)</b>
+<i>825</i>&nbsp;        {
+<b class="fc"><i>826</i>&nbsp;            appendAscii(&quot;-inf&quot;);</b>
+<i>827</i>&nbsp;        }
+<i>828</i>&nbsp;        else
+<i>829</i>&nbsp;        {
+<i>830</i>&nbsp;            // Double.toString() forces a digit after the decimal point.
+<i>831</i>&nbsp;            // Remove it when it&#39;s not meaningful.
+<b class="fc"><i>832</i>&nbsp;            String str = Double.toString(value);</b>
+<b class="fc"><i>833</i>&nbsp;            if (str.endsWith(&quot;.0&quot;))</b>
+<i>834</i>&nbsp;            {
+<b class="fc"><i>835</i>&nbsp;                appendAscii(str, 0, str.length() - 2);</b>
+<b class="fc"><i>836</i>&nbsp;                appendAscii(&quot;e0&quot;);</b>
+<i>837</i>&nbsp;            }
+<i>838</i>&nbsp;            else
+<i>839</i>&nbsp;            {
+<b class="fc"><i>840</i>&nbsp;                appendAscii(str);</b>
+<b class="fc"><i>841</i>&nbsp;                if (str.indexOf(&#39;E&#39;) == -1)</b>
+<i>842</i>&nbsp;                {
+<b class="fc"><i>843</i>&nbsp;                    appendAscii(&quot;e0&quot;);</b>
+<i>844</i>&nbsp;                }
+<i>845</i>&nbsp;            }
+<i>846</i>&nbsp;        }
+<b class="fc"><i>847</i>&nbsp;    }</b>
+<i>848</i>&nbsp;
+<i>849</i>&nbsp;    public void printFloat(Double value)
+<i>850</i>&nbsp;        throws IOException
+<i>851</i>&nbsp;    {
+<b class="fc"><i>852</i>&nbsp;        if (value == null)</b>
+<i>853</i>&nbsp;        {
+<b class="fc"><i>854</i>&nbsp;            appendAscii(&quot;null.float&quot;);</b>
+<i>855</i>&nbsp;        }
+<i>856</i>&nbsp;        else
+<i>857</i>&nbsp;        {
+<b class="fc"><i>858</i>&nbsp;            printFloat(value.doubleValue());</b>
+<i>859</i>&nbsp;        }
+<b class="fc"><i>860</i>&nbsp;    }</b>
+<i>861</i>&nbsp;
+<i>862</i>&nbsp;
+<i>863</i>&nbsp;    //=========================================================================
+<i>864</i>&nbsp;    // LOBs
+<i>865</i>&nbsp;
+<i>866</i>&nbsp;
+<i>867</i>&nbsp;    public void printBlob(_Private_IonTextWriterBuilder _options,
+<i>868</i>&nbsp;                          byte[] value, int start, int len)
+<i>869</i>&nbsp;        throws IOException
+<i>870</i>&nbsp;    {
+<b class="fc"><i>871</i>&nbsp;        if (value == null)</b>
+<i>872</i>&nbsp;        {
+<b class="nc"><i>873</i>&nbsp;            appendAscii(&quot;null.blob&quot;);</b>
+<b class="nc"><i>874</i>&nbsp;            return;</b>
+<i>875</i>&nbsp;        }
+<i>876</i>&nbsp;
+<i>877</i>&nbsp;        @SuppressWarnings(&quot;resource&quot;)
+<b class="fc"><i>878</i>&nbsp;        TextStream ts =</b>
+<i>879</i>&nbsp;            new TextStream(new ByteArrayInputStream(value, start, len));
+<i>880</i>&nbsp;
+<i>881</i>&nbsp;        // base64 encoding is 6 bits per char so
+<i>882</i>&nbsp;        // it evens out at 3 bytes in 4 characters
+<b class="fc"><i>883</i>&nbsp;        char[] buf = new char[_options.isPrettyPrintOn() ? 80 : 400];</b>
+<b class="fc"><i>884</i>&nbsp;        CharBuffer cb = CharBuffer.wrap(buf);</b>
+<i>885</i>&nbsp;
+<b class="fc"><i>886</i>&nbsp;        if (_options._blob_as_string)</b>
+<i>887</i>&nbsp;        {
+<b class="nc"><i>888</i>&nbsp;            appendAscii(&#39;&quot;&#39;);</b>
+<i>889</i>&nbsp;        }
+<i>890</i>&nbsp;        else
+<i>891</i>&nbsp;        {
+<b class="fc"><i>892</i>&nbsp;            appendAscii(&quot;{{&quot;);</b>
+<b class="fc"><i>893</i>&nbsp;            if (_options.isPrettyPrintOn())</b>
+<i>894</i>&nbsp;            {
+<b class="fc"><i>895</i>&nbsp;                appendAscii(&#39; &#39;);</b>
+<i>896</i>&nbsp;            }
+<i>897</i>&nbsp;        }
+<i>898</i>&nbsp;
+<i>899</i>&nbsp;        for (;;)
+<i>900</i>&nbsp;        {
+<i>901</i>&nbsp;            // TODO is it better to fill up the CharBuffer before outputting?
+<b class="fc"><i>902</i>&nbsp;            int clen = ts.read(buf, 0, buf.length);</b>
+<b class="fc"><i>903</i>&nbsp;            if (clen &lt; 1) break;</b>
+<b class="fc"><i>904</i>&nbsp;            appendAscii(cb, 0, clen);</b>
+<b class="fc"><i>905</i>&nbsp;        }</b>
+<i>906</i>&nbsp;
+<b class="fc"><i>907</i>&nbsp;        if (_options._blob_as_string)</b>
+<i>908</i>&nbsp;        {
+<b class="nc"><i>909</i>&nbsp;            appendAscii(&#39;&quot;&#39;);</b>
+<i>910</i>&nbsp;        }
+<i>911</i>&nbsp;        else
+<i>912</i>&nbsp;        {
+<b class="fc"><i>913</i>&nbsp;            if (_options.isPrettyPrintOn())</b>
+<i>914</i>&nbsp;            {
+<b class="fc"><i>915</i>&nbsp;                appendAscii(&#39; &#39;);</b>
+<i>916</i>&nbsp;            }
+<b class="fc"><i>917</i>&nbsp;            appendAscii(&quot;}}&quot;);</b>
+<i>918</i>&nbsp;        }
+<b class="fc"><i>919</i>&nbsp;    }</b>
+<i>920</i>&nbsp;
+<i>921</i>&nbsp;
+<i>922</i>&nbsp;    private void printClobBytes(byte[] value, int start, int end,
+<i>923</i>&nbsp;                                String[] escapes)
+<i>924</i>&nbsp;        throws IOException
+<i>925</i>&nbsp;    {
+<b class="fc"><i>926</i>&nbsp;        for (int i = start; i &lt; end; i++) {</b>
+<b class="fc"><i>927</i>&nbsp;            char c = (char)(value[i] &amp; 0xff);</b>
+<b class="fc"><i>928</i>&nbsp;            String escapedByte = escapes[c];</b>
+<b class="fc"><i>929</i>&nbsp;            if (escapedByte != null) {</b>
+<b class="fc"><i>930</i>&nbsp;                appendAscii(escapedByte);</b>
+<i>931</i>&nbsp;            } else {
+<b class="fc"><i>932</i>&nbsp;                appendAscii(c);</b>
+<i>933</i>&nbsp;            }
+<i>934</i>&nbsp;        }
+<b class="fc"><i>935</i>&nbsp;    }</b>
+<i>936</i>&nbsp;
+<i>937</i>&nbsp;
+<i>938</i>&nbsp;    public void printClob(_Private_IonTextWriterBuilder _options,
+<i>939</i>&nbsp;                          byte[] value, int start, int len)
+<i>940</i>&nbsp;        throws IOException
+<i>941</i>&nbsp;    {
+<b class="fc"><i>942</i>&nbsp;        if (value == null)</b>
+<i>943</i>&nbsp;        {
+<b class="nc"><i>944</i>&nbsp;            appendAscii(&quot;null.clob&quot;);</b>
+<b class="nc"><i>945</i>&nbsp;            return;</b>
+<i>946</i>&nbsp;        }
+<i>947</i>&nbsp;
+<i>948</i>&nbsp;
+<b class="fc"><i>949</i>&nbsp;        final boolean json =</b>
+<i>950</i>&nbsp;            _options._clob_as_string &amp;&amp; _options._string_as_json;
+<i>951</i>&nbsp;
+<b class="fc"><i>952</i>&nbsp;        final int threshold = _options.getLongStringThreshold();</b>
+<b class="fc"><i>953</i>&nbsp;        final boolean longString = (0 &lt; threshold &amp;&amp; threshold &lt; value.length);</b>
+<i>954</i>&nbsp;
+<b class="fc"><i>955</i>&nbsp;        if (!_options._clob_as_string)</b>
+<i>956</i>&nbsp;        {
+<b class="fc"><i>957</i>&nbsp;            appendAscii(&quot;{{&quot;);</b>
+<b class="fc"><i>958</i>&nbsp;            if (_options.isPrettyPrintOn())</b>
+<i>959</i>&nbsp;            {
+<b class="fc"><i>960</i>&nbsp;                appendAscii(&#39; &#39;);</b>
+<i>961</i>&nbsp;            }
+<i>962</i>&nbsp;        }
+<i>963</i>&nbsp;
+<b class="fc"><i>964</i>&nbsp;        if (json)</b>
+<i>965</i>&nbsp;        {
+<b class="fc"><i>966</i>&nbsp;            appendAscii(&#39;&quot;&#39;);</b>
+<b class="fc"><i>967</i>&nbsp;            printClobBytes(value, start, start + len, JSON_ESCAPE_CODES);</b>
+<b class="fc"><i>968</i>&nbsp;            appendAscii(&#39;&quot;&#39;);</b>
+<i>969</i>&nbsp;        }
+<b class="fc"><i>970</i>&nbsp;        else if (longString)</b>
+<i>971</i>&nbsp;        {
+<i>972</i>&nbsp;            // This may escape more often than is necessary, but doing it
+<i>973</i>&nbsp;            // minimally is very tricky. Must be sure to account for
+<i>974</i>&nbsp;            // quotes at the end of the content.
+<i>975</i>&nbsp;
+<i>976</i>&nbsp;            // TODO Account for NL versus CR+NL streams
+<b class="fc"><i>977</i>&nbsp;            appendAscii(TRIPLE_QUOTES);</b>
+<b class="fc"><i>978</i>&nbsp;            printClobBytes(value, start, start + len, LONG_STRING_ESCAPE_CODES);</b>
+<b class="fc"><i>979</i>&nbsp;            appendAscii(TRIPLE_QUOTES);</b>
+<i>980</i>&nbsp;        }
+<i>981</i>&nbsp;        else
+<i>982</i>&nbsp;        {
+<b class="fc"><i>983</i>&nbsp;            appendAscii(&#39;&quot;&#39;);</b>
+<b class="fc"><i>984</i>&nbsp;            printClobBytes(value, start, start + len, STRING_ESCAPE_CODES);</b>
+<b class="fc"><i>985</i>&nbsp;            appendAscii(&#39;&quot;&#39;);</b>
+<i>986</i>&nbsp;        }
+<i>987</i>&nbsp;
+<b class="fc"><i>988</i>&nbsp;        if (! _options._clob_as_string)</b>
+<i>989</i>&nbsp;        {
+<b class="fc"><i>990</i>&nbsp;            if (_options.isPrettyPrintOn())</b>
+<i>991</i>&nbsp;            {
+<b class="fc"><i>992</i>&nbsp;                appendAscii(&#39; &#39;);</b>
+<i>993</i>&nbsp;            }
+<b class="fc"><i>994</i>&nbsp;            appendAscii(&quot;}}&quot;);</b>
+<i>995</i>&nbsp;        }
+<b class="fc"><i>996</i>&nbsp;    }</b>
+<i>997</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,375 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonStruct</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonStruct (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonStruct</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import java.util.Map;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;/**
+<i>22</i>&nbsp; * An Ion &lt;code&gt;struct&lt;/code&gt; value.
+<i>23</i>&nbsp; * &lt;p&gt;
+<i>24</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>25</i>&nbsp; * code outside of this library.
+<i>26</i>&nbsp; * &lt;p&gt;
+<i>27</i>&nbsp; * Note that this cannot extend {@link java.util.Map} because that interface
+<i>28</i>&nbsp; * requires unique keys, while Ion&#39;s structs allow duplicate field names.
+<i>29</i>&nbsp; */
+<i>30</i>&nbsp;public interface IonStruct
+<i>31</i>&nbsp;    extends IonContainer
+<i>32</i>&nbsp;{
+<i>33</i>&nbsp;    /**
+<i>34</i>&nbsp;     * Gets the number of fields in this struct.  If any field names are
+<i>35</i>&nbsp;     * repeated, they are counted individually.  For example, the size of
+<i>36</i>&nbsp;     * &lt;code&gt;{a:1,a:2}&lt;/code&gt; is 2.
+<i>37</i>&nbsp;     *
+<i>38</i>&nbsp;     * @return the number of fields.
+<i>39</i>&nbsp;     * @throws NullValueException if &lt;code&gt;this.isNullValue()&lt;/code&gt;.
+<i>40</i>&nbsp;     */
+<i>41</i>&nbsp;    public int size()
+<i>42</i>&nbsp;        throws NullValueException;
+<i>43</i>&nbsp;
+<i>44</i>&nbsp;
+<i>45</i>&nbsp;    /**
+<i>46</i>&nbsp;     * Determines whether this struct contains one or more fields
+<i>47</i>&nbsp;     * for the specified field name (i.e., key). If this struct is an
+<i>48</i>&nbsp;     * {@linkplain #isNullValue() Ion null value}, it will behave like an empty
+<i>49</i>&nbsp;     * struct.
+<i>50</i>&nbsp;     *
+<i>51</i>&nbsp;     * @param fieldName field name whose presence in this struct is to be tested
+<i>52</i>&nbsp;     *
+<i>53</i>&nbsp;     * @return &lt;code&gt;true&lt;/code&gt; if this struct contains a field for the
+<i>54</i>&nbsp;     *         specified field name
+<i>55</i>&nbsp;     *
+<i>56</i>&nbsp;     * @throws ClassCastException if the specified field name is not a
+<i>57</i>&nbsp;     *         {@link String}
+<i>58</i>&nbsp;     * @throws NullPointerException if the specified field name is
+<i>59</i>&nbsp;     *         &lt;code&gt;null&lt;/code&gt;
+<i>60</i>&nbsp;     */
+<i>61</i>&nbsp;    public boolean containsKey(Object fieldName);
+<i>62</i>&nbsp;
+<i>63</i>&nbsp;
+<i>64</i>&nbsp;    /**
+<i>65</i>&nbsp;     * Determines whether this struct contains one or more fields with
+<i>66</i>&nbsp;     * the specified value. If this struct is an
+<i>67</i>&nbsp;     * {@linkplain #isNullValue() Ion null value}, it will behave like an empty
+<i>68</i>&nbsp;     * struct. This uses reference equality to compare the specified value with
+<i>69</i>&nbsp;     * the value of the struct fields.
+<i>70</i>&nbsp;     *
+<i>71</i>&nbsp;     * @param value value whose presence in this struct is to be tested
+<i>72</i>&nbsp;     *
+<i>73</i>&nbsp;     * @return &lt;code&gt;true&lt;/code&gt; if this struct contains a field for the
+<i>74</i>&nbsp;     *         specified value
+<i>75</i>&nbsp;     *
+<i>76</i>&nbsp;     * @throws ClassCastException if the specified value is not an
+<i>77</i>&nbsp;     *         {@link IonValue}
+<i>78</i>&nbsp;     * @throws NullPointerException if the specified value is &lt;code&gt;null&lt;/code&gt;
+<i>79</i>&nbsp;     */
+<i>80</i>&nbsp;    public boolean containsValue(Object value);
+<i>81</i>&nbsp;
+<i>82</i>&nbsp;
+<i>83</i>&nbsp;    /**
+<i>84</i>&nbsp;     * Gets the value of a field in this struct.  If the field name appears
+<i>85</i>&nbsp;     * more than once, one of the fields will be selected arbitrarily.  For
+<i>86</i>&nbsp;     * example, calling &lt;code&gt;get(&quot;a&quot;)&lt;/code&gt; on the struct:
+<i>87</i>&nbsp;     *&lt;pre&gt;
+<i>88</i>&nbsp;     *    { a:1, b:2, a:3 }
+<i>89</i>&nbsp;     *&lt;/pre&gt;
+<i>90</i>&nbsp;     * will return either 1 or 3.
+<i>91</i>&nbsp;     *
+<i>92</i>&nbsp;     * @param fieldName the desired field.
+<i>93</i>&nbsp;     * @return the value of the field, or &lt;code&gt;null&lt;/code&gt; if it doesn&#39;t
+<i>94</i>&nbsp;     * exist in this struct, or if this is {@code null.struct}.
+<i>95</i>&nbsp;     * @throws NullPointerException if the &lt;code&gt;fieldName&lt;/code&gt;
+<i>96</i>&nbsp;     * is &lt;code&gt;null&lt;/code&gt;.
+<i>97</i>&nbsp;     */
+<i>98</i>&nbsp;    public IonValue get(String fieldName);
+<i>99</i>&nbsp;
+<i>100</i>&nbsp;
+<i>101</i>&nbsp;    /**
+<i>102</i>&nbsp;     * Puts a new field in this struct, replacing all existing fields
+<i>103</i>&nbsp;     * with the same name. If {@code child == null} then all existing fields
+<i>104</i>&nbsp;     * with the given name will be removed.
+<i>105</i>&nbsp;     * &lt;p&gt;
+<i>106</i>&nbsp;     * If this is &lt;code&gt;null.struct&lt;/code&gt; and {@code child != null} then this
+<i>107</i>&nbsp;     * becomes a single-field struct.
+<i>108</i>&nbsp;     * &lt;p&gt;
+<i>109</i>&nbsp;     * The effect of this method is such that if
+<i>110</i>&nbsp;     * {@code put(fieldName, child)} succeeds, then
+<i>111</i>&nbsp;     * {@code get(fieldName) == child} will be true afterwards.
+<i>112</i>&nbsp;     *
+<i>113</i>&nbsp;     * @param fieldName the name of the new field.
+<i>114</i>&nbsp;     * @param child the value of the new field.
+<i>115</i>&nbsp;     *
+<i>116</i>&nbsp;     * @throws NullPointerException
+<i>117</i>&nbsp;     *   if {@code fieldName} is &lt;code&gt;null&lt;/code&gt;.
+<i>118</i>&nbsp;     * @throws ContainedValueException
+<i>119</i>&nbsp;     *   if {@code child} is already part of a container.
+<i>120</i>&nbsp;     * @throws IllegalArgumentException
+<i>121</i>&nbsp;     *   if {@code element} is an {@link IonDatagram}.
+<i>122</i>&nbsp;     */
+<i>123</i>&nbsp;    public void put(String fieldName, IonValue child)
+<i>124</i>&nbsp;        throws ContainedValueException;
+<i>125</i>&nbsp;
+<i>126</i>&nbsp;
+<i>127</i>&nbsp;    /**
+<i>128</i>&nbsp;     * Provides a factory that when invoked constructs a new value and
+<i>129</i>&nbsp;     * {@link #put(String,IonValue) put}s it into this struct using the given
+<i>130</i>&nbsp;     * {@code fieldName}.
+<i>131</i>&nbsp;     * &lt;p&gt;
+<i>132</i>&nbsp;     * These two lines are equivalent:
+<i>133</i>&nbsp;     *&lt;pre&gt;
+<i>134</i>&nbsp;     *    str.put(&quot;f&quot;).newInt(3);
+<i>135</i>&nbsp;     *    str.put(&quot;f&quot;, str.getSystem().newInt(3));
+<i>136</i>&nbsp;     *&lt;/pre&gt;
+<i>137</i>&nbsp;     *
+<i>138</i>&nbsp;     * @throws NullPointerException
+<i>139</i>&nbsp;     *   if {@code fieldName} is &lt;code&gt;null&lt;/code&gt;.
+<i>140</i>&nbsp;     *
+<i>141</i>&nbsp;     * @see #put(String, IonValue)
+<i>142</i>&nbsp;     */
+<i>143</i>&nbsp;    public ValueFactory put(String fieldName);
+<i>144</i>&nbsp;
+<i>145</i>&nbsp;
+<i>146</i>&nbsp;    /**
+<i>147</i>&nbsp;     * Copies all of the mappings from the specified map to this struct.
+<i>148</i>&nbsp;     * The effect of this call is equivalent to that of calling
+<i>149</i>&nbsp;     * {@link #put(String, IonValue) put(k, v)} on this struct once for each
+<i>150</i>&nbsp;     * mapping from key {@code k} to value {@code v} in the specified map.
+<i>151</i>&nbsp;     * The behavior of this operation is undefined if the specified map is
+<i>152</i>&nbsp;     * modified while the operation is in progress.
+<i>153</i>&nbsp;     * &lt;p&gt;
+<i>154</i>&nbsp;     * If a key in the map maps to {@code null}, then all fields with that name
+<i>155</i>&nbsp;     * will be removed from this struct.
+<i>156</i>&nbsp;     *
+<i>157</i>&nbsp;     * @throws NullPointerException if the given map is null.
+<i>158</i>&nbsp;     * @throws ContainedValueException if any values in the map are already
+<i>159</i>&nbsp;     * part of an {@link IonContainer} (even this one).
+<i>160</i>&nbsp;     */
+<i>161</i>&nbsp;    public void putAll(Map&lt;? extends String, ? extends IonValue&gt; m);
+<i>162</i>&nbsp;
+<i>163</i>&nbsp;
+<i>164</i>&nbsp;    /**
+<i>165</i>&nbsp;     * Adds a new field to this struct.
+<i>166</i>&nbsp;     * If this is &lt;code&gt;null.struct&lt;/code&gt;, then it becomes a single-field
+<i>167</i>&nbsp;     * struct.
+<i>168</i>&nbsp;     * &lt;p&gt;
+<i>169</i>&nbsp;     * If a field with the given name already exists in this struct,
+<i>170</i>&nbsp;     * this call will result in repeated fields.
+<i>171</i>&nbsp;     *
+<i>172</i>&nbsp;     * @param fieldName the name of the new field.
+<i>173</i>&nbsp;     * @param child the value of the new field.
+<i>174</i>&nbsp;     *
+<i>175</i>&nbsp;     * @throws NullPointerException
+<i>176</i>&nbsp;     *   if {@code fieldName} or {@code child} is &lt;code&gt;null&lt;/code&gt;.
+<i>177</i>&nbsp;     * @throws ContainedValueException
+<i>178</i>&nbsp;     *   if {@code child} is already part of a container.
+<i>179</i>&nbsp;     * @throws IllegalArgumentException
+<i>180</i>&nbsp;     *   if {@code element} is an {@link IonDatagram}.
+<i>181</i>&nbsp;     */
+<i>182</i>&nbsp;    public void add(String fieldName, IonValue child)
+<i>183</i>&nbsp;        throws ContainedValueException;
+<i>184</i>&nbsp;
+<i>185</i>&nbsp;
+<i>186</i>&nbsp;    /**
+<i>187</i>&nbsp;     * Adds a new field to this struct using a given name and/or SID.
+<i>188</i>&nbsp;     * If this is &lt;code&gt;null.struct&lt;/code&gt;, then it becomes a single-field
+<i>189</i>&nbsp;     * struct.
+<i>190</i>&nbsp;     * &lt;p&gt;
+<i>191</i>&nbsp;     * If a field with the given name already exists in this struct,
+<i>192</i>&nbsp;     * this call will result in repeated fields.
+<i>193</i>&nbsp;     * &lt;p&gt;
+<i>194</i>&nbsp;     * &lt;b&gt;This is an &quot;expert method&quot;: correct use requires deep understanding
+<i>195</i>&nbsp;     * of the Ion binary format. You almost certainly don&#39;t want to use it.&lt;/b&gt;
+<i>196</i>&nbsp;     *
+<i>197</i>&nbsp;     * @param fieldName the name of the new field.
+<i>198</i>&nbsp;     * @param child the value of the new field.
+<i>199</i>&nbsp;     *
+<i>200</i>&nbsp;     * @throws NullPointerException
+<i>201</i>&nbsp;     *   if {@code fieldName} or {@code child} is &lt;code&gt;null&lt;/code&gt;.
+<i>202</i>&nbsp;     * @throws ContainedValueException
+<i>203</i>&nbsp;     *   if {@code child} is already part of a container.
+<i>204</i>&nbsp;     * @throws IllegalArgumentException
+<i>205</i>&nbsp;     *   if {@code element} is an {@link IonDatagram}.
+<i>206</i>&nbsp;     *
+<i>207</i>&nbsp;     */
+<i>208</i>&nbsp;    public void add(SymbolToken fieldName, IonValue child)
+<i>209</i>&nbsp;        throws ContainedValueException;
+<i>210</i>&nbsp;
+<i>211</i>&nbsp;
+<i>212</i>&nbsp;    /**
+<i>213</i>&nbsp;     * Provides a factory that when invoked constructs a new value and
+<i>214</i>&nbsp;     * {@link #add(String,IonValue) add}s it to this struct using the given
+<i>215</i>&nbsp;     * {@code fieldName}.
+<i>216</i>&nbsp;     * &lt;p&gt;
+<i>217</i>&nbsp;     * These two lines are equivalent:
+<i>218</i>&nbsp;     *&lt;pre&gt;
+<i>219</i>&nbsp;     *    str.add(&quot;f&quot;).newInt(3);
+<i>220</i>&nbsp;     *    str.add(&quot;f&quot;, str.getSystem().newInt(3));
+<i>221</i>&nbsp;     *&lt;/pre&gt;
+<i>222</i>&nbsp;     *
+<i>223</i>&nbsp;     * @throws NullPointerException
+<i>224</i>&nbsp;     *   if {@code fieldName} is &lt;code&gt;null&lt;/code&gt;.
+<i>225</i>&nbsp;     *
+<i>226</i>&nbsp;     * @see #add(String, IonValue)
+<i>227</i>&nbsp;     */
+<i>228</i>&nbsp;    public ValueFactory add(String fieldName);
+<i>229</i>&nbsp;
+<i>230</i>&nbsp;
+<i>231</i>&nbsp;    /**
+<i>232</i>&nbsp;     * Removes a field by name, returning a value that was previously
+<i>233</i>&nbsp;     * associated with the field, or {@code null} if this struct contained no
+<i>234</i>&nbsp;     * such field.
+<i>235</i>&nbsp;     * &lt;p&gt;
+<i>236</i>&nbsp;     * Because Ion structs may have repeated fields, additional fields with the
+<i>237</i>&nbsp;     * given name may still exist after this method returns.
+<i>238</i>&nbsp;     * &lt;p&gt;
+<i>239</i>&nbsp;     * If this struct is an {@linkplain #isNullValue() Ion null value} or empty,
+<i>240</i>&nbsp;     * then this method returns null and has no effect.
+<i>241</i>&nbsp;     *
+<i>242</i>&nbsp;     * @param fieldName must not be null.
+<i>243</i>&nbsp;     *
+<i>244</i>&nbsp;     * @return previous value associated with the specified field name, or
+<i>245</i>&nbsp;     * {@code null} if there was no such field.
+<i>246</i>&nbsp;     */
+<i>247</i>&nbsp;    public IonValue remove(String fieldName);
+<i>248</i>&nbsp;
+<i>249</i>&nbsp;
+<i>250</i>&nbsp;    /**
+<i>251</i>&nbsp;     * Removes from this struct all fields with names in the given list.
+<i>252</i>&nbsp;     * If multiple fields with a given name exist in this struct,
+<i>253</i>&nbsp;     * they will all be removed.
+<i>254</i>&nbsp;     * &lt;p&gt;
+<i>255</i>&nbsp;     * If this struct is an {@linkplain #isNullValue() Ion null value} or empty,
+<i>256</i>&nbsp;     * then this method returns {@code false} and has no effect.
+<i>257</i>&nbsp;     *
+<i>258</i>&nbsp;     * @param fieldNames the names of the fields to remove.
+<i>259</i>&nbsp;     *
+<i>260</i>&nbsp;     * @return true if this struct changed as a result of this call.
+<i>261</i>&nbsp;     *
+<i>262</i>&nbsp;     * @throws NullPointerException
+<i>263</i>&nbsp;     *   if {@code fieldNames}, or any element within it, is &lt;code&gt;null&lt;/code&gt;.
+<i>264</i>&nbsp;     */
+<i>265</i>&nbsp;    public boolean removeAll(String... fieldNames);
+<i>266</i>&nbsp;
+<i>267</i>&nbsp;
+<i>268</i>&nbsp;    /**
+<i>269</i>&nbsp;     * Retains only the fields in this struct that have one of the given names.
+<i>270</i>&nbsp;     * In other words, removes all fields with names that are not in
+<i>271</i>&nbsp;     * {@code fieldNames}.
+<i>272</i>&nbsp;     * &lt;p&gt;
+<i>273</i>&nbsp;     * If this struct is an {@linkplain #isNullValue() Ion null value} or empty,
+<i>274</i>&nbsp;     * then this method returns {@code false} and has no effect.
+<i>275</i>&nbsp;     *
+<i>276</i>&nbsp;     * @param fieldNames the names of the fields to retain.
+<i>277</i>&nbsp;     *
+<i>278</i>&nbsp;     * @return true if this struct changed as a result of this call.
+<i>279</i>&nbsp;     *
+<i>280</i>&nbsp;     * @throws NullPointerException
+<i>281</i>&nbsp;     *   if {@code fieldNames}, or any element within it, is &lt;code&gt;null&lt;/code&gt;.
+<i>282</i>&nbsp;     */
+<i>283</i>&nbsp;    public boolean retainAll(String... fieldNames);
+<i>284</i>&nbsp;
+<i>285</i>&nbsp;
+<i>286</i>&nbsp;    // TODO public Set&lt;K&gt; keySet();
+<i>287</i>&nbsp;    // TODO public Collection&lt;V&gt; values();
+<i>288</i>&nbsp;    // TODO public Set&lt;Map.Entry&lt;K,V&gt;&gt; entrySet();
+<i>289</i>&nbsp;
+<i>290</i>&nbsp;    public IonStruct clone()
+<i>291</i>&nbsp;        throws UnknownSymbolException;
+<i>292</i>&nbsp;
+<i>293</i>&nbsp;
+<i>294</i>&nbsp;    /**
+<i>295</i>&nbsp;     * Clones this struct, excluding certain fields. This can be more
+<i>296</i>&nbsp;     * efficient than cloning the struct and removing fields later on.
+<i>297</i>&nbsp;     *
+<i>298</i>&nbsp;     * @param fieldNames the names of the fields to remove.
+<i>299</i>&nbsp;     *   A null field name causes removal of fields with unknown names.
+<i>300</i>&nbsp;     *
+<i>301</i>&nbsp;     * @throws UnknownSymbolException
+<i>302</i>&nbsp;     *   if any part of the cloned value would have unknown text but known SID
+<i>303</i>&nbsp;     *   for its field name, annotation or symbol.
+<i>304</i>&nbsp;     *
+<i>305</i>&nbsp;     * @see IonValue#clone()
+<i>306</i>&nbsp;     */
+<i>307</i>&nbsp;    public IonStruct cloneAndRemove(String... fieldNames)
+<i>308</i>&nbsp;        throws UnknownSymbolException;
+<i>309</i>&nbsp;
+<i>310</i>&nbsp;
+<i>311</i>&nbsp;    /**
+<i>312</i>&nbsp;     * Clones this struct, including only certain fields. This can be more
+<i>313</i>&nbsp;     * efficient than cloning the struct and removing fields later on.
+<i>314</i>&nbsp;     *
+<i>315</i>&nbsp;     * @param fieldNames the names of the fields to retain.
+<i>316</i>&nbsp;     *   Nulls are not allowed.
+<i>317</i>&nbsp;     *
+<i>318</i>&nbsp;     * @throws NullPointerException
+<i>319</i>&nbsp;     *   if {@code fieldNames}, or any element within it, is &lt;code&gt;null&lt;/code&gt;.
+<i>320</i>&nbsp;     * @throws UnknownSymbolException
+<i>321</i>&nbsp;     *   if any part of the cloned value would have unknown text but known SID
+<i>322</i>&nbsp;     *   for its field name, annotation or symbol.
+<i>323</i>&nbsp;     *
+<i>324</i>&nbsp;     * @see IonValue#clone()
+<i>325</i>&nbsp;     */
+<i>326</i>&nbsp;    public IonStruct cloneAndRetain(String... fieldNames)
+<i>327</i>&nbsp;        throws UnknownSymbolException;
+<i>328</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

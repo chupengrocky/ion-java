@@ -1,0 +1,541 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: UnifiedSavePointManagerX</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: UnifiedSavePointManagerX (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UnifiedSavePointManagerX</td>
+<td class="coverageStat">
+  <span class="percent">
+    85.7%
+  </span>
+  <span class="absValue">
+    (12/ 14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.9%
+  </span>
+  <span class="absValue">
+    (79/ 118)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">UnifiedSavePointManagerX$SavePoint</td>
+<td class="coverageStat">
+  <span class="percent">
+    89.7%
+  </span>
+  <span class="absValue">
+    (26/ 29)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86.3%
+  </span>
+  <span class="absValue">
+    (63/ 73)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">UnifiedSavePointManagerX$SavePoint$SavePointState</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    88.6%
+  </span>
+  <span class="absValue">
+    (39/ 44)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    74.5%
+  </span>
+  <span class="absValue">
+    (143/ 192)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;
+<i>19</i>&nbsp;/**
+<i>20</i>&nbsp; *   These classes (UnifiedSavePointManager and the contained
+<i>21</i>&nbsp; *   SavePoint) isolate the save point handing. Its effect spans
+<i>22</i>&nbsp; *   both the input stream and the underlying buffer - so the manager
+<i>23</i>&nbsp; *   keeps it&#39;s own reference to these.  By doing so this should
+<i>24</i>&nbsp; *   make save points easier to use.  It grabs the buffer from
+<i>25</i>&nbsp; *   the stream since it need a reference to the UnifiedInputBuffer
+<i>26</i>&nbsp; *   on most calls and doesn&#39;t need an extra de-ref (mostly for
+<i>27</i>&nbsp; *   code clarity)
+<i>28</i>&nbsp; *
+<i>29</i>&nbsp; *   The general life time of a save point is:
+<i>30</i>&nbsp; *   . allocate a save point
+<i>31</i>&nbsp; *   . . start the save point, which sets the start idx and pos - and
+<i>32</i>&nbsp; *       pins the buffer pages with a use count
+<i>33</i>&nbsp; *   . . mark_end the save point, which sets the end idx and pos
+<i>34</i>&nbsp; *   . . . activate the save point, which sets the input streams pos
+<i>35</i>&nbsp; *         to the start
+<i>36</i>&nbsp; *   . . . deactivate the save point, which pops the save point stack
+<i>37</i>&nbsp; *         and restores the stream to its previous position
+<i>38</i>&nbsp; *   . . clear the save point. this clears its internal values and
+<i>39</i>&nbsp; *       releases its use counter on the buffer. As the buffers in use
+<i>40</i>&nbsp; *       count goes to zero it may release any unnecessary pages.
+<i>41</i>&nbsp; *   . free the save point
+<i>42</i>&nbsp; *
+<i>43</i>&nbsp; *   this order of operation, as nested above, is enforced by checking
+<i>44</i>&nbsp; *   the state of the save points and member values like the end position.
+<i>45</i>&nbsp; *
+<i>46</i>&nbsp; *   if the end position is not set it is treated as &quot;to end of file&quot;
+<i>47</i>&nbsp; *
+<i>48</i>&nbsp; */
+<b class="fc"><i>49</i>&nbsp;final class UnifiedSavePointManagerX</b>
+<i>50</i>&nbsp;{
+<i>51</i>&nbsp;    private static final int FREE_LIST_LIMIT = 20;
+<i>52</i>&nbsp;
+<i>53</i>&nbsp;    UnifiedInputStreamX  _stream;
+<i>54</i>&nbsp;    UnifiedInputBufferX  _buffer;
+<i>55</i>&nbsp;    SavePoint           _inuse;
+<i>56</i>&nbsp;    SavePoint           _free;
+<i>57</i>&nbsp;    int                 _free_count;
+<i>58</i>&nbsp;    SavePoint           _active_stack;
+<i>59</i>&nbsp;    int                 _open_save_points;
+<i>60</i>&nbsp;
+<b class="fc"><i>61</i>&nbsp;    public UnifiedSavePointManagerX(UnifiedInputStreamX  stream) {</b>
+<b class="fc"><i>62</i>&nbsp;        _stream = stream;</b>
+<b class="fc"><i>63</i>&nbsp;        _buffer = stream._buffer;</b>
+<b class="fc"><i>64</i>&nbsp;        _inuse = null;</b>
+<b class="fc"><i>65</i>&nbsp;        _free = null;</b>
+<b class="fc"><i>66</i>&nbsp;        _active_stack = null;</b>
+<b class="fc"><i>67</i>&nbsp;    }</b>
+<i>68</i>&nbsp;
+<i>69</i>&nbsp;    public final boolean isSavePointOpen() {
+<b class="fc"><i>70</i>&nbsp;        return (_open_save_points &gt; 0);</b>
+<i>71</i>&nbsp;    }
+<i>72</i>&nbsp;
+<i>73</i>&nbsp;    public final long lengthOf(SavePoint sp)
+<i>74</i>&nbsp;    {
+<b class="fc"><i>75</i>&nbsp;        int start_idx = sp.getStartIdx();</b>
+<b class="fc"><i>76</i>&nbsp;        int end_idx   = sp.getEndIdx();</b>
+<i>77</i>&nbsp;
+<b class="fc"><i>78</i>&nbsp;        if (start_idx == -1 || end_idx == -1) {</b>
+<b class="nc"><i>79</i>&nbsp;            return 0;</b>
+<i>80</i>&nbsp;        }
+<i>81</i>&nbsp;
+<i>82</i>&nbsp;        long len;
+<b class="fc"><i>83</i>&nbsp;        if (start_idx == end_idx) {  // a very common case</b>
+<b class="fc"><i>84</i>&nbsp;            int start_pos = sp.getStartPos();</b>
+<b class="fc"><i>85</i>&nbsp;            int end_pos   = sp.getEndPos();</b>
+<b class="fc"><i>86</i>&nbsp;            len = end_pos - start_pos;</b>
+<b class="fc"><i>87</i>&nbsp;        }</b>
+<i>88</i>&nbsp;        else {
+<b class="nc"><i>89</i>&nbsp;            UnifiedDataPageX start = _buffer.getPage(start_idx);</b>
+<b class="nc"><i>90</i>&nbsp;            UnifiedDataPageX end   = _buffer.getPage(end_idx);</b>
+<b class="nc"><i>91</i>&nbsp;            long start_pos = start.getFilePosition(sp.getStartPos());</b>
+<b class="nc"><i>92</i>&nbsp;            long end_pos   = end.getFilePosition(sp.getEndPos());</b>
+<b class="nc"><i>93</i>&nbsp;            len = end_pos - start_pos;</b>
+<i>94</i>&nbsp;        }
+<b class="fc"><i>95</i>&nbsp;        return len;</b>
+<i>96</i>&nbsp;    }
+<i>97</i>&nbsp;
+<i>98</i>&nbsp;    public final SavePoint savePointAllocate() {
+<i>99</i>&nbsp;        SavePoint sp;
+<b class="fc"><i>100</i>&nbsp;        if (_free != null) {</b>
+<b class="nc"><i>101</i>&nbsp;            sp = _free;</b>
+<b class="nc"><i>102</i>&nbsp;            _free = sp._next;</b>
+<b class="nc"><i>103</i>&nbsp;            _free_count--;</b>
+<b class="nc"><i>104</i>&nbsp;            sp.clear();</b>
+<i>105</i>&nbsp;        }
+<i>106</i>&nbsp;        else {
+<b class="fc"><i>107</i>&nbsp;            sp = new SavePoint(this);</b>
+<i>108</i>&nbsp;        }
+<b class="fc"><i>109</i>&nbsp;        sp._next = _inuse;</b>
+<b class="fc"><i>110</i>&nbsp;        sp._prev = null;</b>
+<b class="fc"><i>111</i>&nbsp;        if (_inuse != null) {</b>
+<b class="nc"><i>112</i>&nbsp;            _inuse._prev = sp;</b>
+<i>113</i>&nbsp;        }
+<i>114</i>&nbsp;        else {
+<b class="fc"><i>115</i>&nbsp;            _inuse = sp;</b>
+<i>116</i>&nbsp;        }
+<b class="fc"><i>117</i>&nbsp;        return sp;</b>
+<i>118</i>&nbsp;    }
+<i>119</i>&nbsp;    public final void savePointFree(SavePoint sp)
+<i>120</i>&nbsp;    {
+<b class="nc"><i>121</i>&nbsp;        assert(sp.isClear());</b>
+<i>122</i>&nbsp;
+<b class="nc"><i>123</i>&nbsp;        if (_free_count &gt;= FREE_LIST_LIMIT) {</b>
+<i>124</i>&nbsp;            // by not putting this on the free list
+<i>125</i>&nbsp;            // the GC is free to clean it up.
+<b class="nc"><i>126</i>&nbsp;            return;</b>
+<i>127</i>&nbsp;        }
+<i>128</i>&nbsp;
+<b class="nc"><i>129</i>&nbsp;        if (sp._prev == null) {</b>
+<b class="nc"><i>130</i>&nbsp;            sp._prev = sp._next;</b>
+<i>131</i>&nbsp;        }
+<i>132</i>&nbsp;        else {
+<b class="nc"><i>133</i>&nbsp;            _inuse = sp._next;</b>
+<i>134</i>&nbsp;        }
+<b class="nc"><i>135</i>&nbsp;        if (sp._next  != null) {</b>
+<b class="nc"><i>136</i>&nbsp;            sp._next._prev = sp._prev;</b>
+<i>137</i>&nbsp;        }
+<b class="nc"><i>138</i>&nbsp;        sp._next = _free;</b>
+<b class="nc"><i>139</i>&nbsp;        _free = sp;</b>
+<b class="nc"><i>140</i>&nbsp;        _free_count++;</b>
+<b class="nc"><i>141</i>&nbsp;    }</b>
+<i>142</i>&nbsp;    public final SavePoint savePointActiveTop() {
+<b class="fc"><i>143</i>&nbsp;        return _active_stack;</b>
+<i>144</i>&nbsp;    }
+<i>145</i>&nbsp;
+<i>146</i>&nbsp;    public final void savePointPushActive(SavePoint sp, long line_number, long line_start) {
+<b class="fc"><i>147</i>&nbsp;        assert(!sp.isActive());</b>
+<i>148</i>&nbsp;
+<b class="fc"><i>149</i>&nbsp;        int      idx = _buffer.getCurrentPageIdx();</b>
+<b class="fc"><i>150</i>&nbsp;        int      pos = _stream._pos;</b>
+<b class="fc"><i>151</i>&nbsp;        int      limit = _stream._limit;</b>
+<b class="fc"><i>152</i>&nbsp;        UnifiedDataPageX curr = _buffer.getPage(idx);</b>
+<i>153</i>&nbsp;
+<i>154</i>&nbsp;        // save our current state in the Save Point so when
+<i>155</i>&nbsp;        // we pop it off we can restore our current state
+<b class="fc"><i>156</i>&nbsp;        sp.set_prev_pos(idx, pos, limit, line_number, line_start);</b>
+<i>157</i>&nbsp;
+<i>158</i>&nbsp;        // actually push this save point on the stack
+<b class="fc"><i>159</i>&nbsp;        sp._next_active = _active_stack;</b>
+<b class="fc"><i>160</i>&nbsp;        _active_stack = sp;</b>
+<b class="fc"><i>161</i>&nbsp;        sp.set_active();</b>
+<i>162</i>&nbsp;
+<i>163</i>&nbsp;        // if the start page is also the last page we
+<i>164</i>&nbsp;        // need set the limit to the sp end, otherwise
+<i>165</i>&nbsp;        // we use the limit from the page and we&#39;ll
+<i>166</i>&nbsp;        // deal with the last page when we get to it
+<b class="fc"><i>167</i>&nbsp;        idx = sp.getStartIdx();</b>
+<b class="fc"><i>168</i>&nbsp;        pos = sp.getStartPos();</b>
+<b class="fc"><i>169</i>&nbsp;        curr = _buffer.getPage(idx);</b>
+<b class="fc"><i>170</i>&nbsp;        if (sp.getEndIdx() != sp.getStartIdx()) {</b>
+<b class="fc"><i>171</i>&nbsp;            limit = curr.getBufferLimit();</b>
+<i>172</i>&nbsp;        }
+<i>173</i>&nbsp;        else {
+<b class="fc"><i>174</i>&nbsp;            limit = sp.getEndPos();</b>
+<i>175</i>&nbsp;        }
+<b class="fc"><i>176</i>&nbsp;        _stream.make_page_current(curr, idx, pos, limit);</b>
+<b class="fc"><i>177</i>&nbsp;    }</b>
+<i>178</i>&nbsp;
+<i>179</i>&nbsp;    public final void savePointPopActive(SavePoint sp)
+<i>180</i>&nbsp;    {
+<b class="fc"><i>181</i>&nbsp;        if (sp != _active_stack) {</b>
+<b class="nc"><i>182</i>&nbsp;            throw new IllegalArgumentException(&quot;save point being released isn&#39;t currently active&quot;);</b>
+<i>183</i>&nbsp;        }
+<i>184</i>&nbsp;
+<b class="fc"><i>185</i>&nbsp;        _active_stack = sp._next_active;</b>
+<b class="fc"><i>186</i>&nbsp;        sp._next_active = null;</b>
+<b class="fc"><i>187</i>&nbsp;        sp.set_inactive();</b>
+<i>188</i>&nbsp;
+<b class="fc"><i>189</i>&nbsp;        _stream.save_point_reset_to_prev(sp);</b>
+<i>190</i>&nbsp;
+<b class="fc"><i>191</i>&nbsp;        return;</b>
+<i>192</i>&nbsp;    }
+<i>193</i>&nbsp;
+<i>194</i>&nbsp;    private void save_point_clear(SavePoint sp)
+<i>195</i>&nbsp;    {
+<b class="fc"><i>196</i>&nbsp;        if (sp.isClear()) {</b>
+<b class="nc"><i>197</i>&nbsp;            return;</b>
+<i>198</i>&nbsp;        }
+<b class="fc"><i>199</i>&nbsp;        int start_idx = sp.getStartIdx();</b>
+<b class="fc"><i>200</i>&nbsp;        int end_idx = sp.getEndIdx();</b>
+<b class="fc"><i>201</i>&nbsp;        if (end_idx != -1 || start_idx != -1) {</b>
+<b class="fc"><i>202</i>&nbsp;            if (start_idx != -1) {</b>
+<b class="fc"><i>203</i>&nbsp;                _open_save_points--;</b>
+<b class="fc"><i>204</i>&nbsp;                save_point_unpin(sp);</b>
+<i>205</i>&nbsp;            }
+<i>206</i>&nbsp;        }
+<b class="fc"><i>207</i>&nbsp;    }</b>
+<i>208</i>&nbsp;    private final void save_point_unpin(SavePoint sp) {
+<b class="fc"><i>209</i>&nbsp;        if (sp.isActive()) {</b>
+<b class="nc"><i>210</i>&nbsp;            throw new IllegalArgumentException(&quot;you can&#39;t release an active save point&quot;);</b>
+<i>211</i>&nbsp;        }
+<b class="fc"><i>212</i>&nbsp;        assert(sp.isDefined());</b>
+<i>213</i>&nbsp;
+<b class="fc"><i>214</i>&nbsp;        if (_buffer.decLock()) {</b>
+<b class="fc"><i>215</i>&nbsp;            if (_open_save_points == 0) {</b>
+<b class="fc"><i>216</i>&nbsp;                _buffer.resetToCurrentPage();</b>
+<i>217</i>&nbsp;            }
+<i>218</i>&nbsp;        }
+<b class="fc"><i>219</i>&nbsp;        return;</b>
+<i>220</i>&nbsp;    }
+<i>221</i>&nbsp;    private final SavePoint save_point_start(SavePoint sp, long line_number, long line_start) {
+<b class="fc"><i>222</i>&nbsp;        if (sp.isDefined()) {</b>
+<b class="nc"><i>223</i>&nbsp;            throw new IllegalArgumentException(&quot;you can&#39;t start an active save point&quot;);</b>
+<i>224</i>&nbsp;        }
+<i>225</i>&nbsp;
+<b class="fc"><i>226</i>&nbsp;        int new_pinned_idx = _buffer.getCurrentPageIdx();</b>
+<b class="fc"><i>227</i>&nbsp;        _buffer.incLock();</b>
+<b class="fc"><i>228</i>&nbsp;        sp.set_start_pos(new_pinned_idx,_stream._pos, line_number, line_start);</b>
+<b class="fc"><i>229</i>&nbsp;        _open_save_points++;</b>
+<i>230</i>&nbsp;
+<b class="fc"><i>231</i>&nbsp;        return sp;</b>
+<i>232</i>&nbsp;    }
+<i>233</i>&nbsp;    private final void save_point_mark_end(SavePoint sp, int offset) {
+<b class="fc"><i>234</i>&nbsp;        if (sp.isActive()) {</b>
+<b class="nc"><i>235</i>&nbsp;            throw new IllegalArgumentException(&quot;you can&#39;t start an active save point&quot;);</b>
+<i>236</i>&nbsp;        }
+<i>237</i>&nbsp;
+<b class="fc"><i>238</i>&nbsp;        UnifiedDataPageX curr = _buffer.getCurrentPage();</b>
+<b class="fc"><i>239</i>&nbsp;        int curr_idx = _buffer.getCurrentPageIdx();</b>
+<b class="fc"><i>240</i>&nbsp;        int curr_pos = _stream._pos + offset;</b>
+<i>241</i>&nbsp;
+<i>242</i>&nbsp;        // this adjusts the current page idx and pos (in the page buffer)
+<i>243</i>&nbsp;        // to handle the end point being offset from the current pos
+<i>244</i>&nbsp;        // since that may result in the end mark referencing a different page
+<b class="fc"><i>245</i>&nbsp;        if (offset != 0) {</b>
+<b class="fc"><i>246</i>&nbsp;            if (curr_pos &gt;= curr.getBufferLimit()) {</b>
+<b class="nc"><i>247</i>&nbsp;                curr_pos -= curr.getOriginalStartingOffset();</b>
+<b class="nc"><i>248</i>&nbsp;                curr_idx++;</b>
+<b class="nc"><i>249</i>&nbsp;                curr = _buffer.getPage(curr_idx);</b>
+<i>250</i>&nbsp;            }
+<b class="fc"><i>251</i>&nbsp;            else if (curr_pos &lt; curr.getStartingOffset()) {</b>
+<b class="nc"><i>252</i>&nbsp;                int pos_offset = curr_pos - curr.getOriginalStartingOffset();</b>
+<b class="nc"><i>253</i>&nbsp;                curr_idx--;</b>
+<b class="nc"><i>254</i>&nbsp;                curr = _buffer.getPage(curr_idx);</b>
+<b class="nc"><i>255</i>&nbsp;                curr_pos = curr.getBufferLimit() - pos_offset;</b>
+<i>256</i>&nbsp;            }
+<b class="fc"><i>257</i>&nbsp;            if (curr == null || curr_pos &gt;= curr.getBufferLimit() || curr_pos &lt; curr.getStartingOffset()) {</b>
+<b class="nc"><i>258</i>&nbsp;                end_point_too_far(curr_idx);</b>
+<i>259</i>&nbsp;            }
+<i>260</i>&nbsp;        }
+<i>261</i>&nbsp;
+<b class="fc"><i>262</i>&nbsp;        sp.set_end_pos(curr_idx, curr_pos); // we may be &quot;re-setting&quot; the idx (that&#39;s ok)</b>
+<i>263</i>&nbsp;
+<b class="fc"><i>264</i>&nbsp;        return;</b>
+<i>265</i>&nbsp;    }
+<i>266</i>&nbsp;    private final void end_point_too_far(int curr_idx) {
+<b class="nc"><i>267</i>&nbsp;        String message = &quot;end point [&quot;</b>
+<i>268</i>&nbsp;                       + curr_idx
+<i>269</i>&nbsp;                       + &quot;] must be within 1 page of current [&quot;
+<b class="nc"><i>270</i>&nbsp;                       + _buffer.getCurrentPageIdx()</b>
+<i>271</i>&nbsp;                       + &quot;]&quot;;
+<b class="nc"><i>272</i>&nbsp;        throw new IllegalArgumentException(message);</b>
+<i>273</i>&nbsp;    }
+<i>274</i>&nbsp;
+<b class="fc"><i>275</i>&nbsp;    public static class SavePoint</b>
+<i>276</i>&nbsp;    {
+<b class="fc"><i>277</i>&nbsp;        public enum SavePointState { CLEAR, DEFINED, ACTIVE }</b>
+<i>278</i>&nbsp;
+<i>279</i>&nbsp;        private UnifiedSavePointManagerX _owner;
+<i>280</i>&nbsp;        private SavePointState   _state;
+<i>281</i>&nbsp;        private int              _start_idx, _start_pos;
+<i>282</i>&nbsp;        private long             _start_line_count;
+<i>283</i>&nbsp;        private long             _start_line_start;
+<i>284</i>&nbsp;        private int              _end_idx, _end_pos;
+<i>285</i>&nbsp;        private int              _prev_idx, _prev_pos, _prev_limit;
+<i>286</i>&nbsp;        private long             _prev_line_count;
+<i>287</i>&nbsp;        private long             _prev_line_start;
+<i>288</i>&nbsp;        private SavePoint        _next, _prev;
+<i>289</i>&nbsp;        private SavePoint        _next_active;
+<i>290</i>&nbsp;
+<b class="fc"><i>291</i>&nbsp;        SavePoint(UnifiedSavePointManagerX owner) {</b>
+<b class="fc"><i>292</i>&nbsp;            clear();</b>
+<b class="fc"><i>293</i>&nbsp;            _owner = owner;</b>
+<b class="fc"><i>294</i>&nbsp;        }</b>
+<i>295</i>&nbsp;        private final void set_start_pos(int idx, int pos, long line_count, long line_start) {
+<b class="fc"><i>296</i>&nbsp;            assert(_state == SavePointState.CLEAR);</b>
+<b class="fc"><i>297</i>&nbsp;            _state = SavePointState.DEFINED;</b>
+<b class="fc"><i>298</i>&nbsp;            _start_idx = idx;</b>
+<b class="fc"><i>299</i>&nbsp;            _start_pos = pos;</b>
+<b class="fc"><i>300</i>&nbsp;            _start_line_count = line_count;</b>
+<b class="fc"><i>301</i>&nbsp;            _start_line_start = line_start;</b>
+<b class="fc"><i>302</i>&nbsp;        }</b>
+<i>303</i>&nbsp;        private final void set_end_pos(int idx, int pos) {
+<b class="fc"><i>304</i>&nbsp;            assert(_state == SavePointState.DEFINED);</b>
+<b class="fc"><i>305</i>&nbsp;            _end_idx = idx;</b>
+<b class="fc"><i>306</i>&nbsp;            _end_pos = pos;</b>
+<b class="fc"><i>307</i>&nbsp;        }</b>
+<i>308</i>&nbsp;        private final void set_prev_pos(int idx, int pos, int limit, long line_count, long line_start) {
+<b class="fc"><i>309</i>&nbsp;            assert(_state == SavePointState.DEFINED);</b>
+<b class="fc"><i>310</i>&nbsp;            _prev_idx = idx;</b>
+<b class="fc"><i>311</i>&nbsp;            _prev_pos = pos;</b>
+<b class="fc"><i>312</i>&nbsp;            _prev_limit = limit;</b>
+<b class="fc"><i>313</i>&nbsp;            _prev_line_count = line_count;</b>
+<b class="fc"><i>314</i>&nbsp;            _prev_line_start = line_start;</b>
+<b class="fc"><i>315</i>&nbsp;        }</b>
+<i>316</i>&nbsp;
+<i>317</i>&nbsp;        public final void clear() {
+<b class="fc"><i>318</i>&nbsp;            assert(_state != SavePointState.ACTIVE);</b>
+<b class="fc"><i>319</i>&nbsp;            if (isDefined()) {</b>
+<b class="fc"><i>320</i>&nbsp;                _owner.save_point_clear(this);</b>
+<i>321</i>&nbsp;            }
+<b class="fc"><i>322</i>&nbsp;            _state = SavePointState.CLEAR;</b>
+<b class="fc"><i>323</i>&nbsp;            _start_idx = -1;</b>
+<b class="fc"><i>324</i>&nbsp;            _end_idx = -1;</b>
+<b class="fc"><i>325</i>&nbsp;            _prev_idx = -1;</b>
+<b class="fc"><i>326</i>&nbsp;        }</b>
+<i>327</i>&nbsp;        public final void start(long line_number, long line_start) {
+<b class="fc"><i>328</i>&nbsp;            _owner.save_point_start(this, line_number, line_start);</b>
+<b class="fc"><i>329</i>&nbsp;        }</b>
+<i>330</i>&nbsp;        public final void markEnd() {
+<b class="fc"><i>331</i>&nbsp;            _owner.save_point_mark_end(this, 0);</b>
+<b class="fc"><i>332</i>&nbsp;        }</b>
+<i>333</i>&nbsp;        public final void markEnd(int offset) {
+<b class="fc"><i>334</i>&nbsp;            _owner.save_point_mark_end(this, offset);</b>
+<b class="fc"><i>335</i>&nbsp;        }</b>
+<i>336</i>&nbsp;        public final void free() {
+<b class="nc"><i>337</i>&nbsp;            _owner.savePointFree(this);</b>
+<b class="nc"><i>338</i>&nbsp;        }</b>
+<i>339</i>&nbsp;        public final boolean isClear() {
+<b class="fc"><i>340</i>&nbsp;            return (_state == SavePointState.CLEAR);</b>
+<i>341</i>&nbsp;        }
+<i>342</i>&nbsp;        public final boolean isDefined() {
+<b class="fc"><i>343</i>&nbsp;            return (_state == SavePointState.DEFINED || _state == SavePointState.ACTIVE);</b>
+<i>344</i>&nbsp;        }
+<i>345</i>&nbsp;        public final boolean isActive() {
+<b class="fc"><i>346</i>&nbsp;            return (_state == SavePointState.ACTIVE);</b>
+<i>347</i>&nbsp;        }
+<i>348</i>&nbsp;        public final void set_active() {
+<b class="fc"><i>349</i>&nbsp;            assert(_state == SavePointState.DEFINED);</b>
+<b class="fc"><i>350</i>&nbsp;            _state = SavePointState.ACTIVE;</b>
+<b class="fc"><i>351</i>&nbsp;        }</b>
+<i>352</i>&nbsp;        public final void set_inactive() {
+<b class="fc"><i>353</i>&nbsp;            assert(_state == SavePointState.ACTIVE);</b>
+<b class="fc"><i>354</i>&nbsp;            _state = SavePointState.DEFINED;</b>
+<b class="fc"><i>355</i>&nbsp;        }</b>
+<i>356</i>&nbsp;        public final long length() {
+<b class="fc"><i>357</i>&nbsp;            if (_start_idx == -1 || _end_idx == -1) {</b>
+<b class="nc"><i>358</i>&nbsp;                return 0;</b>
+<i>359</i>&nbsp;            }
+<b class="fc"><i>360</i>&nbsp;            return _owner.lengthOf(this);</b>
+<i>361</i>&nbsp;        }
+<i>362</i>&nbsp;
+<i>363</i>&nbsp;        public final int getStartIdx() {
+<b class="fc"><i>364</i>&nbsp;            return _start_idx;</b>
+<i>365</i>&nbsp;        }
+<i>366</i>&nbsp;        public final int getStartPos() {
+<b class="fc"><i>367</i>&nbsp;            assert(_state != SavePointState.CLEAR);</b>
+<b class="fc"><i>368</i>&nbsp;            return _start_pos;</b>
+<i>369</i>&nbsp;        }
+<i>370</i>&nbsp;        public final long getStartLineNumber() {
+<b class="fc"><i>371</i>&nbsp;            return _start_line_count;</b>
+<i>372</i>&nbsp;        }
+<i>373</i>&nbsp;        public final long getStartLineStart() {
+<b class="fc"><i>374</i>&nbsp;            return _start_line_start;</b>
+<i>375</i>&nbsp;        }
+<i>376</i>&nbsp;        public final long getStartFilePosition() {
+<b class="nc"><i>377</i>&nbsp;            if (_start_idx == -1) return -1;</b>
+<b class="nc"><i>378</i>&nbsp;            UnifiedDataPageX p = _owner._buffer.getPage(_start_idx);</b>
+<b class="nc"><i>379</i>&nbsp;            return p.getFilePosition(_start_pos);</b>
+<i>380</i>&nbsp;        }
+<i>381</i>&nbsp;        public final int getEndIdx() {
+<b class="fc"><i>382</i>&nbsp;            return _end_idx;</b>
+<i>383</i>&nbsp;        }
+<i>384</i>&nbsp;        public final int getEndPos() {
+<b class="fc"><i>385</i>&nbsp;            assert(_state != SavePointState.CLEAR);</b>
+<b class="fc"><i>386</i>&nbsp;            return _end_pos;</b>
+<i>387</i>&nbsp;        }
+<i>388</i>&nbsp;        public final long getEndFilePosition() {
+<b class="nc"><i>389</i>&nbsp;            assert(_state != SavePointState.CLEAR);</b>
+<b class="nc"><i>390</i>&nbsp;            if (_end_idx == -1) return -1;</b>
+<b class="nc"><i>391</i>&nbsp;            UnifiedDataPageX p = _owner._buffer.getPage(_end_idx);</b>
+<b class="nc"><i>392</i>&nbsp;            return p.getFilePosition(_end_pos);</b>
+<i>393</i>&nbsp;        }
+<i>394</i>&nbsp;        public final int getPrevIdx() {
+<b class="fc"><i>395</i>&nbsp;            return _prev_idx;</b>
+<i>396</i>&nbsp;        }
+<i>397</i>&nbsp;        public final int getPrevPos() {
+<b class="fc"><i>398</i>&nbsp;            assert(_state != SavePointState.CLEAR);</b>
+<b class="fc"><i>399</i>&nbsp;            return _prev_pos;</b>
+<i>400</i>&nbsp;        }
+<i>401</i>&nbsp;        public final int getPrevLimit() {
+<b class="fc"><i>402</i>&nbsp;            assert(_state != SavePointState.CLEAR);</b>
+<b class="fc"><i>403</i>&nbsp;            return _prev_limit;</b>
+<i>404</i>&nbsp;        }
+<i>405</i>&nbsp;        public final long getPrevLineNumber() {
+<b class="fc"><i>406</i>&nbsp;            return _prev_line_count;</b>
+<i>407</i>&nbsp;        }
+<i>408</i>&nbsp;        public final long getPrevLineStart() {
+<b class="fc"><i>409</i>&nbsp;            return _prev_line_start;</b>
+<i>410</i>&nbsp;        }
+<i>411</i>&nbsp;    }
+<i>412</i>&nbsp;}
+<i>413</i>&nbsp;
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

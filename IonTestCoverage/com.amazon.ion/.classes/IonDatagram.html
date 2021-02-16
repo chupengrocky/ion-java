@@ -1,0 +1,352 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonDatagram</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonDatagram (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonDatagram</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import java.io.IOException;
+<i>19</i>&nbsp;import java.io.OutputStream;
+<i>20</i>&nbsp;import java.util.Collection;
+<i>21</i>&nbsp;import java.util.Iterator;
+<i>22</i>&nbsp;import java.util.ListIterator;
+<i>23</i>&nbsp;
+<i>24</i>&nbsp;
+<i>25</i>&nbsp;/**
+<i>26</i>&nbsp; * A datagram is a &quot;top-level&quot; container of Ion values, and the granularity of
+<i>27</i>&nbsp; * binary encoding Ion content.
+<i>28</i>&nbsp; * &lt;p&gt;
+<i>29</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>30</i>&nbsp; * code outside of this library. Some inherited methods are not yet implemented
+<i>31</i>&nbsp; * or are unsupported for datagrams.
+<i>32</i>&nbsp; * &lt;p&gt;
+<i>33</i>&nbsp; * Along with the normal user values, datagrams contain system values, notably
+<i>34</i>&nbsp; * the symbol table(s) used to atomize all symbols. Most uses of a datagram
+<i>35</i>&nbsp; * will not see system values,
+<i>36</i>&nbsp; * but applications that need visibility into that data can use the
+<i>37</i>&nbsp; * &lt;code&gt;system*()&lt;/code&gt; methods.
+<i>38</i>&nbsp; */
+<i>39</i>&nbsp;public interface IonDatagram
+<i>40</i>&nbsp;    extends IonSequence
+<i>41</i>&nbsp;{
+<i>42</i>&nbsp;    /**
+<i>43</i>&nbsp;     * This inherited method is not yet supported by datagrams.
+<i>44</i>&nbsp;     * &lt;p&gt;
+<i>45</i>&nbsp;     * Vote for issue amzn/ion-java/issues/48 if you need this.
+<i>46</i>&nbsp;     *
+<i>47</i>&nbsp;     * @throws UnsupportedOperationException at every call.
+<i>48</i>&nbsp;     *
+<i>49</i>&nbsp;     * @see &lt;a href=&quot;https://github.com/amzn/ion-java/issues/48&quot;&gt;amzn/ion-java/issues/48&lt;/a&gt;
+<i>50</i>&nbsp;     */
+<i>51</i>&nbsp;    public void add(int index, IonValue element)
+<i>52</i>&nbsp;        throws ContainedValueException, NullPointerException;
+<i>53</i>&nbsp;
+<i>54</i>&nbsp;    /**
+<i>55</i>&nbsp;     * This inherited method is not yet supported by datagrams.
+<i>56</i>&nbsp;     * &lt;p&gt;
+<i>57</i>&nbsp;     * Vote for issue amzn/ion-java/issues/48 if you need this.
+<i>58</i>&nbsp;     *
+<i>59</i>&nbsp;     * @throws UnsupportedOperationException at every call.
+<i>60</i>&nbsp;     *
+<i>61</i>&nbsp;     * @see &lt;a href=&quot;https://github.com/amzn/ion-java/issues/48&quot;&gt;amzn/ion-java/issues/48&lt;/a&gt;
+<i>62</i>&nbsp;     */
+<i>63</i>&nbsp;    public ValueFactory add(int index)
+<i>64</i>&nbsp;        throws ContainedValueException, NullPointerException;
+<i>65</i>&nbsp;
+<i>66</i>&nbsp;    /**
+<i>67</i>&nbsp;     * This inherited method is not yet supported by datagrams.
+<i>68</i>&nbsp;     * &lt;p&gt;
+<i>69</i>&nbsp;     * Vote for issue amzn/ion-java/issues/47 if you need this.
+<i>70</i>&nbsp;     *
+<i>71</i>&nbsp;     * @throws UnsupportedOperationException at every call.
+<i>72</i>&nbsp;     *
+<i>73</i>&nbsp;     * @see &lt;a href=&quot;https://github.com/amzn/ion-java/issues/47&quot;&gt;amzn/ion-java/issues/47&lt;/a&gt;
+<i>74</i>&nbsp;     */
+<i>75</i>&nbsp;    public boolean addAll(int index, Collection&lt;? extends IonValue&gt; c);
+<i>76</i>&nbsp;
+<i>77</i>&nbsp;    /**
+<i>78</i>&nbsp;     * This inherited method is not yet supported by datagrams.
+<i>79</i>&nbsp;     * &lt;p&gt;
+<i>80</i>&nbsp;     * Vote for issue amzn/ion-java/issues/50 if you need this.
+<i>81</i>&nbsp;     *
+<i>82</i>&nbsp;     * @throws UnsupportedOperationException at every call.
+<i>83</i>&nbsp;     *
+<i>84</i>&nbsp;     * @see &lt;a href=&quot;https://github.com/amzn/ion-java/issues/50&quot;&gt;amzn/ion-java/issues/50&lt;/a&gt;
+<i>85</i>&nbsp;     */
+<i>86</i>&nbsp;    public IonValue set(int index, IonValue element);
+<i>87</i>&nbsp;
+<i>88</i>&nbsp;
+<i>89</i>&nbsp;    /**
+<i>90</i>&nbsp;     * Returns {@code false} at every call, since datagrams cannot be null.
+<i>91</i>&nbsp;     *
+<i>92</i>&nbsp;     * @return &lt;code&gt;false&lt;/code&gt;
+<i>93</i>&nbsp;     */
+<i>94</i>&nbsp;    public boolean isNullValue();
+<i>95</i>&nbsp;
+<i>96</i>&nbsp;
+<i>97</i>&nbsp;    /**
+<i>98</i>&nbsp;     * {@inheritDoc}
+<i>99</i>&nbsp;     * &lt;p&gt;
+<i>100</i>&nbsp;     * Datagrams always return &lt;code&gt;null&lt;/code&gt; from this method, since by
+<i>101</i>&nbsp;     * definition they have no container.
+<i>102</i>&nbsp;     */
+<i>103</i>&nbsp;    public IonContainer getContainer();
+<i>104</i>&nbsp;
+<i>105</i>&nbsp;
+<i>106</i>&nbsp;    /**
+<i>107</i>&nbsp;     * Gets the number of elements in the datagram, not counting system
+<i>108</i>&nbsp;     * elements.
+<i>109</i>&nbsp;     */
+<i>110</i>&nbsp;    public int size();
+<i>111</i>&nbsp;
+<i>112</i>&nbsp;    /**
+<i>113</i>&nbsp;     * Gets the number of elements in the datagram, including system elements
+<i>114</i>&nbsp;     * such as version markers and symbol tables.
+<i>115</i>&nbsp;     * Unless your application needs to be aware of such low-level details,
+<i>116</i>&nbsp;     * you almost certainly want to use {@link #size()} instead.
+<i>117</i>&nbsp;     *
+<i>118</i>&nbsp;     * @see #size()
+<i>119</i>&nbsp;     */
+<i>120</i>&nbsp;    public int systemSize();
+<i>121</i>&nbsp;
+<i>122</i>&nbsp;
+<i>123</i>&nbsp;    /**
+<i>124</i>&nbsp;     * Gets a selected non-system element from this datagram.
+<i>125</i>&nbsp;     *
+<i>126</i>&nbsp;     * @param index must be less than &lt;code&gt;{@link #size()}&lt;/code&gt;.
+<i>127</i>&nbsp;     * @return the selected element; not &lt;code&gt;null&lt;/code&gt;.
+<i>128</i>&nbsp;     * @throws IndexOutOfBoundsException if the index is bad.
+<i>129</i>&nbsp;     */
+<i>130</i>&nbsp;    public IonValue get(int index)
+<i>131</i>&nbsp;        throws IndexOutOfBoundsException;
+<i>132</i>&nbsp;
+<i>133</i>&nbsp;    /**
+<i>134</i>&nbsp;     * Gets a selected element from this datagram, potentially getting a
+<i>135</i>&nbsp;     * hidden system element (such as a symbol table).
+<i>136</i>&nbsp;     * Unless your application needs to be aware of such low-level details,
+<i>137</i>&nbsp;     * you almost certainly want to use {@link #get(int)} instead.
+<i>138</i>&nbsp;     *
+<i>139</i>&nbsp;     * @param index must be less than &lt;code&gt;{@link #systemSize()}&lt;/code&gt;.
+<i>140</i>&nbsp;     * @return the selected element; not &lt;code&gt;null&lt;/code&gt;.
+<i>141</i>&nbsp;     * @throws IndexOutOfBoundsException if the index is bad.
+<i>142</i>&nbsp;     *
+<i>143</i>&nbsp;     * @see #get(int)
+<i>144</i>&nbsp;     */
+<i>145</i>&nbsp;    public IonValue systemGet(int index)
+<i>146</i>&nbsp;        throws IndexOutOfBoundsException;
+<i>147</i>&nbsp;
+<i>148</i>&nbsp;
+<i>149</i>&nbsp;    /**
+<i>150</i>&nbsp;     * Creates an iterator providing the (direct) elements of this datagram.
+<i>151</i>&nbsp;     * Elements will be returned
+<i>152</i>&nbsp;     * in order of their appearance in the Ion representation.
+<i>153</i>&nbsp;     * &lt;p&gt;
+<i>154</i>&nbsp;     * This iterator returns only user values, ignoring symbol tables and other
+<i>155</i>&nbsp;     * system values. It does not support the {@link Iterator#remove()}
+<i>156</i>&nbsp;     * operation.
+<i>157</i>&nbsp;     *
+<i>158</i>&nbsp;     * @see #systemIterator()
+<i>159</i>&nbsp;     */
+<i>160</i>&nbsp;    public Iterator&lt;IonValue&gt; iterator();
+<i>161</i>&nbsp;
+<i>162</i>&nbsp;    /**
+<i>163</i>&nbsp;     * Iterate all values in the datagram, including the otherwise-hidden
+<i>164</i>&nbsp;     * system values such as version markers and symbol tables.
+<i>165</i>&nbsp;     * Unless your application needs to be aware of such low-level details,
+<i>166</i>&nbsp;     * you almost certainly want to use {@link #iterator()} instead.
+<i>167</i>&nbsp;     * &lt;p&gt;
+<i>168</i>&nbsp;     * This iterator does not support the modification methods
+<i>169</i>&nbsp;     * {@link Iterator#remove()}, {@link ListIterator#add(Object)}, or
+<i>170</i>&nbsp;     * {@link ListIterator#set(Object)}.
+<i>171</i>&nbsp;     *
+<i>172</i>&nbsp;     * @return not null.
+<i>173</i>&nbsp;     *
+<i>174</i>&nbsp;     * @see #iterator()
+<i>175</i>&nbsp;     */
+<i>176</i>&nbsp;    public ListIterator&lt;IonValue&gt; systemIterator();
+<i>177</i>&nbsp;
+<i>178</i>&nbsp;
+<i>179</i>&nbsp;    /**
+<i>180</i>&nbsp;     * Gets the number of bytes used to encode this datagram.
+<i>181</i>&nbsp;     * As a side effect, this method encodes the entire datagram into Ion
+<i>182</i>&nbsp;     * binary format.
+<i>183</i>&nbsp;
+<i>184</i>&nbsp;     * @return the number of bytes in the binary encoding of this datagram.
+<i>185</i>&nbsp;     *
+<i>186</i>&nbsp;     * @throws IonException if there&#39;s an error encoding the data.
+<i>187</i>&nbsp;     */
+<i>188</i>&nbsp;    public int byteSize()
+<i>189</i>&nbsp;        throws IonException;
+<i>190</i>&nbsp;
+<i>191</i>&nbsp;
+<i>192</i>&nbsp;    /**
+<i>193</i>&nbsp;     * Copies the binary-encoded form of this datagram into a new byte array.
+<i>194</i>&nbsp;     *
+<i>195</i>&nbsp;     * @return a new, non-empty byte array containing the encoded datagram.
+<i>196</i>&nbsp;     *
+<i>197</i>&nbsp;     * @throws IonException if there&#39;s an error encoding the data.
+<i>198</i>&nbsp;     *
+<i>199</i>&nbsp;     * @deprecated Use {@link #getBytes()} instead, which is renamed for consistency with other interfaces.
+<i>200</i>&nbsp;     */
+<i>201</i>&nbsp;    @Deprecated
+<i>202</i>&nbsp;    public byte[] toBytes()
+<i>203</i>&nbsp;        throws IonException;
+<i>204</i>&nbsp;
+<i>205</i>&nbsp;    /**
+<i>206</i>&nbsp;     * Copies the binary-encoded form of this datagram into a new byte array.
+<i>207</i>&nbsp;     *
+<i>208</i>&nbsp;     * @return a new, non-empty byte array containing the encoded datagram.
+<i>209</i>&nbsp;     *
+<i>210</i>&nbsp;     * @throws IonException if there&#39;s an error encoding the data.
+<i>211</i>&nbsp;     */
+<i>212</i>&nbsp;    public byte[] getBytes()
+<i>213</i>&nbsp;        throws IonException;
+<i>214</i>&nbsp;
+<i>215</i>&nbsp;
+<i>216</i>&nbsp;    /**
+<i>217</i>&nbsp;     * Copies the binary-encoded form of this datagram into a given array.
+<i>218</i>&nbsp;     * &lt;p&gt;
+<i>219</i>&nbsp;     * The given array must be large enough to contain all the bytes of this
+<i>220</i>&nbsp;     * datagram.
+<i>221</i>&nbsp;     * &lt;p&gt;
+<i>222</i>&nbsp;     * An invocation of this method of the form {@code dg.get(a)} behaves in
+<i>223</i>&nbsp;     * exactly the same way as the invocation:
+<i>224</i>&nbsp;     *&lt;pre&gt;
+<i>225</i>&nbsp;     *    dg.get(a, 0)
+<i>226</i>&nbsp;     *&lt;/pre&gt;
+<i>227</i>&nbsp;     *
+<i>228</i>&nbsp;     * @param dst the array into which bytes are to be written.
+<i>229</i>&nbsp;     *
+<i>230</i>&nbsp;     * @return the number of bytes copied into {@code dst}.
+<i>231</i>&nbsp;     *
+<i>232</i>&nbsp;     * @throws IonException if there&#39;s an error encoding the data.
+<i>233</i>&nbsp;     * @throws IndexOutOfBoundsException if {@code dst.length} is
+<i>234</i>&nbsp;     * smaller than the result of {@link #byteSize()}.
+<i>235</i>&nbsp;     *
+<i>236</i>&nbsp;     * @see #getBytes(byte[],int)
+<i>237</i>&nbsp;     */
+<i>238</i>&nbsp;    @Deprecated
+<i>239</i>&nbsp;    public int getBytes(byte[] dst)
+<i>240</i>&nbsp;        throws IonException;
+<i>241</i>&nbsp;
+<i>242</i>&nbsp;
+<i>243</i>&nbsp;    /**
+<i>244</i>&nbsp;     * Copies the binary-encoded form of this datagram into a given sub-array.
+<i>245</i>&nbsp;     * &lt;p&gt;
+<i>246</i>&nbsp;     * The given subarray must be large enough to contain all the bytes of this
+<i>247</i>&nbsp;     * datagram.
+<i>248</i>&nbsp;     *
+<i>249</i>&nbsp;     * @param dst the array into which bytes are to be written.
+<i>250</i>&nbsp;     * @param offset the offset within the array of the first byte to be
+<i>251</i>&nbsp;     *   written; must be non-negative and no larger than {@code dst.length}
+<i>252</i>&nbsp;     *
+<i>253</i>&nbsp;     * @return the number of bytes copied into {@code dst}.
+<i>254</i>&nbsp;     *
+<i>255</i>&nbsp;     * @throws IonException if there&#39;s an error encoding the data.
+<i>256</i>&nbsp;     * @throws IndexOutOfBoundsException if {@code (dst.length - offset)} is
+<i>257</i>&nbsp;     * smaller than the result of {@link #byteSize()}.
+<i>258</i>&nbsp;     */
+<i>259</i>&nbsp;    @Deprecated
+<i>260</i>&nbsp;    public int getBytes(byte[] dst, int offset)
+<i>261</i>&nbsp;        throws IonException;
+<i>262</i>&nbsp;
+<i>263</i>&nbsp;
+<i>264</i>&nbsp;    /**
+<i>265</i>&nbsp;     * Copies the binary-encoded form of this datagram to a specified stream.
+<i>266</i>&nbsp;     *
+<i>267</i>&nbsp;     * @param out the output stream to which to write the data.
+<i>268</i>&nbsp;     *
+<i>269</i>&nbsp;     * @return the number of bytes written.
+<i>270</i>&nbsp;     *
+<i>271</i>&nbsp;     * @throws IonException if there&#39;s an error encoding the data.
+<i>272</i>&nbsp;     * @throws IOException if an error occurs writing the data to the stream.
+<i>273</i>&nbsp;     */
+<i>274</i>&nbsp;    public int getBytes(OutputStream out)
+<i>275</i>&nbsp;        throws IOException, IonException;
+<i>276</i>&nbsp;
+<i>277</i>&nbsp;
+<i>278</i>&nbsp;    /**
+<i>279</i>&nbsp;     * This inherited method is not supported by datagrams because there&#39;s no
+<i>280</i>&nbsp;     * single symbol table used across the contents.  Each value contained by
+<i>281</i>&nbsp;     * the datagram may have its own symbol table.
+<i>282</i>&nbsp;     *
+<i>283</i>&nbsp;     * @return nothing, always throws an exception.
+<i>284</i>&nbsp;     *
+<i>285</i>&nbsp;     * @throws UnsupportedOperationException at every call.
+<i>286</i>&nbsp;     */
+<i>287</i>&nbsp;    public SymbolTable getSymbolTable();
+<i>288</i>&nbsp;
+<i>289</i>&nbsp;    /**
+<i>290</i>&nbsp;     * This inherited method is not supported by datagrams.
+<i>291</i>&nbsp;     *
+<i>292</i>&nbsp;     * @throws UnsupportedOperationException at every call.
+<i>293</i>&nbsp;     */
+<i>294</i>&nbsp;    public void addTypeAnnotation(String annotation);
+<i>295</i>&nbsp;
+<i>296</i>&nbsp;    /**
+<i>297</i>&nbsp;     * This inherited method is not supported by datagrams.
+<i>298</i>&nbsp;     *
+<i>299</i>&nbsp;     * @throws UnsupportedOperationException at every call.
+<i>300</i>&nbsp;     */
+<i>301</i>&nbsp;    public void makeNull();
+<i>302</i>&nbsp;
+<i>303</i>&nbsp;    public IonDatagram clone()
+<i>304</i>&nbsp;        throws UnknownSymbolException;
+<i>305</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

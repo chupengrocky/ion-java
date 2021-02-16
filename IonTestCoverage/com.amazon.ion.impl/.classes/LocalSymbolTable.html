@@ -1,0 +1,1005 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: LocalSymbolTable</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: LocalSymbolTable (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">LocalSymbolTable</td>
+<td class="coverageStat">
+  <span class="percent">
+    91.7%
+  </span>
+  <span class="absValue">
+    (33/ 36)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.5%
+  </span>
+  <span class="absValue">
+    (233/ 252)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">LocalSymbolTable$Factory</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/ 10)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">LocalSymbolTable$SymbolIterator</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (3/ 4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (10/ 12)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    90.9%
+  </span>
+  <span class="absValue">
+    (40/ 44)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.3%
+  </span>
+  <span class="absValue">
+    (253/ 274)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.SystemSymbols.IMPORTS;
+<i>19</i>&nbsp;import static com.amazon.ion.SystemSymbols.IMPORTS_SID;
+<i>20</i>&nbsp;import static com.amazon.ion.SystemSymbols.ION;
+<i>21</i>&nbsp;import static com.amazon.ion.SystemSymbols.ION_SYMBOL_TABLE;
+<i>22</i>&nbsp;import static com.amazon.ion.SystemSymbols.MAX_ID_SID;
+<i>23</i>&nbsp;import static com.amazon.ion.SystemSymbols.NAME_SID;
+<i>24</i>&nbsp;import static com.amazon.ion.SystemSymbols.SYMBOLS_SID;
+<i>25</i>&nbsp;import static com.amazon.ion.SystemSymbols.VERSION_SID;
+<i>26</i>&nbsp;import static com.amazon.ion.impl._Private_Utils.copyOf;
+<i>27</i>&nbsp;import static com.amazon.ion.impl._Private_Utils.getSidForSymbolTableField;
+<i>28</i>&nbsp;import static com.amazon.ion.impl._Private_Utils.safeEquals;
+<i>29</i>&nbsp;
+<i>30</i>&nbsp;import com.amazon.ion.IonCatalog;
+<i>31</i>&nbsp;import com.amazon.ion.IonException;
+<i>32</i>&nbsp;import com.amazon.ion.IonReader;
+<i>33</i>&nbsp;import com.amazon.ion.IonType;
+<i>34</i>&nbsp;import com.amazon.ion.IonWriter;
+<i>35</i>&nbsp;import com.amazon.ion.ReadOnlyValueException;
+<i>36</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>37</i>&nbsp;import com.amazon.ion.SymbolToken;
+<i>38</i>&nbsp;import com.amazon.ion.util.IonTextUtils;
+<i>39</i>&nbsp;import java.io.IOException;
+<i>40</i>&nbsp;import java.util.ArrayList;
+<i>41</i>&nbsp;import java.util.Arrays;
+<i>42</i>&nbsp;import java.util.HashMap;
+<i>43</i>&nbsp;import java.util.Iterator;
+<i>44</i>&nbsp;import java.util.List;
+<i>45</i>&nbsp;import java.util.Map;
+<i>46</i>&nbsp;import java.util.NoSuchElementException;
+<i>47</i>&nbsp;
+<i>48</i>&nbsp;/**
+<i>49</i>&nbsp; * A local symbol table.
+<i>50</i>&nbsp; * &lt;p&gt;
+<i>51</i>&nbsp; * Instances of this class are safe for use by multiple threads.
+<i>52</i>&nbsp; */
+<b class="fc"><i>53</i>&nbsp;class LocalSymbolTable</b>
+<i>54</i>&nbsp;    implements SymbolTable
+<i>55</i>&nbsp;{
+<i>56</i>&nbsp;
+<b class="fc"><i>57</i>&nbsp;    static class Factory implements _Private_LocalSymbolTableFactory</b>
+<i>58</i>&nbsp;    {
+<i>59</i>&nbsp;
+<b class="fc"><i>60</i>&nbsp;        private Factory(){} // Should be accessed through the singleton</b>
+<i>61</i>&nbsp;
+<i>62</i>&nbsp;        public SymbolTable newLocalSymtab(IonCatalog catalog,
+<i>63</i>&nbsp;                                          IonReader reader,
+<i>64</i>&nbsp;                                          boolean alreadyInStruct)
+<i>65</i>&nbsp;        {
+<b class="fc"><i>66</i>&nbsp;            List&lt;String&gt; symbolsList = new ArrayList&lt;String&gt;();</b>
+<b class="fc"><i>67</i>&nbsp;            SymbolTable currentSymbolTable = reader.getSymbolTable();</b>
+<b class="fc"><i>68</i>&nbsp;            LocalSymbolTableImports imports = readLocalSymbolTable(reader,</b>
+<i>69</i>&nbsp;                                                                   catalog,
+<i>70</i>&nbsp;                                                                   alreadyInStruct,
+<i>71</i>&nbsp;                                                                   symbolsList,
+<i>72</i>&nbsp;                                                                   currentSymbolTable);
+<b class="fc"><i>73</i>&nbsp;            if (imports == null) {</b>
+<i>74</i>&nbsp;                // This was an LST append, so the existing symbol table was updated.
+<b class="fc"><i>75</i>&nbsp;                return currentSymbolTable;</b>
+<i>76</i>&nbsp;            }
+<b class="fc"><i>77</i>&nbsp;            return new LocalSymbolTable(imports, symbolsList);</b>
+<i>78</i>&nbsp;        }
+<i>79</i>&nbsp;
+<i>80</i>&nbsp;        public SymbolTable newLocalSymtab(SymbolTable defaultSystemSymtab,
+<i>81</i>&nbsp;                                          SymbolTable... imports)
+<i>82</i>&nbsp;        {
+<b class="fc"><i>83</i>&nbsp;            LocalSymbolTableImports unifiedSymtabImports =</b>
+<i>84</i>&nbsp;                new LocalSymbolTableImports(defaultSystemSymtab, imports);
+<i>85</i>&nbsp;
+<b class="fc"><i>86</i>&nbsp;            return new LocalSymbolTable(unifiedSymtabImports,</b>
+<i>87</i>&nbsp;                                        null /* local symbols */);
+<i>88</i>&nbsp;        }
+<i>89</i>&nbsp;
+<i>90</i>&nbsp;    }
+<i>91</i>&nbsp;
+<b class="fc"><i>92</i>&nbsp;    static final Factory DEFAULT_LST_FACTORY = new Factory();</b>
+<i>93</i>&nbsp;
+<i>94</i>&nbsp;    /**
+<i>95</i>&nbsp;     * The initial length of {@link #mySymbolNames}.
+<i>96</i>&nbsp;     */
+<i>97</i>&nbsp;    private static final int DEFAULT_CAPACITY = 16;
+<i>98</i>&nbsp;
+<i>99</i>&nbsp;    /**
+<i>100</i>&nbsp;     * The system and shared symtabs imported by this symtab. Never null.
+<i>101</i>&nbsp;     * &lt;p&gt;
+<i>102</i>&nbsp;     * Note: this member field is immutable and assigned only during
+<i>103</i>&nbsp;     * construction, hence no synchronization is needed for its method calls.
+<i>104</i>&nbsp;     */
+<i>105</i>&nbsp;    private final LocalSymbolTableImports myImportsList;
+<i>106</i>&nbsp;
+<i>107</i>&nbsp;    /**
+<i>108</i>&nbsp;     * Map of symbol names to symbol ids of local symbols that are not in
+<i>109</i>&nbsp;     * imports.
+<i>110</i>&nbsp;     */
+<i>111</i>&nbsp;    private final Map&lt;String, Integer&gt; mySymbolsMap;
+<i>112</i>&nbsp;
+<i>113</i>&nbsp;    /**
+<i>114</i>&nbsp;     * Whether this symbol table is read only, and thus, immutable.
+<i>115</i>&nbsp;     */
+<i>116</i>&nbsp;    private boolean isReadOnly;
+<i>117</i>&nbsp;
+<i>118</i>&nbsp;    /**
+<i>119</i>&nbsp;     * The local symbol names declared in this symtab; never null.
+<i>120</i>&nbsp;     * The sid of the first element is {@link #myFirstLocalSid}.
+<i>121</i>&nbsp;     * Only the first {@link #mySymbolsCount} elements are valid.
+<i>122</i>&nbsp;     */
+<i>123</i>&nbsp;    String[] mySymbolNames;
+<i>124</i>&nbsp;
+<i>125</i>&nbsp;    /**
+<i>126</i>&nbsp;     * This is the number of symbols defined in this symbol table
+<i>127</i>&nbsp;     * locally, that is not imported from some other table.
+<i>128</i>&nbsp;     */
+<i>129</i>&nbsp;    int mySymbolsCount;
+<i>130</i>&nbsp;
+<i>131</i>&nbsp;    /**
+<i>132</i>&nbsp;     * The sid of the first local symbol, which is stored at
+<i>133</i>&nbsp;     * {@link #mySymbolNames}[0].
+<i>134</i>&nbsp;     */
+<i>135</i>&nbsp;    final int myFirstLocalSid;
+<i>136</i>&nbsp;
+<i>137</i>&nbsp;    //==========================================================================
+<i>138</i>&nbsp;    // Private constructor(s) and static factory methods
+<i>139</i>&nbsp;    //==========================================================================
+<i>140</i>&nbsp;
+<i>141</i>&nbsp;    private void buildSymbolsMap()
+<i>142</i>&nbsp;    {
+<b class="fc"><i>143</i>&nbsp;        int sid = myFirstLocalSid;</b>
+<b class="fc"><i>144</i>&nbsp;        for (int i = 0; i &lt; mySymbolNames.length; i++, sid++)</b>
+<i>145</i>&nbsp;        {
+<b class="fc"><i>146</i>&nbsp;            String symbolText = mySymbolNames[i];</b>
+<b class="fc"><i>147</i>&nbsp;            if (symbolText != null)</b>
+<i>148</i>&nbsp;            {
+<b class="fc"><i>149</i>&nbsp;                putToMapIfNotThere(mySymbolsMap, symbolText, sid);</b>
+<i>150</i>&nbsp;            }
+<i>151</i>&nbsp;        }
+<b class="fc"><i>152</i>&nbsp;    }</b>
+<i>153</i>&nbsp;
+<i>154</i>&nbsp;
+<i>155</i>&nbsp;    /**
+<i>156</i>&nbsp;     * @param imports           never null
+<i>157</i>&nbsp;     * @param symbolsList       may be null or empty
+<i>158</i>&nbsp;     */
+<i>159</i>&nbsp;    protected LocalSymbolTable(LocalSymbolTableImports imports, List&lt;String&gt; symbolsList)
+<b class="fc"><i>160</i>&nbsp;    {</b>
+<b class="fc"><i>161</i>&nbsp;        if (symbolsList == null || symbolsList.isEmpty())</b>
+<i>162</i>&nbsp;        {
+<b class="fc"><i>163</i>&nbsp;            mySymbolsCount = 0;</b>
+<b class="fc"><i>164</i>&nbsp;            mySymbolNames  = _Private_Utils.EMPTY_STRING_ARRAY;</b>
+<i>165</i>&nbsp;        }
+<i>166</i>&nbsp;        else
+<i>167</i>&nbsp;        {
+<b class="fc"><i>168</i>&nbsp;            mySymbolsCount = symbolsList.size();</b>
+<b class="fc"><i>169</i>&nbsp;            mySymbolNames  = symbolsList.toArray(new String[mySymbolsCount]);</b>
+<i>170</i>&nbsp;        }
+<i>171</i>&nbsp;
+<b class="fc"><i>172</i>&nbsp;        myImportsList = imports;</b>
+<b class="fc"><i>173</i>&nbsp;        myFirstLocalSid = myImportsList.getMaxId() + 1;</b>
+<i>174</i>&nbsp;
+<i>175</i>&nbsp;        // Copy locally declared symbols to mySymbolsMap
+<i>176</i>&nbsp;        // The initial size is chosen so that resizing is avoided. The default load factor is 0.75. Resizing
+<i>177</i>&nbsp;        // could also be avoided by setting the initial size to mySymbolsCount and setting the load factor to
+<i>178</i>&nbsp;        // 1.0, but this would lead to more hash collisions.
+<b class="fc"><i>179</i>&nbsp;        mySymbolsMap = new HashMap&lt;String, Integer&gt;((int) Math.ceil(mySymbolsCount / 0.75));</b>
+<b class="fc"><i>180</i>&nbsp;        buildSymbolsMap();</b>
+<b class="fc"><i>181</i>&nbsp;    }</b>
+<i>182</i>&nbsp;
+<i>183</i>&nbsp;    /**
+<i>184</i>&nbsp;     * Copy-constructor, performs defensive copying of member fields where
+<i>185</i>&nbsp;     * necessary. The returned instance is mutable.
+<i>186</i>&nbsp;     */
+<i>187</i>&nbsp;    protected LocalSymbolTable(LocalSymbolTable other, int maxId)
+<b class="fc"><i>188</i>&nbsp;    {</b>
+<b class="fc"><i>189</i>&nbsp;        isReadOnly      = false;</b>
+<b class="fc"><i>190</i>&nbsp;        myFirstLocalSid = other.myFirstLocalSid;</b>
+<b class="fc"><i>191</i>&nbsp;        myImportsList   = other.myImportsList;</b>
+<b class="fc"><i>192</i>&nbsp;        mySymbolsCount  = maxId - myImportsList.getMaxId();</b>
+<i>193</i>&nbsp;
+<b class="fc"><i>194</i>&nbsp;        mySymbolNames   = copyOf(other.mySymbolNames, mySymbolsCount);</b>
+<i>195</i>&nbsp;
+<i>196</i>&nbsp;        // Copy locally declared symbols to mySymbolsMap
+<b class="fc"><i>197</i>&nbsp;        if (maxId == other.getMaxId())</b>
+<i>198</i>&nbsp;        {
+<i>199</i>&nbsp;            // Shallow copy
+<b class="fc"><i>200</i>&nbsp;            mySymbolsMap = new HashMap&lt;String, Integer&gt;(other.mySymbolsMap);</b>
+<i>201</i>&nbsp;        }
+<i>202</i>&nbsp;        else
+<i>203</i>&nbsp;        {
+<b class="nc"><i>204</i>&nbsp;            mySymbolsMap = new HashMap&lt;String, Integer&gt;(mySymbolsCount);</b>
+<b class="nc"><i>205</i>&nbsp;            buildSymbolsMap();</b>
+<i>206</i>&nbsp;        }
+<b class="fc"><i>207</i>&nbsp;    }</b>
+<i>208</i>&nbsp;
+<i>209</i>&nbsp;    /**
+<i>210</i>&nbsp;     * Parses the symbol table at the reader&#39;s current position.
+<i>211</i>&nbsp;     * @param reader the reader from which to parse the symbol table.
+<i>212</i>&nbsp;     * @param catalog the catalog from which to resolve shared symbol table imports.
+<i>213</i>&nbsp;     * @param isOnStruct true if the reader is already positioned on the symbol table struct; otherwise, false.
+<i>214</i>&nbsp;     * @param symbolsListOut list into which local symbols declared by the parsed symbol table will be deposited.
+<i>215</i>&nbsp;     * @param currentSymbolTable the symbol table currently active in the stream.
+<i>216</i>&nbsp;     * @return a new LocalSymbolTableImports instance, or null if this was an LST append. If null, `currentSymbolTable`
+<i>217</i>&nbsp;     *   continues to be the active symbol table.
+<i>218</i>&nbsp;     */
+<i>219</i>&nbsp;    protected static LocalSymbolTableImports readLocalSymbolTable(IonReader reader,
+<i>220</i>&nbsp;                                                                  IonCatalog catalog,
+<i>221</i>&nbsp;                                                                  boolean isOnStruct,
+<i>222</i>&nbsp;                                                                  List&lt;String&gt; symbolsListOut,
+<i>223</i>&nbsp;                                                                  SymbolTable currentSymbolTable)
+<i>224</i>&nbsp;    {
+<b class="fc"><i>225</i>&nbsp;        if (! isOnStruct)</b>
+<i>226</i>&nbsp;        {
+<b class="fc"><i>227</i>&nbsp;            reader.next();</b>
+<i>228</i>&nbsp;        }
+<i>229</i>&nbsp;
+<b class="fc"><i>230</i>&nbsp;        assert reader.getType() == IonType.STRUCT</b>
+<i>231</i>&nbsp;            : &quot;invalid symbol table image passed in reader &quot; +
+<b class="nc"><i>232</i>&nbsp;              reader.getType() + &quot; encountered when a struct was expected&quot;;</b>
+<i>233</i>&nbsp;
+<b class="fc"><i>234</i>&nbsp;        assert ION_SYMBOL_TABLE.equals(reader.getTypeAnnotations()[0])</b>
+<i>235</i>&nbsp;            : &quot;local symbol tables must be annotated by &quot; + ION_SYMBOL_TABLE;
+<i>236</i>&nbsp;
+<b class="fc"><i>237</i>&nbsp;        reader.stepIn();</b>
+<i>238</i>&nbsp;
+<b class="fc"><i>239</i>&nbsp;        List&lt;SymbolTable&gt; importsList = new ArrayList&lt;SymbolTable&gt;();</b>
+<b class="fc"><i>240</i>&nbsp;        importsList.add(reader.getSymbolTable().getSystemSymbolTable());</b>
+<i>241</i>&nbsp;
+<i>242</i>&nbsp;        IonType fieldType;
+<b class="fc"><i>243</i>&nbsp;        boolean foundImportList = false;</b>
+<b class="fc"><i>244</i>&nbsp;        boolean foundLocalSymbolList = false;</b>
+<b class="fc"><i>245</i>&nbsp;        boolean isAppend = false;</b>
+<b class="fc"><i>246</i>&nbsp;        while ((fieldType = reader.next()) != null)</b>
+<i>247</i>&nbsp;        {
+<b class="fc"><i>248</i>&nbsp;            if (reader.isNullValue()) continue;</b>
+<i>249</i>&nbsp;
+<b class="fc"><i>250</i>&nbsp;            SymbolToken symTok = reader.getFieldNameSymbol();</b>
+<b class="fc"><i>251</i>&nbsp;            int sid = symTok.getSid();</b>
+<b class="fc"><i>252</i>&nbsp;            if (sid == SymbolTable.UNKNOWN_SYMBOL_ID)</b>
+<i>253</i>&nbsp;            {
+<i>254</i>&nbsp;                // This is a user-defined IonReader or a pure DOM, fall
+<i>255</i>&nbsp;                // back to text
+<b class="fc"><i>256</i>&nbsp;                final String fieldName = reader.getFieldName();</b>
+<b class="fc"><i>257</i>&nbsp;                sid = getSidForSymbolTableField(fieldName);</b>
+<i>258</i>&nbsp;            }
+<i>259</i>&nbsp;
+<i>260</i>&nbsp;            // TODO amzn/ion-java/issues/36 Switching over SIDs doesn&#39;t cover the case
+<i>261</i>&nbsp;            //      where the relevant field names are defined by a prev LST;
+<i>262</i>&nbsp;            //      the prev LST could have &#39;symbols&#39; defined locally with a
+<i>263</i>&nbsp;            //      different SID!
+<b class="fc"><i>264</i>&nbsp;            switch (sid)</b>
+<i>265</i>&nbsp;            {
+<i>266</i>&nbsp;                case SYMBOLS_SID:
+<i>267</i>&nbsp;                {
+<i>268</i>&nbsp;                    // As per the Spec, other field types are treated as
+<i>269</i>&nbsp;                    // empty lists
+<b class="fc"><i>270</i>&nbsp;                    if(foundLocalSymbolList){</b>
+<b class="fc"><i>271</i>&nbsp;                        throw new IonException(&quot;Multiple symbol fields found within a single local symbol table.&quot;);</b>
+<i>272</i>&nbsp;                    }
+<b class="fc"><i>273</i>&nbsp;                    foundLocalSymbolList = true;</b>
+<b class="fc"><i>274</i>&nbsp;                    if (fieldType == IonType.LIST)</b>
+<i>275</i>&nbsp;                    {
+<b class="fc"><i>276</i>&nbsp;                        reader.stepIn();</b>
+<i>277</i>&nbsp;                        IonType type;
+<b class="fc"><i>278</i>&nbsp;                        while ((type = reader.next()) != null)</b>
+<i>279</i>&nbsp;                        {
+<i>280</i>&nbsp;                            final String text;
+<b class="fc"><i>281</i>&nbsp;                            if (type == IonType.STRING)</b>
+<i>282</i>&nbsp;                            {
+<b class="fc"><i>283</i>&nbsp;                                text = reader.stringValue();</b>
+<i>284</i>&nbsp;                            }
+<i>285</i>&nbsp;                            else
+<i>286</i>&nbsp;                            {
+<b class="fc"><i>287</i>&nbsp;                                text = null;</b>
+<i>288</i>&nbsp;                            }
+<i>289</i>&nbsp;
+<b class="fc"><i>290</i>&nbsp;                            symbolsListOut.add(text);</b>
+<b class="fc"><i>291</i>&nbsp;                        }</b>
+<b class="fc"><i>292</i>&nbsp;                        reader.stepOut();</b>
+<b class="fc"><i>293</i>&nbsp;                    }</b>
+<i>294</i>&nbsp;                    break;
+<i>295</i>&nbsp;                }
+<i>296</i>&nbsp;                case IMPORTS_SID:
+<i>297</i>&nbsp;                {
+<b class="fc"><i>298</i>&nbsp;                    if(foundImportList){</b>
+<b class="fc"><i>299</i>&nbsp;                        throw new IonException(&quot;Multiple imports fields found within a single local symbol table.&quot;);</b>
+<i>300</i>&nbsp;                    }
+<b class="fc"><i>301</i>&nbsp;                    foundImportList = true;</b>
+<b class="fc"><i>302</i>&nbsp;                    if (fieldType == IonType.LIST)</b>
+<i>303</i>&nbsp;                    {
+<b class="fc"><i>304</i>&nbsp;                        prepImportsList(importsList, reader, catalog);</b>
+<i>305</i>&nbsp;                    }
+<b class="fc"><i>306</i>&nbsp;                    else if (fieldType == IonType.SYMBOL &amp;&amp; ION_SYMBOL_TABLE.equals(reader.stringValue()))</b>
+<i>307</i>&nbsp;                    {
+<b class="fc"><i>308</i>&nbsp;                        isAppend = true;</b>
+<i>309</i>&nbsp;                    }
+<i>310</i>&nbsp;                    break;
+<i>311</i>&nbsp;                }
+<i>312</i>&nbsp;                default:
+<i>313</i>&nbsp;                {
+<i>314</i>&nbsp;                    // As per the Spec, any other field is ignored
+<i>315</i>&nbsp;                    break;
+<i>316</i>&nbsp;                }
+<i>317</i>&nbsp;            }
+<b class="fc"><i>318</i>&nbsp;        }</b>
+<b class="fc"><i>319</i>&nbsp;        reader.stepOut();</b>
+<b class="fc"><i>320</i>&nbsp;        if (isAppend &amp;&amp; currentSymbolTable.isLocalTable()) {</b>
+<i>321</i>&nbsp;            // Because the current symbol table is a local symbol table (i.e. not the system symbol table), it can
+<i>322</i>&nbsp;            // be appended in-place.
+<b class="fc"><i>323</i>&nbsp;            LocalSymbolTable currentLocalSymbolTable = (LocalSymbolTable) currentSymbolTable;</b>
+<b class="fc"><i>324</i>&nbsp;            for (String newSymbol : symbolsListOut) {</b>
+<b class="fc"><i>325</i>&nbsp;                currentLocalSymbolTable.putSymbol(newSymbol);</b>
+<b class="fc"><i>326</i>&nbsp;            }</b>
+<b class="fc"><i>327</i>&nbsp;            return null;</b>
+<i>328</i>&nbsp;        }
+<b class="fc"><i>329</i>&nbsp;        return new LocalSymbolTableImports(importsList);</b>
+<i>330</i>&nbsp;    }
+<i>331</i>&nbsp;
+<i>332</i>&nbsp;    synchronized LocalSymbolTable makeCopy()
+<i>333</i>&nbsp;    {
+<b class="fc"><i>334</i>&nbsp;        return new LocalSymbolTable(this, getMaxId());</b>
+<i>335</i>&nbsp;    }
+<i>336</i>&nbsp;
+<i>337</i>&nbsp;    synchronized LocalSymbolTable makeCopy(int maxId)
+<i>338</i>&nbsp;    {
+<b class="nc"><i>339</i>&nbsp;        return new LocalSymbolTable(this, maxId);</b>
+<i>340</i>&nbsp;    }
+<i>341</i>&nbsp;
+<i>342</i>&nbsp;    public boolean isLocalTable()
+<i>343</i>&nbsp;    {
+<b class="fc"><i>344</i>&nbsp;        return true;</b>
+<i>345</i>&nbsp;    }
+<i>346</i>&nbsp;
+<i>347</i>&nbsp;    public boolean isSharedTable()
+<i>348</i>&nbsp;    {
+<b class="fc"><i>349</i>&nbsp;        return false;</b>
+<i>350</i>&nbsp;    }
+<i>351</i>&nbsp;
+<i>352</i>&nbsp;    public boolean isSystemTable()
+<i>353</i>&nbsp;    {
+<b class="fc"><i>354</i>&nbsp;        return false;</b>
+<i>355</i>&nbsp;    }
+<i>356</i>&nbsp;
+<i>357</i>&nbsp;    public boolean isSubstitute()
+<i>358</i>&nbsp;    {
+<b class="fc"><i>359</i>&nbsp;        return false;</b>
+<i>360</i>&nbsp;    }
+<i>361</i>&nbsp;
+<i>362</i>&nbsp;    public synchronized boolean isReadOnly()
+<i>363</i>&nbsp;    {
+<b class="fc"><i>364</i>&nbsp;        return isReadOnly;</b>
+<i>365</i>&nbsp;    }
+<i>366</i>&nbsp;
+<i>367</i>&nbsp;    public synchronized void makeReadOnly()
+<i>368</i>&nbsp;    {
+<b class="fc"><i>369</i>&nbsp;        isReadOnly = true;</b>
+<b class="fc"><i>370</i>&nbsp;    }</b>
+<i>371</i>&nbsp;
+<i>372</i>&nbsp;    public int getImportedMaxId()
+<i>373</i>&nbsp;    {
+<b class="fc"><i>374</i>&nbsp;        return myImportsList.getMaxId();</b>
+<i>375</i>&nbsp;    }
+<i>376</i>&nbsp;
+<i>377</i>&nbsp;    public synchronized int getMaxId()
+<i>378</i>&nbsp;    {
+<b class="fc"><i>379</i>&nbsp;        int maxid = mySymbolsCount + myImportsList.getMaxId();</b>
+<b class="fc"><i>380</i>&nbsp;        return maxid;</b>
+<i>381</i>&nbsp;    }
+<i>382</i>&nbsp;
+<i>383</i>&nbsp;    public int getVersion()
+<i>384</i>&nbsp;    {
+<b class="fc"><i>385</i>&nbsp;        return 0;</b>
+<i>386</i>&nbsp;    }
+<i>387</i>&nbsp;
+<i>388</i>&nbsp;    public String getName()
+<i>389</i>&nbsp;    {
+<b class="fc"><i>390</i>&nbsp;        return null;</b>
+<i>391</i>&nbsp;    }
+<i>392</i>&nbsp;
+<i>393</i>&nbsp;    public String getIonVersionId()
+<i>394</i>&nbsp;    {
+<b class="fc"><i>395</i>&nbsp;        SymbolTable system_table = myImportsList.getSystemSymbolTable();</b>
+<b class="fc"><i>396</i>&nbsp;        return system_table.getIonVersionId();</b>
+<i>397</i>&nbsp;    }
+<i>398</i>&nbsp;
+<i>399</i>&nbsp;    public synchronized Iterator&lt;String&gt; iterateDeclaredSymbolNames()
+<i>400</i>&nbsp;    {
+<b class="fc"><i>401</i>&nbsp;        return new SymbolIterator(mySymbolNames, mySymbolsCount);</b>
+<i>402</i>&nbsp;    }
+<i>403</i>&nbsp;
+<i>404</i>&nbsp;    public String findKnownSymbol(int id)
+<i>405</i>&nbsp;    {
+<b class="fc"><i>406</i>&nbsp;        String name = null;</b>
+<i>407</i>&nbsp;
+<b class="fc"><i>408</i>&nbsp;        if (id &lt; 0)</b>
+<i>409</i>&nbsp;        {
+<b class="nc"><i>410</i>&nbsp;            String message = &quot;symbol IDs must be &gt;= 0&quot;;</b>
+<b class="nc"><i>411</i>&nbsp;            throw new IllegalArgumentException(message);</b>
+<i>412</i>&nbsp;        }
+<b class="fc"><i>413</i>&nbsp;        else if (id &lt; myFirstLocalSid)</b>
+<i>414</i>&nbsp;        {
+<b class="fc"><i>415</i>&nbsp;            name = myImportsList.findKnownSymbol(id);</b>
+<i>416</i>&nbsp;        }
+<i>417</i>&nbsp;        else
+<i>418</i>&nbsp;        {
+<b class="fc"><i>419</i>&nbsp;            int offset = id - myFirstLocalSid;</b>
+<i>420</i>&nbsp;
+<i>421</i>&nbsp;            String[] names;
+<b class="fc"><i>422</i>&nbsp;            synchronized (this)</b>
+<i>423</i>&nbsp;            {
+<b class="fc"><i>424</i>&nbsp;                names = mySymbolNames;</b>
+<b class="fc"><i>425</i>&nbsp;            }</b>
+<i>426</i>&nbsp;
+<b class="fc"><i>427</i>&nbsp;            if (offset &lt; names.length)</b>
+<i>428</i>&nbsp;            {
+<b class="fc"><i>429</i>&nbsp;                name = names[offset];</b>
+<i>430</i>&nbsp;            }
+<i>431</i>&nbsp;        }
+<i>432</i>&nbsp;
+<b class="fc"><i>433</i>&nbsp;        return name;</b>
+<i>434</i>&nbsp;    }
+<i>435</i>&nbsp;
+<i>436</i>&nbsp;    public int findSymbol(String name)
+<i>437</i>&nbsp;    {
+<i>438</i>&nbsp;        // Look in system then imports
+<b class="fc"><i>439</i>&nbsp;        int sid = myImportsList.findSymbol(name);</b>
+<i>440</i>&nbsp;
+<i>441</i>&nbsp;        // Look in local symbols
+<b class="fc"><i>442</i>&nbsp;        if (sid == UNKNOWN_SYMBOL_ID)</b>
+<i>443</i>&nbsp;        {
+<b class="fc"><i>444</i>&nbsp;            sid = findLocalSymbol(name);</b>
+<i>445</i>&nbsp;        }
+<i>446</i>&nbsp;
+<b class="fc"><i>447</i>&nbsp;        return sid;</b>
+<i>448</i>&nbsp;    }
+<i>449</i>&nbsp;
+<i>450</i>&nbsp;    private int findLocalSymbol(String name)
+<i>451</i>&nbsp;    {
+<i>452</i>&nbsp;        Integer isid;
+<b class="fc"><i>453</i>&nbsp;        synchronized (this)</b>
+<i>454</i>&nbsp;        {
+<b class="fc"><i>455</i>&nbsp;            isid = mySymbolsMap.get(name);</b>
+<b class="fc"><i>456</i>&nbsp;        }</b>
+<i>457</i>&nbsp;
+<b class="fc"><i>458</i>&nbsp;        if (isid != null)</b>
+<i>459</i>&nbsp;        {
+<b class="fc"><i>460</i>&nbsp;            assert isid != UNKNOWN_SYMBOL_ID;</b>
+<b class="fc"><i>461</i>&nbsp;            return isid;</b>
+<i>462</i>&nbsp;        }
+<b class="fc"><i>463</i>&nbsp;        return UNKNOWN_SYMBOL_ID;</b>
+<i>464</i>&nbsp;    }
+<i>465</i>&nbsp;
+<i>466</i>&nbsp;
+<i>467</i>&nbsp;    public synchronized SymbolToken intern(String text)
+<i>468</i>&nbsp;    {
+<b class="fc"><i>469</i>&nbsp;        SymbolToken is = find(text);</b>
+<b class="fc"><i>470</i>&nbsp;        if (is == null)</b>
+<i>471</i>&nbsp;        {
+<b class="fc"><i>472</i>&nbsp;            validateSymbol(text);</b>
+<b class="fc"><i>473</i>&nbsp;            int sid = putSymbol(text);</b>
+<b class="fc"><i>474</i>&nbsp;            is = new SymbolTokenImpl(text, sid);</b>
+<i>475</i>&nbsp;        }
+<b class="fc"><i>476</i>&nbsp;        return is;</b>
+<i>477</i>&nbsp;    }
+<i>478</i>&nbsp;
+<i>479</i>&nbsp;    public SymbolToken find(String text)
+<i>480</i>&nbsp;    {
+<b class="fc"><i>481</i>&nbsp;        text.getClass(); // fast null check</b>
+<i>482</i>&nbsp;
+<i>483</i>&nbsp;        // Look in system then imports
+<b class="fc"><i>484</i>&nbsp;        SymbolToken symTok = myImportsList.find(text);</b>
+<i>485</i>&nbsp;
+<i>486</i>&nbsp;        // Look in local symbols
+<b class="fc"><i>487</i>&nbsp;        if (symTok == null)</b>
+<i>488</i>&nbsp;        {
+<i>489</i>&nbsp;            Integer  sid;
+<i>490</i>&nbsp;            String[] names;
+<b class="fc"><i>491</i>&nbsp;            synchronized (this)</b>
+<i>492</i>&nbsp;            {
+<b class="fc"><i>493</i>&nbsp;                sid = mySymbolsMap.get(text);</b>
+<b class="fc"><i>494</i>&nbsp;                names = mySymbolNames;</b>
+<b class="fc"><i>495</i>&nbsp;            }</b>
+<i>496</i>&nbsp;
+<b class="fc"><i>497</i>&nbsp;            if (sid != null)</b>
+<i>498</i>&nbsp;            {
+<b class="fc"><i>499</i>&nbsp;                int offset = sid - myFirstLocalSid;</b>
+<b class="fc"><i>500</i>&nbsp;                String internedText = names[offset];</b>
+<b class="fc"><i>501</i>&nbsp;                assert internedText != null;</b>
+<b class="fc"><i>502</i>&nbsp;                symTok = new SymbolTokenImpl(internedText, sid);</b>
+<i>503</i>&nbsp;            }
+<i>504</i>&nbsp;        }
+<i>505</i>&nbsp;
+<b class="fc"><i>506</i>&nbsp;        return symTok;</b>
+<i>507</i>&nbsp;    }
+<i>508</i>&nbsp;
+<i>509</i>&nbsp;    private static final void validateSymbol(String name)
+<i>510</i>&nbsp;    {
+<b class="fc"><i>511</i>&nbsp;        if (name == null)</b>
+<i>512</i>&nbsp;        {
+<b class="nc"><i>513</i>&nbsp;            throw new IllegalArgumentException(&quot;symbols must not be null&quot;);</b>
+<i>514</i>&nbsp;        }
+<b class="fc"><i>515</i>&nbsp;        for (int i = 0; i &lt; name.length(); ++i)</b>
+<i>516</i>&nbsp;        {
+<b class="fc"><i>517</i>&nbsp;            int c = name.charAt(i);</b>
+<b class="fc"><i>518</i>&nbsp;            if (c &gt;= 0xD800 &amp;&amp; c &lt;= 0xDFFF)</b>
+<i>519</i>&nbsp;            {
+<b class="fc"><i>520</i>&nbsp;                if (c &gt;= 0xDC00)</b>
+<i>521</i>&nbsp;                {
+<b class="fc"><i>522</i>&nbsp;                    String message = &quot;unpaired trailing surrogate in symbol &quot; +</b>
+<i>523</i>&nbsp;                            &quot;name at position &quot; + i;
+<b class="fc"><i>524</i>&nbsp;                    throw new IllegalArgumentException(message);</b>
+<i>525</i>&nbsp;                }
+<b class="fc"><i>526</i>&nbsp;                ++i;</b>
+<b class="fc"><i>527</i>&nbsp;                if (i == name.length())</b>
+<i>528</i>&nbsp;                {
+<b class="fc"><i>529</i>&nbsp;                    String message = &quot;unmatched leading surrogate in symbol &quot; +</b>
+<i>530</i>&nbsp;                            &quot;name at position &quot; + i;
+<b class="fc"><i>531</i>&nbsp;                    throw new IllegalArgumentException(message);</b>
+<i>532</i>&nbsp;                }
+<b class="fc"><i>533</i>&nbsp;                c = name.charAt(i);</b>
+<b class="fc"><i>534</i>&nbsp;                if (c &lt; 0xDC00 || c &gt; 0xDFFF)</b>
+<i>535</i>&nbsp;                {
+<b class="fc"><i>536</i>&nbsp;                    String message = &quot;unmatched leading surrogate in symbol &quot; +</b>
+<i>537</i>&nbsp;                            &quot;name at position &quot; + i;
+<b class="fc"><i>538</i>&nbsp;                    throw new IllegalArgumentException(message);</b>
+<i>539</i>&nbsp;                }
+<i>540</i>&nbsp;            }
+<i>541</i>&nbsp;        }
+<b class="fc"><i>542</i>&nbsp;    }</b>
+<i>543</i>&nbsp;
+<i>544</i>&nbsp;    /**
+<i>545</i>&nbsp;     * NOT SYNCHRONIZED! Call within constructor or from synch&#39;d method.
+<i>546</i>&nbsp;     */
+<i>547</i>&nbsp;    int putSymbol(String symbolName)
+<i>548</i>&nbsp;    {
+<i>549</i>&nbsp;
+<b class="fc"><i>550</i>&nbsp;        if (isReadOnly)</b>
+<i>551</i>&nbsp;        {
+<b class="fc"><i>552</i>&nbsp;            throw new ReadOnlyValueException(SymbolTable.class);</b>
+<i>553</i>&nbsp;        }
+<i>554</i>&nbsp;
+<b class="fc"><i>555</i>&nbsp;        if (mySymbolsCount == mySymbolNames.length)</b>
+<i>556</i>&nbsp;        {
+<b class="fc"><i>557</i>&nbsp;            int newlen = mySymbolsCount * 2;</b>
+<b class="fc"><i>558</i>&nbsp;            if (newlen &lt; DEFAULT_CAPACITY)</b>
+<i>559</i>&nbsp;            {
+<b class="fc"><i>560</i>&nbsp;                newlen = DEFAULT_CAPACITY;</b>
+<i>561</i>&nbsp;            }
+<b class="fc"><i>562</i>&nbsp;            String[] temp = new String[newlen];</b>
+<b class="fc"><i>563</i>&nbsp;            System.arraycopy(mySymbolNames, 0, temp, 0, mySymbolsCount);</b>
+<b class="fc"><i>564</i>&nbsp;            mySymbolNames = temp;</b>
+<i>565</i>&nbsp;        }
+<i>566</i>&nbsp;
+<b class="fc"><i>567</i>&nbsp;        int sid = -1;</b>
+<b class="fc"><i>568</i>&nbsp;        if (symbolName != null)</b>
+<i>569</i>&nbsp;        {
+<b class="fc"><i>570</i>&nbsp;            sid = mySymbolsCount + myFirstLocalSid;</b>
+<b class="fc"><i>571</i>&nbsp;            assert sid == getMaxId() + 1;</b>
+<i>572</i>&nbsp;
+<b class="fc"><i>573</i>&nbsp;            putToMapIfNotThere(mySymbolsMap, symbolName, sid);</b>
+<i>574</i>&nbsp;        }
+<b class="fc"><i>575</i>&nbsp;        mySymbolNames[mySymbolsCount] = symbolName;</b>
+<b class="fc"><i>576</i>&nbsp;        mySymbolsCount++;</b>
+<i>577</i>&nbsp;
+<b class="fc"><i>578</i>&nbsp;        return sid;</b>
+<i>579</i>&nbsp;    }
+<i>580</i>&nbsp;
+<i>581</i>&nbsp;    private static void putToMapIfNotThere(Map&lt;String, Integer&gt; symbolsMap,
+<i>582</i>&nbsp;                                           String text,
+<i>583</i>&nbsp;                                           int sid)
+<i>584</i>&nbsp;    {
+<i>585</i>&nbsp;        // When there&#39;s a duplicate name, don&#39;t replace the lower sid.
+<i>586</i>&nbsp;        // This pattern avoids double-lookup in the normal happy case
+<i>587</i>&nbsp;        // and only requires a second lookup when there&#39;s a duplicate.
+<b class="fc"><i>588</i>&nbsp;        Integer extantSid = symbolsMap.put(text, sid);</b>
+<b class="fc"><i>589</i>&nbsp;        if (extantSid != null)</b>
+<i>590</i>&nbsp;        {
+<i>591</i>&nbsp;            // We always insert symbols with increasing sids
+<b class="nc"><i>592</i>&nbsp;            assert extantSid &lt; sid;</b>
+<b class="nc"><i>593</i>&nbsp;            symbolsMap.put(text, extantSid);</b>
+<i>594</i>&nbsp;        }
+<b class="fc"><i>595</i>&nbsp;    }</b>
+<i>596</i>&nbsp;
+<i>597</i>&nbsp;    public SymbolTable getSystemSymbolTable()
+<i>598</i>&nbsp;    {
+<b class="fc"><i>599</i>&nbsp;        return myImportsList.getSystemSymbolTable();</b>
+<i>600</i>&nbsp;    }
+<i>601</i>&nbsp;
+<i>602</i>&nbsp;    public SymbolTable[] getImportedTables()
+<i>603</i>&nbsp;    {
+<b class="fc"><i>604</i>&nbsp;        return myImportsList.getImportedTables();</b>
+<i>605</i>&nbsp;    }
+<i>606</i>&nbsp;
+<i>607</i>&nbsp;    /**
+<i>608</i>&nbsp;     * Returns the imported symbol tables without making a copy.
+<i>609</i>&nbsp;     * &lt;p&gt;
+<i>610</i>&nbsp;     * &lt;b&gt;Note:&lt;/b&gt; Callers must not modify the resulting SymbolTable array!
+<i>611</i>&nbsp;     * This will violate the immutability property of this class.
+<i>612</i>&nbsp;     *
+<i>613</i>&nbsp;     * @return
+<i>614</i>&nbsp;     *          the imported symtabs, as-is; the first element is a system
+<i>615</i>&nbsp;     *          symtab, the rest are non-system shared symtabs
+<i>616</i>&nbsp;     *
+<i>617</i>&nbsp;     * @see #getImportedTables()
+<i>618</i>&nbsp;     */
+<i>619</i>&nbsp;    SymbolTable[] getImportedTablesNoCopy()
+<i>620</i>&nbsp;    {
+<b class="fc"><i>621</i>&nbsp;        return myImportsList.getImportedTablesNoCopy();</b>
+<i>622</i>&nbsp;    }
+<i>623</i>&nbsp;
+<i>624</i>&nbsp;    public void writeTo(IonWriter writer) throws IOException
+<i>625</i>&nbsp;    {
+<b class="fc"><i>626</i>&nbsp;        IonReader reader = new SymbolTableReader(this);</b>
+<b class="fc"><i>627</i>&nbsp;        writer.writeValues(reader);</b>
+<b class="fc"><i>628</i>&nbsp;    }</b>
+<i>629</i>&nbsp;
+<i>630</i>&nbsp;    /**
+<i>631</i>&nbsp;     * Collects the necessary imports from the reader and catalog, and load
+<i>632</i>&nbsp;     * them into the passed-in {@code importsList}.
+<i>633</i>&nbsp;     */
+<i>634</i>&nbsp;    private static void prepImportsList(List&lt;SymbolTable&gt; importsList,
+<i>635</i>&nbsp;                                        IonReader reader,
+<i>636</i>&nbsp;                                        IonCatalog catalog)
+<i>637</i>&nbsp;    {
+<b class="fc"><i>638</i>&nbsp;        assert IMPORTS.equals(reader.getFieldName());</b>
+<i>639</i>&nbsp;
+<b class="fc"><i>640</i>&nbsp;        reader.stepIn();</b>
+<i>641</i>&nbsp;        IonType t;
+<b class="fc"><i>642</i>&nbsp;        while ((t = reader.next()) != null)</b>
+<i>643</i>&nbsp;        {
+<b class="fc"><i>644</i>&nbsp;            if (!reader.isNullValue() &amp;&amp; t == IonType.STRUCT)</b>
+<i>645</i>&nbsp;            {
+<b class="fc"><i>646</i>&nbsp;                SymbolTable importedTable = readOneImport(reader, catalog);</b>
+<i>647</i>&nbsp;
+<b class="fc"><i>648</i>&nbsp;                if (importedTable != null)</b>
+<i>649</i>&nbsp;                {
+<b class="fc"><i>650</i>&nbsp;                    importsList.add(importedTable);</b>
+<i>651</i>&nbsp;                }
+<b class="fc"><i>652</i>&nbsp;            }</b>
+<i>653</i>&nbsp;        }
+<b class="fc"><i>654</i>&nbsp;        reader.stepOut();</b>
+<b class="fc"><i>655</i>&nbsp;    }</b>
+<i>656</i>&nbsp;
+<i>657</i>&nbsp;    /**
+<i>658</i>&nbsp;     * Returns a {@link SymbolTable} representation of a single import
+<i>659</i>&nbsp;     * declaration from the passed-in reader and catalog.
+<i>660</i>&nbsp;     *
+<i>661</i>&nbsp;     * @return
+<i>662</i>&nbsp;     *          symbol table representation of the import; null if the import
+<i>663</i>&nbsp;     *          declaration is malformed
+<i>664</i>&nbsp;     */
+<i>665</i>&nbsp;    private static SymbolTable readOneImport(IonReader ionRep,
+<i>666</i>&nbsp;                                             IonCatalog catalog)
+<i>667</i>&nbsp;    {
+<b class="fc"><i>668</i>&nbsp;        assert (ionRep.getType() == IonType.STRUCT);</b>
+<i>669</i>&nbsp;
+<b class="fc"><i>670</i>&nbsp;        String name = null;</b>
+<b class="fc"><i>671</i>&nbsp;        int    version = -1;</b>
+<b class="fc"><i>672</i>&nbsp;        int    maxid = -1;</b>
+<i>673</i>&nbsp;
+<b class="fc"><i>674</i>&nbsp;        ionRep.stepIn();</b>
+<i>675</i>&nbsp;        IonType t;
+<b class="fc"><i>676</i>&nbsp;        while ((t = ionRep.next()) != null)</b>
+<i>677</i>&nbsp;        {
+<b class="fc"><i>678</i>&nbsp;            if (ionRep.isNullValue()) continue;</b>
+<i>679</i>&nbsp;
+<b class="fc"><i>680</i>&nbsp;            SymbolToken symTok = ionRep.getFieldNameSymbol();</b>
+<b class="fc"><i>681</i>&nbsp;            int field_id = symTok.getSid();</b>
+<b class="fc"><i>682</i>&nbsp;            if (field_id == UNKNOWN_SYMBOL_ID)</b>
+<i>683</i>&nbsp;            {
+<i>684</i>&nbsp;                // this is a user defined reader or a pure DOM
+<i>685</i>&nbsp;                // we fall back to text here
+<b class="nc"><i>686</i>&nbsp;                final String fieldName = ionRep.getFieldName();</b>
+<b class="nc"><i>687</i>&nbsp;                field_id = getSidForSymbolTableField(fieldName);</b>
+<i>688</i>&nbsp;            }
+<b class="fc"><i>689</i>&nbsp;            switch(field_id)</b>
+<i>690</i>&nbsp;            {
+<i>691</i>&nbsp;                case NAME_SID:
+<b class="fc"><i>692</i>&nbsp;                    if (t == IonType.STRING)</b>
+<i>693</i>&nbsp;                    {
+<b class="fc"><i>694</i>&nbsp;                        name = ionRep.stringValue();</b>
+<i>695</i>&nbsp;                    }
+<i>696</i>&nbsp;                    break;
+<i>697</i>&nbsp;                case VERSION_SID:
+<b class="fc"><i>698</i>&nbsp;                    if (t == IonType.INT)</b>
+<i>699</i>&nbsp;                    {
+<b class="fc"><i>700</i>&nbsp;                        version = ionRep.intValue();</b>
+<i>701</i>&nbsp;                    }
+<i>702</i>&nbsp;                    break;
+<i>703</i>&nbsp;                case MAX_ID_SID:
+<b class="fc"><i>704</i>&nbsp;                    if (t == IonType.INT)</b>
+<i>705</i>&nbsp;                    {
+<b class="fc"><i>706</i>&nbsp;                        maxid = ionRep.intValue();</b>
+<i>707</i>&nbsp;                    }
+<i>708</i>&nbsp;                    break;
+<i>709</i>&nbsp;                default:
+<i>710</i>&nbsp;                    // we just ignore anything else as &quot;open content&quot;
+<i>711</i>&nbsp;                    break;
+<i>712</i>&nbsp;            }
+<b class="fc"><i>713</i>&nbsp;        }</b>
+<b class="fc"><i>714</i>&nbsp;        ionRep.stepOut();</b>
+<i>715</i>&nbsp;
+<i>716</i>&nbsp;        // Ignore import clauses with malformed name field.
+<b class="fc"><i>717</i>&nbsp;        if (name == null || name.length() == 0 || name.equals(ION))</b>
+<i>718</i>&nbsp;        {
+<b class="fc"><i>719</i>&nbsp;            return null;</b>
+<i>720</i>&nbsp;        }
+<i>721</i>&nbsp;
+<b class="fc"><i>722</i>&nbsp;        if (version &lt; 1)</b>
+<i>723</i>&nbsp;        {
+<b class="nc"><i>724</i>&nbsp;            version = 1;</b>
+<i>725</i>&nbsp;        }
+<i>726</i>&nbsp;
+<b class="fc"><i>727</i>&nbsp;        SymbolTable itab = null;</b>
+<b class="fc"><i>728</i>&nbsp;        if (catalog != null)</b>
+<i>729</i>&nbsp;        {
+<b class="fc"><i>730</i>&nbsp;            itab = catalog.getTable(name, version);</b>
+<i>731</i>&nbsp;        }
+<b class="fc"><i>732</i>&nbsp;        if (maxid &lt; 0)</b>
+<i>733</i>&nbsp;        {
+<b class="fc"><i>734</i>&nbsp;            if (itab == null || version != itab.getVersion())</b>
+<i>735</i>&nbsp;            {
+<b class="fc"><i>736</i>&nbsp;                String message =</b>
+<i>737</i>&nbsp;                    &quot;Import of shared table &quot;
+<b class="fc"><i>738</i>&nbsp;                        + IonTextUtils.printString(name)</b>
+<i>739</i>&nbsp;                        + &quot; lacks a valid max_id field, but an exact match was not&quot;
+<i>740</i>&nbsp;                        + &quot; found in the catalog&quot;;
+<b class="fc"><i>741</i>&nbsp;                if (itab != null)</b>
+<i>742</i>&nbsp;                {
+<b class="nc"><i>743</i>&nbsp;                    message += &quot; (found version &quot; + itab.getVersion() + &quot;)&quot;;</b>
+<i>744</i>&nbsp;                }
+<i>745</i>&nbsp;                // TODO custom exception
+<b class="fc"><i>746</i>&nbsp;                throw new IonException(message);</b>
+<i>747</i>&nbsp;            }
+<i>748</i>&nbsp;
+<i>749</i>&nbsp;            // Exact match is found, but max_id is undefined in import
+<i>750</i>&nbsp;            // declaration, set max_id to largest sid of shared symtab
+<b class="fc"><i>751</i>&nbsp;            maxid = itab.getMaxId();</b>
+<i>752</i>&nbsp;        }
+<i>753</i>&nbsp;
+<b class="fc"><i>754</i>&nbsp;        if (itab == null)</b>
+<i>755</i>&nbsp;        {
+<b class="fc"><i>756</i>&nbsp;            assert maxid &gt;= 0;</b>
+<i>757</i>&nbsp;
+<i>758</i>&nbsp;            // Construct substitute table with max_id undefined symbols
+<b class="fc"><i>759</i>&nbsp;            itab = new SubstituteSymbolTable(name, version, maxid);</b>
+<i>760</i>&nbsp;        }
+<b class="fc"><i>761</i>&nbsp;        else if (itab.getVersion() != version || itab.getMaxId() != maxid)</b>
+<i>762</i>&nbsp;        {
+<i>763</i>&nbsp;            // A match was found BUT specs are not an exact match
+<i>764</i>&nbsp;            // Construct a substitute with correct specs, containing the
+<i>765</i>&nbsp;            // original import table that was found
+<b class="fc"><i>766</i>&nbsp;            itab = new SubstituteSymbolTable(itab, version, maxid);</b>
+<i>767</i>&nbsp;        }
+<i>768</i>&nbsp;
+<b class="fc"><i>769</i>&nbsp;        return itab;</b>
+<i>770</i>&nbsp;    }
+<i>771</i>&nbsp;
+<i>772</i>&nbsp;    /**
+<i>773</i>&nbsp;     * Generate the string representation of a symbol with an unknown id.
+<i>774</i>&nbsp;     * @param id must be a value greater than zero.
+<i>775</i>&nbsp;     * @return the symbol name, of the form &lt;code&gt;$NNN&lt;/code&gt; where NNN is the
+<i>776</i>&nbsp;     * integer rendering of &lt;code&gt;id&lt;/code&gt;
+<i>777</i>&nbsp;     */
+<i>778</i>&nbsp;    public static String unknownSymbolName(int id)
+<i>779</i>&nbsp;    {
+<b class="nc"><i>780</i>&nbsp;        assert id &gt; 0;</b>
+<b class="nc"><i>781</i>&nbsp;        return &quot;$&quot; + id;</b>
+<i>782</i>&nbsp;    }
+<i>783</i>&nbsp;
+<i>784</i>&nbsp;    @Override
+<i>785</i>&nbsp;    public String toString()
+<i>786</i>&nbsp;    {
+<b class="nc"><i>787</i>&nbsp;        return &quot;(LocalSymbolTable max_id:&quot; + getMaxId() + &#39;)&#39;;</b>
+<i>788</i>&nbsp;    }
+<i>789</i>&nbsp;
+<i>790</i>&nbsp;    private static final class SymbolIterator
+<i>791</i>&nbsp;        implements Iterator&lt;String&gt;
+<i>792</i>&nbsp;    {
+<i>793</i>&nbsp;        private final String[] mySymbolNames;
+<i>794</i>&nbsp;        private final int      mySymbolsCount;
+<b class="fc"><i>795</i>&nbsp;        private int            _idx = 0;</b>
+<i>796</i>&nbsp;
+<i>797</i>&nbsp;        SymbolIterator(String[] symbolNames, int count)
+<b class="fc"><i>798</i>&nbsp;        {</b>
+<b class="fc"><i>799</i>&nbsp;            mySymbolNames = symbolNames;</b>
+<b class="fc"><i>800</i>&nbsp;            mySymbolsCount = count;</b>
+<b class="fc"><i>801</i>&nbsp;        }</b>
+<i>802</i>&nbsp;
+<i>803</i>&nbsp;        public boolean hasNext()
+<i>804</i>&nbsp;        {
+<b class="fc"><i>805</i>&nbsp;            if (_idx &lt; mySymbolsCount)</b>
+<i>806</i>&nbsp;            {
+<b class="fc"><i>807</i>&nbsp;                return true;</b>
+<i>808</i>&nbsp;            }
+<b class="fc"><i>809</i>&nbsp;            return false;</b>
+<i>810</i>&nbsp;        }
+<i>811</i>&nbsp;
+<i>812</i>&nbsp;        public String next()
+<i>813</i>&nbsp;        {
+<b class="fc"><i>814</i>&nbsp;            if (_idx &lt; mySymbolsCount)</b>
+<i>815</i>&nbsp;            {
+<b class="fc"><i>816</i>&nbsp;                return mySymbolNames[_idx++];</b>
+<i>817</i>&nbsp;            }
+<b class="nc"><i>818</i>&nbsp;            throw new NoSuchElementException();</b>
+<i>819</i>&nbsp;        }
+<i>820</i>&nbsp;
+<i>821</i>&nbsp;        public void remove()
+<i>822</i>&nbsp;        {
+<b class="nc"><i>823</i>&nbsp;            throw new UnsupportedOperationException();</b>
+<i>824</i>&nbsp;        }
+<i>825</i>&nbsp;    }
+<i>826</i>&nbsp;
+<i>827</i>&nbsp;    /**
+<i>828</i>&nbsp;     * This method, and the context from which it is called, assumes that the
+<i>829</i>&nbsp;     * symtabs are not being mutated by another thread.
+<i>830</i>&nbsp;     * Therefore it doesn&#39;t use synchronization.
+<i>831</i>&nbsp;     */
+<i>832</i>&nbsp;    boolean symtabExtends(SymbolTable other)
+<i>833</i>&nbsp;    {
+<i>834</i>&nbsp;        // Throws ClassCastException if other isn&#39;t a local symtab
+<b class="fc"><i>835</i>&nbsp;        LocalSymbolTable subset = (LocalSymbolTable) other;</b>
+<i>836</i>&nbsp;
+<i>837</i>&nbsp;        // Gather snapshots of each LST&#39;s data, so we don&#39;t
+<i>838</i>&nbsp;
+<i>839</i>&nbsp;        // Superset must have same/more known symbols than subset.
+<b class="fc"><i>840</i>&nbsp;        if (getMaxId() &lt; subset.getMaxId()) return false;</b>
+<i>841</i>&nbsp;
+<i>842</i>&nbsp;        // TODO amzn/ion-java/issues/18 Currently, we check imports by their refs. which
+<i>843</i>&nbsp;        //      might be overly strict; imports which are not the same ref.
+<i>844</i>&nbsp;        //      but have the same semantic states fails the extension check.
+<b class="fc"><i>845</i>&nbsp;        if (! myImportsList.equalImports(subset.myImportsList))</b>
+<b class="nc"><i>846</i>&nbsp;            return false;</b>
+<i>847</i>&nbsp;
+<b class="fc"><i>848</i>&nbsp;        int subLocalSymbolCount = subset.mySymbolsCount;</b>
+<i>849</i>&nbsp;
+<i>850</i>&nbsp;        // Superset extends subset if subset doesn&#39;t have any declared symbols.
+<b class="fc"><i>851</i>&nbsp;        if (subLocalSymbolCount == 0) return true;</b>
+<i>852</i>&nbsp;
+<i>853</i>&nbsp;        // Superset must have same/more declared (local) symbols than subset.
+<b class="fc"><i>854</i>&nbsp;        if (mySymbolsCount &lt; subLocalSymbolCount) return false;</b>
+<i>855</i>&nbsp;
+<b class="fc"><i>856</i>&nbsp;        String[] subsetSymbols = subset.mySymbolNames;</b>
+<i>857</i>&nbsp;
+<i>858</i>&nbsp;        // Before we go through the expensive iteration from the front,
+<i>859</i>&nbsp;        // check the last (largest) declared symbol in subset beforehand
+<b class="fc"><i>860</i>&nbsp;        if (! safeEquals(mySymbolNames[subLocalSymbolCount- 1],</b>
+<i>861</i>&nbsp;                                  subsetSymbols[subLocalSymbolCount- 1]))
+<i>862</i>&nbsp;        {
+<b class="nc"><i>863</i>&nbsp;            return false;</b>
+<i>864</i>&nbsp;        }
+<i>865</i>&nbsp;
+<i>866</i>&nbsp;        // Now, we iterate from the first declared symbol, note that the
+<i>867</i>&nbsp;        // iteration below is O(n)!
+<b class="fc"><i>868</i>&nbsp;        for (int i = 0; i &lt; subLocalSymbolCount - 1; i++)</b>
+<i>869</i>&nbsp;        {
+<b class="fc"><i>870</i>&nbsp;            if (! safeEquals(mySymbolNames[i], subsetSymbols[i]))</b>
+<b class="nc"><i>871</i>&nbsp;                return false;</b>
+<i>872</i>&nbsp;        }
+<i>873</i>&nbsp;
+<b class="fc"><i>874</i>&nbsp;        return true;</b>
+<i>875</i>&nbsp;    }
+<i>876</i>&nbsp;
+<i>877</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

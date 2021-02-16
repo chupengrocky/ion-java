@@ -1,0 +1,103 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonBool</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonBool (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonBool</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;/**
+<i>21</i>&nbsp; * An Ion &lt;code&gt;bool&lt;/code&gt; value.
+<i>22</i>&nbsp; * &lt;p&gt;
+<i>23</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>24</i>&nbsp; * code outside of this library.
+<i>25</i>&nbsp; */
+<i>26</i>&nbsp;public interface IonBool
+<i>27</i>&nbsp;    extends IonValue
+<i>28</i>&nbsp;{
+<i>29</i>&nbsp;    /**
+<i>30</i>&nbsp;     * Gets the value of this Ion &lt;code&gt;bool&lt;/code&gt; as a Java
+<i>31</i>&nbsp;     * &lt;code&gt;boolean&lt;/code&gt; value.
+<i>32</i>&nbsp;     *
+<i>33</i>&nbsp;     * @return the boolean value.
+<i>34</i>&nbsp;     * @throws NullValueException if &lt;code&gt;this.isNullValue()&lt;/code&gt;.
+<i>35</i>&nbsp;     */
+<i>36</i>&nbsp;    public boolean booleanValue()
+<i>37</i>&nbsp;        throws NullValueException;
+<i>38</i>&nbsp;
+<i>39</i>&nbsp;    /**
+<i>40</i>&nbsp;     * Sets this instance to have a specific value.
+<i>41</i>&nbsp;     *
+<i>42</i>&nbsp;     * @param b the new value for this &lt;code&gt;bool&lt;/code&gt;.
+<i>43</i>&nbsp;     */
+<i>44</i>&nbsp;    public void setValue(boolean b);
+<i>45</i>&nbsp;
+<i>46</i>&nbsp;    /**
+<i>47</i>&nbsp;     * Sets this instance to have a specific value.
+<i>48</i>&nbsp;     *
+<i>49</i>&nbsp;     * @param b the new value for this &lt;code&gt;bool&lt;/code&gt;;
+<i>50</i>&nbsp;     * may be &lt;code&gt;null&lt;/code&gt; to make this &lt;code&gt;null.bool&lt;/code&gt;.
+<i>51</i>&nbsp;     */
+<i>52</i>&nbsp;    public void setValue(Boolean b);
+<i>53</i>&nbsp;
+<i>54</i>&nbsp;    public IonBool clone()
+<i>55</i>&nbsp;        throws UnknownSymbolException;
+<i>56</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

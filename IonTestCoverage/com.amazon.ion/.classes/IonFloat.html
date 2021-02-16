@@ -1,0 +1,158 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonFloat</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonFloat (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonFloat</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;import java.math.BigDecimal;
+<i>18</i>&nbsp;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;/**
+<i>21</i>&nbsp; * An Ion &lt;code&gt;float&lt;/code&gt; value.
+<i>22</i>&nbsp; * &lt;p&gt;
+<i>23</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>24</i>&nbsp; * code outside of this library.
+<i>25</i>&nbsp; *
+<i>26</i>&nbsp; * &lt;h2&gt;Precision Problems&lt;/h2&gt;
+<i>27</i>&nbsp; *
+<i>28</i>&nbsp; * Use of binary floating-point numbers is prone to countless problems.
+<i>29</i>&nbsp; * The vast majority of applications should use {@code decimal} values instead.
+<i>30</i>&nbsp; * Please read the
+<i>31</i>&nbsp; * &lt;a href=&quot;http://speleotrove.com/decimal/decifaq1.html&quot;&gt;Decimal Arithmetic
+<i>32</i>&nbsp; * FAQ&lt;/a&gt; for horror stories.
+<i>33</i>&nbsp; * &lt;p&gt;
+<i>34</i>&nbsp; * If you have any doubt whatsoever on whether you should use {@code float} or
+<i>35</i>&nbsp; * {@code decimal}, then you should use {@code decimal}.
+<i>36</i>&nbsp; *
+<i>37</i>&nbsp; * @see IonDecimal
+<i>38</i>&nbsp; */
+<i>39</i>&nbsp;public interface IonFloat
+<i>40</i>&nbsp;    extends IonValue
+<i>41</i>&nbsp;{
+<i>42</i>&nbsp;    /**
+<i>43</i>&nbsp;     * Gets the value of this Ion &lt;code&gt;float&lt;/code&gt; as a Java
+<i>44</i>&nbsp;     * &lt;code&gt;float&lt;/code&gt; value.
+<i>45</i>&nbsp;     *
+<i>46</i>&nbsp;     * @return the float value.
+<i>47</i>&nbsp;     * @throws NullValueException if &lt;code&gt;this.isNullValue()&lt;/code&gt;.
+<i>48</i>&nbsp;     */
+<i>49</i>&nbsp;    public float floatValue()
+<i>50</i>&nbsp;        throws NullValueException;
+<i>51</i>&nbsp;
+<i>52</i>&nbsp;    /**
+<i>53</i>&nbsp;     * Gets the value of this Ion &lt;code&gt;float&lt;/code&gt; as a Java
+<i>54</i>&nbsp;     * &lt;code&gt;double&lt;/code&gt; value.
+<i>55</i>&nbsp;     *
+<i>56</i>&nbsp;     * @return the double value.
+<i>57</i>&nbsp;     * @throws NullValueException if &lt;code&gt;this.isNullValue()&lt;/code&gt;.
+<i>58</i>&nbsp;     */
+<i>59</i>&nbsp;    public double doubleValue()
+<i>60</i>&nbsp;        throws NullValueException;
+<i>61</i>&nbsp;
+<i>62</i>&nbsp;
+<i>63</i>&nbsp;    /**
+<i>64</i>&nbsp;     * Gets the value of this Ion {@code float} as a Java {@link BigDecimal}.
+<i>65</i>&nbsp;     * This follows the behavior of {@link BigDecimal#valueOf(double)}. It&#39;s
+<i>66</i>&nbsp;     * recommended to call {@link IonFloat#isNumericValue()} before calling
+<i>67</i>&nbsp;     * this method.
+<i>68</i>&nbsp;     *
+<i>69</i>&nbsp;     * @return the {@link BigDecimal} value, or {@code null} if
+<i>70</i>&nbsp;     * {@code this.isNullValue()}.
+<i>71</i>&nbsp;     *
+<i>72</i>&nbsp;     * @throws NumberFormatException if this value is {@code nan},
+<i>73</i>&nbsp;     * {@code +inf}, or {@code -inf}, because {@link BigDecimal} cannot
+<i>74</i>&nbsp;     * represent those values.
+<i>75</i>&nbsp;     */
+<i>76</i>&nbsp;    public BigDecimal bigDecimalValue()
+<i>77</i>&nbsp;        throws NullValueException;
+<i>78</i>&nbsp;
+<i>79</i>&nbsp;    /**
+<i>80</i>&nbsp;     * Sets the value of this element.
+<i>81</i>&nbsp;     */
+<i>82</i>&nbsp;    public void setValue(float value);
+<i>83</i>&nbsp;
+<i>84</i>&nbsp;    /**
+<i>85</i>&nbsp;     * Sets the value of this element.
+<i>86</i>&nbsp;     */
+<i>87</i>&nbsp;    public void setValue(double value);
+<i>88</i>&nbsp;
+<i>89</i>&nbsp;    /**
+<i>90</i>&nbsp;     * Sets the value of this element.
+<i>91</i>&nbsp;     * Since Ion {@code float}s are essentially Java {@code double}s,
+<i>92</i>&nbsp;     * this performs a narrowing conversion as described by
+<i>93</i>&nbsp;     * {@link BigDecimal#doubleValue()}.
+<i>94</i>&nbsp;     *
+<i>95</i>&nbsp;     * @param value the new value of this float;
+<i>96</i>&nbsp;     * may be &lt;code&gt;null&lt;/code&gt; to make this &lt;code&gt;null.float&lt;/code&gt;.
+<i>97</i>&nbsp;     */
+<i>98</i>&nbsp;    public void setValue(BigDecimal value);
+<i>99</i>&nbsp;
+<i>100</i>&nbsp;    /**
+<i>101</i>&nbsp;     * Determines whether this value is numeric. Returns true if this value
+<i>102</i>&nbsp;     * is none of {@code null}, {@code nan}, {@code +inf}, and {@code -inf},
+<i>103</i>&nbsp;     * and false if it is any of them.
+<i>104</i>&nbsp;     *
+<i>105</i>&nbsp;     * @return a checked condition whether this value is numeric.
+<i>106</i>&nbsp;     */
+<i>107</i>&nbsp;    public boolean isNumericValue();
+<i>108</i>&nbsp;
+<i>109</i>&nbsp;    public IonFloat clone()
+<i>110</i>&nbsp;        throws UnknownSymbolException;
+<i>111</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

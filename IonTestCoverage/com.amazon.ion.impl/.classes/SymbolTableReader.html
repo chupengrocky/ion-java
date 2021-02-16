@@ -1,0 +1,1546 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: SymbolTableReader</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl</a> ]
+</div>
+
+<h1>Coverage Summary for Class: SymbolTableReader (com.amazon.ion.impl)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SymbolTableReader</td>
+<td class="coverageStat">
+  <span class="percent">
+    59.6%
+  </span>
+  <span class="absValue">
+    (31/ 52)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57%
+  </span>
+  <span class="absValue">
+    (213/ 374)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">SymbolTableReader$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">SymbolTableReader$Op</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    61.1%
+  </span>
+  <span class="absValue">
+    (33/ 54)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    57.2%
+  </span>
+  <span class="absValue">
+    (215/ 376)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;
+<i>19</i>&nbsp;import static com.amazon.ion.SystemSymbols.IMPORTS;
+<i>20</i>&nbsp;import static com.amazon.ion.SystemSymbols.IMPORTS_SID;
+<i>21</i>&nbsp;import static com.amazon.ion.SystemSymbols.ION_SHARED_SYMBOL_TABLE;
+<i>22</i>&nbsp;import static com.amazon.ion.SystemSymbols.ION_SHARED_SYMBOL_TABLE_SID;
+<i>23</i>&nbsp;import static com.amazon.ion.SystemSymbols.ION_SYMBOL_TABLE;
+<i>24</i>&nbsp;import static com.amazon.ion.SystemSymbols.ION_SYMBOL_TABLE_SID;
+<i>25</i>&nbsp;import static com.amazon.ion.SystemSymbols.MAX_ID;
+<i>26</i>&nbsp;import static com.amazon.ion.SystemSymbols.MAX_ID_SID;
+<i>27</i>&nbsp;import static com.amazon.ion.SystemSymbols.NAME;
+<i>28</i>&nbsp;import static com.amazon.ion.SystemSymbols.NAME_SID;
+<i>29</i>&nbsp;import static com.amazon.ion.SystemSymbols.SYMBOLS;
+<i>30</i>&nbsp;import static com.amazon.ion.SystemSymbols.SYMBOLS_SID;
+<i>31</i>&nbsp;import static com.amazon.ion.SystemSymbols.VERSION;
+<i>32</i>&nbsp;import static com.amazon.ion.SystemSymbols.VERSION_SID;
+<i>33</i>&nbsp;import static com.amazon.ion.impl._Private_Utils.newSymbolToken;
+<i>34</i>&nbsp;
+<i>35</i>&nbsp;import com.amazon.ion.Decimal;
+<i>36</i>&nbsp;import com.amazon.ion.IntegerSize;
+<i>37</i>&nbsp;import com.amazon.ion.IonException;
+<i>38</i>&nbsp;import com.amazon.ion.IonReader;
+<i>39</i>&nbsp;import com.amazon.ion.IonType;
+<i>40</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>41</i>&nbsp;import com.amazon.ion.SymbolToken;
+<i>42</i>&nbsp;import com.amazon.ion.Timestamp;
+<i>43</i>&nbsp;import java.io.IOException;
+<i>44</i>&nbsp;import java.math.BigDecimal;
+<i>45</i>&nbsp;import java.math.BigInteger;
+<i>46</i>&nbsp;import java.util.Arrays;
+<i>47</i>&nbsp;import java.util.Date;
+<i>48</i>&nbsp;import java.util.Iterator;
+<i>49</i>&nbsp;
+<i>50</i>&nbsp;/**
+<i>51</i>&nbsp; *   This is a reader that traverses a {@link SymbolTable}
+<i>52</i>&nbsp; *   and returns the contents as if the table was serialized
+<i>53</i>&nbsp; *   in Ion in a standard fashion (in fact this serialization
+<i>54</i>&nbsp; *   defines the &quot;standard fashion&quot;).
+<i>55</i>&nbsp; *
+<i>56</i>&nbsp; *   This does not support open content in symbol tables and
+<i>57</i>&nbsp; *   should.  Support for open content will require additional
+<i>58</i>&nbsp; *   data be kept in the {@link SymbolTable}, probably as an
+<i>59</i>&nbsp; *   IonStruct or an IonReader or binary buffer.
+<i>60</i>&nbsp; *
+<i>61</i>&nbsp; *   The reader uses the _state member to track its progress
+<i>62</i>&nbsp; *   through the members of the outer struct, the import
+<i>63</i>&nbsp; *   list and the symbol list.  It used _idx to track its
+<i>64</i>&nbsp; *   progress thought the elements of the import list and
+<i>65</i>&nbsp; *   the elements of the symbol list.
+<i>66</i>&nbsp; *
+<i>67</i>&nbsp; *
+<i>68</i>&nbsp;
+<i>69</i>&nbsp;    These are the states in a local symbol table:
+<i>70</i>&nbsp;
+<i>71</i>&nbsp;        &lt;S_BOF&gt;
+<i>72</i>&nbsp;        &lt;S_STRUCT&gt;
+<i>73</i>&nbsp;        $ion_symbol_table:: {
+<i>74</i>&nbsp;          &lt;S_IN_STRUCT&gt;
+<i>75</i>&nbsp;          &lt;S_MAX_ID&gt;
+<i>76</i>&nbsp;            max_id:3,
+<i>77</i>&nbsp;          &lt;S_SYMBOL_LIST&gt;
+<i>78</i>&nbsp;            symbols:[
+<i>79</i>&nbsp;          &lt;S_IN_SYMBOLS&gt;
+<i>80</i>&nbsp;          &lt;S_SYMBOL&gt;
+<i>81</i>&nbsp;              &quot;symbol1&quot;,
+<i>82</i>&nbsp;          &lt;S_SYMBOL&gt;
+<i>83</i>&nbsp;              &quot;symbol2&quot;,
+<i>84</i>&nbsp;          &lt;S_SYMBOL&gt;
+<i>85</i>&nbsp;              &quot;symbol3&quot;
+<i>86</i>&nbsp;          &lt;S_SYMBOL_LIST_CLOSE&gt;
+<i>87</i>&nbsp;            ]
+<i>88</i>&nbsp;          &lt;S_STRUCT_CLOSE&gt;
+<i>89</i>&nbsp;        }
+<i>90</i>&nbsp;        &lt;S_EOF&gt;
+<i>91</i>&nbsp;
+<i>92</i>&nbsp;    States for a shared symbol Table:
+<i>93</i>&nbsp;
+<i>94</i>&nbsp;        &lt;S_BOF&gt;
+<i>95</i>&nbsp;        &lt;S_STRUCT&gt;
+<i>96</i>&nbsp;            $ion_shared_symbol_table::{
+<i>97</i>&nbsp;          &lt;S_IN_STRUCT&gt;
+<i>98</i>&nbsp;          &lt;S_NAME&gt;
+<i>99</i>&nbsp;              name:&quot;mySharedTable&quot;,
+<i>100</i>&nbsp;          &lt;S_VERSION&gt;
+<i>101</i>&nbsp;              version:1,
+<i>102</i>&nbsp;          &lt;S_MAX_ID&gt;
+<i>103</i>&nbsp;              max_id:3,
+<i>104</i>&nbsp;          &lt;S_IMPORT_LIST&gt;
+<i>105</i>&nbsp;              imports:[
+<i>106</i>&nbsp;            &lt;S_IN_IMPORTS&gt;
+<i>107</i>&nbsp;            &lt;S_IMPORT_STRUCT&gt;
+<i>108</i>&nbsp;                {
+<i>109</i>&nbsp;              &lt;S_IN_IMPORT_STRUCT&gt;
+<i>110</i>&nbsp;              &lt;S_IMPORT_NAME&gt;
+<i>111</i>&nbsp;                  name:&quot;otherTable&quot;,
+<i>112</i>&nbsp;              &lt;S_IMPORT_VERSION&gt;
+<i>113</i>&nbsp;                  version:2,
+<i>114</i>&nbsp;              &lt;S_IMPORT_MAX_ID&gt;
+<i>115</i>&nbsp;                  max_id:192
+<i>116</i>&nbsp;              &lt;S_IMPORT_STRUCT_CLOSE&gt;
+<i>117</i>&nbsp;                },
+<i>118</i>&nbsp;            &lt;S_IMPORT_STRUCT&gt;
+<i>119</i>&nbsp;                {
+<i>120</i>&nbsp;              &lt;S_IN_IMPORT_STRUCT&gt;
+<i>121</i>&nbsp;              &lt;S_IMPORT_NAME&gt;
+<i>122</i>&nbsp;                  name:&quot;yetAnotherTable&quot;,
+<i>123</i>&nbsp;              &lt;S_IMPORT_VERSION&gt;
+<i>124</i>&nbsp;                  version:4,
+<i>125</i>&nbsp;              &lt;S_IMPORT_MAX_ID&gt;
+<i>126</i>&nbsp;                  max_id:34
+<i>127</i>&nbsp;              &lt;S_IMPORT_STRUCT_CLOSE&gt;
+<i>128</i>&nbsp;                },
+<i>129</i>&nbsp;            &lt;S_IMPORT_LIST_CLOSE&gt;
+<i>130</i>&nbsp;              ],
+<i>131</i>&nbsp;          &lt;S_AFTER_IMPORT_LIST&gt;  new
+<i>132</i>&nbsp;          &lt;S_SYMBOL_LIST&gt;
+<i>133</i>&nbsp;              symbols:[
+<i>134</i>&nbsp;            &lt;S_IN_SYMBOLS&gt;
+<i>135</i>&nbsp;            &lt;S_SYMBOL&gt;
+<i>136</i>&nbsp;                &quot;symbol1&quot;,
+<i>137</i>&nbsp;            &lt;S_SYMBOL&gt;
+<i>138</i>&nbsp;                &quot;symbol2&quot;,
+<i>139</i>&nbsp;            &lt;S_SYMBOL&gt;
+<i>140</i>&nbsp;                &quot;symbol3&quot;
+<i>141</i>&nbsp;            &lt;S_SYMBOL_LIST_CLOSE&gt;
+<i>142</i>&nbsp;              ]
+<i>143</i>&nbsp;          &lt;S_STRUCT_CLOSE&gt;
+<i>144</i>&nbsp;            }
+<i>145</i>&nbsp;        &lt;S_EOF&gt;
+<i>146</i>&nbsp;
+<i>147</i>&nbsp;
+<i>148</i>&nbsp;        Version 1.0 system symbol table:
+<i>149</i>&nbsp;
+<i>150</i>&nbsp;        &lt;S_BOF&gt;
+<i>151</i>&nbsp;        &lt;S_STRUCT&gt;
+<i>152</i>&nbsp;            $ion_symbol_table::{
+<i>153</i>&nbsp;        &lt;S_IN_STRUCT&gt;
+<i>154</i>&nbsp;        &lt;S_VERSION&gt;
+<i>155</i>&nbsp;              version:1,
+<i>156</i>&nbsp;        &lt;S_MAX_ID&gt;
+<i>157</i>&nbsp;              max_id:9,
+<i>158</i>&nbsp;        &lt;S_SYMBOL_LIST&gt;
+<i>159</i>&nbsp;              symbols:[
+<i>160</i>&nbsp;        &lt;S_IN_SYMBOLS&gt;
+<i>161</i>&nbsp;        &lt;S_SYMBOL&gt;
+<i>162</i>&nbsp;            &quot;$ion&quot;,
+<i>163</i>&nbsp;        &lt;S_SYMBOL&gt;
+<i>164</i>&nbsp;            &quot;$ion_1_0&quot;,
+<i>165</i>&nbsp;        &lt;S_SYMBOL&gt;
+<i>166</i>&nbsp;            &quot;$ion_symbol_table&quot;,
+<i>167</i>&nbsp;        &lt;S_SYMBOL&gt;
+<i>168</i>&nbsp;            &quot;name&quot;,
+<i>169</i>&nbsp;        &lt;S_SYMBOL&gt;
+<i>170</i>&nbsp;            &quot;version&quot;,
+<i>171</i>&nbsp;        &lt;S_SYMBOL&gt;
+<i>172</i>&nbsp;            &quot;imports&quot;,
+<i>173</i>&nbsp;        &lt;S_SYMBOL&gt;
+<i>174</i>&nbsp;            &quot;symbols&quot;,
+<i>175</i>&nbsp;        &lt;S_SYMBOL&gt;
+<i>176</i>&nbsp;            &quot;max_id&quot;,
+<i>177</i>&nbsp;        &lt;S_SYMBOL&gt;
+<i>178</i>&nbsp;            &quot;$ion_shared_symbol_table&quot;
+<i>179</i>&nbsp;        &lt;S_SYMBOL_LIST_CLOSE&gt;
+<i>180</i>&nbsp;              ]
+<i>181</i>&nbsp;        &lt;S_STRUCT_CLOSE&gt;
+<i>182</i>&nbsp;            }
+<i>183</i>&nbsp;        &lt;S_EOF&gt;
+<i>184</i>&nbsp;
+<i>185</i>&nbsp; */
+<i>186</i>&nbsp;
+<i>187</i>&nbsp;/*  --------------------------------------------------------------------------------
+<i>188</i>&nbsp;
+<i>189</i>&nbsp;Notes regarding the various states that may be encountered.
+<i>190</i>&nbsp;The reader depth is in parenthesis after the name
+<i>191</i>&nbsp;
+<i>192</i>&nbsp;state                      next()                  stepIn()                stepOut()                     container
+<i>193</i>&nbsp;------------------------   ---------------------   ---------------------   -------------------------     ---------
+<i>194</i>&nbsp;S_BOF(0)                 = S_STRUCT              | &lt;error&gt;                | &lt;error&gt;                    |           |
+<i>195</i>&nbsp;
+<i>196</i>&nbsp;S_STRUCT(0)              = S_EOF                 | S_IN_STRUCT            | &lt;error&gt;                    | true      |
+<i>197</i>&nbsp;
+<i>198</i>&nbsp;S_IN_STRUCT(1)           = S_NAME (load)         | &lt;error&gt;                | S_EOF                      |           |
+<i>199</i>&nbsp;            [if no name] : S_VERSION (load)      | &lt;error&gt;                | S_EOF                      |           |
+<i>200</i>&nbsp;             [if no ver] : S_MAX_ID (load)       | &lt;error&gt;                | S_EOF                      |           |
+<i>201</i>&nbsp;
+<i>202</i>&nbsp;S_NAME(1)                = S_VERSION (load)      | &lt;error&gt;                | S_EOF                      |           |
+<i>203</i>&nbsp;             [if no ver] : S_MAX_ID (load)       | &lt;error&gt;                | S_EOF                      |           |
+<i>204</i>&nbsp;
+<i>205</i>&nbsp;S_VERSION(1)             = S_MAX_ID (load)       | &lt;error&gt;                | S_EOF                      |           |
+<i>206</i>&nbsp;
+<i>207</i>&nbsp;S_MAX_ID(1)              = S_IMPORT_LIST (load)  | &lt;error&gt;                | S_EOF                      |           |
+<i>208</i>&nbsp;         [if no imports] : S_SYMBOL_LIST         | &lt;error&gt;                | S_EOF                      |           |
+<i>209</i>&nbsp;          [if no locals] : S_EOF                 | &lt;error&gt;                | S_EOF                      |           |
+<i>210</i>&nbsp;
+<i>211</i>&nbsp;S_IMPORT_LIST(1)         = S_SYMBOL_LIST (load)  | S_IN_IMPORTS           | S_EOF                      | true      |
+<i>212</i>&nbsp;          [if no locals] : S_EOF                 | &lt;error&gt;                | S_EOF                      |           |
+<i>213</i>&nbsp;
+<i>214</i>&nbsp;S_IN_IMPORTS(2)          = S_IMPORT_STRUCT       | &lt;error&gt;                | S_AFTER_IMPORT_LIST (load) |           |
+<i>215</i>&nbsp;    [if no more imports] : S_EOF                 | &lt;error&gt;                | S_AFTER_IMPORT_LIST (load) |           |
+<i>216</i>&nbsp;          [if no locals] : -------               | -------                | S_STRUCT_CLOSE             |           |
+<i>217</i>&nbsp;
+<i>218</i>&nbsp;S_IMPORT_STRUCT(2)       = S_IMPORT_STRUCT       | S_IN_IMPORT_STRUCT     | S_AFTER_IMPORT_LIST (load) | true      |
+<i>219</i>&nbsp;    [if no more imports] : S_IMPORT_STRUCT_CLOSE | &lt;error&gt;                | S_AFTER_IMPORT_LIST (load) |           |
+<i>220</i>&nbsp;          [if no locals] : -------               | -------                | S_STRUCT_CLOSE             |           |
+<i>221</i>&nbsp;
+<i>222</i>&nbsp;S_IN_IMPORT_STRUCT(3)    = S_IMPORT_NAME (load)  | &lt;error&gt;                | S_IMPORT_STRUCT            |           |
+<i>223</i>&nbsp;    [if no more imports] : -------               | -------                | S_IMPORT_STRUCT_CLOSE      |           |
+<i>224</i>&nbsp;
+<i>225</i>&nbsp;S_IMPORT_NAME(3)         = S_IMPORT_VERSION(load)| &lt;error&gt;                | S_IMPORT_STRUCT            |           |
+<i>226</i>&nbsp;    [if no more imports] : -------               | -------                | S_IMPORT_STRUCT_CLOSE      |           |
+<i>227</i>&nbsp;
+<i>228</i>&nbsp;S_IMPORT_VERSION(3)      = S_IMPORT_MAX_ID (load)| &lt;error&gt;                | S_IMPORT_STRUCT            |           |
+<i>229</i>&nbsp;    [if no more imports] : -------               | -------                | S_IMPORT_STRUCT_CLOSE      |           |
+<i>230</i>&nbsp;
+<i>231</i>&nbsp;S_IMPORT_MAX_ID(3)       = S_IMPORT_STRUCT_CLOSE | &lt;error&gt;                | S_IMPORT_STRUCT            |           |
+<i>232</i>&nbsp;    [if no more imports] : -------               | -------                | S_IMPORT_STRUCT_CLOSE      |           |
+<i>233</i>&nbsp;
+<i>234</i>&nbsp;S_IMPORT_STRUCT_CLOSE(3) = S_IMPORT_STRUCT_CLOSE | &lt;error&gt;                | S_IMPORT_STRUCT            |           |
+<i>235</i>&nbsp;    [if no more imports] : -------               | -------                | S_STRUCT_CLOSE             |           |
+<i>236</i>&nbsp;
+<i>237</i>&nbsp;S_IMPORT_LIST_CLOSE(2)   = S_IMPORT_LIST_CLOSE   | &lt;error&gt;                | S_AFTER_IMPORT_LIST (load) |           |
+<i>238</i>&nbsp;          [if no locals] : S_IMPORT_LIST_CLOSE   | &lt;error&gt;                | S_STRUCT_CLOSE             |           |
+<i>239</i>&nbsp;
+<i>240</i>&nbsp;S_AFTER_IMPORT_LIST(1)   = S_SYMBOL_LIST         | &lt;error&gt;                | S_EOF                      |           |
+<i>241</i>&nbsp;
+<i>242</i>&nbsp;S_SYMBOL_LIST(1)         = S_STRUCT_CLOSE        | S_IN_SYMBOLS           | S_EOF                      | true      |
+<i>243</i>&nbsp;          [if no locals] : -------               | S_SYMBOL_LIST_CLOSE    | S_EOF                      |           |
+<i>244</i>&nbsp;
+<i>245</i>&nbsp;S_IN_SYMBOLS(2)          = S_SYMBOL (load)       | &lt;error&gt;                | S_STRUCT_CLOSE             |           |
+<i>246</i>&nbsp;     [if no more locals] : S_SYMBOL_LIST_CLOSE   | &lt;error&gt;                | S_STRUCT_CLOSE             |           |
+<i>247</i>&nbsp;
+<i>248</i>&nbsp;S_SYMBOL(2)              = S_SYMBOL (load)       | &lt;error&gt;                | S_STRUCT_CLOSE             |           |
+<i>249</i>&nbsp;     [if no more locals] : S_SYMBOL_LIST_CLOSE   | &lt;error&gt;                | S_STRUCT_CLOSE             |           |
+<i>250</i>&nbsp;
+<i>251</i>&nbsp;S_SYMBOL_LIST_CLOSE(2)   = S_EOF                 | &lt;error&gt;                | S_STRUCT_CLOSE             |           |
+<i>252</i>&nbsp;
+<i>253</i>&nbsp;S_STRUCT_CLOSE(1)        = S_EOF                 | &lt;error&gt;                | S_EOF                      |           |
+<i>254</i>&nbsp;S_EOF(0)                 = S_EOF                 | &lt;error&gt;                | S_EOF                      |           |
+<i>255</i>&nbsp;
+<i>256</i>&nbsp;
+<i>257</i>&nbsp;Same list sorted by depth (i.e. by the various sequences that
+<i>258</i>&nbsp;the reader progresses through to a local or global eof)
+<i>259</i>&nbsp;
+<i>260</i>&nbsp;state
+<i>261</i>&nbsp;------------------------
+<i>262</i>&nbsp;S_BOF(0)                   system
+<i>263</i>&nbsp;S_STRUCT(0)                required
+<i>264</i>&nbsp;S_EOF(0)                   system
+<i>265</i>&nbsp;
+<i>266</i>&nbsp;
+<i>267</i>&nbsp;S_IN_STRUCT(1)             system
+<i>268</i>&nbsp;S_NAME(1)                  optional   if name not null (or if isLocalSymbolTable == false)
+<i>269</i>&nbsp;S_VERSION(1)               optional   if version &gt; 0  (or if isLocalSymbolTable == false)
+<i>270</i>&nbsp;S_MAX_ID(1)                optional   if max_id &gt; 0
+<i>271</i>&nbsp;S_IMPORT_LIST(1)           optional   if import count &gt; 0
+<i>272</i>&nbsp;S_AFTER_IMPORT_LIST(1)     optional   if import count &gt; 0 &amp;&amp; local count &gt; 0 (this state exists only after stepOut of the import list)
+<i>273</i>&nbsp;S_SYMBOL_LIST(1)           optional:  if local count &gt; 0
+<i>274</i>&nbsp;S_STRUCT_CLOSE(1)          system
+<i>275</i>&nbsp;
+<i>276</i>&nbsp;
+<i>277</i>&nbsp;S_IN_IMPORTS(2)            system
+<i>278</i>&nbsp;S_IMPORT_STRUCT(2)         variable   if _imports.hasNext() (import symbol table iterator)
+<i>279</i>&nbsp;S_IMPORT_LIST_CLOSE(2)     system
+<i>280</i>&nbsp;
+<i>281</i>&nbsp;
+<i>282</i>&nbsp;S_IN_IMPORT_STRUCT(3)      system
+<i>283</i>&nbsp;S_IMPORT_NAME(3)           required
+<i>284</i>&nbsp;S_IMPORT_VERSION(3)        required
+<i>285</i>&nbsp;S_IMPORT_MAX_ID(3)         required
+<i>286</i>&nbsp;S_IMPORT_STRUCT_CLOSE(3)   system
+<i>287</i>&nbsp;
+<i>288</i>&nbsp;
+<i>289</i>&nbsp;S_IN_SYMBOLS(2)            system
+<i>290</i>&nbsp;S_SYMBOL(2)                variable  if _symbols.hasNext() (local symbol iterator)
+<i>291</i>&nbsp;S_SYMBOL_LIST_CLOSE(2)     system
+<i>292</i>&nbsp;
+<i>293</i>&nbsp;*/
+<i>294</i>&nbsp;
+<i>295</i>&nbsp;
+<b class="fc"><i>296</i>&nbsp;final class SymbolTableReader</b>
+<i>297</i>&nbsp;    implements IonReader
+<i>298</i>&nbsp;{
+<i>299</i>&nbsp;
+<i>300</i>&nbsp;    /**
+<i>301</i>&nbsp;     * these are the states of the reader.
+<i>302</i>&nbsp;     * Each state tells the reader it is
+<i>303</i>&nbsp;     * just before (or on as you might want
+<i>304</i>&nbsp;     * to think about it) one of the possible
+<i>305</i>&nbsp;     * values in the serialized image.
+<i>306</i>&nbsp;     */
+<i>307</i>&nbsp;    static final int S_BOF                  =  0;
+<i>308</i>&nbsp;    static final int S_STRUCT               =  1;
+<i>309</i>&nbsp;    static final int S_IN_STRUCT            =  2;
+<i>310</i>&nbsp;    static final int S_NAME                 =  3;
+<i>311</i>&nbsp;    static final int S_VERSION              =  4;
+<i>312</i>&nbsp;    static final int S_MAX_ID               =  5;
+<i>313</i>&nbsp;    static final int S_IMPORT_LIST          =  6;
+<i>314</i>&nbsp;    static final int S_IN_IMPORTS           =  7;
+<i>315</i>&nbsp;    static final int S_IMPORT_STRUCT        =  8;
+<i>316</i>&nbsp;    static final int S_IN_IMPORT_STRUCT     =  9;
+<i>317</i>&nbsp;    static final int S_IMPORT_NAME          = 10;
+<i>318</i>&nbsp;    static final int S_IMPORT_VERSION       = 11;
+<i>319</i>&nbsp;    static final int S_IMPORT_MAX_ID        = 12;
+<i>320</i>&nbsp;    static final int S_IMPORT_STRUCT_CLOSE  = 13;
+<i>321</i>&nbsp;    static final int S_IMPORT_LIST_CLOSE    = 14;
+<i>322</i>&nbsp;    static final int S_AFTER_IMPORT_LIST    = 15;
+<i>323</i>&nbsp;    static final int S_SYMBOL_LIST          = 16;
+<i>324</i>&nbsp;    static final int S_IN_SYMBOLS           = 17;
+<i>325</i>&nbsp;    static final int S_SYMBOL               = 18;
+<i>326</i>&nbsp;    static final int S_SYMBOL_LIST_CLOSE    = 19;
+<i>327</i>&nbsp;    static final int S_STRUCT_CLOSE         = 20;
+<i>328</i>&nbsp;    static final int S_EOF                  = 21;
+<i>329</i>&nbsp;
+<i>330</i>&nbsp;    private final static String get_state_name(int state)
+<i>331</i>&nbsp;    {
+<b class="nc"><i>332</i>&nbsp;        switch (state) {</b>
+<b class="nc"><i>333</i>&nbsp;        case S_BOF:                     return &quot;S_BOF&quot;;</b>
+<b class="nc"><i>334</i>&nbsp;        case S_STRUCT:                  return &quot;S_STRUCT&quot;;</b>
+<b class="nc"><i>335</i>&nbsp;        case S_IN_STRUCT:               return &quot;S_IN_STRUCT&quot;;</b>
+<b class="nc"><i>336</i>&nbsp;        case S_NAME:                    return &quot;S_NAME&quot;;</b>
+<b class="nc"><i>337</i>&nbsp;        case S_VERSION:                 return &quot;S_VERSION&quot;;</b>
+<b class="nc"><i>338</i>&nbsp;        case S_MAX_ID:                  return &quot;S_MAX_ID&quot;;</b>
+<b class="nc"><i>339</i>&nbsp;        case S_IMPORT_LIST:             return &quot;S_IMPORT_LIST&quot;;</b>
+<b class="nc"><i>340</i>&nbsp;        case S_IN_IMPORTS:              return &quot;S_IN_IMPORTS&quot;;</b>
+<b class="nc"><i>341</i>&nbsp;        case S_IMPORT_STRUCT:           return &quot;S_IMPORT_STRUCT&quot;;</b>
+<b class="nc"><i>342</i>&nbsp;        case S_IN_IMPORT_STRUCT:        return &quot;S_IN_IMPORT_STRUCT&quot;;</b>
+<b class="nc"><i>343</i>&nbsp;        case S_IMPORT_NAME:             return &quot;S_IMPORT_NAME&quot;;</b>
+<b class="nc"><i>344</i>&nbsp;        case S_IMPORT_VERSION:          return &quot;S_IMPORT_VERSION&quot;;</b>
+<b class="nc"><i>345</i>&nbsp;        case S_IMPORT_MAX_ID:           return &quot;S_IMPORT_MAX_ID&quot;;</b>
+<b class="nc"><i>346</i>&nbsp;        case S_IMPORT_STRUCT_CLOSE:     return &quot;S_IMPORT_STRUCT_CLOSE&quot;;</b>
+<b class="nc"><i>347</i>&nbsp;        case S_IMPORT_LIST_CLOSE:       return &quot;S_IMPORT_LIST_CLOSE&quot;;</b>
+<b class="nc"><i>348</i>&nbsp;        case S_AFTER_IMPORT_LIST:       return &quot;S_AFTER_IMPORT_LIST&quot;;</b>
+<b class="nc"><i>349</i>&nbsp;        case S_SYMBOL_LIST:             return &quot;S_SYMBOL_LIST&quot;;</b>
+<b class="nc"><i>350</i>&nbsp;        case S_IN_SYMBOLS:              return &quot;S_IN_SYMBOLS&quot;;</b>
+<b class="nc"><i>351</i>&nbsp;        case S_SYMBOL:                  return &quot;S_SYMBOL&quot;;</b>
+<b class="nc"><i>352</i>&nbsp;        case S_SYMBOL_LIST_CLOSE:       return &quot;S_SYMBOL_LIST_CLOSE&quot;;</b>
+<b class="nc"><i>353</i>&nbsp;        case S_STRUCT_CLOSE:            return &quot;S_STRUCT_CLOSE&quot;;</b>
+<b class="nc"><i>354</i>&nbsp;        case S_EOF:                     return &quot;S_EOF&quot;;</b>
+<b class="nc"><i>355</i>&nbsp;        default:                        return &quot;&lt;Unrecognized state: &quot;+state+&quot;&gt;&quot;;</b>
+<i>356</i>&nbsp;        }
+<i>357</i>&nbsp;    }
+<i>358</i>&nbsp;
+<i>359</i>&nbsp;    static final IonType stateType(int state)
+<i>360</i>&nbsp;    {
+<b class="fc"><i>361</i>&nbsp;        switch (state)</b>
+<i>362</i>&nbsp;        {
+<b class="fc"><i>363</i>&nbsp;        case S_BOF:                  return null;</b>
+<b class="fc"><i>364</i>&nbsp;        case S_STRUCT:               return IonType.STRUCT;</b>
+<b class="nc"><i>365</i>&nbsp;        case S_IN_STRUCT:            return null;</b>
+<b class="fc"><i>366</i>&nbsp;        case S_NAME:                 return IonType.STRING;</b>
+<b class="fc"><i>367</i>&nbsp;        case S_VERSION:              return IonType.INT;</b>
+<b class="nc"><i>368</i>&nbsp;        case S_MAX_ID:               return IonType.INT;</b>
+<b class="fc"><i>369</i>&nbsp;        case S_IMPORT_LIST:          return IonType.LIST;</b>
+<b class="nc"><i>370</i>&nbsp;        case S_IN_IMPORTS:           return null;</b>
+<b class="fc"><i>371</i>&nbsp;        case S_IMPORT_STRUCT:        return IonType.STRUCT;</b>
+<b class="nc"><i>372</i>&nbsp;        case S_IN_IMPORT_STRUCT:     return null;</b>
+<b class="fc"><i>373</i>&nbsp;        case S_IMPORT_NAME:          return IonType.STRING;</b>
+<b class="fc"><i>374</i>&nbsp;        case S_IMPORT_VERSION:       return IonType.INT;</b>
+<b class="fc"><i>375</i>&nbsp;        case S_IMPORT_MAX_ID:        return IonType.INT;</b>
+<b class="nc"><i>376</i>&nbsp;        case S_IMPORT_STRUCT_CLOSE:  return null;</b>
+<b class="nc"><i>377</i>&nbsp;        case S_IMPORT_LIST_CLOSE:    return null;</b>
+<b class="nc"><i>378</i>&nbsp;        case S_AFTER_IMPORT_LIST:    return null;</b>
+<b class="fc"><i>379</i>&nbsp;        case S_SYMBOL_LIST:          return IonType.LIST;</b>
+<b class="nc"><i>380</i>&nbsp;        case S_IN_SYMBOLS:           return null;</b>
+<b class="fc"><i>381</i>&nbsp;        case S_SYMBOL:               return IonType.STRING;</b>
+<b class="nc"><i>382</i>&nbsp;        case S_SYMBOL_LIST_CLOSE:    return null;</b>
+<b class="nc"><i>383</i>&nbsp;        case S_STRUCT_CLOSE:         return null;</b>
+<b class="fc"><i>384</i>&nbsp;        case S_EOF:                  return null;</b>
+<i>385</i>&nbsp;        default:
+<b class="nc"><i>386</i>&nbsp;            throwUnrecognizedState(state);</b>
+<b class="nc"><i>387</i>&nbsp;            return null;</b>
+<i>388</i>&nbsp;        }
+<i>389</i>&nbsp;    }
+<i>390</i>&nbsp;
+<i>391</i>&nbsp;    static final int stateDepth(int state)
+<i>392</i>&nbsp;    {
+<b class="fc"><i>393</i>&nbsp;        switch (state)</b>
+<i>394</i>&nbsp;        {
+<b class="fc"><i>395</i>&nbsp;        case S_BOF:                  return 0;</b>
+<b class="nc"><i>396</i>&nbsp;        case S_STRUCT:               return 0;</b>
+<b class="nc"><i>397</i>&nbsp;        case S_IN_STRUCT:            return 1;</b>
+<b class="nc"><i>398</i>&nbsp;        case S_NAME:                 return 1;</b>
+<b class="nc"><i>399</i>&nbsp;        case S_VERSION:              return 1;</b>
+<b class="nc"><i>400</i>&nbsp;        case S_MAX_ID:               return 1;</b>
+<b class="nc"><i>401</i>&nbsp;        case S_IMPORT_LIST:          return 1;</b>
+<b class="nc"><i>402</i>&nbsp;        case S_IN_IMPORTS:           return 2;</b>
+<b class="nc"><i>403</i>&nbsp;        case S_IMPORT_STRUCT:        return 2;</b>
+<b class="nc"><i>404</i>&nbsp;        case S_IN_IMPORT_STRUCT:     return 3;</b>
+<b class="nc"><i>405</i>&nbsp;        case S_IMPORT_NAME:          return 3;</b>
+<b class="nc"><i>406</i>&nbsp;        case S_IMPORT_VERSION:       return 3;</b>
+<b class="nc"><i>407</i>&nbsp;        case S_IMPORT_MAX_ID:        return 3;</b>
+<b class="nc"><i>408</i>&nbsp;        case S_IMPORT_STRUCT_CLOSE:  return 3;</b>
+<b class="nc"><i>409</i>&nbsp;        case S_IMPORT_LIST_CLOSE:    return 2;</b>
+<b class="nc"><i>410</i>&nbsp;        case S_AFTER_IMPORT_LIST:    return 1;</b>
+<b class="nc"><i>411</i>&nbsp;        case S_SYMBOL_LIST:          return 1;</b>
+<b class="nc"><i>412</i>&nbsp;        case S_IN_SYMBOLS:           return 2;</b>
+<b class="nc"><i>413</i>&nbsp;        case S_SYMBOL:               return 2;</b>
+<b class="nc"><i>414</i>&nbsp;        case S_SYMBOL_LIST_CLOSE:    return 2;</b>
+<b class="nc"><i>415</i>&nbsp;        case S_STRUCT_CLOSE:         return 1;</b>
+<b class="nc"><i>416</i>&nbsp;        case S_EOF:                  return 0;</b>
+<i>417</i>&nbsp;        default:
+<b class="nc"><i>418</i>&nbsp;            throwUnrecognizedState(state);</b>
+<b class="nc"><i>419</i>&nbsp;            return -1;</b>
+<i>420</i>&nbsp;        }
+<i>421</i>&nbsp;    }
+<i>422</i>&nbsp;
+<i>423</i>&nbsp;
+<i>424</i>&nbsp;    /**
+<i>425</i>&nbsp;     * these define the bit masked flags used
+<i>426</i>&nbsp;     * to inform iteration over the optional
+<i>427</i>&nbsp;     * values that may be present
+<i>428</i>&nbsp;     */
+<i>429</i>&nbsp;    private static final int HAS_NAME           = 0x01;
+<i>430</i>&nbsp;    private static final int HAS_VERSION        = 0x02;
+<i>431</i>&nbsp;    private static final int HAS_MAX_ID         = 0x04;
+<i>432</i>&nbsp;    private static final int HAS_IMPORT_LIST    = 0x08;
+<i>433</i>&nbsp;    private static final int HAS_SYMBOL_LIST    = 0x10;
+<i>434</i>&nbsp;
+<i>435</i>&nbsp;
+<i>436</i>&nbsp;    /**
+<i>437</i>&nbsp;     * The symbol table we are reading.
+<i>438</i>&nbsp;     *
+<i>439</i>&nbsp;     * We MUST NOT call methods whose value may change! Otherwise there&#39;s a
+<i>440</i>&nbsp;     * thread-safety problem.
+<i>441</i>&nbsp;     */
+<i>442</i>&nbsp;    private final SymbolTable _symbol_table;
+<i>443</i>&nbsp;
+<i>444</i>&nbsp;    private final int _maxId;
+<i>445</i>&nbsp;
+<i>446</i>&nbsp;    /**
+<i>447</i>&nbsp;     * _state tracks the progress through the various
+<i>448</i>&nbsp;     * members, including the substructures in the
+<i>449</i>&nbsp;     * import list and symbol list.  The previous state
+<i>450</i>&nbsp;     * is needed when we run into an end of container.
+<i>451</i>&nbsp;     */
+<b class="fc"><i>452</i>&nbsp;    int _current_state  = S_BOF;</b>
+<i>453</i>&nbsp;
+<i>454</i>&nbsp;    /**
+<i>455</i>&nbsp;     * state variables that hold the values referenced
+<i>456</i>&nbsp;     * by the current reader position.  These are filled
+<i>457</i>&nbsp;     * in by nextStateDepthFirst() and used by the value
+<i>458</i>&nbsp;     * getting methods.
+<i>459</i>&nbsp;     *
+<i>460</i>&nbsp;     * The iterators are opened when the user steps into
+<i>461</i>&nbsp;     * one of the two lists (imports and symbols).
+<i>462</i>&nbsp;     *
+<i>463</i>&nbsp;     */
+<i>464</i>&nbsp;    int                          _flags;                  // has name, has ... optional top level values
+<i>465</i>&nbsp;    String                       _string_value;
+<i>466</i>&nbsp;    long                         _int_value;
+<i>467</i>&nbsp;    private SymbolTable[]        _imported_tables;
+<i>468</i>&nbsp;    private Iterator&lt;SymbolTable&gt; _import_iterator;
+<i>469</i>&nbsp;    private SymbolTable          _current_import;
+<i>470</i>&nbsp;    Iterator&lt;String&gt;             _local_symbols;
+<i>471</i>&nbsp;
+<i>472</i>&nbsp;    public SymbolTableReader(SymbolTable symbol_table)
+<b class="fc"><i>473</i>&nbsp;    {</b>
+<b class="fc"><i>474</i>&nbsp;        _symbol_table = symbol_table;</b>
+<i>475</i>&nbsp;
+<b class="fc"><i>476</i>&nbsp;        synchronized (symbol_table)</b>
+<i>477</i>&nbsp;        {
+<b class="fc"><i>478</i>&nbsp;            _maxId = symbol_table.getMaxId();</b>
+<b class="fc"><i>479</i>&nbsp;            _local_symbols = symbol_table.iterateDeclaredSymbolNames();</b>
+<b class="fc"><i>480</i>&nbsp;        }</b>
+<i>481</i>&nbsp;
+<b class="fc"><i>482</i>&nbsp;        if (symbol_table.isLocalTable() == false) {</b>
+<b class="fc"><i>483</i>&nbsp;            set_flag(HAS_NAME, true);</b>
+<b class="fc"><i>484</i>&nbsp;            set_flag(HAS_VERSION, true);</b>
+<i>485</i>&nbsp;        }
+<b class="fc"><i>486</i>&nbsp;        if (_maxId &gt; 0) {</b>
+<i>487</i>&nbsp;            // FIXME: is this ever true?            set_flag(HAS_MAX_ID, true);
+<i>488</i>&nbsp;        }
+<b class="fc"><i>489</i>&nbsp;        _imported_tables = _symbol_table.getImportedTables();</b>
+<b class="fc"><i>490</i>&nbsp;        if (_imported_tables != null &amp;&amp; _imported_tables.length != 0) {</b>
+<b class="fc"><i>491</i>&nbsp;            set_flag(HAS_IMPORT_LIST, true);</b>
+<i>492</i>&nbsp;        }
+<b class="fc"><i>493</i>&nbsp;        if (_symbol_table.getImportedMaxId() &lt; _maxId) {</b>
+<b class="fc"><i>494</i>&nbsp;            set_flag(HAS_SYMBOL_LIST, true);</b>
+<i>495</i>&nbsp;        }
+<b class="fc"><i>496</i>&nbsp;    }</b>
+<i>497</i>&nbsp;
+<i>498</i>&nbsp;
+<i>499</i>&nbsp;    /**
+<i>500</i>&nbsp;     * @return This implementation always returns null.
+<i>501</i>&nbsp;     */
+<i>502</i>&nbsp;    public &lt;T&gt; T asFacet(Class&lt;T&gt; facetType)
+<i>503</i>&nbsp;    {
+<b class="nc"><i>504</i>&nbsp;        return null;</b>
+<i>505</i>&nbsp;    }
+<i>506</i>&nbsp;
+<i>507</i>&nbsp;    //========================================================================
+<i>508</i>&nbsp;
+<i>509</i>&nbsp;
+<i>510</i>&nbsp;    private final void set_flag(int flag_bit, boolean flag_state)
+<i>511</i>&nbsp;    {
+<b class="fc"><i>512</i>&nbsp;        if (flag_state) {</b>
+<b class="fc"><i>513</i>&nbsp;            _flags |= flag_bit;</b>
+<i>514</i>&nbsp;        }
+<i>515</i>&nbsp;        else {
+<b class="nc"><i>516</i>&nbsp;            _flags &amp;= ~flag_bit;</b>
+<i>517</i>&nbsp;        }
+<b class="fc"><i>518</i>&nbsp;    }</b>
+<i>519</i>&nbsp;
+<i>520</i>&nbsp;    private final boolean test_flag(int flag_bit)
+<i>521</i>&nbsp;    {
+<b class="fc"><i>522</i>&nbsp;        boolean flag_state = (_flags &amp; flag_bit) != 0;</b>
+<b class="fc"><i>523</i>&nbsp;        return flag_state;</b>
+<i>524</i>&nbsp;    }
+<i>525</i>&nbsp;
+<i>526</i>&nbsp;    final boolean hasName() {
+<b class="fc"><i>527</i>&nbsp;        boolean flag_state = test_flag(HAS_NAME);</b>
+<b class="fc"><i>528</i>&nbsp;        return flag_state;</b>
+<i>529</i>&nbsp;    }
+<i>530</i>&nbsp;
+<i>531</i>&nbsp;    final boolean hasVersion() {
+<b class="fc"><i>532</i>&nbsp;        boolean flag_state = test_flag(HAS_VERSION);</b>
+<b class="fc"><i>533</i>&nbsp;        return flag_state;</b>
+<i>534</i>&nbsp;    }
+<i>535</i>&nbsp;
+<i>536</i>&nbsp;    final boolean hasMaxId() {
+<b class="fc"><i>537</i>&nbsp;        boolean flag_state = test_flag(HAS_MAX_ID);</b>
+<b class="fc"><i>538</i>&nbsp;        return flag_state;</b>
+<i>539</i>&nbsp;    }
+<i>540</i>&nbsp;
+<i>541</i>&nbsp;    final boolean hasImports() {
+<b class="fc"><i>542</i>&nbsp;        boolean flag_state = test_flag(HAS_IMPORT_LIST);</b>
+<b class="fc"><i>543</i>&nbsp;        return flag_state;</b>
+<i>544</i>&nbsp;    }
+<i>545</i>&nbsp;
+<i>546</i>&nbsp;    final boolean hasLocalSymbols() {
+<b class="fc"><i>547</i>&nbsp;        boolean flag_state = test_flag(HAS_SYMBOL_LIST);</b>
+<b class="fc"><i>548</i>&nbsp;        return flag_state;</b>
+<i>549</i>&nbsp;    }
+<i>550</i>&nbsp;
+<i>551</i>&nbsp;
+<i>552</i>&nbsp;    public boolean hasNext()
+<i>553</i>&nbsp;    {
+<b class="nc"><i>554</i>&nbsp;        boolean has_next = has_next_helper();</b>
+<b class="nc"><i>555</i>&nbsp;        return has_next;</b>
+<i>556</i>&nbsp;    }
+<i>557</i>&nbsp;
+<i>558</i>&nbsp;    private final boolean has_next_helper()
+<i>559</i>&nbsp;    {
+<i>560</i>&nbsp;        // this just tells us whether or not we have more
+<i>561</i>&nbsp;        // value coming at our current scanning depth
+<b class="fc"><i>562</i>&nbsp;        switch (_current_state)</b>
+<i>563</i>&nbsp;        {
+<i>564</i>&nbsp;        case S_BOF:
+<i>565</i>&nbsp;            // outer struct always follows
+<b class="fc"><i>566</i>&nbsp;            return true;</b>
+<i>567</i>&nbsp;
+<i>568</i>&nbsp;        case S_STRUCT:
+<i>569</i>&nbsp;            // only top level value
+<b class="nc"><i>570</i>&nbsp;            return false;</b>
+<i>571</i>&nbsp;
+<i>572</i>&nbsp;        case S_IN_STRUCT:
+<b class="fc"><i>573</i>&nbsp;            if (stateFirstInStruct() != S_STRUCT_CLOSE) {</b>
+<b class="fc"><i>574</i>&nbsp;                return true;</b>
+<i>575</i>&nbsp;            }
+<b class="fc"><i>576</i>&nbsp;            return false;</b>
+<i>577</i>&nbsp;
+<i>578</i>&nbsp;        case S_NAME:
+<i>579</i>&nbsp;            // if we have name we have version
+<b class="fc"><i>580</i>&nbsp;            return true;</b>
+<i>581</i>&nbsp;
+<i>582</i>&nbsp;        case S_VERSION:
+<b class="fc"><i>583</i>&nbsp;            if (hasMaxId()) {</b>
+<b class="nc"><i>584</i>&nbsp;                return true;</b>
+<i>585</i>&nbsp;            }
+<b class="fc"><i>586</i>&nbsp;            if (stateFollowingMaxId() != S_STRUCT_CLOSE) {</b>
+<b class="fc"><i>587</i>&nbsp;                return true;</b>
+<i>588</i>&nbsp;            }
+<b class="nc"><i>589</i>&nbsp;            return false;</b>
+<i>590</i>&nbsp;
+<i>591</i>&nbsp;        case S_MAX_ID:
+<i>592</i>&nbsp;            // maybe something follows, but not always
+<b class="nc"><i>593</i>&nbsp;            if (stateFollowingMaxId() != S_STRUCT_CLOSE) {</b>
+<b class="nc"><i>594</i>&nbsp;                return true;</b>
+<i>595</i>&nbsp;            }
+<b class="nc"><i>596</i>&nbsp;            return false;</b>
+<i>597</i>&nbsp;
+<i>598</i>&nbsp;        case S_IMPORT_LIST:
+<i>599</i>&nbsp;            // locals are the only thing that might follow imports
+<b class="nc"><i>600</i>&nbsp;            if (hasLocalSymbols())  return true;</b>
+<b class="nc"><i>601</i>&nbsp;            return false;</b>
+<i>602</i>&nbsp;
+<i>603</i>&nbsp;        case S_IN_IMPORTS:
+<i>604</i>&nbsp;        case S_IMPORT_STRUCT:
+<i>605</i>&nbsp;            // we have more if there is
+<b class="fc"><i>606</i>&nbsp;            boolean more_imports = _import_iterator.hasNext();</b>
+<b class="fc"><i>607</i>&nbsp;            return more_imports;</b>
+<i>608</i>&nbsp;
+<i>609</i>&nbsp;        case S_IN_IMPORT_STRUCT:
+<i>610</i>&nbsp;        case S_IMPORT_NAME:
+<i>611</i>&nbsp;            // we always have a name and version
+<b class="fc"><i>612</i>&nbsp;            return true;</b>
+<i>613</i>&nbsp;
+<i>614</i>&nbsp;        case S_IMPORT_VERSION:
+<i>615</i>&nbsp;            // we always have a max_id on imports
+<b class="fc"><i>616</i>&nbsp;            return true;</b>
+<i>617</i>&nbsp;
+<i>618</i>&nbsp;        case S_IMPORT_MAX_ID:
+<i>619</i>&nbsp;        case S_IMPORT_STRUCT_CLOSE:
+<b class="fc"><i>620</i>&nbsp;            return false;</b>
+<i>621</i>&nbsp;
+<i>622</i>&nbsp;        case S_IMPORT_LIST_CLOSE:
+<b class="fc"><i>623</i>&nbsp;            return false;</b>
+<i>624</i>&nbsp;
+<i>625</i>&nbsp;        case S_AFTER_IMPORT_LIST:
+<i>626</i>&nbsp;            // locals are the only thing that might follow imports
+<b class="fc"><i>627</i>&nbsp;            if (hasLocalSymbols())  return true;</b>
+<b class="nc"><i>628</i>&nbsp;            return false;</b>
+<i>629</i>&nbsp;
+<i>630</i>&nbsp;        case S_SYMBOL_LIST:
+<i>631</i>&nbsp;            // the symbol list is the last member, so it has no &quot;next sibling&quot;
+<i>632</i>&nbsp;            // but ... just in case we put something after the local symbol list
+<b class="fc"><i>633</i>&nbsp;            assert(stateFollowingLocalSymbols() == S_STRUCT_CLOSE);</b>
+<b class="fc"><i>634</i>&nbsp;            return false;</b>
+<i>635</i>&nbsp;
+<i>636</i>&nbsp;        case S_IN_SYMBOLS:
+<i>637</i>&nbsp;        case S_SYMBOL:
+<b class="fc"><i>638</i>&nbsp;            if (_local_symbols.hasNext()) return true;</b>
+<b class="fc"><i>639</i>&nbsp;            return false;</b>
+<i>640</i>&nbsp;
+<i>641</i>&nbsp;        case S_SYMBOL_LIST_CLOSE:
+<i>642</i>&nbsp;        case S_STRUCT_CLOSE:
+<i>643</i>&nbsp;        case S_EOF:
+<i>644</i>&nbsp;            // these are all at the end of their respective containers
+<b class="fc"><i>645</i>&nbsp;            return false;</b>
+<i>646</i>&nbsp;
+<i>647</i>&nbsp;        default:
+<b class="nc"><i>648</i>&nbsp;            throwUnrecognizedState(_current_state);</b>
+<b class="nc"><i>649</i>&nbsp;            return false;</b>
+<i>650</i>&nbsp;        }
+<i>651</i>&nbsp;    }
+<i>652</i>&nbsp;
+<i>653</i>&nbsp;    private final static void throwUnrecognizedState(int state)
+<i>654</i>&nbsp;    {
+<b class="nc"><i>655</i>&nbsp;        String message = &quot;Internal error: &quot;</b>
+<i>656</i>&nbsp;            + &quot;UnifiedSymbolTableReader&quot;
+<i>657</i>&nbsp;            + &quot; is in an unrecognized state: &quot;
+<b class="nc"><i>658</i>&nbsp;            + get_state_name(state);</b>
+<b class="nc"><i>659</i>&nbsp;        throw new IonException(message);</b>
+<i>660</i>&nbsp;    }
+<i>661</i>&nbsp;
+<i>662</i>&nbsp;
+<i>663</i>&nbsp;    // helpers to resolve the existence of a number
+<i>664</i>&nbsp;    // &quot;follow&quot; states where the answer depends on the
+<i>665</i>&nbsp;    // details of the symbol table we&#39;re reading.
+<i>666</i>&nbsp;
+<i>667</i>&nbsp;    private final int stateFirstInStruct()
+<i>668</i>&nbsp;    {
+<i>669</i>&nbsp;        int new_state;
+<i>670</i>&nbsp;
+<b class="fc"><i>671</i>&nbsp;        if (hasName()) {</b>
+<b class="fc"><i>672</i>&nbsp;            new_state = S_NAME;</b>
+<i>673</i>&nbsp;        }
+<b class="fc"><i>674</i>&nbsp;        else if (hasMaxId()) {</b>
+<b class="nc"><i>675</i>&nbsp;            new_state = S_MAX_ID;</b>
+<i>676</i>&nbsp;        }
+<b class="fc"><i>677</i>&nbsp;        else if (hasImports()) {</b>
+<b class="fc"><i>678</i>&nbsp;            new_state = S_IMPORT_LIST;</b>
+<i>679</i>&nbsp;        }
+<b class="fc"><i>680</i>&nbsp;        else if (hasLocalSymbols()) {</b>
+<b class="fc"><i>681</i>&nbsp;            new_state = S_SYMBOL_LIST;</b>
+<i>682</i>&nbsp;        }
+<i>683</i>&nbsp;        else {
+<b class="fc"><i>684</i>&nbsp;            new_state = S_STRUCT_CLOSE;</b>
+<i>685</i>&nbsp;        }
+<b class="fc"><i>686</i>&nbsp;        return new_state;</b>
+<i>687</i>&nbsp;    }
+<i>688</i>&nbsp;
+<i>689</i>&nbsp;    private final int stateFollowingMaxId()
+<i>690</i>&nbsp;    {
+<i>691</i>&nbsp;        int new_state;
+<i>692</i>&nbsp;
+<b class="fc"><i>693</i>&nbsp;        if (hasImports()) {</b>
+<b class="nc"><i>694</i>&nbsp;            new_state = S_IMPORT_LIST;</b>
+<i>695</i>&nbsp;        }
+<b class="fc"><i>696</i>&nbsp;        else if (hasLocalSymbols()) {</b>
+<b class="fc"><i>697</i>&nbsp;            new_state = S_SYMBOL_LIST;</b>
+<i>698</i>&nbsp;        }
+<i>699</i>&nbsp;        else {
+<b class="nc"><i>700</i>&nbsp;            new_state = S_STRUCT_CLOSE;</b>
+<i>701</i>&nbsp;        }
+<b class="fc"><i>702</i>&nbsp;        return new_state;</b>
+<i>703</i>&nbsp;    }
+<i>704</i>&nbsp;
+<i>705</i>&nbsp;    private final int nextImport()
+<i>706</i>&nbsp;    {
+<b class="fc"><i>707</i>&nbsp;        assert(_import_iterator != null);</b>
+<i>708</i>&nbsp;
+<i>709</i>&nbsp;        int new_state;
+<b class="fc"><i>710</i>&nbsp;        if (_import_iterator.hasNext()) {</b>
+<b class="fc"><i>711</i>&nbsp;            _current_import = _import_iterator.next();</b>
+<b class="fc"><i>712</i>&nbsp;            new_state = S_IMPORT_STRUCT;</b>
+<i>713</i>&nbsp;        }
+<i>714</i>&nbsp;        else {
+<i>715</i>&nbsp;            // the import list is empty, so we jump to
+<i>716</i>&nbsp;            // the close list and null out our current
+<b class="nc"><i>717</i>&nbsp;            _current_import = null;</b>
+<b class="nc"><i>718</i>&nbsp;            new_state = S_IMPORT_LIST_CLOSE;</b>
+<i>719</i>&nbsp;        }
+<b class="fc"><i>720</i>&nbsp;        return new_state;</b>
+<i>721</i>&nbsp;    }
+<i>722</i>&nbsp;
+<b class="fc"><i>723</i>&nbsp;    private static enum Op {NEXT, STEPOUT}</b>
+<i>724</i>&nbsp;    private final int stateFollowingImportList(Op op)
+<i>725</i>&nbsp;    {
+<b class="fc"><i>726</i>&nbsp;        int new_state = -1;</b>
+<i>727</i>&nbsp;
+<b class="fc"><i>728</i>&nbsp;        if (hasLocalSymbols()) {</b>
+<b class="fc"><i>729</i>&nbsp;            switch (op) {</b>
+<i>730</i>&nbsp;            case NEXT:
+<b class="nc"><i>731</i>&nbsp;                new_state = S_SYMBOL_LIST;</b>
+<b class="nc"><i>732</i>&nbsp;                break;</b>
+<i>733</i>&nbsp;            case STEPOUT:
+<b class="fc"><i>734</i>&nbsp;                new_state = S_AFTER_IMPORT_LIST;</b>
+<b class="fc"><i>735</i>&nbsp;                break;</b>
+<i>736</i>&nbsp;            }
+<i>737</i>&nbsp;        }
+<i>738</i>&nbsp;        else {
+<b class="fc"><i>739</i>&nbsp;            new_state = S_STRUCT_CLOSE;</b>
+<i>740</i>&nbsp;        }
+<b class="fc"><i>741</i>&nbsp;        return new_state;</b>
+<i>742</i>&nbsp;    }
+<i>743</i>&nbsp;
+<i>744</i>&nbsp;    private final int stateFollowingLocalSymbols()
+<i>745</i>&nbsp;    {
+<b class="fc"><i>746</i>&nbsp;        return S_STRUCT_CLOSE;</b>
+<i>747</i>&nbsp;    }
+<i>748</i>&nbsp;
+<i>749</i>&nbsp;    /**
+<i>750</i>&nbsp;     * this computes the actual move to the next state
+<i>751</i>&nbsp;     *
+<i>752</i>&nbsp;     * It does take into account the existence or absence
+<i>753</i>&nbsp;     * of various properties, such as the symbol table
+<i>754</i>&nbsp;     * name which is only present in some symbol tables.
+<i>755</i>&nbsp;     *
+<i>756</i>&nbsp;     * This also fills in a variety of current state
+<i>757</i>&nbsp;     * variables that are used to return correct values
+<i>758</i>&nbsp;     * by the &quot;get&quot; methods.
+<i>759</i>&nbsp;     *
+<i>760</i>&nbsp;     */
+<i>761</i>&nbsp;    public IonType next()
+<i>762</i>&nbsp;    {
+<b class="fc"><i>763</i>&nbsp;        if (has_next_helper() == false) {</b>
+<b class="fc"><i>764</i>&nbsp;            return null;</b>
+<i>765</i>&nbsp;        }
+<i>766</i>&nbsp;        int new_state;
+<i>767</i>&nbsp;
+<b class="fc"><i>768</i>&nbsp;        switch (_current_state)</b>
+<i>769</i>&nbsp;        {
+<i>770</i>&nbsp;        case S_BOF:
+<b class="fc"><i>771</i>&nbsp;            new_state = S_STRUCT;</b>
+<b class="fc"><i>772</i>&nbsp;            break;</b>
+<i>773</i>&nbsp;
+<i>774</i>&nbsp;        case S_STRUCT:
+<b class="nc"><i>775</i>&nbsp;            new_state = S_EOF;</b>
+<b class="nc"><i>776</i>&nbsp;            break;</b>
+<i>777</i>&nbsp;
+<i>778</i>&nbsp;        case S_IN_STRUCT:
+<b class="fc"><i>779</i>&nbsp;            new_state = stateFirstInStruct();</b>
+<b class="fc"><i>780</i>&nbsp;            loadStateData(new_state);</b>
+<b class="fc"><i>781</i>&nbsp;            break;</b>
+<i>782</i>&nbsp;
+<i>783</i>&nbsp;        case S_NAME:
+<b class="fc"><i>784</i>&nbsp;            assert(hasVersion());</b>
+<b class="fc"><i>785</i>&nbsp;            new_state = S_VERSION;</b>
+<b class="fc"><i>786</i>&nbsp;            loadStateData(new_state);</b>
+<b class="fc"><i>787</i>&nbsp;            break;</b>
+<i>788</i>&nbsp;
+<i>789</i>&nbsp;        case S_VERSION:
+<b class="fc"><i>790</i>&nbsp;            if (hasMaxId()) {</b>
+<b class="nc"><i>791</i>&nbsp;                new_state = S_MAX_ID;</b>
+<b class="nc"><i>792</i>&nbsp;                loadStateData(new_state);</b>
+<i>793</i>&nbsp;            }
+<i>794</i>&nbsp;            else {
+<b class="fc"><i>795</i>&nbsp;                new_state = stateFollowingMaxId();</b>
+<i>796</i>&nbsp;            }
+<b class="fc"><i>797</i>&nbsp;            break;</b>
+<i>798</i>&nbsp;
+<i>799</i>&nbsp;        case S_MAX_ID:
+<b class="nc"><i>800</i>&nbsp;            new_state = stateFollowingMaxId();</b>
+<b class="nc"><i>801</i>&nbsp;            break;</b>
+<i>802</i>&nbsp;
+<i>803</i>&nbsp;        case S_IMPORT_LIST:
+<b class="nc"><i>804</i>&nbsp;            new_state = this.stateFollowingImportList(Op.NEXT);</b>
+<b class="nc"><i>805</i>&nbsp;            break;</b>
+<i>806</i>&nbsp;
+<i>807</i>&nbsp;        case S_IN_IMPORTS:
+<i>808</i>&nbsp;        case S_IMPORT_STRUCT:
+<i>809</i>&nbsp;            // we only need to get the import list once, which we
+<i>810</i>&nbsp;            // do as we step into the import list, so it should
+<i>811</i>&nbsp;            // be waiting for us here.
+<b class="fc"><i>812</i>&nbsp;            assert(_import_iterator != null);</b>
+<b class="fc"><i>813</i>&nbsp;            new_state = nextImport();</b>
+<b class="fc"><i>814</i>&nbsp;            break;</b>
+<i>815</i>&nbsp;
+<i>816</i>&nbsp;        case S_IN_IMPORT_STRUCT:
+<i>817</i>&nbsp;            // shared tables have to have a name
+<b class="fc"><i>818</i>&nbsp;            new_state = S_IMPORT_NAME;</b>
+<b class="fc"><i>819</i>&nbsp;            loadStateData(new_state);</b>
+<b class="fc"><i>820</i>&nbsp;            break;</b>
+<i>821</i>&nbsp;
+<i>822</i>&nbsp;        case S_IMPORT_NAME:
+<i>823</i>&nbsp;            // shared tables have to have a version
+<b class="fc"><i>824</i>&nbsp;            new_state = S_IMPORT_VERSION;</b>
+<b class="fc"><i>825</i>&nbsp;            loadStateData(new_state);</b>
+<b class="fc"><i>826</i>&nbsp;            break;</b>
+<i>827</i>&nbsp;
+<i>828</i>&nbsp;        case S_IMPORT_VERSION:
+<i>829</i>&nbsp;            // and they also always have a max id - so we set up
+<i>830</i>&nbsp;            // for it
+<b class="fc"><i>831</i>&nbsp;            new_state = S_IMPORT_MAX_ID;</b>
+<b class="fc"><i>832</i>&nbsp;            loadStateData(new_state);</b>
+<b class="fc"><i>833</i>&nbsp;            break;</b>
+<i>834</i>&nbsp;
+<i>835</i>&nbsp;        case S_IMPORT_MAX_ID:
+<b class="nc"><i>836</i>&nbsp;            new_state = S_IMPORT_STRUCT_CLOSE;</b>
+<b class="nc"><i>837</i>&nbsp;            break;</b>
+<i>838</i>&nbsp;
+<i>839</i>&nbsp;        case S_IMPORT_STRUCT_CLOSE:
+<i>840</i>&nbsp;            // no change here - we just bump up against this local eof
+<b class="nc"><i>841</i>&nbsp;            new_state = S_IMPORT_STRUCT_CLOSE;</b>
+<b class="nc"><i>842</i>&nbsp;            break;</b>
+<i>843</i>&nbsp;
+<i>844</i>&nbsp;        case S_IMPORT_LIST_CLOSE:
+<i>845</i>&nbsp;            // no change here - we just bump up against this local eof
+<b class="nc"><i>846</i>&nbsp;            new_state = S_IMPORT_LIST_CLOSE;</b>
+<b class="nc"><i>847</i>&nbsp;            break;</b>
+<i>848</i>&nbsp;
+<i>849</i>&nbsp;        case S_AFTER_IMPORT_LIST:
+<b class="fc"><i>850</i>&nbsp;            assert(_symbol_table.getImportedMaxId() &lt; _maxId);</b>
+<b class="fc"><i>851</i>&nbsp;            new_state = S_SYMBOL_LIST;</b>
+<b class="fc"><i>852</i>&nbsp;            break;</b>
+<i>853</i>&nbsp;
+<i>854</i>&nbsp;        case S_SYMBOL_LIST:
+<b class="nc"><i>855</i>&nbsp;            assert(_symbol_table.getImportedMaxId() &lt; _maxId);</b>
+<b class="nc"><i>856</i>&nbsp;            new_state = stateFollowingLocalSymbols();</b>
+<b class="nc"><i>857</i>&nbsp;            break;</b>
+<i>858</i>&nbsp;
+<i>859</i>&nbsp;        case S_IN_SYMBOLS:
+<i>860</i>&nbsp;            // we have some symbols - so we&#39;ll set up to read them,
+<i>861</i>&nbsp;            // which we *have* to do once and *need* to do only once.
+<b class="fc"><i>862</i>&nbsp;            assert(_local_symbols != null);</b>
+<i>863</i>&nbsp;            // since we only get into the symbol list if
+<i>864</i>&nbsp;            // there are some symbols - our next state
+<i>865</i>&nbsp;            // is at the first symbol
+<b class="fc"><i>866</i>&nbsp;            assert(_local_symbols.hasNext() == true);</b>
+<i>867</i>&nbsp;            // so we just fall through to and let the S_SYMBOL
+<i>868</i>&nbsp;            // state do it&#39;s thing (which it will do every time
+<i>869</i>&nbsp;            // we move to the next symbol)
+<i>870</i>&nbsp;        case S_SYMBOL:
+<b class="fc"><i>871</i>&nbsp;            if (_local_symbols.hasNext())</b>
+<i>872</i>&nbsp;            {
+<b class="fc"><i>873</i>&nbsp;                _string_value = _local_symbols.next();</b>
+<i>874</i>&nbsp;                // null means this symbol isn&#39;t defined
+<b class="fc"><i>875</i>&nbsp;                new_state = S_SYMBOL;</b>
+<i>876</i>&nbsp;            }
+<i>877</i>&nbsp;            else {
+<b class="nc"><i>878</i>&nbsp;                new_state = S_SYMBOL_LIST_CLOSE;</b>
+<i>879</i>&nbsp;            }
+<b class="nc"><i>880</i>&nbsp;            break;</b>
+<i>881</i>&nbsp;
+<i>882</i>&nbsp;        case S_SYMBOL_LIST_CLOSE:
+<i>883</i>&nbsp;            // no change here - we just bump up against this local eof
+<b class="nc"><i>884</i>&nbsp;            new_state = S_SYMBOL_LIST_CLOSE;</b>
+<b class="nc"><i>885</i>&nbsp;            break;</b>
+<i>886</i>&nbsp;
+<i>887</i>&nbsp;        case S_STRUCT_CLOSE:
+<i>888</i>&nbsp;            // no change here - we just bump up against this local eof
+<b class="nc"><i>889</i>&nbsp;            new_state = S_STRUCT_CLOSE;</b>
+<b class="nc"><i>890</i>&nbsp;            break;</b>
+<i>891</i>&nbsp;
+<i>892</i>&nbsp;        case S_EOF:
+<b class="nc"><i>893</i>&nbsp;            new_state = S_EOF;</b>
+<b class="nc"><i>894</i>&nbsp;            break;</b>
+<i>895</i>&nbsp;
+<i>896</i>&nbsp;        default:
+<b class="nc"><i>897</i>&nbsp;            throwUnrecognizedState(_current_state);</b>
+<b class="nc"><i>898</i>&nbsp;            new_state = -1;</b>
+<i>899</i>&nbsp;            break;
+<i>900</i>&nbsp;        }
+<i>901</i>&nbsp;
+<b class="fc"><i>902</i>&nbsp;        _current_state = new_state;</b>
+<b class="fc"><i>903</i>&nbsp;        return stateType(_current_state);</b>
+<i>904</i>&nbsp;    }
+<i>905</i>&nbsp;
+<i>906</i>&nbsp;
+<i>907</i>&nbsp;    private final void loadStateData(int new_state)
+<i>908</i>&nbsp;    {
+<b class="fc"><i>909</i>&nbsp;        switch(new_state) {</b>
+<i>910</i>&nbsp;        case S_NAME:
+<b class="fc"><i>911</i>&nbsp;            assert(hasName());</b>
+<b class="fc"><i>912</i>&nbsp;            String name = _symbol_table.getName();</b>
+<b class="fc"><i>913</i>&nbsp;            _string_value = name;</b>
+<b class="fc"><i>914</i>&nbsp;            assert(_string_value != null);</b>
+<i>915</i>&nbsp;            break;
+<i>916</i>&nbsp;
+<i>917</i>&nbsp;        case S_VERSION:
+<b class="fc"><i>918</i>&nbsp;            int value = _symbol_table.getVersion();</b>
+<b class="fc"><i>919</i>&nbsp;            _int_value = value;</b>
+<b class="fc"><i>920</i>&nbsp;            assert(value != 0);</b>
+<i>921</i>&nbsp;            break;
+<i>922</i>&nbsp;
+<i>923</i>&nbsp;        case S_MAX_ID:
+<b class="nc"><i>924</i>&nbsp;            _int_value = _maxId;</b>
+<b class="nc"><i>925</i>&nbsp;            break;</b>
+<i>926</i>&nbsp;
+<i>927</i>&nbsp;        case S_IMPORT_LIST:
+<i>928</i>&nbsp;        case S_SYMBOL_LIST:
+<i>929</i>&nbsp;            // no op to simplify the initial fields logic in next()
+<b class="fc"><i>930</i>&nbsp;            break;</b>
+<i>931</i>&nbsp;
+<i>932</i>&nbsp;        case S_IMPORT_NAME:
+<b class="fc"><i>933</i>&nbsp;            assert(_current_import != null);</b>
+<b class="fc"><i>934</i>&nbsp;            _string_value = _current_import.getName();</b>
+<b class="fc"><i>935</i>&nbsp;            break;</b>
+<i>936</i>&nbsp;
+<i>937</i>&nbsp;        case S_IMPORT_VERSION:
+<i>938</i>&nbsp;            // shared tables have to have a version
+<b class="fc"><i>939</i>&nbsp;            _string_value = null;</b>
+<b class="fc"><i>940</i>&nbsp;            _int_value = _current_import.getVersion();</b>
+<b class="fc"><i>941</i>&nbsp;            break;</b>
+<i>942</i>&nbsp;
+<i>943</i>&nbsp;        case S_IMPORT_MAX_ID:
+<i>944</i>&nbsp;            // and they also always have a max id - so we set up
+<i>945</i>&nbsp;            // for it
+<b class="fc"><i>946</i>&nbsp;            _int_value = _current_import.getMaxId();</b>
+<b class="fc"><i>947</i>&nbsp;            break;</b>
+<i>948</i>&nbsp;
+<i>949</i>&nbsp;        default:
+<b class="nc"><i>950</i>&nbsp;            String message = &quot;UnifiedSymbolTableReader in state &quot;</b>
+<b class="nc"><i>951</i>&nbsp;                           + SymbolTableReader.get_state_name(new_state)</b>
+<i>952</i>&nbsp;                           + &quot; has no state to load.&quot;;
+<b class="nc"><i>953</i>&nbsp;            throw new IonException(message);</b>
+<i>954</i>&nbsp;        }
+<b class="fc"><i>955</i>&nbsp;    }</b>
+<i>956</i>&nbsp;
+<i>957</i>&nbsp;    public void stepIn()
+<i>958</i>&nbsp;    {
+<i>959</i>&nbsp;        int new_state;
+<i>960</i>&nbsp;
+<b class="fc"><i>961</i>&nbsp;        switch (_current_state) {</b>
+<i>962</i>&nbsp;        case S_STRUCT:
+<b class="fc"><i>963</i>&nbsp;            new_state = S_IN_STRUCT;</b>
+<b class="fc"><i>964</i>&nbsp;            break;</b>
+<i>965</i>&nbsp;        case S_IMPORT_LIST:
+<b class="fc"><i>966</i>&nbsp;            _import_iterator = Arrays.asList(_imported_tables).iterator();</b>
+<b class="fc"><i>967</i>&nbsp;            new_state = S_IN_IMPORTS;</b>
+<b class="fc"><i>968</i>&nbsp;            break;</b>
+<i>969</i>&nbsp;        case S_IMPORT_STRUCT:
+<b class="fc"><i>970</i>&nbsp;            assert(_current_import != null);</b>
+<b class="fc"><i>971</i>&nbsp;            new_state = S_IN_IMPORT_STRUCT;</b>
+<b class="fc"><i>972</i>&nbsp;            break;</b>
+<i>973</i>&nbsp;        case S_SYMBOL_LIST:
+<b class="fc"><i>974</i>&nbsp;            new_state = S_IN_SYMBOLS;</b>
+<b class="fc"><i>975</i>&nbsp;            break;</b>
+<i>976</i>&nbsp;        default:
+<b class="nc"><i>977</i>&nbsp;            throw new IllegalStateException(&quot;current value is not a container&quot;);</b>
+<i>978</i>&nbsp;        }
+<i>979</i>&nbsp;
+<b class="fc"><i>980</i>&nbsp;        _current_state = new_state;</b>
+<b class="fc"><i>981</i>&nbsp;        return;</b>
+<i>982</i>&nbsp;    }
+<i>983</i>&nbsp;
+<i>984</i>&nbsp;    public void stepOut()
+<i>985</i>&nbsp;    {
+<b class="fc"><i>986</i>&nbsp;        int new_state = -1;</b>
+<i>987</i>&nbsp;
+<b class="fc"><i>988</i>&nbsp;        switch (_current_state) {</b>
+<i>989</i>&nbsp;            case S_IN_STRUCT:
+<i>990</i>&nbsp;            case S_NAME:
+<i>991</i>&nbsp;            case S_VERSION:
+<i>992</i>&nbsp;            case S_MAX_ID:
+<i>993</i>&nbsp;            case S_IMPORT_LIST:
+<i>994</i>&nbsp;            case S_AFTER_IMPORT_LIST:
+<i>995</i>&nbsp;            case S_SYMBOL_LIST:
+<i>996</i>&nbsp;            case S_STRUCT_CLOSE:
+<i>997</i>&nbsp;                // these are all top level so stepOut()
+<i>998</i>&nbsp;                // ends up at the end of our data
+<b class="fc"><i>999</i>&nbsp;                new_state = S_EOF;</b>
+<b class="fc"><i>1000</i>&nbsp;                break;</b>
+<i>1001</i>&nbsp;
+<i>1002</i>&nbsp;            case S_IN_IMPORTS:
+<i>1003</i>&nbsp;            case S_IMPORT_STRUCT:
+<i>1004</i>&nbsp;            case S_IMPORT_LIST_CLOSE:
+<i>1005</i>&nbsp;                // if we&#39;re outside a struct, and we&#39;re in the import
+<i>1006</i>&nbsp;                // list stepOut will be whatever follows the import list
+<i>1007</i>&nbsp;                // close and we&#39;re done with these
+<b class="fc"><i>1008</i>&nbsp;                _current_import = null;</b>
+<b class="fc"><i>1009</i>&nbsp;                _import_iterator = null;</b>
+<b class="fc"><i>1010</i>&nbsp;                new_state = stateFollowingImportList(Op.STEPOUT);</b>
+<b class="fc"><i>1011</i>&nbsp;                break;</b>
+<i>1012</i>&nbsp;
+<i>1013</i>&nbsp;            case S_IN_IMPORT_STRUCT:
+<i>1014</i>&nbsp;            case S_IMPORT_NAME:
+<i>1015</i>&nbsp;            case S_IMPORT_VERSION:
+<i>1016</i>&nbsp;            case S_IMPORT_MAX_ID:
+<i>1017</i>&nbsp;            case S_IMPORT_STRUCT_CLOSE:
+<i>1018</i>&nbsp;                // if there is a next import the next state
+<i>1019</i>&nbsp;                // will be its struct open
+<i>1020</i>&nbsp;                // otherwise next will be the list close
+<b class="fc"><i>1021</i>&nbsp;                if (_import_iterator.hasNext()) {</b>
+<b class="fc"><i>1022</i>&nbsp;                    new_state = S_IMPORT_STRUCT;</b>
+<i>1023</i>&nbsp;                }
+<i>1024</i>&nbsp;                else {
+<b class="fc"><i>1025</i>&nbsp;                    new_state = S_IMPORT_LIST_CLOSE;</b>
+<i>1026</i>&nbsp;                }
+<b class="fc"><i>1027</i>&nbsp;                break;</b>
+<i>1028</i>&nbsp;
+<i>1029</i>&nbsp;            case S_IN_SYMBOLS:
+<i>1030</i>&nbsp;            case S_SYMBOL:
+<i>1031</i>&nbsp;            case S_SYMBOL_LIST_CLOSE:
+<i>1032</i>&nbsp;                // I think this is just S_EOF, but if we ever
+<i>1033</i>&nbsp;                // put anything after the symbol list this
+<i>1034</i>&nbsp;                // will need to be updated.  And we&#39;re done
+<i>1035</i>&nbsp;                // with our local symbol references.
+<b class="fc"><i>1036</i>&nbsp;                _string_value = null;</b>
+<b class="fc"><i>1037</i>&nbsp;                _local_symbols = null;</b>
+<b class="fc"><i>1038</i>&nbsp;                new_state = stateFollowingLocalSymbols();</b>
+<b class="fc"><i>1039</i>&nbsp;                break;</b>
+<i>1040</i>&nbsp;
+<i>1041</i>&nbsp;            default:
+<b class="nc"><i>1042</i>&nbsp;                throw new IllegalStateException(&quot;current value is not in a container&quot;);</b>
+<i>1043</i>&nbsp;        }
+<i>1044</i>&nbsp;
+<b class="fc"><i>1045</i>&nbsp;        _current_state = new_state;</b>
+<b class="fc"><i>1046</i>&nbsp;        return;</b>
+<i>1047</i>&nbsp;    }
+<i>1048</i>&nbsp;
+<i>1049</i>&nbsp;    public int getDepth()
+<i>1050</i>&nbsp;    {
+<b class="fc"><i>1051</i>&nbsp;        return stateDepth(_current_state);</b>
+<i>1052</i>&nbsp;    }
+<i>1053</i>&nbsp;
+<i>1054</i>&nbsp;    public SymbolTable getSymbolTable()
+<i>1055</i>&nbsp;    {
+<i>1056</i>&nbsp;        // TODO: this should return a system symbol table
+<i>1057</i>&nbsp;        //       but, for now, we don&#39;t really know which
+<i>1058</i>&nbsp;        //       one to return;
+<i>1059</i>&nbsp;        //
+<i>1060</i>&nbsp;        // UnifiedSymbolTable.makeSystemSymbolTable(_sys, _version);
+<i>1061</i>&nbsp;        //
+<i>1062</i>&nbsp;        // although, with this reader in place we should be
+<i>1063</i>&nbsp;        // able to cons one up without a system
+<b class="nc"><i>1064</i>&nbsp;        return null;</b>
+<i>1065</i>&nbsp;    }
+<i>1066</i>&nbsp;
+<i>1067</i>&nbsp;    public IonType getType()
+<i>1068</i>&nbsp;    {
+<b class="fc"><i>1069</i>&nbsp;        return stateType(_current_state);</b>
+<i>1070</i>&nbsp;    }
+<i>1071</i>&nbsp;
+<i>1072</i>&nbsp;
+<i>1073</i>&nbsp;    public String[] getTypeAnnotations()
+<i>1074</i>&nbsp;    {
+<b class="nc"><i>1075</i>&nbsp;        if (_current_state == S_STRUCT) {</b>
+<i>1076</i>&nbsp;            // Must return a new array each time to prevent user from changing it
+<b class="nc"><i>1077</i>&nbsp;            if (_symbol_table.isLocalTable() || _symbol_table.isSystemTable())</b>
+<i>1078</i>&nbsp;            {
+<b class="nc"><i>1079</i>&nbsp;                return new String[] { ION_SYMBOL_TABLE };</b>
+<i>1080</i>&nbsp;            }
+<b class="nc"><i>1081</i>&nbsp;            return new String[] { ION_SHARED_SYMBOL_TABLE };</b>
+<i>1082</i>&nbsp;        }
+<b class="nc"><i>1083</i>&nbsp;        return _Private_Utils.EMPTY_STRING_ARRAY;</b>
+<i>1084</i>&nbsp;    }
+<i>1085</i>&nbsp;
+<b class="fc"><i>1086</i>&nbsp;    private static final SymbolToken ION_SYMBOL_TABLE_SYM =</b>
+<b class="fc"><i>1087</i>&nbsp;        newSymbolToken(ION_SYMBOL_TABLE, ION_SYMBOL_TABLE_SID);</b>
+<i>1088</i>&nbsp;
+<b class="fc"><i>1089</i>&nbsp;    private static final SymbolToken ION_SHARED_SYMBOL_TABLE_SYM =</b>
+<b class="fc"><i>1090</i>&nbsp;        newSymbolToken(ION_SHARED_SYMBOL_TABLE, ION_SHARED_SYMBOL_TABLE_SID);</b>
+<i>1091</i>&nbsp;
+<i>1092</i>&nbsp;    public SymbolToken[] getTypeAnnotationSymbols()
+<i>1093</i>&nbsp;    {
+<b class="fc"><i>1094</i>&nbsp;        if (_current_state == S_STRUCT) {</b>
+<i>1095</i>&nbsp;            SymbolToken sym;
+<b class="fc"><i>1096</i>&nbsp;            if (_symbol_table.isLocalTable() || _symbol_table.isSystemTable())</b>
+<i>1097</i>&nbsp;            {
+<b class="fc"><i>1098</i>&nbsp;                sym = ION_SYMBOL_TABLE_SYM;</b>
+<i>1099</i>&nbsp;            }
+<i>1100</i>&nbsp;            else
+<i>1101</i>&nbsp;            {
+<b class="fc"><i>1102</i>&nbsp;                sym = ION_SHARED_SYMBOL_TABLE_SYM;</b>
+<i>1103</i>&nbsp;            }
+<i>1104</i>&nbsp;
+<i>1105</i>&nbsp;            // Must return a new array each time to prevent user from changing it
+<b class="fc"><i>1106</i>&nbsp;            return new SymbolToken[] { sym };</b>
+<i>1107</i>&nbsp;        }
+<b class="fc"><i>1108</i>&nbsp;        return SymbolToken.EMPTY_ARRAY;</b>
+<i>1109</i>&nbsp;    }
+<i>1110</i>&nbsp;
+<i>1111</i>&nbsp;
+<i>1112</i>&nbsp;    public Iterator&lt;String&gt; iterateTypeAnnotations()
+<i>1113</i>&nbsp;    {
+<b class="nc"><i>1114</i>&nbsp;        String[] annotations = getTypeAnnotations();</b>
+<b class="nc"><i>1115</i>&nbsp;        return _Private_Utils.stringIterator(annotations);</b>
+<i>1116</i>&nbsp;    }
+<i>1117</i>&nbsp;
+<i>1118</i>&nbsp;
+<i>1119</i>&nbsp;    public int getFieldId()
+<i>1120</i>&nbsp;    {
+<i>1121</i>&nbsp;
+<b class="nc"><i>1122</i>&nbsp;        switch (_current_state)</b>
+<i>1123</i>&nbsp;        {
+<i>1124</i>&nbsp;        case S_STRUCT:
+<i>1125</i>&nbsp;        case S_IN_STRUCT:
+<i>1126</i>&nbsp;        case S_IN_IMPORTS:
+<i>1127</i>&nbsp;        case S_IMPORT_STRUCT:
+<i>1128</i>&nbsp;        case S_IN_IMPORT_STRUCT:
+<i>1129</i>&nbsp;        case S_IMPORT_STRUCT_CLOSE:
+<i>1130</i>&nbsp;        case S_IMPORT_LIST_CLOSE:
+<i>1131</i>&nbsp;        case S_AFTER_IMPORT_LIST:
+<i>1132</i>&nbsp;        case S_IN_SYMBOLS:
+<i>1133</i>&nbsp;        case S_SYMBOL:
+<i>1134</i>&nbsp;        case S_SYMBOL_LIST_CLOSE:
+<i>1135</i>&nbsp;        case S_STRUCT_CLOSE:
+<i>1136</i>&nbsp;        case S_EOF:
+<b class="nc"><i>1137</i>&nbsp;            return SymbolTable.UNKNOWN_SYMBOL_ID;</b>
+<i>1138</i>&nbsp;
+<i>1139</i>&nbsp;        case S_NAME:
+<i>1140</i>&nbsp;        case S_IMPORT_NAME:
+<b class="nc"><i>1141</i>&nbsp;            return NAME_SID;</b>
+<i>1142</i>&nbsp;
+<i>1143</i>&nbsp;        case S_VERSION:
+<i>1144</i>&nbsp;        case S_IMPORT_VERSION:
+<b class="nc"><i>1145</i>&nbsp;            return VERSION_SID;</b>
+<i>1146</i>&nbsp;
+<i>1147</i>&nbsp;        case S_MAX_ID:
+<i>1148</i>&nbsp;        case S_IMPORT_MAX_ID:
+<b class="nc"><i>1149</i>&nbsp;            return MAX_ID_SID;</b>
+<i>1150</i>&nbsp;
+<i>1151</i>&nbsp;        case S_IMPORT_LIST:
+<b class="nc"><i>1152</i>&nbsp;            return IMPORTS_SID;</b>
+<i>1153</i>&nbsp;
+<i>1154</i>&nbsp;        case S_SYMBOL_LIST:
+<b class="nc"><i>1155</i>&nbsp;            return SYMBOLS_SID;</b>
+<i>1156</i>&nbsp;
+<i>1157</i>&nbsp;        default:
+<b class="nc"><i>1158</i>&nbsp;            throw new IonException(&quot;Internal error: UnifiedSymbolTableReader is in an unrecognized state: &quot;+_current_state);</b>
+<i>1159</i>&nbsp;        }
+<i>1160</i>&nbsp;    }
+<i>1161</i>&nbsp;
+<i>1162</i>&nbsp;    public String getFieldName()
+<i>1163</i>&nbsp;    {
+<b class="fc"><i>1164</i>&nbsp;        switch (_current_state)</b>
+<i>1165</i>&nbsp;        {
+<i>1166</i>&nbsp;        case S_STRUCT:
+<i>1167</i>&nbsp;        case S_IN_STRUCT:
+<i>1168</i>&nbsp;        case S_IN_IMPORTS:
+<i>1169</i>&nbsp;        case S_IMPORT_STRUCT:
+<i>1170</i>&nbsp;        case S_IN_IMPORT_STRUCT:
+<i>1171</i>&nbsp;        case S_IMPORT_STRUCT_CLOSE:
+<i>1172</i>&nbsp;        case S_IMPORT_LIST_CLOSE:
+<i>1173</i>&nbsp;        case S_AFTER_IMPORT_LIST:
+<i>1174</i>&nbsp;        case S_IN_SYMBOLS:
+<i>1175</i>&nbsp;        case S_SYMBOL:
+<i>1176</i>&nbsp;        case S_SYMBOL_LIST_CLOSE:
+<i>1177</i>&nbsp;        case S_STRUCT_CLOSE:
+<i>1178</i>&nbsp;        case S_EOF:
+<b class="nc"><i>1179</i>&nbsp;            return null;</b>
+<i>1180</i>&nbsp;
+<i>1181</i>&nbsp;        case S_NAME:
+<i>1182</i>&nbsp;        case S_IMPORT_NAME:
+<b class="nc"><i>1183</i>&nbsp;            return NAME;</b>
+<i>1184</i>&nbsp;
+<i>1185</i>&nbsp;        case S_VERSION:
+<i>1186</i>&nbsp;        case S_IMPORT_VERSION:
+<b class="nc"><i>1187</i>&nbsp;            return VERSION;</b>
+<i>1188</i>&nbsp;
+<i>1189</i>&nbsp;        case S_MAX_ID:
+<i>1190</i>&nbsp;        case S_IMPORT_MAX_ID:
+<b class="nc"><i>1191</i>&nbsp;            return MAX_ID;</b>
+<i>1192</i>&nbsp;
+<i>1193</i>&nbsp;        case S_IMPORT_LIST:
+<b class="fc"><i>1194</i>&nbsp;            return IMPORTS;</b>
+<i>1195</i>&nbsp;
+<i>1196</i>&nbsp;        case S_SYMBOL_LIST:
+<b class="fc"><i>1197</i>&nbsp;            return SYMBOLS;</b>
+<i>1198</i>&nbsp;
+<i>1199</i>&nbsp;        default:
+<b class="nc"><i>1200</i>&nbsp;            throw new IonException(&quot;Internal error: UnifiedSymbolTableReader is in an unrecognized state: &quot;+_current_state);</b>
+<i>1201</i>&nbsp;        }
+<i>1202</i>&nbsp;    }
+<i>1203</i>&nbsp;
+<i>1204</i>&nbsp;    public SymbolToken getFieldNameSymbol()
+<i>1205</i>&nbsp;    {
+<b class="fc"><i>1206</i>&nbsp;        switch (_current_state)</b>
+<i>1207</i>&nbsp;        {
+<i>1208</i>&nbsp;        case S_STRUCT:
+<i>1209</i>&nbsp;        case S_IN_STRUCT:
+<i>1210</i>&nbsp;        case S_IN_IMPORTS:
+<i>1211</i>&nbsp;        case S_IMPORT_STRUCT:
+<i>1212</i>&nbsp;        case S_IN_IMPORT_STRUCT:
+<i>1213</i>&nbsp;        case S_IMPORT_STRUCT_CLOSE:
+<i>1214</i>&nbsp;        case S_IMPORT_LIST_CLOSE:
+<i>1215</i>&nbsp;        case S_AFTER_IMPORT_LIST:
+<i>1216</i>&nbsp;        case S_IN_SYMBOLS:
+<i>1217</i>&nbsp;        case S_SYMBOL:
+<i>1218</i>&nbsp;        case S_SYMBOL_LIST_CLOSE:
+<i>1219</i>&nbsp;        case S_STRUCT_CLOSE:
+<i>1220</i>&nbsp;        case S_EOF:
+<b class="fc"><i>1221</i>&nbsp;            return null;</b>
+<i>1222</i>&nbsp;
+<i>1223</i>&nbsp;        case S_NAME:
+<i>1224</i>&nbsp;        case S_IMPORT_NAME:
+<b class="fc"><i>1225</i>&nbsp;            return new SymbolTokenImpl(NAME, NAME_SID);</b>
+<i>1226</i>&nbsp;
+<i>1227</i>&nbsp;        case S_VERSION:
+<i>1228</i>&nbsp;        case S_IMPORT_VERSION:
+<b class="fc"><i>1229</i>&nbsp;            return new SymbolTokenImpl(VERSION, VERSION_SID);</b>
+<i>1230</i>&nbsp;
+<i>1231</i>&nbsp;        case S_MAX_ID:
+<i>1232</i>&nbsp;        case S_IMPORT_MAX_ID:
+<b class="fc"><i>1233</i>&nbsp;            return new SymbolTokenImpl(MAX_ID, MAX_ID_SID);</b>
+<i>1234</i>&nbsp;
+<i>1235</i>&nbsp;        case S_IMPORT_LIST:
+<b class="fc"><i>1236</i>&nbsp;            return new SymbolTokenImpl(IMPORTS, IMPORTS_SID);</b>
+<i>1237</i>&nbsp;
+<i>1238</i>&nbsp;        case S_SYMBOL_LIST:
+<b class="fc"><i>1239</i>&nbsp;            return new SymbolTokenImpl(SYMBOLS, SYMBOLS_SID);</b>
+<i>1240</i>&nbsp;
+<i>1241</i>&nbsp;        default:
+<b class="nc"><i>1242</i>&nbsp;            throw new IonException(&quot;Internal error: UnifiedSymbolTableReader is in an unrecognized state: &quot;+_current_state);</b>
+<i>1243</i>&nbsp;        }
+<i>1244</i>&nbsp;    }
+<i>1245</i>&nbsp;
+<i>1246</i>&nbsp;    public boolean isNullValue()
+<i>1247</i>&nbsp;    {
+<b class="fc"><i>1248</i>&nbsp;        switch (_current_state)</b>
+<i>1249</i>&nbsp;        {
+<i>1250</i>&nbsp;        case S_STRUCT:
+<i>1251</i>&nbsp;        case S_IN_STRUCT:
+<i>1252</i>&nbsp;        case S_NAME:
+<i>1253</i>&nbsp;        case S_VERSION:
+<i>1254</i>&nbsp;        case S_MAX_ID:
+<i>1255</i>&nbsp;        case S_IMPORT_LIST:
+<i>1256</i>&nbsp;        case S_IN_IMPORTS:
+<i>1257</i>&nbsp;        case S_IMPORT_STRUCT:
+<i>1258</i>&nbsp;        case S_IN_IMPORT_STRUCT:
+<i>1259</i>&nbsp;        case S_IMPORT_NAME:
+<i>1260</i>&nbsp;        case S_IMPORT_VERSION:
+<i>1261</i>&nbsp;        case S_IMPORT_MAX_ID:
+<i>1262</i>&nbsp;        case S_IN_SYMBOLS:
+<i>1263</i>&nbsp;        case S_SYMBOL:
+<i>1264</i>&nbsp;            // these values are either present and non-null
+<i>1265</i>&nbsp;            // or entirely absent (in which case they will
+<i>1266</i>&nbsp;            // have been skipped and we won&#39;t be in a state
+<i>1267</i>&nbsp;            // to return them).
+<b class="fc"><i>1268</i>&nbsp;            return false;</b>
+<i>1269</i>&nbsp;
+<i>1270</i>&nbsp;        case S_IMPORT_STRUCT_CLOSE:
+<i>1271</i>&nbsp;        case S_IMPORT_LIST_CLOSE:
+<i>1272</i>&nbsp;        case S_AFTER_IMPORT_LIST:
+<i>1273</i>&nbsp;        case S_SYMBOL_LIST:
+<i>1274</i>&nbsp;        case S_SYMBOL_LIST_CLOSE:
+<i>1275</i>&nbsp;        case S_STRUCT_CLOSE:
+<i>1276</i>&nbsp;        case S_EOF:
+<i>1277</i>&nbsp;            // here we&#39;re not really on a value, so we&#39;re not
+<i>1278</i>&nbsp;            // on a value that is a null - so false again.
+<b class="fc"><i>1279</i>&nbsp;            return false;</b>
+<i>1280</i>&nbsp;
+<i>1281</i>&nbsp;        default:
+<b class="nc"><i>1282</i>&nbsp;            throw new IonException(&quot;Internal error: UnifiedSymbolTableReader is in an unrecognized state: &quot;+_current_state);</b>
+<i>1283</i>&nbsp;        }
+<i>1284</i>&nbsp;    }
+<i>1285</i>&nbsp;
+<i>1286</i>&nbsp;    public boolean isInStruct()
+<i>1287</i>&nbsp;    {
+<b class="nc"><i>1288</i>&nbsp;        switch (_current_state)</b>
+<i>1289</i>&nbsp;        {
+<i>1290</i>&nbsp;        case S_STRUCT:
+<i>1291</i>&nbsp;        case S_IN_IMPORTS:
+<i>1292</i>&nbsp;        case S_IMPORT_STRUCT:
+<i>1293</i>&nbsp;        case S_IN_SYMBOLS:
+<i>1294</i>&nbsp;        case S_SYMBOL:
+<i>1295</i>&nbsp;            // these values are either not contained, or
+<i>1296</i>&nbsp;            // contained in a list.  So we aren&#39;t in a
+<i>1297</i>&nbsp;            // struct if they&#39;re pending.
+<b class="nc"><i>1298</i>&nbsp;            return false;</b>
+<i>1299</i>&nbsp;
+<i>1300</i>&nbsp;        case S_IN_STRUCT:
+<i>1301</i>&nbsp;        case S_NAME:
+<i>1302</i>&nbsp;        case S_VERSION:
+<i>1303</i>&nbsp;        case S_MAX_ID:
+<i>1304</i>&nbsp;        case S_IMPORT_LIST:
+<i>1305</i>&nbsp;        case S_IN_IMPORT_STRUCT:
+<i>1306</i>&nbsp;        case S_IMPORT_NAME:
+<i>1307</i>&nbsp;        case S_IMPORT_VERSION:
+<i>1308</i>&nbsp;        case S_IMPORT_MAX_ID:
+<i>1309</i>&nbsp;        case S_AFTER_IMPORT_LIST:
+<i>1310</i>&nbsp;        case S_SYMBOL_LIST:
+<i>1311</i>&nbsp;            // the values above are all members
+<i>1312</i>&nbsp;            // of a struct, so we must be in a
+<i>1313</i>&nbsp;            // struct to have them pending
+<b class="nc"><i>1314</i>&nbsp;            return true;</b>
+<i>1315</i>&nbsp;
+<i>1316</i>&nbsp;        case S_IMPORT_STRUCT_CLOSE:
+<i>1317</i>&nbsp;        case S_STRUCT_CLOSE:
+<i>1318</i>&nbsp;            // if we&#39;re closing a struct we&#39;re in a struct
+<b class="nc"><i>1319</i>&nbsp;            return true;</b>
+<i>1320</i>&nbsp;
+<i>1321</i>&nbsp;        case S_IMPORT_LIST_CLOSE:
+<i>1322</i>&nbsp;        case S_SYMBOL_LIST_CLOSE:
+<i>1323</i>&nbsp;        case S_EOF:
+<i>1324</i>&nbsp;            // if we&#39;re closing a list we in a list, not a struct
+<i>1325</i>&nbsp;            // and EOF is not in a struct
+<b class="nc"><i>1326</i>&nbsp;            return false;</b>
+<i>1327</i>&nbsp;
+<i>1328</i>&nbsp;        default:
+<b class="nc"><i>1329</i>&nbsp;            throw new IonException(&quot;Internal error: UnifiedSymbolTableReader is in an unrecognized state: &quot;+_current_state);</b>
+<i>1330</i>&nbsp;        }
+<i>1331</i>&nbsp;    }
+<i>1332</i>&nbsp;
+<i>1333</i>&nbsp;    public boolean booleanValue()
+<i>1334</i>&nbsp;    {
+<b class="nc"><i>1335</i>&nbsp;        throw new IllegalStateException(&quot;only valid if the value is a boolean&quot;);</b>
+<i>1336</i>&nbsp;    }
+<i>1337</i>&nbsp;
+<i>1338</i>&nbsp;    public int intValue()
+<i>1339</i>&nbsp;    {
+<b class="fc"><i>1340</i>&nbsp;        return (int)_int_value;</b>
+<i>1341</i>&nbsp;    }
+<i>1342</i>&nbsp;
+<i>1343</i>&nbsp;    public long longValue()
+<i>1344</i>&nbsp;    {
+<b class="nc"><i>1345</i>&nbsp;        return _int_value;</b>
+<i>1346</i>&nbsp;    }
+<i>1347</i>&nbsp;
+<i>1348</i>&nbsp;    public BigInteger bigIntegerValue()
+<i>1349</i>&nbsp;    {
+<b class="fc"><i>1350</i>&nbsp;        String value = Long .toString(_int_value);</b>
+<b class="fc"><i>1351</i>&nbsp;        BigInteger bi = new BigInteger(value);     // this is SOOOOO broken &lt;sigh&gt;</b>
+<b class="fc"><i>1352</i>&nbsp;        return bi;</b>
+<i>1353</i>&nbsp;    }
+<i>1354</i>&nbsp;
+<i>1355</i>&nbsp;    public double doubleValue()
+<i>1356</i>&nbsp;    {
+<b class="nc"><i>1357</i>&nbsp;        throw new IllegalStateException(&quot;only valid if the value is a double&quot;);</b>
+<i>1358</i>&nbsp;    }
+<i>1359</i>&nbsp;
+<i>1360</i>&nbsp;    public BigDecimal bigDecimalValue()
+<i>1361</i>&nbsp;    {
+<b class="nc"><i>1362</i>&nbsp;        throw new IllegalStateException(&quot;only valid if the value is a decimal&quot;);    }</b>
+<i>1363</i>&nbsp;
+<i>1364</i>&nbsp;    public Decimal decimalValue()
+<i>1365</i>&nbsp;    {
+<b class="nc"><i>1366</i>&nbsp;        throw new IllegalStateException(&quot;only valid if the value is a decimal&quot;);</b>
+<i>1367</i>&nbsp;    }
+<i>1368</i>&nbsp;
+<i>1369</i>&nbsp;    public Date dateValue()
+<i>1370</i>&nbsp;    {
+<b class="nc"><i>1371</i>&nbsp;        throw new IllegalStateException(&quot;only valid if the value is a timestamp&quot;);</b>
+<i>1372</i>&nbsp;    }
+<i>1373</i>&nbsp;
+<i>1374</i>&nbsp;    public Timestamp timestampValue()
+<i>1375</i>&nbsp;    {
+<b class="nc"><i>1376</i>&nbsp;        throw new IllegalStateException(&quot;only valid if the value is a timestamp&quot;);</b>
+<i>1377</i>&nbsp;    }
+<i>1378</i>&nbsp;
+<i>1379</i>&nbsp;    public String stringValue()
+<i>1380</i>&nbsp;    {
+<b class="fc"><i>1381</i>&nbsp;        return _string_value;</b>
+<i>1382</i>&nbsp;    }
+<i>1383</i>&nbsp;
+<i>1384</i>&nbsp;    public SymbolToken symbolValue()
+<i>1385</i>&nbsp;    {
+<i>1386</i>&nbsp;        // TODO handle null
+<b class="nc"><i>1387</i>&nbsp;        throw new UnsupportedOperationException();</b>
+<i>1388</i>&nbsp;    }
+<i>1389</i>&nbsp;
+<i>1390</i>&nbsp;    public int getBytes(byte[] buffer, int offset, int len)
+<i>1391</i>&nbsp;    {
+<b class="nc"><i>1392</i>&nbsp;        throw new IllegalStateException(&quot;getBytes() is only valid if the reader is on a lob value, not a &quot;+stateType(_current_state)+&quot; value&quot;);</b>
+<i>1393</i>&nbsp;    }
+<i>1394</i>&nbsp;
+<i>1395</i>&nbsp;    public int byteSize()
+<i>1396</i>&nbsp;    {
+<b class="nc"><i>1397</i>&nbsp;        throw new IllegalStateException(&quot;byteSize() is only valid if the reader is on a lob value, not a &quot;+stateType(_current_state)+&quot; value&quot;);</b>
+<i>1398</i>&nbsp;    }
+<i>1399</i>&nbsp;
+<i>1400</i>&nbsp;    public byte[] newBytes()
+<i>1401</i>&nbsp;    {
+<b class="nc"><i>1402</i>&nbsp;        throw new IllegalStateException(&quot;newBytes() is only valid if the reader is on a lob value, not a &quot;+stateType(_current_state)+&quot; value&quot;);</b>
+<i>1403</i>&nbsp;    }
+<i>1404</i>&nbsp;
+<i>1405</i>&nbsp;    public void close() throws IOException
+<i>1406</i>&nbsp;    {
+<b class="nc"><i>1407</i>&nbsp;        _current_state = S_EOF;</b>
+<b class="nc"><i>1408</i>&nbsp;    }</b>
+<i>1409</i>&nbsp;
+<i>1410</i>&nbsp;    public IntegerSize getIntegerSize()
+<i>1411</i>&nbsp;    {
+<b class="fc"><i>1412</i>&nbsp;        if (stateType(_current_state) != IonType.INT)</b>
+<i>1413</i>&nbsp;        {
+<b class="nc"><i>1414</i>&nbsp;            return null;</b>
+<i>1415</i>&nbsp;        }
+<b class="fc"><i>1416</i>&nbsp;        return IntegerSize.INT; // all of SymbolTable&#39;s integers are type int</b>
+<i>1417</i>&nbsp;    }
+<i>1418</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

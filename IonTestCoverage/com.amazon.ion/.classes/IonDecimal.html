@@ -1,0 +1,155 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonDecimal</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonDecimal (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonDecimal</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import java.math.BigDecimal;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;/**
+<i>21</i>&nbsp; * An Ion &lt;code&gt;decimal&lt;/code&gt; value.
+<i>22</i>&nbsp; * &lt;p&gt;
+<i>23</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>24</i>&nbsp; * code outside of this library.
+<i>25</i>&nbsp; */
+<i>26</i>&nbsp;public interface IonDecimal
+<i>27</i>&nbsp;    extends IonNumber
+<i>28</i>&nbsp;{
+<i>29</i>&nbsp;    /**
+<i>30</i>&nbsp;     * Gets the value of this Ion {@code decimal} as a Java
+<i>31</i>&nbsp;     * &lt;code&gt;float&lt;/code&gt; value.
+<i>32</i>&nbsp;     *
+<i>33</i>&nbsp;     * @return the float value.
+<i>34</i>&nbsp;     * @throws NullValueException if &lt;code&gt;this.isNullValue()&lt;/code&gt;.
+<i>35</i>&nbsp;     */
+<i>36</i>&nbsp;    public float floatValue()
+<i>37</i>&nbsp;        throws NullValueException;
+<i>38</i>&nbsp;
+<i>39</i>&nbsp;    /**
+<i>40</i>&nbsp;     * Gets the value of this Ion {@code decimal} as a Java
+<i>41</i>&nbsp;     * &lt;code&gt;double&lt;/code&gt; value.
+<i>42</i>&nbsp;     *
+<i>43</i>&nbsp;     * @return the double value.
+<i>44</i>&nbsp;     * @throws NullValueException if &lt;code&gt;this.isNullValue()&lt;/code&gt;.
+<i>45</i>&nbsp;     */
+<i>46</i>&nbsp;    public double doubleValue()
+<i>47</i>&nbsp;        throws NullValueException;
+<i>48</i>&nbsp;
+<i>49</i>&nbsp;    /**
+<i>50</i>&nbsp;     * Gets the value of this Ion {@code decimal} as a {@link BigDecimal}.
+<i>51</i>&nbsp;     * If you need negative zeros, use {@link #decimalValue()}.
+<i>52</i>&nbsp;     *
+<i>53</i>&nbsp;     * @return the {@code BigDecimal} value,
+<i>54</i>&nbsp;     * or {@code null} if {@code this.isNullValue()}.
+<i>55</i>&nbsp;     *
+<i>56</i>&nbsp;     * @see #decimalValue()
+<i>57</i>&nbsp;     */
+<i>58</i>&nbsp;    public BigDecimal bigDecimalValue();
+<i>59</i>&nbsp;
+<i>60</i>&nbsp;    /**
+<i>61</i>&nbsp;     * Gets the value of this Ion {@code decimal} as a {@link Decimal},
+<i>62</i>&nbsp;     * which extends {@link BigDecimal} with support for negative zeros.
+<i>63</i>&nbsp;     *
+<i>64</i>&nbsp;     * @return the {@code Decimal} value,
+<i>65</i>&nbsp;     * or {@code null} if {@code this.isNullValue()}.
+<i>66</i>&nbsp;     *
+<i>67</i>&nbsp;     * @see #bigDecimalValue()
+<i>68</i>&nbsp;     */
+<i>69</i>&nbsp;    public Decimal decimalValue();
+<i>70</i>&nbsp;
+<i>71</i>&nbsp;    /**
+<i>72</i>&nbsp;     * Sets the value of this element.
+<i>73</i>&nbsp;     */
+<i>74</i>&nbsp;    public void setValue(long value);
+<i>75</i>&nbsp;
+<i>76</i>&nbsp;    /**
+<i>77</i>&nbsp;     * Sets the value of this element.
+<i>78</i>&nbsp;     * This method behaves like {@link BigDecimal#valueOf(double)} in that it
+<i>79</i>&nbsp;     * uses the {@code double}&#39;s canonical string representation provided by
+<i>80</i>&nbsp;     * {@link Double#toString(double)}}.
+<i>81</i>&nbsp;     *
+<i>82</i>&nbsp;     * @see Decimal#valueOf(double)
+<i>83</i>&nbsp;     */
+<i>84</i>&nbsp;    public void setValue(float value);
+<i>85</i>&nbsp;
+<i>86</i>&nbsp;    /**
+<i>87</i>&nbsp;     * Sets the value of this element.
+<i>88</i>&nbsp;     * This method behaves like {@link BigDecimal#valueOf(double)} in that it
+<i>89</i>&nbsp;     * uses the {@code double}&#39;s canonical string representation provided by
+<i>90</i>&nbsp;     * {@link Double#toString(double)}}.
+<i>91</i>&nbsp;     *
+<i>92</i>&nbsp;     * @see Decimal#valueOf(double)
+<i>93</i>&nbsp;     */
+<i>94</i>&nbsp;    public void setValue(double value);
+<i>95</i>&nbsp;
+<i>96</i>&nbsp;    /**
+<i>97</i>&nbsp;     * Sets the value of this element.
+<i>98</i>&nbsp;     * To set a negative zero value, pass an {@link Decimal}.
+<i>99</i>&nbsp;     *
+<i>100</i>&nbsp;     * @param value the new value of this decimal;
+<i>101</i>&nbsp;     * may be &lt;code&gt;null&lt;/code&gt; to make this &lt;code&gt;null.decimal&lt;/code&gt;.
+<i>102</i>&nbsp;     */
+<i>103</i>&nbsp;    public void setValue(BigDecimal value);
+<i>104</i>&nbsp;
+<i>105</i>&nbsp;
+<i>106</i>&nbsp;    public IonDecimal clone()
+<i>107</i>&nbsp;        throws UnknownSymbolException;
+<i>108</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

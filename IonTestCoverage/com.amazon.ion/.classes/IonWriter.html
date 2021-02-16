@@ -1,0 +1,569 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonWriter</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonWriter (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonWriter</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import com.amazon.ion.facet.Faceted;
+<i>19</i>&nbsp;import com.amazon.ion.system.IonTextWriterBuilder;
+<i>20</i>&nbsp;import com.amazon.ion.util.IonStreamUtils;
+<i>21</i>&nbsp;import java.io.ByteArrayOutputStream;
+<i>22</i>&nbsp;import java.io.Closeable;
+<i>23</i>&nbsp;import java.io.Flushable;
+<i>24</i>&nbsp;import java.io.IOException;
+<i>25</i>&nbsp;import java.math.BigDecimal;
+<i>26</i>&nbsp;import java.math.BigInteger;
+<i>27</i>&nbsp;import java.util.Date;
+<i>28</i>&nbsp;
+<i>29</i>&nbsp;/**
+<i>30</i>&nbsp; * Writes Ion data to an output source.
+<i>31</i>&nbsp; *
+<i>32</i>&nbsp; * This interface allows the user to write Ion data without being concerned
+<i>33</i>&nbsp; * about which output format is being used.
+<i>34</i>&nbsp; * &lt;p&gt;
+<i>35</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>36</i>&nbsp; * code outside of this library.
+<i>37</i>&nbsp; * &lt;p&gt;
+<i>38</i>&nbsp; * A value is written via the set of typed {@code write*()} methods such as
+<i>39</i>&nbsp; * {@link #writeBool(boolean)} and {@link #writeInt(long)}.
+<i>40</i>&nbsp; * Each of these methods outputs a single Ion value, and afterwards the writer
+<i>41</i>&nbsp; * is prepared to receive the data for the next sibling value.
+<i>42</i>&nbsp; * &lt;p&gt;
+<i>43</i>&nbsp; * Any type annotations must be set before the value is written.
+<i>44</i>&nbsp; * Once the value has been written the &quot;pending annotations&quot; are erased,
+<i>45</i>&nbsp; * so they are must be set again if they need to be applied to the next value.
+<i>46</i>&nbsp; * &lt;p&gt;
+<i>47</i>&nbsp; * Similarly the field name must be set before the value is
+<i>48</i>&nbsp; * written (assuming the value is a field in a structure).  The field name
+<i>49</i>&nbsp; * is also &quot;erased&quot; once used, so it must be set for each field.
+<i>50</i>&nbsp; * &lt;p&gt;
+<i>51</i>&nbsp; * To write a container, first write any annotations and/or field name
+<i>52</i>&nbsp; * applicable to the container itself.
+<i>53</i>&nbsp; * Then call {@link #stepIn(IonType)} with the desired container type.
+<i>54</i>&nbsp; * Then write each child value in order.
+<i>55</i>&nbsp; * Finally, call {@link #stepOut()} to complete the container.
+<i>56</i>&nbsp; * &lt;p&gt;
+<i>57</i>&nbsp; * Once all the top-level values have been written (and stepped-out back to
+<i>58</i>&nbsp; * the starting level), the caller must {@link #close()} the writer
+<i>59</i>&nbsp; * (or at least {@link #flush()} or {@link #finish()} it) before accessing
+<i>60</i>&nbsp; * the data written to the underlying data sink
+<i>61</i>&nbsp; * (for example, via {@link ByteArrayOutputStream#toByteArray()}).
+<i>62</i>&nbsp; * The writer may have internal buffers and without closing, flushing, or
+<i>63</i>&nbsp; * finishing it, it may not have written everything to the underlying data
+<i>64</i>&nbsp; * sink.
+<i>65</i>&nbsp; *
+<i>66</i>&nbsp; * &lt;h2&gt;Exception Handling&lt;/h2&gt;
+<i>67</i>&nbsp; * {@code IonWriter} is a generic interface for generating Ion data, and it&#39;s
+<i>68</i>&nbsp; * not possible to fully specify the set of exceptions that could be thrown
+<i>69</i>&nbsp; * from the underlying data sink.  Thus all failures are thrown as instances
+<i>70</i>&nbsp; * of {@link IonException}, wrapping the originating cause.  If an application
+<i>71</i>&nbsp; * wants to handle (say) {@link IOException}s specially, then it needs to
+<i>72</i>&nbsp; * extract that from the wrappers; the documentation of {@link IonException}
+<i>73</i>&nbsp; * explains how to do that.
+<i>74</i>&nbsp; *
+<i>75</i>&nbsp; * @see IonStreamUtils
+<i>76</i>&nbsp; * @see IonTextWriterBuilder
+<i>77</i>&nbsp; */
+<i>78</i>&nbsp;public interface IonWriter
+<i>79</i>&nbsp;    extends Closeable, Flushable, Faceted
+<i>80</i>&nbsp;{
+<i>81</i>&nbsp;    /**
+<i>82</i>&nbsp;     * Gets the symbol table that is currently in use by the writer.
+<i>83</i>&nbsp;     * While writing a number of values the symbol table will be
+<i>84</i>&nbsp;     * populated with any added symbols.
+<i>85</i>&nbsp;     * &lt;p&gt;
+<i>86</i>&nbsp;     * Note that the table may be replaced during processing.  For example,
+<i>87</i>&nbsp;     * the stream may start out with a system table that&#39;s later replaced by a
+<i>88</i>&nbsp;     * local table in order to store newly-encountered symbols.
+<i>89</i>&nbsp;     * &lt;p&gt;
+<i>90</i>&nbsp;     * When this method returns a local table, it may be
+<i>91</i>&nbsp;     * {@linkplain SymbolTable#isReadOnly() mutable}, meaning that additional
+<i>92</i>&nbsp;     * symbols may be interned until it is
+<i>93</i>&nbsp;     * {@linkplain SymbolTable#makeReadOnly() made read-only}. Note that
+<i>94</i>&nbsp;     * manually mutating local symbol tables is a deprecated feature;
+<i>95</i>&nbsp;     * please instead use
+<i>96</i>&nbsp;     * {@link IonSystem#newBinaryWriter(java.io.OutputStream, SymbolTable...)}
+<i>97</i>&nbsp;     * or {@link IonSystem#newTextWriter(java.io.OutputStream, SymbolTable...)}
+<i>98</i>&nbsp;     * to provide custom symbol table(s) to writers upon construction.
+<i>99</i>&nbsp;     *
+<i>100</i>&nbsp;     * @return current symbol table
+<i>101</i>&nbsp;     */
+<i>102</i>&nbsp;    public SymbolTable getSymbolTable();
+<i>103</i>&nbsp;
+<i>104</i>&nbsp;
+<i>105</i>&nbsp;    /**
+<i>106</i>&nbsp;     * Flushes this writer by writing any buffered output to the underlying
+<i>107</i>&nbsp;     * output target without finalizing the stream&#39;s local symbol table.
+<i>108</i>&nbsp;     * &lt;p&gt;
+<i>109</i>&nbsp;     * For some implementations this may have no effect even when some data is
+<i>110</i>&nbsp;     * buffered, because it&#39;s not always possible to fully write partial data.
+<i>111</i>&nbsp;     * In particular, when writing binary Ion data, Ion&#39;s length-prefixed
+<i>112</i>&nbsp;     * encoding requires a complete top-level value to be written at once.
+<i>113</i>&nbsp;     * &lt;p&gt;
+<i>114</i>&nbsp;     * If localSymbolTableAppend is enabled (see
+<i>115</i>&nbsp;     * {@link com.amazon.ion.system.IonBinaryWriterBuilder#withLocalSymbolTableAppendEnabled}),
+<i>116</i>&nbsp;     * this feature can be used to flush buffered data before writing more
+<i>117</i>&nbsp;     * values without subsequently having to redeclare the current local
+<i>118</i>&nbsp;     * symbol table. Applications that produce long streams of binary Ion may
+<i>119</i>&nbsp;     * wish to flush occasionally to relieve memory pressure, then continue
+<i>120</i>&nbsp;     * writing data using the same local symbol table. The symbol table will
+<i>121</i>&nbsp;     * be appended with newly-encountered symbols as necessary.
+<i>122</i>&nbsp;     *
+<i>123</i>&nbsp;     * @throws IOException if thrown by the underlying output target.
+<i>124</i>&nbsp;     *
+<i>125</i>&nbsp;     * @see #finish()
+<i>126</i>&nbsp;     */
+<i>127</i>&nbsp;    public void flush() throws IOException;
+<i>128</i>&nbsp;
+<i>129</i>&nbsp;
+<i>130</i>&nbsp;    /**
+<i>131</i>&nbsp;     * Indicates that writing is completed and all buffered data should be
+<i>132</i>&nbsp;     * written and flushed as if this were the end of the Ion data stream.
+<i>133</i>&nbsp;     * For example, an Ion binary writer will finalize any local symbol table,
+<i>134</i>&nbsp;     * write all top-level values, and then flush.
+<i>135</i>&nbsp;     * &lt;p&gt;
+<i>136</i>&nbsp;     * This method may only be called when all top-level values are
+<i>137</i>&nbsp;     * completely written and {@linkplain #stepOut() stepped-out}.
+<i>138</i>&nbsp;     * &lt;p&gt;
+<i>139</i>&nbsp;     * Implementations should allow the application to continue writing further
+<i>140</i>&nbsp;     * top-level values following the semantics for concatenating Ion data
+<i>141</i>&nbsp;     * streams. If another top-level value is written, the result must behave
+<i>142</i>&nbsp;     * as if it were preceded by an Ion version marker, resetting the stream
+<i>143</i>&nbsp;     * context as if this were a new stream. (Whether or not an IVM is written
+<i>144</i>&nbsp;     * may depend upon the writer&#39;s configuration; see
+<i>145</i>&nbsp;     * {@link com.amazon.ion.system.IonWriterBuilder.IvmMinimizing
+<i>146</i>&nbsp;     * IvmMinimizing}.)
+<i>147</i>&nbsp;     * &lt;p&gt;
+<i>148</i>&nbsp;     * This feature can be used to flush buffered data and reset the local
+<i>149</i>&nbsp;     * symbol table before writing more values. Applications that produce long
+<i>150</i>&nbsp;     * streams of binary Ion may wish to finish occasionally to relieve memory
+<i>151</i>&nbsp;     * pressure, then continue writing data using a new local symbol table.
+<i>152</i>&nbsp;     * This is particularly useful for streams that contain an ever-growing
+<i>153</i>&nbsp;     * number of unique symbols to avoid unbounded growth of the symbol table,
+<i>154</i>&nbsp;     * which may degrade performance and bloat the encoding. Applications that
+<i>155</i>&nbsp;     * produce long streams with a limited number of unique symbols should
+<i>156</i>&nbsp;     * enable localSymbolTableAppend (see
+<i>157</i>&nbsp;     * {@link com.amazon.ion.system.IonBinaryWriterBuilder#withLocalSymbolTableAppendEnabled})
+<i>158</i>&nbsp;     * and {@link #flush()} instead to avoid re-declaring the local symbol
+<i>159</i>&nbsp;     * table unnecessarily.
+<i>160</i>&nbsp;     *
+<i>161</i>&nbsp;     * @throws IOException if thrown by the underlying output target.
+<i>162</i>&nbsp;     * @throws IllegalStateException when not between top-level values.
+<i>163</i>&nbsp;     *
+<i>164</i>&nbsp;     * @see #flush()
+<i>165</i>&nbsp;     * @see #close()
+<i>166</i>&nbsp;     */
+<i>167</i>&nbsp;    public void finish() throws IOException;
+<i>168</i>&nbsp;
+<i>169</i>&nbsp;
+<i>170</i>&nbsp;    /**
+<i>171</i>&nbsp;     * Closes this stream and releases any system resources associated with it.
+<i>172</i>&nbsp;     * If the stream is already closed then invoking this method has no effect.
+<i>173</i>&nbsp;     * &lt;p&gt;
+<i>174</i>&nbsp;     * If the cursor is between top-level values, this method will
+<i>175</i>&nbsp;     * {@link #finish()} before closing the underlying output stream.
+<i>176</i>&nbsp;     * If not, the resulting data may be incomplete and invalid Ion.
+<i>177</i>&nbsp;     * &lt;p&gt;
+<i>178</i>&nbsp;     * In other words: unless you&#39;re recovering from a failure condition,
+<i>179</i>&nbsp;     * &lt;b&gt;don&#39;t close the writer until you&#39;ve
+<i>180</i>&nbsp;     * {@linkplain #stepOut() stepped-out} back to the starting level.&lt;/b&gt;
+<i>181</i>&nbsp;     *
+<i>182</i>&nbsp;     * @throws IOException if thrown by the underlying output target.
+<i>183</i>&nbsp;     *
+<i>184</i>&nbsp;     * @see #finish()
+<i>185</i>&nbsp;     */
+<i>186</i>&nbsp;    public void close() throws IOException;
+<i>187</i>&nbsp;
+<i>188</i>&nbsp;
+<i>189</i>&nbsp;    /**
+<i>190</i>&nbsp;     * Sets the pending field name to the given text.
+<i>191</i>&nbsp;     * &lt;p&gt;
+<i>192</i>&nbsp;     * The pending field name is cleared when the current value is
+<i>193</i>&nbsp;     * written via {@link #stepIn(IonType) stepIn()} or one of the
+<i>194</i>&nbsp;     * {@code write*()} methods.
+<i>195</i>&nbsp;     *
+<i>196</i>&nbsp;     * @param name text of the field name
+<i>197</i>&nbsp;     *
+<i>198</i>&nbsp;     * @throws IllegalStateException if the current container isn&#39;t a struct,
+<i>199</i>&nbsp;     * that is, if {@link #isInStruct()} is false.
+<i>200</i>&nbsp;     * @throws NullPointerException if {@code name} is null.
+<i>201</i>&nbsp;     */
+<i>202</i>&nbsp;    public void setFieldName(String name);
+<i>203</i>&nbsp;
+<i>204</i>&nbsp;
+<i>205</i>&nbsp;    /**
+<i>206</i>&nbsp;     * Sets the pending field name to the given token.
+<i>207</i>&nbsp;     * &lt;p&gt;
+<i>208</i>&nbsp;     * The pending field name is cleared when the current value is
+<i>209</i>&nbsp;     * written via {@link #stepIn(IonType) stepIn()} or one of the
+<i>210</i>&nbsp;     * {@code write*()} methods.
+<i>211</i>&nbsp;     *
+<i>212</i>&nbsp;     * @param name text of the field name
+<i>213</i>&nbsp;     *
+<i>214</i>&nbsp;     * @throws IllegalStateException if the current container isn&#39;t a struct,
+<i>215</i>&nbsp;     * that is, if {@link #isInStruct()} is false.
+<i>216</i>&nbsp;     * @throws NullPointerException if {@code name} is null.
+<i>217</i>&nbsp;     *
+<i>218</i>&nbsp;     */
+<i>219</i>&nbsp;    public void setFieldNameSymbol(SymbolToken name);
+<i>220</i>&nbsp;
+<i>221</i>&nbsp;
+<i>222</i>&nbsp;    /**
+<i>223</i>&nbsp;     * Sets the full list of pending annotations to the given text symbols.
+<i>224</i>&nbsp;     * Any pending annotations are cleared.
+<i>225</i>&nbsp;     * The contents of the {@code annotations} array are copied into this
+<i>226</i>&nbsp;     * writer, so the caller does not need to preserve the array.
+<i>227</i>&nbsp;     * &lt;p&gt;
+<i>228</i>&nbsp;     * The list of pending annotations is cleared when the current value is
+<i>229</i>&nbsp;     * written via {@link #stepIn(IonType) stepIn()} or one of the
+<i>230</i>&nbsp;     * {@code write*()} methods.
+<i>231</i>&nbsp;     *
+<i>232</i>&nbsp;     * @param annotations string array with the annotations.
+<i>233</i>&nbsp;     * If null or empty, any pending annotations are cleared.
+<i>234</i>&nbsp;     */
+<i>235</i>&nbsp;    public void setTypeAnnotations(String... annotations);
+<i>236</i>&nbsp;
+<i>237</i>&nbsp;
+<i>238</i>&nbsp;    /**
+<i>239</i>&nbsp;     * Sets the full list of pending annotations to the given symbols.
+<i>240</i>&nbsp;     * Any pending annotations are cleared.
+<i>241</i>&nbsp;     * The contents of the {@code annotations} array are copied into this
+<i>242</i>&nbsp;     * writer, so the caller does not need to preserve the array.
+<i>243</i>&nbsp;     * &lt;p&gt;
+<i>244</i>&nbsp;     * The list of pending annotations is cleared when the current value is
+<i>245</i>&nbsp;     * written via {@link #stepIn(IonType) stepIn()} or one of the
+<i>246</i>&nbsp;     * {@code write*()} methods.
+<i>247</i>&nbsp;     * &lt;p&gt;
+<i>248</i>&nbsp;     * &lt;b&gt;This is an &quot;expert method&quot;: correct use requires deep understanding
+<i>249</i>&nbsp;     * of the Ion binary format. You almost certainly don&#39;t want to use it.&lt;/b&gt;
+<i>250</i>&nbsp;     *
+<i>251</i>&nbsp;     * @param annotations
+<i>252</i>&nbsp;     * If null or empty, any pending annotations are cleared.
+<i>253</i>&nbsp;     *
+<i>254</i>&nbsp;
+<i>255</i>&nbsp;     */
+<i>256</i>&nbsp;    public void setTypeAnnotationSymbols(SymbolToken... annotations);
+<i>257</i>&nbsp;
+<i>258</i>&nbsp;
+<i>259</i>&nbsp;    /**
+<i>260</i>&nbsp;     * Adds a given string to the list of pending annotations.
+<i>261</i>&nbsp;     * &lt;p&gt;
+<i>262</i>&nbsp;     * The list of pending annotations is cleared when the current value is
+<i>263</i>&nbsp;     * written via {@link #stepIn(IonType) stepIn()} or one of the
+<i>264</i>&nbsp;     * {@code write*()} methods.
+<i>265</i>&nbsp;     *
+<i>266</i>&nbsp;     * @param annotation string annotation to append to the annotation list
+<i>267</i>&nbsp;     */
+<i>268</i>&nbsp;    public void addTypeAnnotation(String annotation);
+<i>269</i>&nbsp;
+<i>270</i>&nbsp;
+<i>271</i>&nbsp;    //=========================================================================
+<i>272</i>&nbsp;    // Container navigation
+<i>273</i>&nbsp;
+<i>274</i>&nbsp;    /**
+<i>275</i>&nbsp;     * Writes the beginning of a non-null container (list, sexp, or struct).
+<i>276</i>&nbsp;     * This must be matched by a call to {@link #stepOut()} after the last
+<i>277</i>&nbsp;     * child value.
+<i>278</i>&nbsp;     * &lt;p&gt;
+<i>279</i>&nbsp;     * This method is &lt;em&gt;not&lt;/em&gt; used to write {@code null.list} et al.
+<i>280</i>&nbsp;     * To write null values use {@link #writeNull(IonType)}.
+<i>281</i>&nbsp;     *
+<i>282</i>&nbsp;     * @param containerType must be one of
+<i>283</i>&nbsp;     * {@link IonType#LIST}, {@link IonType#SEXP}, or {@link IonType#STRUCT}.
+<i>284</i>&nbsp;     */
+<i>285</i>&nbsp;    public void stepIn(IonType containerType) throws IOException;
+<i>286</i>&nbsp;
+<i>287</i>&nbsp;
+<i>288</i>&nbsp;    /**
+<i>289</i>&nbsp;     * Writes the end of the current container, returning this writer to the
+<i>290</i>&nbsp;     * context of parent container.
+<i>291</i>&nbsp;     * Invocation of this method must match a preceding call to
+<i>292</i>&nbsp;     * {@link #stepIn(IonType)}.
+<i>293</i>&nbsp;     */
+<i>294</i>&nbsp;    public void stepOut() throws IOException;
+<i>295</i>&nbsp;
+<i>296</i>&nbsp;
+<i>297</i>&nbsp;    /**
+<i>298</i>&nbsp;     * Determines whether values are being written as fields of a struct.
+<i>299</i>&nbsp;     * This is especially useful when it is not clear whether field names need
+<i>300</i>&nbsp;     * to be written or not.
+<i>301</i>&nbsp;     *
+<i>302</i>&nbsp;     * @return true when the parent is a struct.
+<i>303</i>&nbsp;     */
+<i>304</i>&nbsp;    public boolean isInStruct();
+<i>305</i>&nbsp;
+<i>306</i>&nbsp;
+<i>307</i>&nbsp;    //=========================================================================
+<i>308</i>&nbsp;    // Value writing
+<i>309</i>&nbsp;
+<i>310</i>&nbsp;    /**
+<i>311</i>&nbsp;     * writes the contents of the passed in Ion value to the output.
+<i>312</i>&nbsp;     * &lt;p&gt;
+<i>313</i>&nbsp;     * This method also writes annotations and field names (if in a struct),
+<i>314</i>&nbsp;     * and performs a deep write, including the contents of
+<i>315</i>&nbsp;     * any containers encountered.
+<i>316</i>&nbsp;     *
+<i>317</i>&nbsp;     * @param value may be null, in which case this method does nothing.
+<i>318</i>&nbsp;     *
+<i>319</i>&nbsp;     * @deprecated Use {@link IonValue#writeTo(IonWriter)} instead.
+<i>320</i>&nbsp;     */
+<i>321</i>&nbsp;    @Deprecated
+<i>322</i>&nbsp;    public void writeValue(IonValue value) throws IOException;
+<i>323</i>&nbsp;
+<i>324</i>&nbsp;    /**
+<i>325</i>&nbsp;     * Writes the current value from a reader.
+<i>326</i>&nbsp;     * &lt;p&gt;
+<i>327</i>&nbsp;     * This method also writes annotations and field names (if in a struct),
+<i>328</i>&nbsp;     * and performs a deep write, including the contents of
+<i>329</i>&nbsp;     * any containers encountered.
+<i>330</i>&nbsp;     */
+<i>331</i>&nbsp;    public void writeValue(IonReader reader) throws IOException;
+<i>332</i>&nbsp;
+<i>333</i>&nbsp;    /**
+<i>334</i>&nbsp;     * Writes a reader&#39;s current value, and all following values until the end
+<i>335</i>&nbsp;     * of the current container.  If there&#39;s no current value then this method
+<i>336</i>&nbsp;     * calls {@link IonReader#next()} to get going.
+<i>337</i>&nbsp;     *  &lt;p&gt;
+<i>338</i>&nbsp;     * This method iterates until {@link IonReader#next()} returns {@code null}
+<i>339</i>&nbsp;     * and does not {@linkplain IonReader#stepOut() step out} to the container
+<i>340</i>&nbsp;     * of the current cursor position.
+<i>341</i>&nbsp;     * &lt;p&gt;
+<i>342</i>&nbsp;     * This method also writes annotations and field names (if in a struct),
+<i>343</i>&nbsp;     * and performs a deep write, including the contents of
+<i>344</i>&nbsp;     * any containers encountered.
+<i>345</i>&nbsp;     */
+<i>346</i>&nbsp;    public void writeValues(IonReader reader) throws IOException;
+<i>347</i>&nbsp;
+<i>348</i>&nbsp;
+<i>349</i>&nbsp;    /**
+<i>350</i>&nbsp;     * Writes a value of Ion&#39;s null type ({@code null} aka {@code null.null}).
+<i>351</i>&nbsp;     */
+<i>352</i>&nbsp;    public void writeNull() throws IOException;
+<i>353</i>&nbsp;
+<i>354</i>&nbsp;    /**
+<i>355</i>&nbsp;     * Writes a null value of a specified Ion type.
+<i>356</i>&nbsp;     *
+<i>357</i>&nbsp;     * @param type type of the null to be written
+<i>358</i>&nbsp;     */
+<i>359</i>&nbsp;    public void writeNull(IonType type) throws IOException;
+<i>360</i>&nbsp;
+<i>361</i>&nbsp;
+<i>362</i>&nbsp;    /**
+<i>363</i>&nbsp;     * writes a non-null boolean value (true or false) as an IonBool
+<i>364</i>&nbsp;     * to output.
+<i>365</i>&nbsp;     * @param value true or false as desired
+<i>366</i>&nbsp;     */
+<i>367</i>&nbsp;    public void writeBool(boolean value) throws IOException;
+<i>368</i>&nbsp;
+<i>369</i>&nbsp;
+<i>370</i>&nbsp;    /**
+<i>371</i>&nbsp;     * writes a signed 64 bit value, a Java long, as an IonInt.
+<i>372</i>&nbsp;     * @param value signed int to write
+<i>373</i>&nbsp;     */
+<i>374</i>&nbsp;    public void writeInt(long value) throws IOException;
+<i>375</i>&nbsp;
+<i>376</i>&nbsp;    /**
+<i>377</i>&nbsp;     * writes a BigInteger value as an IonInt.  If the
+<i>378</i>&nbsp;     * BigInteger value is null this writes a null int.
+<i>379</i>&nbsp;     * @param value BigInteger to write
+<i>380</i>&nbsp;     */
+<i>381</i>&nbsp;    public void writeInt(BigInteger value) throws IOException;
+<i>382</i>&nbsp;
+<i>383</i>&nbsp;
+<i>384</i>&nbsp;    /**
+<i>385</i>&nbsp;     * writes a 64 bit binary floating point value, a Java double,
+<i>386</i>&nbsp;     * as an IonFloat.  Currently IonFloat values are output as
+<i>387</i>&nbsp;     * 64 bit IEEE 754 big endian values.  IonFloat preserves all
+<i>388</i>&nbsp;     * valid floating point values, including -0.0, Nan and +/-infinity.
+<i>389</i>&nbsp;     * It does not guarantee preservation of -Nan or other less
+<i>390</i>&nbsp;     * less &quot;common&quot; values.
+<i>391</i>&nbsp;     * @param value double to write
+<i>392</i>&nbsp;     */
+<i>393</i>&nbsp;    public void writeFloat(double value) throws IOException;
+<i>394</i>&nbsp;
+<i>395</i>&nbsp;    /**
+<i>396</i>&nbsp;     * Writes a BigDecimal value as an Ion decimal.  Ion uses an
+<i>397</i>&nbsp;     * arbitrarily long sign/value and an arbitrarily long signed
+<i>398</i>&nbsp;     * exponent to write the value. This preserves
+<i>399</i>&nbsp;     * all of the BigDecimal digits, the number of
+<i>400</i>&nbsp;     * significant digits.
+<i>401</i>&nbsp;     * &lt;p&gt;
+<i>402</i>&nbsp;     * To write a negative zero value, pass this method a
+<i>403</i>&nbsp;     * {@link Decimal} instance.
+<i>404</i>&nbsp;     *
+<i>405</i>&nbsp;     * @param value may be null to represent {@code null.decimal}.
+<i>406</i>&nbsp;     */
+<i>407</i>&nbsp;    public void writeDecimal(BigDecimal value) throws IOException;
+<i>408</i>&nbsp;
+<i>409</i>&nbsp;
+<i>410</i>&nbsp;    /**
+<i>411</i>&nbsp;     * Writes a timestamp value.
+<i>412</i>&nbsp;     *
+<i>413</i>&nbsp;     * @param value may be null to represent {@code null.timestamp}.
+<i>414</i>&nbsp;     */
+<i>415</i>&nbsp;    public void writeTimestamp(Timestamp value) throws IOException;
+<i>416</i>&nbsp;
+<i>417</i>&nbsp;    /**
+<i>418</i>&nbsp;     * writes the passed in Date (in milliseconds since the epoch) as an
+<i>419</i>&nbsp;     * IonTimestamp.  The Date value is treated as a UTC value with an
+<i>420</i>&nbsp;     * unknown timezone offset (a z value).
+<i>421</i>&nbsp;     * @param value java.util Date holding the UTC timestamp;
+<i>422</i>&nbsp;     * may be null to represent {@code null.timestamp}.
+<i>423</i>&nbsp;     *
+<i>424</i>&nbsp;     * @deprecated Use {@link #writeTimestamp(Timestamp)
+<i>425</i>&nbsp;     * IonWriter.writeTimestamp(}{@link Timestamp#forDateZ(Date) Timestamp.forDateZ(Date))} instead.
+<i>426</i>&nbsp;     */
+<i>427</i>&nbsp;    @Deprecated
+<i>428</i>&nbsp;    public void writeTimestampUTC(Date value) throws IOException;
+<i>429</i>&nbsp;
+<i>430</i>&nbsp;    /**
+<i>431</i>&nbsp;     * Writes the text of an Ion symbol value.
+<i>432</i>&nbsp;     *
+<i>433</i>&nbsp;     * @param content may be null to represent {@code null.symbol}.
+<i>434</i>&nbsp;     *
+<i>435</i>&nbsp;     * @throws IllegalArgumentException if the value contains an invalid UTF-16
+<i>436</i>&nbsp;     * surrogate pair.
+<i>437</i>&nbsp;     */
+<i>438</i>&nbsp;    public void writeSymbol(String content) throws IOException;
+<i>439</i>&nbsp;
+<i>440</i>&nbsp;    /**
+<i>441</i>&nbsp;     * Writes the content of an Ion symbol value.
+<i>442</i>&nbsp;     *
+<i>443</i>&nbsp;     * @param content may be null to represent {@code null.symbol}.
+<i>444</i>&nbsp;     *
+<i>445</i>&nbsp;     * @throws IllegalArgumentException if the value contains an invalid UTF-16
+<i>446</i>&nbsp;     * surrogate pair.
+<i>447</i>&nbsp;     *
+<i>448</i>&nbsp;
+<i>449</i>&nbsp;     */
+<i>450</i>&nbsp;    public void writeSymbolToken(SymbolToken content) throws IOException;
+<i>451</i>&nbsp;
+<i>452</i>&nbsp;    /**
+<i>453</i>&nbsp;     * Write an Ion version marker symbol to the output.  This
+<i>454</i>&nbsp;     * is the $ion_1_0 value currently (in later versions the
+<i>455</i>&nbsp;     * number may change).  In text output this appears as the
+<i>456</i>&nbsp;     * text symbol.  In binary this will be the symbol id if
+<i>457</i>&nbsp;     * the writer is in a list, sexp or struct.  If the writer
+<i>458</i>&nbsp;     * is currently at the top level this will write the
+<i>459</i>&nbsp;     * &quot;magic cookie&quot; value.
+<i>460</i>&nbsp;     *
+<i>461</i>&nbsp;     *  Writing a version marker will reset the symbol table
+<i>462</i>&nbsp;     *  to be the system symbol table.
+<i>463</i>&nbsp;     *
+<i>464</i>&nbsp;     * @throws IOException
+<i>465</i>&nbsp;     */
+<i>466</i>&nbsp;//    public void writeIonVersionMarker() throws IOException;
+<i>467</i>&nbsp;
+<i>468</i>&nbsp;    /**
+<i>469</i>&nbsp;     * Writes a {@link java.lang.String} as an Ion string. Since Ion strings are
+<i>470</i>&nbsp;     * UTF-8 and Java Strings are Unicode 16.  As such the resulting
+<i>471</i>&nbsp;     * lengths may not match.  In addition some Java strings are not
+<i>472</i>&nbsp;     * valid as they may contain only one of the two needed surrogate
+<i>473</i>&nbsp;     * code units necessary to define the Unicode code point to be
+<i>474</i>&nbsp;     * output, an exception will be raised if this case is encountered.
+<i>475</i>&nbsp;     *
+<i>476</i>&nbsp;     * @param value may be null to represent {@code null.string}.
+<i>477</i>&nbsp;     *
+<i>478</i>&nbsp;     * @throws IllegalArgumentException if the value contains an invalid UTF-16
+<i>479</i>&nbsp;     * surrogate pair.
+<i>480</i>&nbsp;     */
+<i>481</i>&nbsp;    public void writeString(String value) throws IOException;
+<i>482</i>&nbsp;
+<i>483</i>&nbsp;    /**
+<i>484</i>&nbsp;     * write the byte array out as an IonClob value.  This copies
+<i>485</i>&nbsp;     * the byte array.
+<i>486</i>&nbsp;     *
+<i>487</i>&nbsp;     * @param value may be null to represent {@code null.clob}.
+<i>488</i>&nbsp;     */
+<i>489</i>&nbsp;    public void writeClob(byte[] value) throws IOException;
+<i>490</i>&nbsp;
+<i>491</i>&nbsp;    /**
+<i>492</i>&nbsp;     * Writes a portion of the byte array out as an IonClob value.  This
+<i>493</i>&nbsp;     * copies the porition of the byte array that is written.
+<i>494</i>&nbsp;     *
+<i>495</i>&nbsp;     * @param value bytes to be written.
+<i>496</i>&nbsp;     * May be {@code null} to represent {@code null.clob}.
+<i>497</i>&nbsp;     * @param start offset of the first byte in value to write
+<i>498</i>&nbsp;     * @param len number of bytes to write from value
+<i>499</i>&nbsp;     */
+<i>500</i>&nbsp;    public void writeClob(byte[] value, int start, int len)
+<i>501</i>&nbsp;        throws IOException;
+<i>502</i>&nbsp;
+<i>503</i>&nbsp;    /**
+<i>504</i>&nbsp;     * write the byte array out as an IonBlob value.  This copies
+<i>505</i>&nbsp;     * the byte array.
+<i>506</i>&nbsp;     *
+<i>507</i>&nbsp;     * @param value may be null to represent {@code null.blob}.
+<i>508</i>&nbsp;     */
+<i>509</i>&nbsp;    public void writeBlob(byte[] value) throws IOException;
+<i>510</i>&nbsp;
+<i>511</i>&nbsp;    /**
+<i>512</i>&nbsp;     * Writes a portion of the byte array out as an IonBlob value.  This
+<i>513</i>&nbsp;     * copies the portion of the byte array that is written.
+<i>514</i>&nbsp;     *
+<i>515</i>&nbsp;     * @param value bytes to be written.
+<i>516</i>&nbsp;     * May be {@code null} to represent {@code null.blob}.
+<i>517</i>&nbsp;     * @param start offset of the first byte in value to write
+<i>518</i>&nbsp;     * @param len number of bytes to write from value
+<i>519</i>&nbsp;     */
+<i>520</i>&nbsp;    public void writeBlob(byte[] value, int start, int len)
+<i>521</i>&nbsp;        throws IOException;
+<i>522</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

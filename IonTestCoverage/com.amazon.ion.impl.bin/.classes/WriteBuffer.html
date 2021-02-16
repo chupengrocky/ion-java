@@ -1,0 +1,1180 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: WriteBuffer</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl.bin</a> ]
+</div>
+
+<h1>Coverage Summary for Class: WriteBuffer (com.amazon.ion.impl.bin)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WriteBuffer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (57/ 57)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    98.3%
+  </span>
+  <span class="absValue">
+    (511/ 520)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl.bin;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import java.io.Closeable;
+<i>19</i>&nbsp;import java.io.IOException;
+<i>20</i>&nbsp;import java.io.OutputStream;
+<i>21</i>&nbsp;import java.util.ArrayList;
+<i>22</i>&nbsp;import java.util.List;
+<i>23</i>&nbsp;
+<i>24</i>&nbsp;/**
+<i>25</i>&nbsp; * A facade over {@link Block} management and low-level Ion encoding concerns for the {@link IonRawBinaryWriter}.
+<i>26</i>&nbsp; */
+<b class="fc"><i>27</i>&nbsp;/*package*/ final class WriteBuffer implements Closeable</b>
+<i>28</i>&nbsp;{
+<i>29</i>&nbsp;    private final BlockAllocator allocator;
+<i>30</i>&nbsp;    private final List&lt;Block&gt; blocks;
+<i>31</i>&nbsp;    private Block current;
+<i>32</i>&nbsp;    private int index;
+<i>33</i>&nbsp;
+<i>34</i>&nbsp;    public WriteBuffer(final BlockAllocator allocator)
+<b class="fc"><i>35</i>&nbsp;    {</b>
+<b class="fc"><i>36</i>&nbsp;        this.allocator = allocator;</b>
+<b class="fc"><i>37</i>&nbsp;        this.blocks = new ArrayList&lt;Block&gt;();</b>
+<i>38</i>&nbsp;
+<i>39</i>&nbsp;        // initial seed of the first block
+<b class="fc"><i>40</i>&nbsp;        allocateNewBlock();</b>
+<i>41</i>&nbsp;
+<b class="fc"><i>42</i>&nbsp;        this.index = 0;</b>
+<b class="fc"><i>43</i>&nbsp;        this.current = blocks.get(0);</b>
+<b class="fc"><i>44</i>&nbsp;    }</b>
+<i>45</i>&nbsp;
+<i>46</i>&nbsp;    private void allocateNewBlock()
+<i>47</i>&nbsp;    {
+<b class="fc"><i>48</i>&nbsp;        blocks.add(allocator.allocateBlock());</b>
+<b class="fc"><i>49</i>&nbsp;    }</b>
+<i>50</i>&nbsp;
+<i>51</i>&nbsp;    /** Returns the block index for the given position. */
+<i>52</i>&nbsp;    private int index(final long position)
+<i>53</i>&nbsp;    {
+<b class="fc"><i>54</i>&nbsp;        return (int) (position / allocator.getBlockSize());</b>
+<i>55</i>&nbsp;    }
+<i>56</i>&nbsp;
+<i>57</i>&nbsp;    /** Returns the offset within the block for a given position. */
+<i>58</i>&nbsp;    private int offset(final long position)
+<i>59</i>&nbsp;    {
+<b class="fc"><i>60</i>&nbsp;        return (int) (position % allocator.getBlockSize());</b>
+<i>61</i>&nbsp;    }
+<i>62</i>&nbsp;
+<i>63</i>&nbsp;    /** Resets the write buffer to empty. */
+<i>64</i>&nbsp;    public void reset()
+<i>65</i>&nbsp;    {
+<b class="fc"><i>66</i>&nbsp;        close();</b>
+<b class="fc"><i>67</i>&nbsp;        allocateNewBlock();</b>
+<b class="fc"><i>68</i>&nbsp;        index = 0;</b>
+<b class="fc"><i>69</i>&nbsp;        current = blocks.get(index);</b>
+<b class="fc"><i>70</i>&nbsp;    }</b>
+<i>71</i>&nbsp;
+<i>72</i>&nbsp;    public void close()
+<i>73</i>&nbsp;    {
+<i>74</i>&nbsp;        // free all the blocks
+<b class="fc"><i>75</i>&nbsp;        for (final Block block : blocks)</b>
+<i>76</i>&nbsp;        {
+<b class="fc"><i>77</i>&nbsp;            block.close();</b>
+<b class="fc"><i>78</i>&nbsp;        }</b>
+<b class="fc"><i>79</i>&nbsp;        blocks.clear();</b>
+<i>80</i>&nbsp;
+<i>81</i>&nbsp;        // note--we don&#39;t explicitly flag that we&#39;re closed for efficiency
+<b class="fc"><i>82</i>&nbsp;    }</b>
+<i>83</i>&nbsp;
+<i>84</i>&nbsp;    /** Resets the write buffer to a particular point. */
+<i>85</i>&nbsp;    public void truncate(final long position)
+<i>86</i>&nbsp;    {
+<b class="fc"><i>87</i>&nbsp;        final int index = index(position);</b>
+<b class="fc"><i>88</i>&nbsp;        final int offset = offset(position);</b>
+<b class="fc"><i>89</i>&nbsp;        final Block block = blocks.get(index);</b>
+<b class="fc"><i>90</i>&nbsp;        this.index = index;</b>
+<b class="fc"><i>91</i>&nbsp;        block.limit = offset;</b>
+<b class="fc"><i>92</i>&nbsp;        current = block;</b>
+<b class="fc"><i>93</i>&nbsp;    }</b>
+<i>94</i>&nbsp;
+<i>95</i>&nbsp;    /** Returns the amount of capacity left in the current block. */
+<i>96</i>&nbsp;    public int remaining()
+<i>97</i>&nbsp;    {
+<b class="fc"><i>98</i>&nbsp;        return current.remaining();</b>
+<i>99</i>&nbsp;    }
+<i>100</i>&nbsp;
+<i>101</i>&nbsp;    /** Returns the logical position in the current block. */
+<i>102</i>&nbsp;    public long position()
+<i>103</i>&nbsp;    {
+<b class="fc"><i>104</i>&nbsp;        return (((long) index) * allocator.getBlockSize()) + current.limit;</b>
+<i>105</i>&nbsp;    }
+<i>106</i>&nbsp;
+<i>107</i>&nbsp;    private static final int OCTET_MASK = 0xFF;
+<i>108</i>&nbsp;
+<i>109</i>&nbsp;    /** Returns the octet at the logical position given. */
+<i>110</i>&nbsp;    public int getUInt8At(final long position)
+<i>111</i>&nbsp;    {
+<b class="fc"><i>112</i>&nbsp;        final int index = index(position);</b>
+<b class="fc"><i>113</i>&nbsp;        final int offset = offset(position);</b>
+<b class="fc"><i>114</i>&nbsp;        final Block block = blocks.get(index);</b>
+<b class="fc"><i>115</i>&nbsp;        return block.data[offset] &amp; OCTET_MASK;</b>
+<i>116</i>&nbsp;    }
+<i>117</i>&nbsp;
+<i>118</i>&nbsp;    /** Writes a single octet to the buffer, expanding if necessary. */
+<i>119</i>&nbsp;    public void writeByte(final byte octet)
+<i>120</i>&nbsp;    {
+<b class="fc"><i>121</i>&nbsp;        if (remaining() &lt; 1)</b>
+<i>122</i>&nbsp;        {
+<b class="fc"><i>123</i>&nbsp;            if (index == blocks.size() - 1)</b>
+<i>124</i>&nbsp;            {
+<b class="fc"><i>125</i>&nbsp;                allocateNewBlock();</b>
+<i>126</i>&nbsp;            }
+<b class="fc"><i>127</i>&nbsp;            index++;</b>
+<b class="fc"><i>128</i>&nbsp;            current = blocks.get(index);</b>
+<i>129</i>&nbsp;        }
+<b class="fc"><i>130</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>131</i>&nbsp;        block.data[block.limit] = octet;</b>
+<b class="fc"><i>132</i>&nbsp;        block.limit++;</b>
+<b class="fc"><i>133</i>&nbsp;    }</b>
+<i>134</i>&nbsp;
+<i>135</i>&nbsp;    // slow in the sense that we do all kind of block boundary checking
+<i>136</i>&nbsp;    private void writeBytesSlow(final byte[] bytes, int off, int len)
+<i>137</i>&nbsp;    {
+<b class="fc"><i>138</i>&nbsp;        while (len &gt; 0)</b>
+<i>139</i>&nbsp;        {
+<b class="fc"><i>140</i>&nbsp;            final Block block = current;</b>
+<b class="fc"><i>141</i>&nbsp;            final int amount = Math.min(len, block.remaining());</b>
+<b class="fc"><i>142</i>&nbsp;            System.arraycopy(bytes, off, block.data, block.limit, amount);</b>
+<b class="fc"><i>143</i>&nbsp;            block.limit += amount;</b>
+<b class="fc"><i>144</i>&nbsp;            off += amount;</b>
+<b class="fc"><i>145</i>&nbsp;            len -= amount;</b>
+<b class="fc"><i>146</i>&nbsp;            if (block.remaining() == 0)</b>
+<i>147</i>&nbsp;            {
+<b class="fc"><i>148</i>&nbsp;                if (index == blocks.size() - 1)</b>
+<i>149</i>&nbsp;                {
+<b class="fc"><i>150</i>&nbsp;                    allocateNewBlock();</b>
+<i>151</i>&nbsp;                }
+<b class="fc"><i>152</i>&nbsp;                index++;</b>
+<b class="fc"><i>153</i>&nbsp;                current = blocks.get(index);</b>
+<i>154</i>&nbsp;            }
+<b class="fc"><i>155</i>&nbsp;        }</b>
+<i>156</i>&nbsp;
+<b class="fc"><i>157</i>&nbsp;    }</b>
+<i>158</i>&nbsp;
+<i>159</i>&nbsp;    /** Writes an array of bytes to the buffer expanding if necessary. */
+<i>160</i>&nbsp;    public void writeBytes(final byte[] bytes, final int off, final int len)
+<i>161</i>&nbsp;    {
+<b class="fc"><i>162</i>&nbsp;        if (len &gt; remaining())</b>
+<i>163</i>&nbsp;        {
+<b class="fc"><i>164</i>&nbsp;            writeBytesSlow(bytes, off, len);</b>
+<b class="fc"><i>165</i>&nbsp;            return;</b>
+<i>166</i>&nbsp;        }
+<i>167</i>&nbsp;
+<b class="fc"><i>168</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>169</i>&nbsp;        System.arraycopy(bytes, off, block.data, block.limit, len);</b>
+<b class="fc"><i>170</i>&nbsp;        block.limit += len;</b>
+<b class="fc"><i>171</i>&nbsp;    }</b>
+<i>172</i>&nbsp;
+<i>173</i>&nbsp;    /** Writes an array of bytes to the buffer expanding if necessary, defaulting to the entire array. */
+<i>174</i>&nbsp;    public void writeBytes(byte[] bytes)
+<i>175</i>&nbsp;    {
+<b class="fc"><i>176</i>&nbsp;        writeBytes(bytes, 0, bytes.length);</b>
+<b class="fc"><i>177</i>&nbsp;    }</b>
+<i>178</i>&nbsp;
+<i>179</i>&nbsp;    // UTF-8 character writing
+<i>180</i>&nbsp;
+<i>181</i>&nbsp;    private static final char HIGH_SURROGATE_FIRST      = 0xD800;
+<i>182</i>&nbsp;    private static final char HIGH_SURROGATE_LAST       = 0xDBFF;
+<i>183</i>&nbsp;    private static final char LOW_SURROGATE_FIRST       = 0xDC00;
+<i>184</i>&nbsp;    private static final char LOW_SURROGATE_LAST        = 0xDFFF;
+<i>185</i>&nbsp;    private static final int  SURROGATE_BASE            = 0x10000;
+<i>186</i>&nbsp;    private static final int  BITS_PER_SURROGATE        = 10;
+<i>187</i>&nbsp;
+<i>188</i>&nbsp;    private static final int  UTF8_FOLLOW_MASK          = 0x3F;
+<i>189</i>&nbsp;
+<i>190</i>&nbsp;    private static final int  UTF8_FOLLOW_PREFIX_MASK   = 0x80;
+<i>191</i>&nbsp;    private static final int  UTF8_2_OCTET_PREFIX_MASK  = 0xC0;
+<i>192</i>&nbsp;    private static final int  UTF8_3_OCTET_PREFIX_MASK  = 0xE0;
+<i>193</i>&nbsp;    private static final int  UTF8_4_OCTET_PREFIX_MASK  = 0xF0;
+<i>194</i>&nbsp;
+<i>195</i>&nbsp;    private static final int  UTF8_BITS_PER_FOLLOW_OCTET = 6;
+<i>196</i>&nbsp;    private static final int  UTF8_2_OCTET_SHIFT         = 1 * UTF8_BITS_PER_FOLLOW_OCTET;
+<i>197</i>&nbsp;    private static final int  UTF8_3_OCTET_SHIFT         = 2 * UTF8_BITS_PER_FOLLOW_OCTET;
+<i>198</i>&nbsp;    private static final int  UTF8_4_OCTET_SHIFT         = 3 * UTF8_BITS_PER_FOLLOW_OCTET;
+<i>199</i>&nbsp;
+<i>200</i>&nbsp;    private static final int UTF8_2_OCTET_MIN_VALUE = 1 &lt;&lt; 7;
+<i>201</i>&nbsp;    private static final int UTF8_3_OCTET_MIN_VALUE = 1 &lt;&lt; (5 + (1 * UTF8_BITS_PER_FOLLOW_OCTET));
+<i>202</i>&nbsp;
+<i>203</i>&nbsp;
+<i>204</i>&nbsp;    // slow in the sense that we deal with any kind of UTF-8 sequence and block boundaries
+<i>205</i>&nbsp;    private int writeUTF8Slow(final CharSequence chars, int off, int len)
+<i>206</i>&nbsp;    {
+<b class="fc"><i>207</i>&nbsp;        int octets = 0;</b>
+<b class="fc"><i>208</i>&nbsp;        while (len &gt; 0)</b>
+<i>209</i>&nbsp;        {
+<b class="fc"><i>210</i>&nbsp;            final char ch = chars.charAt(off);</b>
+<b class="fc"><i>211</i>&nbsp;            if (ch &gt;= LOW_SURROGATE_FIRST &amp;&amp; ch &lt;= LOW_SURROGATE_LAST)</b>
+<i>212</i>&nbsp;            {
+<b class="fc"><i>213</i>&nbsp;                throw new IllegalArgumentException(&quot;Unpaired low surrogate: &quot; + (int) ch);</b>
+<i>214</i>&nbsp;            }
+<b class="fc"><i>215</i>&nbsp;            if ((ch &gt;= HIGH_SURROGATE_FIRST &amp;&amp; ch &lt;= HIGH_SURROGATE_LAST))</b>
+<i>216</i>&nbsp;            {
+<i>217</i>&nbsp;                // we need to look ahead in this case
+<b class="fc"><i>218</i>&nbsp;                off++;</b>
+<b class="fc"><i>219</i>&nbsp;                len--;</b>
+<b class="fc"><i>220</i>&nbsp;                if (len == 0)</b>
+<i>221</i>&nbsp;                {
+<b class="nc"><i>222</i>&nbsp;                    throw new IllegalArgumentException(&quot;Unpaired low surrogate at end of character sequence: &quot; + ch);</b>
+<i>223</i>&nbsp;                }
+<i>224</i>&nbsp;
+<b class="fc"><i>225</i>&nbsp;                final int ch2 = chars.charAt(off);</b>
+<b class="fc"><i>226</i>&nbsp;                if (ch2 &lt; LOW_SURROGATE_FIRST || ch2 &gt; LOW_SURROGATE_LAST)</b>
+<i>227</i>&nbsp;                {
+<b class="fc"><i>228</i>&nbsp;                    throw new IllegalArgumentException(&quot;Low surrogate with unpaired high surrogate: &quot; + ch + &quot; + &quot; + ch2);</b>
+<i>229</i>&nbsp;                }
+<i>230</i>&nbsp;
+<i>231</i>&nbsp;                // at this point we have a high and low surrogate
+<b class="fc"><i>232</i>&nbsp;                final int codepoint = (((ch - HIGH_SURROGATE_FIRST) &lt;&lt; BITS_PER_SURROGATE) | (ch2 - LOW_SURROGATE_FIRST)) + SURROGATE_BASE;</b>
+<b class="fc"><i>233</i>&nbsp;                writeByte((byte) (UTF8_4_OCTET_PREFIX_MASK | ( codepoint &gt;&gt; UTF8_4_OCTET_SHIFT)                    ));</b>
+<b class="fc"><i>234</i>&nbsp;                writeByte((byte) (UTF8_FOLLOW_PREFIX_MASK  | ((codepoint &gt;&gt; UTF8_3_OCTET_SHIFT) &amp; UTF8_FOLLOW_MASK)));</b>
+<b class="fc"><i>235</i>&nbsp;                writeByte((byte) (UTF8_FOLLOW_PREFIX_MASK  | ((codepoint &gt;&gt; UTF8_2_OCTET_SHIFT) &amp; UTF8_FOLLOW_MASK)));</b>
+<b class="fc"><i>236</i>&nbsp;                writeByte((byte) (UTF8_FOLLOW_PREFIX_MASK  | ( codepoint                        &amp; UTF8_FOLLOW_MASK)));</b>
+<i>237</i>&nbsp;
+<b class="fc"><i>238</i>&nbsp;                octets += 4;</b>
+<b class="fc"><i>239</i>&nbsp;            }</b>
+<b class="fc"><i>240</i>&nbsp;            else if (ch &lt; UTF8_2_OCTET_MIN_VALUE)</b>
+<i>241</i>&nbsp;            {
+<b class="fc"><i>242</i>&nbsp;                writeByte((byte) ch);</b>
+<b class="fc"><i>243</i>&nbsp;                octets++;</b>
+<i>244</i>&nbsp;            }
+<b class="fc"><i>245</i>&nbsp;            else if (ch &lt; UTF8_3_OCTET_MIN_VALUE)</b>
+<i>246</i>&nbsp;            {
+<b class="fc"><i>247</i>&nbsp;                writeByte((byte) (UTF8_2_OCTET_PREFIX_MASK | (ch &gt;&gt; UTF8_2_OCTET_SHIFT)                    ));</b>
+<b class="fc"><i>248</i>&nbsp;                writeByte((byte) (UTF8_FOLLOW_PREFIX_MASK  | (ch                        &amp; UTF8_FOLLOW_MASK)));</b>
+<b class="fc"><i>249</i>&nbsp;                octets += 2;</b>
+<i>250</i>&nbsp;            }
+<i>251</i>&nbsp;            else
+<i>252</i>&nbsp;            {
+<b class="fc"><i>253</i>&nbsp;                writeByte((byte) (UTF8_3_OCTET_PREFIX_MASK | ( ch &gt;&gt; UTF8_3_OCTET_SHIFT)                    ));</b>
+<b class="fc"><i>254</i>&nbsp;                writeByte((byte) (UTF8_FOLLOW_PREFIX_MASK  | ((ch &gt;&gt; UTF8_2_OCTET_SHIFT) &amp; UTF8_FOLLOW_MASK)));</b>
+<b class="fc"><i>255</i>&nbsp;                writeByte((byte) (UTF8_FOLLOW_PREFIX_MASK  | ( ch                        &amp; UTF8_FOLLOW_MASK)));</b>
+<b class="fc"><i>256</i>&nbsp;                octets += 3;</b>
+<i>257</i>&nbsp;            }
+<b class="fc"><i>258</i>&nbsp;            off++;</b>
+<b class="fc"><i>259</i>&nbsp;            len--;</b>
+<b class="fc"><i>260</i>&nbsp;        }</b>
+<b class="fc"><i>261</i>&nbsp;        return octets;</b>
+<i>262</i>&nbsp;    }
+<i>263</i>&nbsp;
+<i>264</i>&nbsp;    private int writeUTF8UpTo3Byte(final CharSequence chars, int off, int len)
+<i>265</i>&nbsp;    {
+<i>266</i>&nbsp;        // fast path if we fit in the block assuming optimistically for all three-byte
+<b class="fc"><i>267</i>&nbsp;        if ((len * 3) &gt; remaining())</b>
+<i>268</i>&nbsp;        {
+<b class="nc"><i>269</i>&nbsp;            return writeUTF8Slow(chars, off, len);</b>
+<i>270</i>&nbsp;        }
+<i>271</i>&nbsp;
+<b class="fc"><i>272</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>273</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>274</i>&nbsp;        int octets = 0;</b>
+<b class="fc"><i>275</i>&nbsp;        while (len &gt; 0)</b>
+<i>276</i>&nbsp;        {
+<b class="fc"><i>277</i>&nbsp;            final char ch = chars.charAt(off);</b>
+<b class="fc"><i>278</i>&nbsp;            if (ch &gt;= LOW_SURROGATE_FIRST &amp;&amp; ch &lt;= LOW_SURROGATE_LAST)</b>
+<i>279</i>&nbsp;            {
+<b class="nc"><i>280</i>&nbsp;                throw new IllegalArgumentException(&quot;Unpaired low surrogate: &quot; + ch);</b>
+<i>281</i>&nbsp;            }
+<b class="fc"><i>282</i>&nbsp;            if ((ch &gt;= HIGH_SURROGATE_FIRST &amp;&amp; ch &lt;= HIGH_SURROGATE_LAST))</b>
+<i>283</i>&nbsp;            {
+<i>284</i>&nbsp;                // we lost the 3-byte bet
+<b class="fc"><i>285</i>&nbsp;                break;</b>
+<i>286</i>&nbsp;            }
+<i>287</i>&nbsp;
+<b class="fc"><i>288</i>&nbsp;            if (ch &lt; UTF8_2_OCTET_MIN_VALUE)</b>
+<i>289</i>&nbsp;            {
+<b class="nc"><i>290</i>&nbsp;                block.data[limit++] = (byte) ch;</b>
+<b class="nc"><i>291</i>&nbsp;                octets++;</b>
+<i>292</i>&nbsp;            }
+<b class="fc"><i>293</i>&nbsp;            else if (ch &lt; UTF8_3_OCTET_MIN_VALUE)</b>
+<i>294</i>&nbsp;            {
+<b class="nc"><i>295</i>&nbsp;                block.data[limit++] = (byte) (UTF8_2_OCTET_PREFIX_MASK | (ch &gt;&gt; UTF8_2_OCTET_SHIFT)                    );</b>
+<b class="nc"><i>296</i>&nbsp;                block.data[limit++] = (byte) (UTF8_FOLLOW_PREFIX_MASK  | (ch                        &amp; UTF8_FOLLOW_MASK));</b>
+<b class="nc"><i>297</i>&nbsp;                octets += 2;</b>
+<i>298</i>&nbsp;            }
+<i>299</i>&nbsp;            else
+<i>300</i>&nbsp;            {
+<b class="fc"><i>301</i>&nbsp;                block.data[limit++] = (byte) (UTF8_3_OCTET_PREFIX_MASK | ( ch &gt;&gt; UTF8_3_OCTET_SHIFT)                    );</b>
+<b class="fc"><i>302</i>&nbsp;                block.data[limit++] = (byte) (UTF8_FOLLOW_PREFIX_MASK  | ((ch &gt;&gt; UTF8_2_OCTET_SHIFT) &amp; UTF8_FOLLOW_MASK));</b>
+<b class="fc"><i>303</i>&nbsp;                block.data[limit++] = (byte) (UTF8_FOLLOW_PREFIX_MASK  | ( ch                        &amp; UTF8_FOLLOW_MASK));</b>
+<b class="fc"><i>304</i>&nbsp;                octets += 3;</b>
+<i>305</i>&nbsp;            }
+<b class="fc"><i>306</i>&nbsp;            off++;</b>
+<b class="fc"><i>307</i>&nbsp;            len--;</b>
+<b class="fc"><i>308</i>&nbsp;        }</b>
+<b class="fc"><i>309</i>&nbsp;        block.limit = limit;</b>
+<i>310</i>&nbsp;
+<b class="fc"><i>311</i>&nbsp;        if (len &gt; 0)</b>
+<i>312</i>&nbsp;        {
+<i>313</i>&nbsp;            // just defer to &#39;slow&#39; writing for non-BMP characters
+<b class="fc"><i>314</i>&nbsp;            return octets + writeUTF8Slow(chars, off, len);</b>
+<i>315</i>&nbsp;        }
+<b class="fc"><i>316</i>&nbsp;        return octets;</b>
+<i>317</i>&nbsp;    }
+<i>318</i>&nbsp;
+<i>319</i>&nbsp;    private int writeUTF8UpTo2Byte(final CharSequence chars, int off, int len)
+<i>320</i>&nbsp;    {
+<i>321</i>&nbsp;        // fast path if we fit in the block assuming optimistically for all two-byte
+<b class="fc"><i>322</i>&nbsp;        if ((len * 2) &gt; remaining())</b>
+<i>323</i>&nbsp;        {
+<b class="fc"><i>324</i>&nbsp;            return writeUTF8Slow(chars, off, len);</b>
+<i>325</i>&nbsp;        }
+<i>326</i>&nbsp;
+<b class="fc"><i>327</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>328</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>329</i>&nbsp;        char ch = &#39;\0&#39;;</b>
+<b class="fc"><i>330</i>&nbsp;        int octets = 0;</b>
+<b class="fc"><i>331</i>&nbsp;        while (len &gt; 0)</b>
+<i>332</i>&nbsp;        {
+<b class="fc"><i>333</i>&nbsp;            ch = chars.charAt(off);</b>
+<b class="fc"><i>334</i>&nbsp;            if (ch &gt;= UTF8_3_OCTET_MIN_VALUE)</b>
+<i>335</i>&nbsp;            {
+<i>336</i>&nbsp;                // we lost the 2-byte bet
+<b class="fc"><i>337</i>&nbsp;                break;</b>
+<i>338</i>&nbsp;            }
+<i>339</i>&nbsp;
+<b class="fc"><i>340</i>&nbsp;            if (ch &lt; UTF8_2_OCTET_MIN_VALUE)</b>
+<i>341</i>&nbsp;            {
+<b class="fc"><i>342</i>&nbsp;                block.data[limit++] = (byte) ch;</b>
+<b class="fc"><i>343</i>&nbsp;                octets++;</b>
+<i>344</i>&nbsp;            }
+<i>345</i>&nbsp;            else
+<i>346</i>&nbsp;            {
+<b class="fc"><i>347</i>&nbsp;                block.data[limit++] = (byte) (UTF8_2_OCTET_PREFIX_MASK | (ch &gt;&gt; UTF8_2_OCTET_SHIFT)                    );</b>
+<b class="fc"><i>348</i>&nbsp;                block.data[limit++] = (byte) (UTF8_FOLLOW_PREFIX_MASK  | (ch                        &amp; UTF8_FOLLOW_MASK));</b>
+<b class="fc"><i>349</i>&nbsp;                octets += 2;</b>
+<i>350</i>&nbsp;            }
+<b class="fc"><i>351</i>&nbsp;            off++;</b>
+<b class="fc"><i>352</i>&nbsp;            len--;</b>
+<i>353</i>&nbsp;        }
+<b class="fc"><i>354</i>&nbsp;        block.limit = limit;</b>
+<i>355</i>&nbsp;
+<b class="fc"><i>356</i>&nbsp;        if (len &gt; 0)</b>
+<i>357</i>&nbsp;        {
+<b class="fc"><i>358</i>&nbsp;            if (ch &gt;= LOW_SURROGATE_FIRST &amp;&amp; ch &lt;= LOW_SURROGATE_LAST)</b>
+<i>359</i>&nbsp;            {
+<b class="nc"><i>360</i>&nbsp;                throw new IllegalArgumentException(&quot;Unpaired low surrogate: &quot; + ch);</b>
+<i>361</i>&nbsp;            }
+<b class="fc"><i>362</i>&nbsp;            if (ch &gt;= HIGH_SURROGATE_FIRST &amp;&amp; ch &lt;= HIGH_SURROGATE_LAST)</b>
+<i>363</i>&nbsp;            {
+<i>364</i>&nbsp;                // just defer to &#39;slow&#39; writing for non-BMP characters
+<b class="fc"><i>365</i>&nbsp;                return octets + writeUTF8Slow(chars, off, len);</b>
+<i>366</i>&nbsp;            }
+<i>367</i>&nbsp;
+<i>368</i>&nbsp;            // we must be a three byte BMP character
+<b class="fc"><i>369</i>&nbsp;            return octets + writeUTF8UpTo3Byte(chars, off, len);</b>
+<i>370</i>&nbsp;        }
+<b class="fc"><i>371</i>&nbsp;        return octets;</b>
+<i>372</i>&nbsp;    }
+<i>373</i>&nbsp;
+<i>374</i>&nbsp;    /** Returns the number of octets written. */
+<i>375</i>&nbsp;    public int writeUTF8(final CharSequence chars, int off, int len)
+<i>376</i>&nbsp;    {
+<i>377</i>&nbsp;        // fast path if we fit in the block assuming optimistically for all ASCII
+<b class="fc"><i>378</i>&nbsp;        if (len &gt; remaining())</b>
+<i>379</i>&nbsp;        {
+<b class="fc"><i>380</i>&nbsp;            return writeUTF8Slow(chars, off, len);</b>
+<i>381</i>&nbsp;        }
+<b class="fc"><i>382</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>383</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>384</i>&nbsp;        char ch = &#39;\0&#39;;</b>
+<b class="fc"><i>385</i>&nbsp;        int octets = 0;</b>
+<b class="fc"><i>386</i>&nbsp;        while (len &gt; 0)</b>
+<i>387</i>&nbsp;        {
+<b class="fc"><i>388</i>&nbsp;            ch = chars.charAt(off);</b>
+<b class="fc"><i>389</i>&nbsp;            if (ch &gt;= UTF8_2_OCTET_MIN_VALUE)</b>
+<i>390</i>&nbsp;            {
+<i>391</i>&nbsp;                // we lost the ASCII bet
+<b class="fc"><i>392</i>&nbsp;                break;</b>
+<i>393</i>&nbsp;            }
+<i>394</i>&nbsp;
+<b class="fc"><i>395</i>&nbsp;            block.data[limit++] = (byte) ch;</b>
+<b class="fc"><i>396</i>&nbsp;            octets++;</b>
+<b class="fc"><i>397</i>&nbsp;            off++;</b>
+<b class="fc"><i>398</i>&nbsp;            len--;</b>
+<i>399</i>&nbsp;        }
+<b class="fc"><i>400</i>&nbsp;        block.limit = limit;</b>
+<i>401</i>&nbsp;
+<b class="fc"><i>402</i>&nbsp;        if (len &gt; 0)</b>
+<i>403</i>&nbsp;        {
+<b class="fc"><i>404</i>&nbsp;            if (ch &lt; UTF8_3_OCTET_MIN_VALUE)</b>
+<i>405</i>&nbsp;            {
+<b class="fc"><i>406</i>&nbsp;                return octets + writeUTF8UpTo2Byte(chars, off, len);</b>
+<i>407</i>&nbsp;            }
+<b class="fc"><i>408</i>&nbsp;            if (ch &gt;= LOW_SURROGATE_FIRST &amp;&amp; ch &lt;= LOW_SURROGATE_LAST)</b>
+<i>409</i>&nbsp;            {
+<b class="fc"><i>410</i>&nbsp;                throw new IllegalArgumentException(&quot;Unpaired low surrogate: &quot; + ch);</b>
+<i>411</i>&nbsp;            }
+<b class="fc"><i>412</i>&nbsp;            if (ch &gt;= HIGH_SURROGATE_FIRST &amp;&amp; ch &lt;= HIGH_SURROGATE_LAST)</b>
+<i>413</i>&nbsp;            {
+<i>414</i>&nbsp;                // just defer to &#39;slow&#39; writing for non-BMP characters
+<b class="fc"><i>415</i>&nbsp;                return octets + writeUTF8Slow(chars, off, len);</b>
+<i>416</i>&nbsp;            }
+<i>417</i>&nbsp;
+<i>418</i>&nbsp;            // we must be a three byte BMP character
+<b class="fc"><i>419</i>&nbsp;            return octets + writeUTF8UpTo3Byte(chars, off, len);</b>
+<i>420</i>&nbsp;        }
+<b class="fc"><i>421</i>&nbsp;        return octets;</b>
+<i>422</i>&nbsp;    }
+<i>423</i>&nbsp;
+<i>424</i>&nbsp;    /** Returns the number of octets written. */
+<i>425</i>&nbsp;    public int writeUTF8(final CharSequence chars)
+<i>426</i>&nbsp;    {
+<b class="fc"><i>427</i>&nbsp;        return writeUTF8(chars, 0, chars.length());</b>
+<i>428</i>&nbsp;    }
+<i>429</i>&nbsp;
+<i>430</i>&nbsp;    // unsigned fixed integer writes -- does not check sign/bounds
+<i>431</i>&nbsp;
+<i>432</i>&nbsp;    private static final int UINT_2_OCTET_SHIFT = 8 * 1;
+<i>433</i>&nbsp;    private static final int UINT_3_OCTET_SHIFT = 8 * 2;
+<i>434</i>&nbsp;    private static final int UINT_4_OCTET_SHIFT = 8 * 3;
+<i>435</i>&nbsp;    private static final int UINT_5_OCTET_SHIFT = 8 * 4;
+<i>436</i>&nbsp;    private static final int UINT_6_OCTET_SHIFT = 8 * 5;
+<i>437</i>&nbsp;    private static final int UINT_7_OCTET_SHIFT = 8 * 6;
+<i>438</i>&nbsp;    private static final int UINT_8_OCTET_SHIFT = 8 * 7;
+<i>439</i>&nbsp;
+<i>440</i>&nbsp;
+<i>441</i>&nbsp;    public void writeUInt8(long value)
+<i>442</i>&nbsp;    {
+<b class="fc"><i>443</i>&nbsp;        writeByte((byte) value);</b>
+<b class="fc"><i>444</i>&nbsp;    }</b>
+<i>445</i>&nbsp;
+<i>446</i>&nbsp;    private void writeUInt16Slow(long value)
+<i>447</i>&nbsp;    {
+<b class="fc"><i>448</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_2_OCTET_SHIFT));</b>
+<b class="fc"><i>449</i>&nbsp;        writeByte((byte) (value                      ));</b>
+<b class="fc"><i>450</i>&nbsp;    }</b>
+<i>451</i>&nbsp;
+<i>452</i>&nbsp;    public void writeUInt16(long value)
+<i>453</i>&nbsp;    {
+<b class="fc"><i>454</i>&nbsp;        if (remaining() &lt; 2)</b>
+<i>455</i>&nbsp;        {
+<b class="fc"><i>456</i>&nbsp;            writeUInt16Slow(value);</b>
+<b class="fc"><i>457</i>&nbsp;            return;</b>
+<i>458</i>&nbsp;        }
+<i>459</i>&nbsp;
+<b class="fc"><i>460</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>461</i>&nbsp;        final byte[] data = block.data;</b>
+<b class="fc"><i>462</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>463</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_2_OCTET_SHIFT);</b>
+<b class="fc"><i>464</i>&nbsp;        data[limit++] = (byte) (value                      );</b>
+<b class="fc"><i>465</i>&nbsp;        block.limit = limit;</b>
+<b class="fc"><i>466</i>&nbsp;    }</b>
+<i>467</i>&nbsp;
+<i>468</i>&nbsp;    private void writeUInt24Slow(long value)
+<i>469</i>&nbsp;    {
+<b class="fc"><i>470</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_3_OCTET_SHIFT));</b>
+<b class="fc"><i>471</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_2_OCTET_SHIFT));</b>
+<b class="fc"><i>472</i>&nbsp;        writeByte((byte) (value                      ));</b>
+<b class="fc"><i>473</i>&nbsp;    }</b>
+<i>474</i>&nbsp;
+<i>475</i>&nbsp;    public void writeUInt24(long value)
+<i>476</i>&nbsp;    {
+<b class="fc"><i>477</i>&nbsp;        if (remaining() &lt; 3)</b>
+<i>478</i>&nbsp;        {
+<b class="fc"><i>479</i>&nbsp;            writeUInt24Slow(value);</b>
+<b class="fc"><i>480</i>&nbsp;            return;</b>
+<i>481</i>&nbsp;        }
+<i>482</i>&nbsp;
+<b class="fc"><i>483</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>484</i>&nbsp;        final byte[] data = block.data;</b>
+<b class="fc"><i>485</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>486</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_3_OCTET_SHIFT);</b>
+<b class="fc"><i>487</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_2_OCTET_SHIFT);</b>
+<b class="fc"><i>488</i>&nbsp;        data[limit++] = (byte) (value                      );</b>
+<b class="fc"><i>489</i>&nbsp;        block.limit = limit;</b>
+<b class="fc"><i>490</i>&nbsp;    }</b>
+<i>491</i>&nbsp;
+<i>492</i>&nbsp;    private void writeUInt32Slow(long value)
+<i>493</i>&nbsp;    {
+<b class="fc"><i>494</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_4_OCTET_SHIFT));</b>
+<b class="fc"><i>495</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_3_OCTET_SHIFT));</b>
+<b class="fc"><i>496</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_2_OCTET_SHIFT));</b>
+<b class="fc"><i>497</i>&nbsp;        writeByte((byte) (value                      ));</b>
+<b class="fc"><i>498</i>&nbsp;    }</b>
+<i>499</i>&nbsp;
+<i>500</i>&nbsp;    public void writeUInt32(long value)
+<i>501</i>&nbsp;    {
+<b class="fc"><i>502</i>&nbsp;        if (remaining() &lt; 4)</b>
+<i>503</i>&nbsp;        {
+<b class="fc"><i>504</i>&nbsp;            writeUInt32Slow(value);</b>
+<b class="fc"><i>505</i>&nbsp;            return;</b>
+<i>506</i>&nbsp;        }
+<i>507</i>&nbsp;
+<b class="fc"><i>508</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>509</i>&nbsp;        final byte[] data = block.data;</b>
+<b class="fc"><i>510</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>511</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_4_OCTET_SHIFT);</b>
+<b class="fc"><i>512</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_3_OCTET_SHIFT);</b>
+<b class="fc"><i>513</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_2_OCTET_SHIFT);</b>
+<b class="fc"><i>514</i>&nbsp;        data[limit++] = (byte) (value                      );</b>
+<b class="fc"><i>515</i>&nbsp;        block.limit = limit;</b>
+<b class="fc"><i>516</i>&nbsp;    }</b>
+<i>517</i>&nbsp;
+<i>518</i>&nbsp;    private void writeUInt40Slow(long value)
+<i>519</i>&nbsp;    {
+<b class="fc"><i>520</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_5_OCTET_SHIFT));</b>
+<b class="fc"><i>521</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_4_OCTET_SHIFT));</b>
+<b class="fc"><i>522</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_3_OCTET_SHIFT));</b>
+<b class="fc"><i>523</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_2_OCTET_SHIFT));</b>
+<b class="fc"><i>524</i>&nbsp;        writeByte((byte) (value                      ));</b>
+<b class="fc"><i>525</i>&nbsp;    }</b>
+<i>526</i>&nbsp;
+<i>527</i>&nbsp;    public void writeUInt40(long value)
+<i>528</i>&nbsp;    {
+<b class="fc"><i>529</i>&nbsp;        if (remaining() &lt; 5)</b>
+<i>530</i>&nbsp;        {
+<b class="fc"><i>531</i>&nbsp;            writeUInt40Slow(value);</b>
+<b class="fc"><i>532</i>&nbsp;            return;</b>
+<i>533</i>&nbsp;        }
+<i>534</i>&nbsp;
+<b class="fc"><i>535</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>536</i>&nbsp;        final byte[] data = block.data;</b>
+<b class="fc"><i>537</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>538</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_5_OCTET_SHIFT);</b>
+<b class="fc"><i>539</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_4_OCTET_SHIFT);</b>
+<b class="fc"><i>540</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_3_OCTET_SHIFT);</b>
+<b class="fc"><i>541</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_2_OCTET_SHIFT);</b>
+<b class="fc"><i>542</i>&nbsp;        data[limit++] = (byte) (value                      );</b>
+<b class="fc"><i>543</i>&nbsp;        block.limit = limit;</b>
+<b class="fc"><i>544</i>&nbsp;    }</b>
+<i>545</i>&nbsp;
+<i>546</i>&nbsp;    private void writeUInt48Slow(long value)
+<i>547</i>&nbsp;    {
+<b class="fc"><i>548</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_6_OCTET_SHIFT));</b>
+<b class="fc"><i>549</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_5_OCTET_SHIFT));</b>
+<b class="fc"><i>550</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_4_OCTET_SHIFT));</b>
+<b class="fc"><i>551</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_3_OCTET_SHIFT));</b>
+<b class="fc"><i>552</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_2_OCTET_SHIFT));</b>
+<b class="fc"><i>553</i>&nbsp;        writeByte((byte) (value                      ));</b>
+<b class="fc"><i>554</i>&nbsp;    }</b>
+<i>555</i>&nbsp;
+<i>556</i>&nbsp;    public void writeUInt48(long value)
+<i>557</i>&nbsp;    {
+<b class="fc"><i>558</i>&nbsp;        if (remaining() &lt; 6)</b>
+<i>559</i>&nbsp;        {
+<b class="fc"><i>560</i>&nbsp;            writeUInt48Slow(value);</b>
+<b class="fc"><i>561</i>&nbsp;            return;</b>
+<i>562</i>&nbsp;        }
+<i>563</i>&nbsp;
+<b class="fc"><i>564</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>565</i>&nbsp;        final byte[] data = block.data;</b>
+<b class="fc"><i>566</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>567</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_6_OCTET_SHIFT);</b>
+<b class="fc"><i>568</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_5_OCTET_SHIFT);</b>
+<b class="fc"><i>569</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_4_OCTET_SHIFT);</b>
+<b class="fc"><i>570</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_3_OCTET_SHIFT);</b>
+<b class="fc"><i>571</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_2_OCTET_SHIFT);</b>
+<b class="fc"><i>572</i>&nbsp;        data[limit++] = (byte) ( value                     );</b>
+<b class="fc"><i>573</i>&nbsp;        block.limit = limit;</b>
+<b class="fc"><i>574</i>&nbsp;    }</b>
+<i>575</i>&nbsp;
+<i>576</i>&nbsp;    private void writeUInt56Slow(long value)
+<i>577</i>&nbsp;    {
+<b class="fc"><i>578</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_7_OCTET_SHIFT));</b>
+<b class="fc"><i>579</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_6_OCTET_SHIFT));</b>
+<b class="fc"><i>580</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_5_OCTET_SHIFT));</b>
+<b class="fc"><i>581</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_4_OCTET_SHIFT));</b>
+<b class="fc"><i>582</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_3_OCTET_SHIFT));</b>
+<b class="fc"><i>583</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_2_OCTET_SHIFT));</b>
+<b class="fc"><i>584</i>&nbsp;        writeByte((byte) (value                      ));</b>
+<b class="fc"><i>585</i>&nbsp;    }</b>
+<i>586</i>&nbsp;
+<i>587</i>&nbsp;    public void writeUInt56(long value)
+<i>588</i>&nbsp;    {
+<b class="fc"><i>589</i>&nbsp;        if (remaining() &lt; 7)</b>
+<i>590</i>&nbsp;        {
+<b class="fc"><i>591</i>&nbsp;            writeUInt56Slow(value);</b>
+<b class="fc"><i>592</i>&nbsp;            return;</b>
+<i>593</i>&nbsp;        }
+<i>594</i>&nbsp;
+<b class="fc"><i>595</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>596</i>&nbsp;        final byte[] data = block.data;</b>
+<b class="fc"><i>597</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>598</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_7_OCTET_SHIFT);</b>
+<b class="fc"><i>599</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_6_OCTET_SHIFT);</b>
+<b class="fc"><i>600</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_5_OCTET_SHIFT);</b>
+<b class="fc"><i>601</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_4_OCTET_SHIFT);</b>
+<b class="fc"><i>602</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_3_OCTET_SHIFT);</b>
+<b class="fc"><i>603</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_2_OCTET_SHIFT);</b>
+<b class="fc"><i>604</i>&nbsp;        data[limit++] = (byte) (value                      );</b>
+<b class="fc"><i>605</i>&nbsp;        block.limit = limit;</b>
+<b class="fc"><i>606</i>&nbsp;    }</b>
+<i>607</i>&nbsp;
+<i>608</i>&nbsp;    private void writeUInt64Slow(long value)
+<i>609</i>&nbsp;    {
+<b class="fc"><i>610</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_8_OCTET_SHIFT));</b>
+<b class="fc"><i>611</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_7_OCTET_SHIFT));</b>
+<b class="fc"><i>612</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_6_OCTET_SHIFT));</b>
+<b class="fc"><i>613</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_5_OCTET_SHIFT));</b>
+<b class="fc"><i>614</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_4_OCTET_SHIFT));</b>
+<b class="fc"><i>615</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_3_OCTET_SHIFT));</b>
+<b class="fc"><i>616</i>&nbsp;        writeByte((byte) (value &gt;&gt; UINT_2_OCTET_SHIFT));</b>
+<b class="fc"><i>617</i>&nbsp;        writeByte((byte) ( value                     ));</b>
+<b class="fc"><i>618</i>&nbsp;    }</b>
+<i>619</i>&nbsp;
+<i>620</i>&nbsp;    public void writeUInt64(long value)
+<i>621</i>&nbsp;    {
+<b class="fc"><i>622</i>&nbsp;        if (remaining() &lt; 8)</b>
+<i>623</i>&nbsp;        {
+<b class="fc"><i>624</i>&nbsp;            writeUInt64Slow(value);</b>
+<b class="fc"><i>625</i>&nbsp;            return;</b>
+<i>626</i>&nbsp;        }
+<i>627</i>&nbsp;
+<b class="fc"><i>628</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>629</i>&nbsp;        final byte[] data = block.data;</b>
+<b class="fc"><i>630</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>631</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_8_OCTET_SHIFT);</b>
+<b class="fc"><i>632</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_7_OCTET_SHIFT);</b>
+<b class="fc"><i>633</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_6_OCTET_SHIFT);</b>
+<b class="fc"><i>634</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_5_OCTET_SHIFT);</b>
+<b class="fc"><i>635</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_4_OCTET_SHIFT);</b>
+<b class="fc"><i>636</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_3_OCTET_SHIFT);</b>
+<b class="fc"><i>637</i>&nbsp;        data[limit++] = (byte) (value &gt;&gt; UINT_2_OCTET_SHIFT);</b>
+<b class="fc"><i>638</i>&nbsp;        data[limit++] = (byte) ( value                      );</b>
+<b class="fc"><i>639</i>&nbsp;        block.limit = limit;</b>
+<i>640</i>&nbsp;
+<i>641</i>&nbsp;
+<b class="fc"><i>642</i>&nbsp;    }</b>
+<i>643</i>&nbsp;
+<i>644</i>&nbsp;    // signed fixed integer writes - does not check bounds (especially important for IntX.MIN_VALUE).
+<i>645</i>&nbsp;
+<i>646</i>&nbsp;    private static final long INT8_SIGN_MASK  = 1L &lt;&lt; ((8 * 1) - 1);
+<i>647</i>&nbsp;    private static final long INT16_SIGN_MASK = 1L &lt;&lt; ((8 * 2) - 1);
+<i>648</i>&nbsp;    private static final long INT24_SIGN_MASK = 1L &lt;&lt; ((8 * 3) - 1);
+<i>649</i>&nbsp;    private static final long INT32_SIGN_MASK = 1L &lt;&lt; ((8 * 4) - 1);
+<i>650</i>&nbsp;    private static final long INT40_SIGN_MASK = 1L &lt;&lt; ((8 * 5) - 1);
+<i>651</i>&nbsp;    private static final long INT48_SIGN_MASK = 1L &lt;&lt; ((8 * 6) - 1);
+<i>652</i>&nbsp;    private static final long INT56_SIGN_MASK = 1L &lt;&lt; ((8 * 7) - 1);
+<i>653</i>&nbsp;    private static final long INT64_SIGN_MASK = 1L &lt;&lt; ((8 * 8) - 1);
+<i>654</i>&nbsp;
+<i>655</i>&nbsp;    public void writeInt8(long value)
+<i>656</i>&nbsp;    {
+<b class="fc"><i>657</i>&nbsp;        if (value &lt; 0)</b>
+<i>658</i>&nbsp;        {
+<b class="fc"><i>659</i>&nbsp;            value = (-value) | INT8_SIGN_MASK;</b>
+<i>660</i>&nbsp;        }
+<b class="fc"><i>661</i>&nbsp;        writeUInt8(value);</b>
+<b class="fc"><i>662</i>&nbsp;    }</b>
+<i>663</i>&nbsp;
+<i>664</i>&nbsp;
+<i>665</i>&nbsp;    public void writeInt16(long value)
+<i>666</i>&nbsp;    {
+<b class="fc"><i>667</i>&nbsp;        if (value &lt; 0)</b>
+<i>668</i>&nbsp;        {
+<b class="fc"><i>669</i>&nbsp;            value = (-value) | INT16_SIGN_MASK;</b>
+<i>670</i>&nbsp;        }
+<b class="fc"><i>671</i>&nbsp;        writeUInt16(value);</b>
+<b class="fc"><i>672</i>&nbsp;    }</b>
+<i>673</i>&nbsp;
+<i>674</i>&nbsp;    public void writeInt24(long value)
+<i>675</i>&nbsp;    {
+<b class="fc"><i>676</i>&nbsp;        if (value &lt; 0)</b>
+<i>677</i>&nbsp;        {
+<b class="fc"><i>678</i>&nbsp;            value = (-value) | INT24_SIGN_MASK;</b>
+<i>679</i>&nbsp;        }
+<b class="fc"><i>680</i>&nbsp;        writeUInt24(value);</b>
+<b class="fc"><i>681</i>&nbsp;    }</b>
+<i>682</i>&nbsp;
+<i>683</i>&nbsp;
+<i>684</i>&nbsp;    public void writeInt32(long value)
+<i>685</i>&nbsp;    {
+<b class="fc"><i>686</i>&nbsp;        if (value &lt; 0)</b>
+<i>687</i>&nbsp;        {
+<b class="fc"><i>688</i>&nbsp;            value = (-value) | INT32_SIGN_MASK;</b>
+<i>689</i>&nbsp;        }
+<b class="fc"><i>690</i>&nbsp;        writeUInt32(value);</b>
+<b class="fc"><i>691</i>&nbsp;    }</b>
+<i>692</i>&nbsp;
+<i>693</i>&nbsp;
+<i>694</i>&nbsp;    public void writeInt40(long value)
+<i>695</i>&nbsp;    {
+<b class="fc"><i>696</i>&nbsp;        if (value &lt; 0)</b>
+<i>697</i>&nbsp;        {
+<b class="fc"><i>698</i>&nbsp;            value = (-value) | INT40_SIGN_MASK;</b>
+<i>699</i>&nbsp;        }
+<b class="fc"><i>700</i>&nbsp;        writeUInt40(value);</b>
+<b class="fc"><i>701</i>&nbsp;    }</b>
+<i>702</i>&nbsp;
+<i>703</i>&nbsp;
+<i>704</i>&nbsp;    public void writeInt48(long value)
+<i>705</i>&nbsp;    {
+<b class="fc"><i>706</i>&nbsp;        if (value &lt; 0)</b>
+<i>707</i>&nbsp;        {
+<b class="fc"><i>708</i>&nbsp;            value = (-value) | INT48_SIGN_MASK;</b>
+<i>709</i>&nbsp;        }
+<b class="fc"><i>710</i>&nbsp;        writeUInt48(value);</b>
+<b class="fc"><i>711</i>&nbsp;    }</b>
+<i>712</i>&nbsp;
+<i>713</i>&nbsp;
+<i>714</i>&nbsp;    public void writeInt56(long value)
+<i>715</i>&nbsp;    {
+<b class="fc"><i>716</i>&nbsp;        if (value &lt; 0)</b>
+<i>717</i>&nbsp;        {
+<b class="fc"><i>718</i>&nbsp;            value = (-value) | INT56_SIGN_MASK;</b>
+<i>719</i>&nbsp;        }
+<b class="fc"><i>720</i>&nbsp;        writeUInt56(value);</b>
+<b class="fc"><i>721</i>&nbsp;    }</b>
+<i>722</i>&nbsp;
+<i>723</i>&nbsp;
+<i>724</i>&nbsp;    public void writeInt64(long value)
+<i>725</i>&nbsp;    {
+<b class="fc"><i>726</i>&nbsp;        if (value &lt; 0)</b>
+<i>727</i>&nbsp;        {
+<b class="fc"><i>728</i>&nbsp;            value = (-value) | INT64_SIGN_MASK;</b>
+<i>729</i>&nbsp;        }
+<b class="fc"><i>730</i>&nbsp;        writeUInt64(value);</b>
+<b class="fc"><i>731</i>&nbsp;    }</b>
+<i>732</i>&nbsp;
+<i>733</i>&nbsp;    // variable length integer writing
+<i>734</i>&nbsp;
+<i>735</i>&nbsp;    private static final long VAR_INT_BITS_PER_OCTET = 7;
+<i>736</i>&nbsp;    private static final long VAR_INT_MASK = 0x7F;
+<i>737</i>&nbsp;
+<i>738</i>&nbsp;    private static final long VAR_UINT_9_OCTET_SHIFT = (8 * VAR_INT_BITS_PER_OCTET);
+<i>739</i>&nbsp;    private static final long VAR_UINT_9_OCTET_MIN_VALUE = (1L &lt;&lt; VAR_UINT_9_OCTET_SHIFT);
+<i>740</i>&nbsp;
+<i>741</i>&nbsp;    private static final long VAR_UINT_8_OCTET_SHIFT = (7 * VAR_INT_BITS_PER_OCTET);
+<i>742</i>&nbsp;    private static final long VAR_UINT_8_OCTET_MIN_VALUE = (1L &lt;&lt; VAR_UINT_8_OCTET_SHIFT);
+<i>743</i>&nbsp;
+<i>744</i>&nbsp;    private static final long VAR_UINT_7_OCTET_SHIFT = (6 * VAR_INT_BITS_PER_OCTET);
+<i>745</i>&nbsp;    private static final long VAR_UINT_7_OCTET_MIN_VALUE = (1L &lt;&lt; VAR_UINT_7_OCTET_SHIFT);
+<i>746</i>&nbsp;
+<i>747</i>&nbsp;    private static final long VAR_UINT_6_OCTET_SHIFT = (5 * VAR_INT_BITS_PER_OCTET);
+<i>748</i>&nbsp;    private static final long VAR_UINT_6_OCTET_MIN_VALUE = (1L &lt;&lt; VAR_UINT_6_OCTET_SHIFT);
+<i>749</i>&nbsp;
+<i>750</i>&nbsp;    private static final long VAR_UINT_5_OCTET_SHIFT = (4 * VAR_INT_BITS_PER_OCTET);
+<i>751</i>&nbsp;    private static final long VAR_UINT_5_OCTET_MIN_VALUE = (1L &lt;&lt; VAR_UINT_5_OCTET_SHIFT);
+<i>752</i>&nbsp;
+<i>753</i>&nbsp;    private static final long VAR_UINT_4_OCTET_SHIFT = (3 * VAR_INT_BITS_PER_OCTET);
+<i>754</i>&nbsp;    private static final long VAR_UINT_4_OCTET_MIN_VALUE = (1L &lt;&lt; VAR_UINT_4_OCTET_SHIFT);
+<i>755</i>&nbsp;
+<i>756</i>&nbsp;    private static final long VAR_UINT_3_OCTET_SHIFT = (2 * VAR_INT_BITS_PER_OCTET);
+<i>757</i>&nbsp;    private static final long VAR_UINT_3_OCTET_MIN_VALUE = (1L &lt;&lt; VAR_UINT_3_OCTET_SHIFT);
+<i>758</i>&nbsp;
+<i>759</i>&nbsp;    private static final long VAR_UINT_2_OCTET_SHIFT = (1 * VAR_INT_BITS_PER_OCTET);
+<i>760</i>&nbsp;    private static final long VAR_UINT_2_OCTET_MIN_VALUE = (1L &lt;&lt; VAR_UINT_2_OCTET_SHIFT);
+<i>761</i>&nbsp;
+<i>762</i>&nbsp;    private static final long VAR_INT_FINAL_OCTET_SIGNAL_MASK = 0x80;
+<i>763</i>&nbsp;
+<i>764</i>&nbsp;    private int writeVarUIntSlow(final long value)
+<i>765</i>&nbsp;    {
+<b class="fc"><i>766</i>&nbsp;        int size = 1;</b>
+<b class="fc"><i>767</i>&nbsp;        if (value &gt;= VAR_UINT_9_OCTET_MIN_VALUE)</b>
+<i>768</i>&nbsp;        {
+<b class="fc"><i>769</i>&nbsp;            writeUInt8((value &gt;&gt; VAR_UINT_9_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>770</i>&nbsp;            size++;</b>
+<i>771</i>&nbsp;        }
+<b class="fc"><i>772</i>&nbsp;        if (value &gt;= VAR_UINT_8_OCTET_MIN_VALUE)</b>
+<i>773</i>&nbsp;        {
+<b class="fc"><i>774</i>&nbsp;            writeUInt8((value &gt;&gt; VAR_UINT_8_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>775</i>&nbsp;            size++;</b>
+<i>776</i>&nbsp;        }
+<b class="fc"><i>777</i>&nbsp;        if (value &gt;= VAR_UINT_7_OCTET_MIN_VALUE)</b>
+<i>778</i>&nbsp;        {
+<b class="fc"><i>779</i>&nbsp;            writeUInt8((value &gt;&gt; VAR_UINT_7_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>780</i>&nbsp;            size++;</b>
+<i>781</i>&nbsp;        }
+<b class="fc"><i>782</i>&nbsp;        if (value &gt;= VAR_UINT_6_OCTET_MIN_VALUE)</b>
+<i>783</i>&nbsp;        {
+<b class="fc"><i>784</i>&nbsp;            writeUInt8((value &gt;&gt; VAR_UINT_6_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>785</i>&nbsp;            size++;</b>
+<i>786</i>&nbsp;        }
+<b class="fc"><i>787</i>&nbsp;        if (value &gt;= VAR_UINT_5_OCTET_MIN_VALUE)</b>
+<i>788</i>&nbsp;        {
+<b class="fc"><i>789</i>&nbsp;            writeUInt8((value &gt;&gt; VAR_UINT_5_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>790</i>&nbsp;            size++;</b>
+<i>791</i>&nbsp;        }
+<b class="fc"><i>792</i>&nbsp;        if (value &gt;= VAR_UINT_4_OCTET_MIN_VALUE)</b>
+<i>793</i>&nbsp;        {
+<b class="fc"><i>794</i>&nbsp;            writeUInt8((value &gt;&gt; VAR_UINT_4_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>795</i>&nbsp;            size++;</b>
+<i>796</i>&nbsp;        }
+<b class="fc"><i>797</i>&nbsp;        if (value &gt;= VAR_UINT_3_OCTET_MIN_VALUE)</b>
+<i>798</i>&nbsp;        {
+<b class="fc"><i>799</i>&nbsp;            writeUInt8((value &gt;&gt; VAR_UINT_3_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>800</i>&nbsp;            size++;</b>
+<i>801</i>&nbsp;        }
+<b class="fc"><i>802</i>&nbsp;        if (value &gt;= VAR_UINT_2_OCTET_MIN_VALUE)</b>
+<i>803</i>&nbsp;        {
+<b class="fc"><i>804</i>&nbsp;            writeUInt8((value &gt;&gt; VAR_UINT_2_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>805</i>&nbsp;            size++;</b>
+<i>806</i>&nbsp;        }
+<b class="fc"><i>807</i>&nbsp;        writeUInt8((value &amp; VAR_INT_MASK) | VAR_INT_FINAL_OCTET_SIGNAL_MASK);</b>
+<b class="fc"><i>808</i>&nbsp;        return size;</b>
+<i>809</i>&nbsp;    }
+<i>810</i>&nbsp;
+<i>811</i>&nbsp;    private int writeVarUIntDirect2(final long value)
+<i>812</i>&nbsp;    {
+<b class="fc"><i>813</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>814</i>&nbsp;        final byte[] data = block.data;</b>
+<b class="fc"><i>815</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>816</i>&nbsp;        data[limit++] = (byte)  ((value &gt;&gt; VAR_UINT_2_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>817</i>&nbsp;        data[limit++] = (byte) (((value)                           &amp; VAR_INT_MASK) | VAR_INT_FINAL_OCTET_SIGNAL_MASK);</b>
+<i>818</i>&nbsp;
+<b class="fc"><i>819</i>&nbsp;        block.limit = limit;</b>
+<b class="fc"><i>820</i>&nbsp;        return 2;</b>
+<i>821</i>&nbsp;    }
+<i>822</i>&nbsp;
+<i>823</i>&nbsp;    private int writeVarUIntDirect3(final long value)
+<i>824</i>&nbsp;    {
+<b class="fc"><i>825</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>826</i>&nbsp;        final byte[] data = block.data;</b>
+<b class="fc"><i>827</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>828</i>&nbsp;        data[limit++] = (byte)  ((value &gt;&gt; VAR_UINT_3_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>829</i>&nbsp;        data[limit++] = (byte)  ((value &gt;&gt; VAR_UINT_2_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>830</i>&nbsp;        data[limit++] = (byte) (((value)                           &amp; VAR_INT_MASK) | VAR_INT_FINAL_OCTET_SIGNAL_MASK);</b>
+<i>831</i>&nbsp;
+<b class="fc"><i>832</i>&nbsp;        block.limit = limit;</b>
+<b class="fc"><i>833</i>&nbsp;        return 3;</b>
+<i>834</i>&nbsp;    }
+<i>835</i>&nbsp;
+<i>836</i>&nbsp;    private int writeVarUIntDirect4(final long value)
+<i>837</i>&nbsp;    {
+<b class="fc"><i>838</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>839</i>&nbsp;        final byte[] data = block.data;</b>
+<b class="fc"><i>840</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>841</i>&nbsp;        data[limit++] = (byte)  ((value &gt;&gt; VAR_UINT_4_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>842</i>&nbsp;        data[limit++] = (byte)  ((value &gt;&gt; VAR_UINT_3_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>843</i>&nbsp;        data[limit++] = (byte)  ((value &gt;&gt; VAR_UINT_2_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>844</i>&nbsp;        data[limit++] = (byte) (((value)                           &amp; VAR_INT_MASK) | VAR_INT_FINAL_OCTET_SIGNAL_MASK);</b>
+<i>845</i>&nbsp;
+<b class="fc"><i>846</i>&nbsp;        block.limit = limit;</b>
+<b class="fc"><i>847</i>&nbsp;        return 4;</b>
+<i>848</i>&nbsp;    }
+<i>849</i>&nbsp;
+<i>850</i>&nbsp;    private int writeVarUIntDirect5(final long value)
+<i>851</i>&nbsp;    {
+<b class="fc"><i>852</i>&nbsp;        final Block block = current;</b>
+<b class="fc"><i>853</i>&nbsp;        final byte[] data = block.data;</b>
+<b class="fc"><i>854</i>&nbsp;        int limit = block.limit;</b>
+<b class="fc"><i>855</i>&nbsp;        data[limit++] = (byte)  ((value &gt;&gt; VAR_UINT_5_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>856</i>&nbsp;        data[limit++] = (byte)  ((value &gt;&gt; VAR_UINT_4_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>857</i>&nbsp;        data[limit++] = (byte)  ((value &gt;&gt; VAR_UINT_3_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>858</i>&nbsp;        data[limit++] = (byte)  ((value &gt;&gt; VAR_UINT_2_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>859</i>&nbsp;        data[limit++] = (byte) (((value)                           &amp; VAR_INT_MASK) | VAR_INT_FINAL_OCTET_SIGNAL_MASK);</b>
+<i>860</i>&nbsp;
+<b class="fc"><i>861</i>&nbsp;        block.limit = limit;</b>
+<b class="fc"><i>862</i>&nbsp;        return 5;</b>
+<i>863</i>&nbsp;    }
+<i>864</i>&nbsp;
+<i>865</i>&nbsp;    public int writeVarUInt(final long value)
+<i>866</i>&nbsp;    {
+<b class="fc"><i>867</i>&nbsp;        if (value &lt; VAR_UINT_2_OCTET_MIN_VALUE)</b>
+<i>868</i>&nbsp;        {
+<b class="fc"><i>869</i>&nbsp;            writeUInt8((value &amp; 0x7F) | 0x80);</b>
+<b class="fc"><i>870</i>&nbsp;            return 1;</b>
+<i>871</i>&nbsp;        }
+<b class="fc"><i>872</i>&nbsp;        if (value &lt; VAR_UINT_3_OCTET_MIN_VALUE)</b>
+<i>873</i>&nbsp;        {
+<b class="fc"><i>874</i>&nbsp;            if (remaining() &lt; 2)</b>
+<i>875</i>&nbsp;            {
+<b class="fc"><i>876</i>&nbsp;                return writeVarUIntSlow(value);</b>
+<i>877</i>&nbsp;            }
+<b class="fc"><i>878</i>&nbsp;            return writeVarUIntDirect2(value);</b>
+<i>879</i>&nbsp;        }
+<b class="fc"><i>880</i>&nbsp;        if (value &lt; VAR_UINT_4_OCTET_MIN_VALUE)</b>
+<i>881</i>&nbsp;        {
+<b class="fc"><i>882</i>&nbsp;            if (remaining() &lt; 3)</b>
+<i>883</i>&nbsp;            {
+<b class="fc"><i>884</i>&nbsp;                return writeVarUIntSlow(value);</b>
+<i>885</i>&nbsp;            }
+<b class="fc"><i>886</i>&nbsp;            return writeVarUIntDirect3(value);</b>
+<i>887</i>&nbsp;        }
+<b class="fc"><i>888</i>&nbsp;        if (value &lt; VAR_UINT_5_OCTET_MIN_VALUE)</b>
+<i>889</i>&nbsp;        {
+<b class="fc"><i>890</i>&nbsp;            if (remaining() &lt; 4)</b>
+<i>891</i>&nbsp;            {
+<b class="fc"><i>892</i>&nbsp;                return writeVarUIntSlow(value);</b>
+<i>893</i>&nbsp;            }
+<b class="fc"><i>894</i>&nbsp;            return writeVarUIntDirect4(value);</b>
+<i>895</i>&nbsp;        }
+<b class="fc"><i>896</i>&nbsp;        if (value &lt; VAR_UINT_6_OCTET_MIN_VALUE)</b>
+<i>897</i>&nbsp;        {
+<b class="fc"><i>898</i>&nbsp;            if (remaining() &lt; 5)</b>
+<i>899</i>&nbsp;            {
+<b class="fc"><i>900</i>&nbsp;                return writeVarUIntSlow(value);</b>
+<i>901</i>&nbsp;            }
+<b class="fc"><i>902</i>&nbsp;            return writeVarUIntDirect5(value);</b>
+<i>903</i>&nbsp;
+<i>904</i>&nbsp;        }
+<i>905</i>&nbsp;        // TODO determine if it is worth doing the fast path beyond 2**35 - 1
+<i>906</i>&nbsp;
+<i>907</i>&nbsp;        // we give up--go to the &#39;slow&#39; path
+<b class="fc"><i>908</i>&nbsp;        return writeVarUIntSlow(value);</b>
+<i>909</i>&nbsp;    }
+<i>910</i>&nbsp;
+<i>911</i>&nbsp;    private static final long VAR_INT_SIGNED_OCTET_MASK = 0x3F;
+<i>912</i>&nbsp;    private static final long VAR_INT_SIGNBIT_ON_MASK   = 0x40L;
+<i>913</i>&nbsp;    private static final long VAR_INT_SIGNBIT_OFF_MASK  = 0x00L;
+<i>914</i>&nbsp;
+<i>915</i>&nbsp;    // note that the highest order bit for signed 64-bit values cannot fit in 9 bytes with the sign
+<i>916</i>&nbsp;    private static final long VAR_INT_10_OCTET_SHIFT = 62;
+<i>917</i>&nbsp;
+<i>918</i>&nbsp;    private static final long VAR_INT_10_OCTET_MIN_VALUE = (1L &lt;&lt; VAR_INT_10_OCTET_SHIFT);
+<i>919</i>&nbsp;    private static final long VAR_INT_9_OCTET_MIN_VALUE  = (VAR_UINT_9_OCTET_MIN_VALUE &gt;&gt; 1);
+<i>920</i>&nbsp;    private static final long VAR_INT_8_OCTET_MIN_VALUE  = (VAR_UINT_8_OCTET_MIN_VALUE &gt;&gt; 1);
+<i>921</i>&nbsp;    private static final long VAR_INT_7_OCTET_MIN_VALUE  = (VAR_UINT_7_OCTET_MIN_VALUE &gt;&gt; 1);
+<i>922</i>&nbsp;    private static final long VAR_INT_6_OCTET_MIN_VALUE  = (VAR_UINT_6_OCTET_MIN_VALUE &gt;&gt; 1);
+<i>923</i>&nbsp;    private static final long VAR_INT_5_OCTET_MIN_VALUE  = (VAR_UINT_5_OCTET_MIN_VALUE &gt;&gt; 1);
+<i>924</i>&nbsp;    private static final long VAR_INT_4_OCTET_MIN_VALUE  = (VAR_UINT_4_OCTET_MIN_VALUE &gt;&gt; 1);
+<i>925</i>&nbsp;    private static final long VAR_INT_3_OCTET_MIN_VALUE  = (VAR_UINT_3_OCTET_MIN_VALUE &gt;&gt; 1);
+<i>926</i>&nbsp;    private static final long VAR_INT_2_OCTET_MIN_VALUE  = (VAR_UINT_2_OCTET_MIN_VALUE &gt;&gt; 1);
+<i>927</i>&nbsp;
+<i>928</i>&nbsp;    private int writeVarIntSlow(final long magnitude, final long signMask)
+<i>929</i>&nbsp;    {
+<b class="fc"><i>930</i>&nbsp;        int size = 1;</b>
+<b class="fc"><i>931</i>&nbsp;        if (magnitude &gt;= VAR_INT_10_OCTET_MIN_VALUE)</b>
+<i>932</i>&nbsp;        {
+<b class="fc"><i>933</i>&nbsp;            writeUInt8(((magnitude &gt;&gt; VAR_INT_10_OCTET_SHIFT) &amp; VAR_INT_SIGNED_OCTET_MASK) | signMask);</b>
+<b class="fc"><i>934</i>&nbsp;            size++;</b>
+<i>935</i>&nbsp;        }
+<b class="fc"><i>936</i>&nbsp;        if (magnitude &gt;= VAR_INT_9_OCTET_MIN_VALUE)</b>
+<i>937</i>&nbsp;        {
+<b class="fc"><i>938</i>&nbsp;            final long bits = (magnitude &gt;&gt; VAR_UINT_9_OCTET_SHIFT);</b>
+<b class="fc"><i>939</i>&nbsp;            writeUInt8(size == 1 ? ((bits &amp; VAR_INT_SIGNED_OCTET_MASK) | signMask) : (bits &amp; VAR_INT_MASK));</b>
+<b class="fc"><i>940</i>&nbsp;            size++;</b>
+<i>941</i>&nbsp;        }
+<b class="fc"><i>942</i>&nbsp;        if (magnitude &gt;= VAR_INT_8_OCTET_MIN_VALUE)</b>
+<i>943</i>&nbsp;        {
+<b class="fc"><i>944</i>&nbsp;            final long bits = (magnitude &gt;&gt; VAR_UINT_8_OCTET_SHIFT);</b>
+<b class="fc"><i>945</i>&nbsp;            writeUInt8(size == 1 ? ((bits &amp; VAR_INT_SIGNED_OCTET_MASK) | signMask) : (bits &amp; VAR_INT_MASK));</b>
+<b class="fc"><i>946</i>&nbsp;            size++;</b>
+<i>947</i>&nbsp;        }
+<b class="fc"><i>948</i>&nbsp;        if (magnitude &gt;= VAR_INT_7_OCTET_MIN_VALUE)</b>
+<i>949</i>&nbsp;        {
+<b class="fc"><i>950</i>&nbsp;            final long bits = (magnitude &gt;&gt; VAR_UINT_7_OCTET_SHIFT);</b>
+<b class="fc"><i>951</i>&nbsp;            writeUInt8(size == 1 ? ((bits &amp; VAR_INT_SIGNED_OCTET_MASK) | signMask) : (bits &amp; VAR_INT_MASK));</b>
+<b class="fc"><i>952</i>&nbsp;            size++;</b>
+<i>953</i>&nbsp;        }
+<b class="fc"><i>954</i>&nbsp;        if (magnitude &gt;= VAR_INT_6_OCTET_MIN_VALUE)</b>
+<i>955</i>&nbsp;        {
+<b class="fc"><i>956</i>&nbsp;            final long bits = (magnitude &gt;&gt; VAR_UINT_6_OCTET_SHIFT);</b>
+<b class="fc"><i>957</i>&nbsp;            writeUInt8(size == 1 ? ((bits &amp; VAR_INT_SIGNED_OCTET_MASK) | signMask) : (bits &amp; VAR_INT_MASK));</b>
+<b class="fc"><i>958</i>&nbsp;            size++;</b>
+<i>959</i>&nbsp;        }
+<b class="fc"><i>960</i>&nbsp;        if (magnitude &gt;= VAR_INT_5_OCTET_MIN_VALUE)</b>
+<i>961</i>&nbsp;        {
+<b class="fc"><i>962</i>&nbsp;            final long bits = (magnitude &gt;&gt; VAR_UINT_5_OCTET_SHIFT);</b>
+<b class="fc"><i>963</i>&nbsp;            writeUInt8(size == 1 ? ((bits &amp; VAR_INT_SIGNED_OCTET_MASK) | signMask) : (bits &amp; VAR_INT_MASK));</b>
+<b class="fc"><i>964</i>&nbsp;            size++;</b>
+<i>965</i>&nbsp;        }
+<b class="fc"><i>966</i>&nbsp;        if (magnitude &gt;= VAR_INT_4_OCTET_MIN_VALUE)</b>
+<i>967</i>&nbsp;        {
+<b class="fc"><i>968</i>&nbsp;            final long bits = (magnitude &gt;&gt; VAR_UINT_4_OCTET_SHIFT);</b>
+<b class="fc"><i>969</i>&nbsp;            writeUInt8(size == 1 ? ((bits &amp; VAR_INT_SIGNED_OCTET_MASK) | signMask) : (bits &amp; VAR_INT_MASK));</b>
+<b class="fc"><i>970</i>&nbsp;            size++;</b>
+<i>971</i>&nbsp;        }
+<b class="fc"><i>972</i>&nbsp;        if (magnitude &gt;= VAR_INT_3_OCTET_MIN_VALUE)</b>
+<i>973</i>&nbsp;        {
+<b class="fc"><i>974</i>&nbsp;            final long bits = (magnitude &gt;&gt; VAR_UINT_3_OCTET_SHIFT);</b>
+<b class="fc"><i>975</i>&nbsp;            writeUInt8(size == 1 ? ((bits &amp; VAR_INT_SIGNED_OCTET_MASK) | signMask) : (bits &amp; VAR_INT_MASK));</b>
+<b class="fc"><i>976</i>&nbsp;            size++;</b>
+<i>977</i>&nbsp;        }
+<b class="fc"><i>978</i>&nbsp;        if (magnitude &gt;= VAR_INT_2_OCTET_MIN_VALUE)</b>
+<i>979</i>&nbsp;        {
+<b class="fc"><i>980</i>&nbsp;            final long bits = (magnitude &gt;&gt; VAR_UINT_2_OCTET_SHIFT);</b>
+<b class="fc"><i>981</i>&nbsp;            writeUInt8(size == 1 ? ((bits &amp; VAR_INT_SIGNED_OCTET_MASK) | signMask) : (bits &amp; VAR_INT_MASK));</b>
+<b class="fc"><i>982</i>&nbsp;            size++;</b>
+<i>983</i>&nbsp;        }
+<b class="fc"><i>984</i>&nbsp;        writeUInt8((size == 1 ? ((magnitude &amp; VAR_INT_SIGNED_OCTET_MASK) | signMask) : (magnitude &amp; VAR_INT_MASK)) | VAR_INT_FINAL_OCTET_SIGNAL_MASK);</b>
+<i>985</i>&nbsp;
+<b class="fc"><i>986</i>&nbsp;        return size;</b>
+<i>987</i>&nbsp;    }
+<i>988</i>&nbsp;
+<i>989</i>&nbsp;    private static final long VAR_INT_BITS_PER_SIGNED_OCTET = 6;
+<i>990</i>&nbsp;    private static final long VAR_SINT_2_OCTET_SHIFT = VAR_INT_BITS_PER_SIGNED_OCTET + (1 * VAR_INT_BITS_PER_OCTET);
+<i>991</i>&nbsp;    private static final long VAR_SINT_3_OCTET_SHIFT = VAR_INT_BITS_PER_SIGNED_OCTET + (2 * VAR_INT_BITS_PER_OCTET);
+<i>992</i>&nbsp;    private static final long VAR_SINT_4_OCTET_SHIFT = VAR_INT_BITS_PER_SIGNED_OCTET + (3 * VAR_INT_BITS_PER_OCTET);
+<i>993</i>&nbsp;    private static final long VAR_SINT_5_OCTET_SHIFT = VAR_INT_BITS_PER_SIGNED_OCTET + (4 * VAR_INT_BITS_PER_OCTET);
+<i>994</i>&nbsp;
+<i>995</i>&nbsp;    public int writeVarInt(long value)
+<i>996</i>&nbsp;    {
+<b class="fc"><i>997</i>&nbsp;        assert value != Long.MIN_VALUE;</b>
+<i>998</i>&nbsp;
+<b class="fc"><i>999</i>&nbsp;        final long signMask = value &lt; 0 ? VAR_INT_SIGNBIT_ON_MASK : VAR_INT_SIGNBIT_OFF_MASK;</b>
+<b class="fc"><i>1000</i>&nbsp;        final long magnitude = value &lt; 0 ? -value : value;</b>
+<b class="fc"><i>1001</i>&nbsp;        if (magnitude &lt; VAR_INT_2_OCTET_MIN_VALUE)</b>
+<i>1002</i>&nbsp;        {
+<b class="fc"><i>1003</i>&nbsp;            writeUInt8((magnitude &amp; VAR_INT_SIGNED_OCTET_MASK) | VAR_INT_FINAL_OCTET_SIGNAL_MASK | signMask);</b>
+<b class="fc"><i>1004</i>&nbsp;            return 1;</b>
+<i>1005</i>&nbsp;        }
+<b class="fc"><i>1006</i>&nbsp;        final long signBit = value &lt; 0 ? 1 : 0;</b>
+<b class="fc"><i>1007</i>&nbsp;        final int remaining = remaining();</b>
+<b class="fc"><i>1008</i>&nbsp;        if (magnitude &lt; VAR_INT_3_OCTET_MIN_VALUE &amp;&amp; remaining &gt;= 2)</b>
+<i>1009</i>&nbsp;        {
+<b class="fc"><i>1010</i>&nbsp;            return writeVarUIntDirect2(magnitude | (signBit &lt;&lt; VAR_SINT_2_OCTET_SHIFT));</b>
+<i>1011</i>&nbsp;        }
+<b class="fc"><i>1012</i>&nbsp;        else if (magnitude &lt; VAR_INT_4_OCTET_MIN_VALUE &amp;&amp; remaining &gt;= 3)</b>
+<i>1013</i>&nbsp;        {
+<b class="fc"><i>1014</i>&nbsp;            return writeVarUIntDirect3(magnitude | (signBit &lt;&lt; VAR_SINT_3_OCTET_SHIFT));</b>
+<i>1015</i>&nbsp;        }
+<b class="fc"><i>1016</i>&nbsp;        else if (magnitude &lt; VAR_INT_5_OCTET_MIN_VALUE &amp;&amp; remaining &gt;= 4)</b>
+<i>1017</i>&nbsp;        {
+<b class="fc"><i>1018</i>&nbsp;            return writeVarUIntDirect4(magnitude | (signBit &lt;&lt; VAR_SINT_4_OCTET_SHIFT));</b>
+<i>1019</i>&nbsp;        }
+<b class="fc"><i>1020</i>&nbsp;        else if (magnitude &lt; VAR_INT_6_OCTET_MIN_VALUE &amp;&amp; remaining &gt;= 5)</b>
+<i>1021</i>&nbsp;        {
+<b class="fc"><i>1022</i>&nbsp;            return writeVarUIntDirect5(magnitude | (signBit &lt;&lt; VAR_SINT_5_OCTET_SHIFT));</b>
+<i>1023</i>&nbsp;        }
+<i>1024</i>&nbsp;        // TODO determine if it is worth doing the fast path beyond 2**34 - 1
+<i>1025</i>&nbsp;
+<i>1026</i>&nbsp;        // we give up--go to the slow path
+<b class="fc"><i>1027</i>&nbsp;        return writeVarIntSlow(magnitude, signMask);</b>
+<i>1028</i>&nbsp;    }
+<i>1029</i>&nbsp;
+<i>1030</i>&nbsp;    // write variable integer of specific size at a specified position -- no bounds checking, will not expand the buffer
+<i>1031</i>&nbsp;
+<i>1032</i>&nbsp;    public void writeVarUIntDirect1At(final long position, final long value)
+<i>1033</i>&nbsp;    {
+<b class="fc"><i>1034</i>&nbsp;        writeUInt8At(position, (value &amp; VAR_INT_MASK) | VAR_INT_FINAL_OCTET_SIGNAL_MASK);</b>
+<b class="fc"><i>1035</i>&nbsp;    }</b>
+<i>1036</i>&nbsp;
+<i>1037</i>&nbsp;    private void writeVarUIntDirect2StraddlingAt(final int index, final int offset, final long value)
+<i>1038</i>&nbsp;    {
+<i>1039</i>&nbsp;        // XXX we&#39;re stradling a block
+<b class="fc"><i>1040</i>&nbsp;        final Block block1 = blocks.get(index);</b>
+<b class="fc"><i>1041</i>&nbsp;        block1.data[offset] = (byte) ((value &gt;&gt; VAR_UINT_2_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>1042</i>&nbsp;        final Block block2 = blocks.get(index + 1);</b>
+<b class="fc"><i>1043</i>&nbsp;        block2.data[0]      = (byte) ((value                            &amp; VAR_INT_MASK) | VAR_INT_FINAL_OCTET_SIGNAL_MASK);</b>
+<b class="fc"><i>1044</i>&nbsp;    }</b>
+<i>1045</i>&nbsp;
+<i>1046</i>&nbsp;    public void writeVarUIntDirect2At(long position, long value)
+<i>1047</i>&nbsp;    {
+<b class="fc"><i>1048</i>&nbsp;        final int index = index(position);</b>
+<b class="fc"><i>1049</i>&nbsp;        final int offset = offset(position);</b>
+<i>1050</i>&nbsp;
+<b class="fc"><i>1051</i>&nbsp;        if (offset + 2 &gt; allocator.getBlockSize())</b>
+<i>1052</i>&nbsp;        {
+<b class="fc"><i>1053</i>&nbsp;            writeVarUIntDirect2StraddlingAt(index, offset, value);</b>
+<b class="fc"><i>1054</i>&nbsp;            return;</b>
+<i>1055</i>&nbsp;        }
+<i>1056</i>&nbsp;
+<b class="fc"><i>1057</i>&nbsp;        final Block block = blocks.get(index);</b>
+<b class="fc"><i>1058</i>&nbsp;        block.data[offset    ] = (byte) ((value &gt;&gt; VAR_UINT_2_OCTET_SHIFT) &amp; VAR_INT_MASK);</b>
+<b class="fc"><i>1059</i>&nbsp;        block.data[offset + 1] = (byte) ((value                            &amp; VAR_INT_MASK) | VAR_INT_FINAL_OCTET_SIGNAL_MASK);</b>
+<b class="fc"><i>1060</i>&nbsp;    }</b>
+<i>1061</i>&nbsp;
+<i>1062</i>&nbsp;    public void writeUInt8At(final long position, final long value)
+<i>1063</i>&nbsp;    {
+<b class="fc"><i>1064</i>&nbsp;        final int index = index(position);</b>
+<b class="fc"><i>1065</i>&nbsp;        final int offset = offset(position);</b>
+<i>1066</i>&nbsp;
+<i>1067</i>&nbsp;        // XXX we&#39;ll never overrun a block unless we&#39;re given a position past our block array
+<b class="fc"><i>1068</i>&nbsp;        final Block block = blocks.get(index);</b>
+<b class="fc"><i>1069</i>&nbsp;        block.data[offset] = (byte) value;</b>
+<b class="fc"><i>1070</i>&nbsp;    }</b>
+<i>1071</i>&nbsp;
+<i>1072</i>&nbsp;    /** Write the entire buffer to output stream. */
+<i>1073</i>&nbsp;    public void writeTo(final OutputStream out) throws IOException
+<i>1074</i>&nbsp;    {
+<b class="fc"><i>1075</i>&nbsp;        for (int i = 0; i &lt;= index; i++)</b>
+<i>1076</i>&nbsp;        {
+<b class="fc"><i>1077</i>&nbsp;            Block block = blocks.get(i);</b>
+<b class="fc"><i>1078</i>&nbsp;            out.write(block.data, 0, block.limit);</b>
+<i>1079</i>&nbsp;        }
+<b class="fc"><i>1080</i>&nbsp;    }</b>
+<i>1081</i>&nbsp;
+<i>1082</i>&nbsp;    /** Write a specific segment of data from the buffer to a stream. */
+<i>1083</i>&nbsp;    public void writeTo(final OutputStream out, long position, long length) throws IOException
+<i>1084</i>&nbsp;    {
+<b class="fc"><i>1085</i>&nbsp;        while (length &gt; 0)</b>
+<i>1086</i>&nbsp;        {
+<b class="fc"><i>1087</i>&nbsp;            final int index = index(position);</b>
+<b class="fc"><i>1088</i>&nbsp;            final int offset = offset(position);</b>
+<b class="fc"><i>1089</i>&nbsp;            final Block block = blocks.get(index);</b>
+<b class="fc"><i>1090</i>&nbsp;            final int amount = (int) Math.min(block.data.length - offset, length);</b>
+<b class="fc"><i>1091</i>&nbsp;            out.write(block.data, offset, amount);</b>
+<i>1092</i>&nbsp;
+<b class="fc"><i>1093</i>&nbsp;            position += amount;</b>
+<b class="fc"><i>1094</i>&nbsp;            length -= amount;</b>
+<b class="fc"><i>1095</i>&nbsp;        }</b>
+<b class="fc"><i>1096</i>&nbsp;    }</b>
+<i>1097</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

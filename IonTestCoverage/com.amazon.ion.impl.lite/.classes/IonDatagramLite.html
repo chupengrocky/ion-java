@@ -1,0 +1,1326 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonDatagramLite</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl.lite</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonDatagramLite (com.amazon.ion.impl.lite)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">IonDatagramLite</td>
+<td class="coverageStat">
+  <span class="percent">
+    70.5%
+  </span>
+  <span class="absValue">
+    (31/ 44)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    68.2%
+  </span>
+  <span class="absValue">
+    (101/ 148)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">IonDatagramLite$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/ 3)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonDatagramLite$2</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/ 2)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonDatagramLite$SystemContentIterator</td>
+<td class="coverageStat">
+  <span class="percent">
+    52.4%
+  </span>
+  <span class="absValue">
+    (11/ 21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    39.6%
+  </span>
+  <span class="absValue">
+    (42/ 106)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">IonDatagramLite$SystemIteratorPosition</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (10/ 15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    61.7%
+  </span>
+  <span class="absValue">
+    (87/ 141)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    64.3%
+  </span>
+  <span class="absValue">
+    (54/ 84)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    58.2%
+  </span>
+  <span class="absValue">
+    (233/ 400)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl.lite;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import static com.amazon.ion.SystemSymbols.ION_1_0;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;import com.amazon.ion.ContainedValueException;
+<i>21</i>&nbsp;import com.amazon.ion.IonCatalog;
+<i>22</i>&nbsp;import com.amazon.ion.IonDatagram;
+<i>23</i>&nbsp;import com.amazon.ion.IonException;
+<i>24</i>&nbsp;import com.amazon.ion.IonSymbol;
+<i>25</i>&nbsp;import com.amazon.ion.IonSystem;
+<i>26</i>&nbsp;import com.amazon.ion.IonType;
+<i>27</i>&nbsp;import com.amazon.ion.IonValue;
+<i>28</i>&nbsp;import com.amazon.ion.IonWriter;
+<i>29</i>&nbsp;import com.amazon.ion.SymbolTable;
+<i>30</i>&nbsp;import com.amazon.ion.SymbolToken;
+<i>31</i>&nbsp;import com.amazon.ion.SystemSymbols;
+<i>32</i>&nbsp;import com.amazon.ion.ValueFactory;
+<i>33</i>&nbsp;import com.amazon.ion.ValueVisitor;
+<i>34</i>&nbsp;import com.amazon.ion.impl._Private_CurriedValueFactory;
+<i>35</i>&nbsp;import com.amazon.ion.impl._Private_IonDatagram;
+<i>36</i>&nbsp;import com.amazon.ion.impl._Private_Utils;
+<i>37</i>&nbsp;import java.io.IOException;
+<i>38</i>&nbsp;import java.io.OutputStream;
+<i>39</i>&nbsp;import java.lang.reflect.Array;
+<i>40</i>&nbsp;import java.util.Collection;
+<i>41</i>&nbsp;import java.util.ListIterator;
+<i>42</i>&nbsp;import java.util.NoSuchElementException;
+<i>43</i>&nbsp;
+<i>44</i>&nbsp;/**
+<i>45</i>&nbsp; *  The datagram generally behaves as an IonSexp. A list with space
+<i>46</i>&nbsp; *  separated values.
+<i>47</i>&nbsp; *
+<i>48</i>&nbsp; *  As a user datagram it only shows user values as current members
+<i>49</i>&nbsp; *  of the list.
+<i>50</i>&nbsp; *
+<i>51</i>&nbsp; *  As a system datagram it also includes system values (adding Ion
+<i>52</i>&nbsp; *  version marker symbols and local symbol tables to the list).
+<i>53</i>&nbsp; *
+<i>54</i>&nbsp; *  Most API&#39;s operate on the user view.  The exceptions are getBytes
+<i>55</i>&nbsp; *  (and related), and the system* API&#39;s.  These synthesize a system
+<i>56</i>&nbsp; *  view over the user values.
+<i>57</i>&nbsp; *
+<i>58</i>&nbsp; *  When system values are added they translate into setsymboltableat
+<i>59</i>&nbsp; *  operations.  Which sets a pending symbol table at the current
+<i>60</i>&nbsp; *  user position (as specified by the add pos).  When the next add
+<i>61</i>&nbsp; *  occurs if it is at the specified position the pending symbol
+<i>62</i>&nbsp; *  table is applied to the value if the value doesn&#39;t already have
+<i>63</i>&nbsp; *  a local symbol table defined.
+<i>64</i>&nbsp; *
+<i>65</i>&nbsp; *  in any event any membership update invalidates the pending symbol
+<i>66</i>&nbsp; *  table.
+<i>67</i>&nbsp; *
+<i>68</i>&nbsp; *  In general on add if there is no pending symbol table the preceding
+<i>69</i>&nbsp; *  value local symbol table is applied as the local symbol table to
+<i>70</i>&nbsp; *  the new value, if it needs one.
+<i>71</i>&nbsp; *
+<i>72</i>&nbsp; *  The system iterator inserts system values to create the minimum
+<i>73</i>&nbsp; *  additional values to represent a correct Ion sequence by injecting
+<i>74</i>&nbsp; *  IVM&#39;s when the symbol table transitions to system, and local
+<i>75</i>&nbsp; *  symbol tables when they first occur.
+<i>76</i>&nbsp; *
+<i>77</i>&nbsp; */
+<i>78</i>&nbsp;
+<b class="fc"><i>79</i>&nbsp;final class IonDatagramLite</b>
+<i>80</i>&nbsp;    extends IonSequenceLite
+<i>81</i>&nbsp;    implements IonDatagram, IonContext, _Private_IonDatagram
+<i>82</i>&nbsp;{
+<i>83</i>&nbsp;
+<b class="fc"><i>84</i>&nbsp;    private static final int HASH_SIGNATURE =</b>
+<b class="fc"><i>85</i>&nbsp;        IonType.DATAGRAM.toString().hashCode();</b>
+<i>86</i>&nbsp;
+<i>87</i>&nbsp;    private final IonSystemLite      _system;
+<i>88</i>&nbsp;    private final IonCatalog         _catalog;
+<i>89</i>&nbsp;    private       SymbolTable        _pending_symbol_table;
+<i>90</i>&nbsp;    private       int                _pending_symbol_table_idx;
+<i>91</i>&nbsp;    private       IonSymbolLite      _ivm;
+<i>92</i>&nbsp;
+<i>93</i>&nbsp;    // Default buffer size for ReverseBinaryEncoder - SYNC&#39;ed with
+<i>94</i>&nbsp;    // BlockedBuffer._defaultBlockSizeMin (4 kb)
+<i>95</i>&nbsp;    private static final int REVERSE_BINARY_ENCODER_INITIAL_SIZE = 4096 * 8;
+<i>96</i>&nbsp;
+<i>97</i>&nbsp;    IonDatagramLite(IonSystemLite system, IonCatalog catalog) {
+<b class="fc"><i>98</i>&nbsp;        super(ContainerlessContext.wrap(system), false);</b>
+<b class="fc"><i>99</i>&nbsp;        _system = system;</b>
+<b class="fc"><i>100</i>&nbsp;        _catalog = catalog;</b>
+<b class="fc"><i>101</i>&nbsp;        _pending_symbol_table_idx = -1;</b>
+<b class="fc"><i>102</i>&nbsp;    }</b>
+<i>103</i>&nbsp;
+<i>104</i>&nbsp;    IonDatagramLite(IonDatagramLite existing)
+<i>105</i>&nbsp;    {
+<b class="fc"><i>106</i>&nbsp;        super(existing, ContainerlessContext.wrap(existing._system));</b>
+<b class="fc"><i>107</i>&nbsp;        this._system  = existing._system;</b>
+<b class="fc"><i>108</i>&nbsp;        this._catalog = existing._catalog;</b>
+<b class="fc"><i>109</i>&nbsp;    }</b>
+<i>110</i>&nbsp;
+<i>111</i>&nbsp;    @Override
+<i>112</i>&nbsp;    IonDatagramLite clone(IonContext parentContext)
+<i>113</i>&nbsp;    {
+<b class="nc"><i>114</i>&nbsp;        String message = &quot;IonDatagram cannot have a parent context (be nested)&quot;;</b>
+<b class="nc"><i>115</i>&nbsp;        throw new UnsupportedOperationException(message);</b>
+<i>116</i>&nbsp;    }
+<i>117</i>&nbsp;
+<i>118</i>&nbsp;    @Override
+<i>119</i>&nbsp;    public IonDatagramLite clone()
+<i>120</i>&nbsp;    {
+<b class="fc"><i>121</i>&nbsp;        return new IonDatagramLite(this);</b>
+<i>122</i>&nbsp;    }
+<i>123</i>&nbsp;
+<i>124</i>&nbsp;
+<i>125</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>126</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>127</i>&nbsp;
+<i>128</i>&nbsp;    //  these are the context methods
+<i>129</i>&nbsp;
+<i>130</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>131</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>132</i>&nbsp;
+<i>133</i>&nbsp;    @Override
+<i>134</i>&nbsp;    public IonValueLite topLevelValue()
+<i>135</i>&nbsp;    {
+<b class="fc"><i>136</i>&nbsp;        throw new UnsupportedOperationException();</b>
+<i>137</i>&nbsp;    }
+<i>138</i>&nbsp;
+<i>139</i>&nbsp;    @Override
+<i>140</i>&nbsp;    public SymbolToken[] getTypeAnnotationSymbols()
+<i>141</i>&nbsp;    {
+<i>142</i>&nbsp;        // An Ion Datagram cannot be annotated - however is sometimes interrogated as a generic
+<i>143</i>&nbsp;        // IonValue - hence having the explicit fast-path override of a non-null, empty SymbolToken
+<i>144</i>&nbsp;        // array
+<b class="fc"><i>145</i>&nbsp;        return SymbolToken.EMPTY_ARRAY;</b>
+<i>146</i>&nbsp;    }
+<i>147</i>&nbsp;
+<i>148</i>&nbsp;    @Override
+<i>149</i>&nbsp;    public SymbolToken getFieldNameSymbol()
+<i>150</i>&nbsp;    {
+<i>151</i>&nbsp;        // TOP level IonDatagram cannot have a field name (fundamentally it isn&#39;t a Struct)
+<b class="nc"><i>152</i>&nbsp;        return null;</b>
+<i>153</i>&nbsp;    }
+<i>154</i>&nbsp;
+<i>155</i>&nbsp;    @Override
+<i>156</i>&nbsp;    public void makeReadOnly()
+<i>157</i>&nbsp;    {
+<b class="fc"><i>158</i>&nbsp;        if (_isLocked()) {</b>
+<b class="nc"><i>159</i>&nbsp;            return;</b>
+<i>160</i>&nbsp;        }
+<i>161</i>&nbsp;
+<b class="fc"><i>162</i>&nbsp;        if (_children != null) {</b>
+<b class="fc"><i>163</i>&nbsp;            for (int ii=0; ii&lt;_child_count; ii++) {</b>
+<b class="fc"><i>164</i>&nbsp;                IonValueLite child = _children[ii];</b>
+<b class="fc"><i>165</i>&nbsp;                child.makeReadOnly();</b>
+<i>166</i>&nbsp;            }
+<i>167</i>&nbsp;        }
+<b class="fc"><i>168</i>&nbsp;        _isLocked(true);</b>
+<b class="fc"><i>169</i>&nbsp;    }</b>
+<i>170</i>&nbsp;
+<i>171</i>&nbsp;    @Override
+<i>172</i>&nbsp;    public SymbolTable getSymbolTable()
+<i>173</i>&nbsp;    {
+<b class="nc"><i>174</i>&nbsp;        throw new UnsupportedOperationException();</b>
+<i>175</i>&nbsp;    }
+<i>176</i>&nbsp;
+<i>177</i>&nbsp;    @Override
+<i>178</i>&nbsp;    public SymbolTable getAssignedSymbolTable()
+<i>179</i>&nbsp;    {
+<b class="fc"><i>180</i>&nbsp;        throw new UnsupportedOperationException();</b>
+<i>181</i>&nbsp;    }
+<i>182</i>&nbsp;
+<i>183</i>&nbsp;    @Override
+<i>184</i>&nbsp;    public void setSymbolTable(SymbolTable symbols)
+<i>185</i>&nbsp;    {
+<b class="nc"><i>186</i>&nbsp;        throw new UnsupportedOperationException();</b>
+<i>187</i>&nbsp;    }
+<i>188</i>&nbsp;
+<i>189</i>&nbsp;    public void appendTrailingSymbolTable(SymbolTable symtab)
+<i>190</i>&nbsp;    {
+<b class="fc"><i>191</i>&nbsp;        assert symtab.isLocalTable() || symtab.isSystemTable();</b>
+<i>192</i>&nbsp;
+<b class="fc"><i>193</i>&nbsp;        _pending_symbol_table = symtab;</b>
+<b class="fc"><i>194</i>&nbsp;        _pending_symbol_table_idx = get_child_count();</b>
+<b class="fc"><i>195</i>&nbsp;    }</b>
+<i>196</i>&nbsp;
+<i>197</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>198</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>199</i>&nbsp;
+<i>200</i>&nbsp;    //  these are the sequence methods
+<i>201</i>&nbsp;
+<i>202</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>203</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>204</i>&nbsp;
+<i>205</i>&nbsp;    @Override
+<i>206</i>&nbsp;    public boolean add(IonValue child)
+<i>207</i>&nbsp;        throws ContainedValueException, NullPointerException
+<i>208</i>&nbsp;    {
+<b class="fc"><i>209</i>&nbsp;        int index = _child_count;</b>
+<b class="fc"><i>210</i>&nbsp;        add(index, child);</b>
+<b class="fc"><i>211</i>&nbsp;        return true;</b>
+<i>212</i>&nbsp;    }
+<i>213</i>&nbsp;
+<i>214</i>&nbsp;    @Override
+<i>215</i>&nbsp;    public ValueFactory add()
+<i>216</i>&nbsp;    {
+<b class="fc"><i>217</i>&nbsp;        return new _Private_CurriedValueFactory(this.getSystem())</b>
+<b class="fc"><i>218</i>&nbsp;        {</b>
+<i>219</i>&nbsp;            @Override
+<i>220</i>&nbsp;            protected void handle(IonValue newValue)
+<i>221</i>&nbsp;            {
+<b class="fc"><i>222</i>&nbsp;                add(newValue);</b>
+<b class="fc"><i>223</i>&nbsp;            }</b>
+<i>224</i>&nbsp;        };
+<i>225</i>&nbsp;    }
+<i>226</i>&nbsp;
+<i>227</i>&nbsp;    @Override
+<i>228</i>&nbsp;    // Increasing visibility - note this is the base, workhorse, add method
+<i>229</i>&nbsp;    // for datagram (it does use the add_child through super.add()) for the
+<i>230</i>&nbsp;    // basic child array update, but it takes care of the datagram special
+<i>231</i>&nbsp;    // behaviors around local symbol tables for values
+<i>232</i>&nbsp;    public void add(int index, IonValue element)
+<i>233</i>&nbsp;        throws ContainedValueException, NullPointerException
+<i>234</i>&nbsp;    {
+<b class="fc"><i>235</i>&nbsp;        if (element == null) {</b>
+<b class="fc"><i>236</i>&nbsp;            throw new NullPointerException();</b>
+<i>237</i>&nbsp;        }
+<b class="fc"><i>238</i>&nbsp;        if (!(element instanceof IonValueLite)) {</b>
+<b class="nc"><i>239</i>&nbsp;            throw new IllegalArgumentException(&quot;IonValue implementation can&#39;t be mixed&quot;);</b>
+<i>240</i>&nbsp;        }
+<i>241</i>&nbsp;        // TODO where do we validate that element isn&#39;t a datagram?
+<i>242</i>&nbsp;
+<b class="fc"><i>243</i>&nbsp;        IonValueLite concrete = (IonValueLite)element;</b>
+<i>244</i>&nbsp;
+<i>245</i>&nbsp;        // super.add will check for the lock
+<b class="fc"><i>246</i>&nbsp;        super.add(index, concrete);</b>
+<i>247</i>&nbsp;        // handled in super.add(): patch_elements_helper(index + 1);
+<i>248</i>&nbsp;
+<i>249</i>&nbsp;        // the pending symbol table is only good for 1 use
+<i>250</i>&nbsp;        // after that the previous super.add will fill
+<i>251</i>&nbsp;        // in the symbol table if that is appropriate.
+<b class="fc"><i>252</i>&nbsp;        _pending_symbol_table = null;</b>
+<b class="fc"><i>253</i>&nbsp;        _pending_symbol_table_idx = -1;</b>
+<b class="fc"><i>254</i>&nbsp;    }</b>
+<i>255</i>&nbsp;
+<i>256</i>&nbsp;    @Override
+<i>257</i>&nbsp;    public ValueFactory add(final int index)
+<i>258</i>&nbsp;    {
+<b class="nc"><i>259</i>&nbsp;        return new _Private_CurriedValueFactory(getSystem())</b>
+<b class="nc"><i>260</i>&nbsp;        {</b>
+<i>261</i>&nbsp;            @Override
+<i>262</i>&nbsp;            protected void handle(IonValue newValue)
+<i>263</i>&nbsp;            {
+<b class="nc"><i>264</i>&nbsp;                add(index, newValue);</b>
+<i>265</i>&nbsp;            }
+<i>266</i>&nbsp;        };
+<i>267</i>&nbsp;    }
+<i>268</i>&nbsp;
+<i>269</i>&nbsp;    @Override
+<i>270</i>&nbsp;    public boolean addAll(Collection&lt;? extends IonValue&gt; c)
+<i>271</i>&nbsp;    {
+<b class="fc"><i>272</i>&nbsp;        boolean changed = false;</b>
+<b class="fc"><i>273</i>&nbsp;        for (IonValue v : c)</b>
+<i>274</i>&nbsp;        {
+<b class="fc"><i>275</i>&nbsp;            changed = add(v) || changed;</b>
+<b class="fc"><i>276</i>&nbsp;        }</b>
+<b class="fc"><i>277</i>&nbsp;        return changed;</b>
+<i>278</i>&nbsp;    }
+<i>279</i>&nbsp;
+<i>280</i>&nbsp;    @Override
+<i>281</i>&nbsp;    public boolean addAll(int index, Collection&lt;? extends IonValue&gt; c)
+<i>282</i>&nbsp;    {
+<b class="nc"><i>283</i>&nbsp;        if (index &lt; 0 || index &gt; size())</b>
+<i>284</i>&nbsp;        {
+<b class="nc"><i>285</i>&nbsp;            throw new IndexOutOfBoundsException();</b>
+<i>286</i>&nbsp;        }
+<i>287</i>&nbsp;
+<i>288</i>&nbsp;        // TODO optimize to avoid n^2 shifting and renumbering of elements.
+<b class="nc"><i>289</i>&nbsp;        boolean changed = false;</b>
+<b class="nc"><i>290</i>&nbsp;        for (IonValue v : c)</b>
+<i>291</i>&nbsp;        {
+<b class="nc"><i>292</i>&nbsp;            add(index++, v);</b>
+<b class="nc"><i>293</i>&nbsp;            changed = true;</b>
+<b class="nc"><i>294</i>&nbsp;        }</b>
+<i>295</i>&nbsp;
+<b class="nc"><i>296</i>&nbsp;        if (changed) {</b>
+<b class="nc"><i>297</i>&nbsp;            patch_elements_helper(index);</b>
+<i>298</i>&nbsp;        }
+<i>299</i>&nbsp;
+<b class="nc"><i>300</i>&nbsp;        return changed;</b>
+<i>301</i>&nbsp;    }
+<i>302</i>&nbsp;
+<i>303</i>&nbsp;    @Override
+<i>304</i>&nbsp;    public int hashCode() {
+<b class="nc"><i>305</i>&nbsp;        int prime  = 8191;</b>
+<b class="nc"><i>306</i>&nbsp;        int result = HASH_SIGNATURE;</b>
+<i>307</i>&nbsp;
+<b class="nc"><i>308</i>&nbsp;        if (!isNullValue()) {</b>
+<i>309</i>&nbsp;            // As we are a datagram then the children need to resolve their own symbol tables -
+<i>310</i>&nbsp;            // so we use the &#39;top level&#39; #hashCode() which will force each child to resolve it&#39;s
+<i>311</i>&nbsp;            // own symbol table.
+<b class="nc"><i>312</i>&nbsp;            for (IonValue v : this) {</b>
+<b class="nc"><i>313</i>&nbsp;                result = prime * result + v.hashCode();</b>
+<i>314</i>&nbsp;                // mixing at each step to make the hash code order-dependent
+<b class="nc"><i>315</i>&nbsp;                result ^= (result &lt;&lt; 29) ^ (result &gt;&gt; 3);</b>
+<b class="nc"><i>316</i>&nbsp;            }</b>
+<i>317</i>&nbsp;        }
+<b class="nc"><i>318</i>&nbsp;        return result;</b>
+<i>319</i>&nbsp;    }
+<i>320</i>&nbsp;
+<i>321</i>&nbsp;    @Override
+<i>322</i>&nbsp;    int hashCode(SymbolTableProvider symbolTableProvider) {
+<b class="nc"><i>323</i>&nbsp;        String message = &quot;IonDatagrams do not need a resolved Symbol table use #hashCode()&quot;;</b>
+<b class="nc"><i>324</i>&nbsp;        throw new UnsupportedOperationException(message);</b>
+<i>325</i>&nbsp;    }
+<i>326</i>&nbsp;
+<i>327</i>&nbsp;
+<i>328</i>&nbsp;    @Override
+<i>329</i>&nbsp;    public &lt;T extends IonValue&gt; T[] extract(Class&lt;T&gt; type)
+<i>330</i>&nbsp;    {
+<b class="nc"><i>331</i>&nbsp;        if (isNullValue()) return null;</b>
+<i>332</i>&nbsp;
+<i>333</i>&nbsp;        @SuppressWarnings(&quot;unchecked&quot;)
+<b class="nc"><i>334</i>&nbsp;        T[] array = (T[]) Array.newInstance(type, size());</b>
+<b class="nc"><i>335</i>&nbsp;        toArray(array);</b>
+<b class="nc"><i>336</i>&nbsp;        clear();</b>
+<b class="nc"><i>337</i>&nbsp;        return array;</b>
+<i>338</i>&nbsp;    }
+<i>339</i>&nbsp;
+<i>340</i>&nbsp;
+<i>341</i>&nbsp;    @Override
+<i>342</i>&nbsp;    public ListIterator&lt;IonValue&gt; listIterator(int index)
+<i>343</i>&nbsp;    {
+<b class="fc"><i>344</i>&nbsp;        ListIterator&lt;IonValue&gt; iterator = new SequenceContentIterator(index, this.isReadOnly());</b>
+<b class="fc"><i>345</i>&nbsp;        return iterator;</b>
+<i>346</i>&nbsp;    }
+<i>347</i>&nbsp;
+<i>348</i>&nbsp;    @Override
+<i>349</i>&nbsp;    public IonValue set(int index, IonValue element){
+<b class="fc"><i>350</i>&nbsp;        throw new UnsupportedOperationException();</b>
+<i>351</i>&nbsp;    }
+<i>352</i>&nbsp;
+<i>353</i>&nbsp;    @Override
+<i>354</i>&nbsp;    public IonContext getContextForIndex(IonValue element, int index)
+<i>355</i>&nbsp;    {
+<b class="fc"><i>356</i>&nbsp;        if (index == this._pending_symbol_table_idx) {</b>
+<b class="fc"><i>357</i>&nbsp;            SymbolTable symbols = _pending_symbol_table;</b>
+<b class="fc"><i>358</i>&nbsp;            _pending_symbol_table = null;</b>
+<b class="fc"><i>359</i>&nbsp;            _pending_symbol_table_idx = -1;</b>
+<b class="fc"><i>360</i>&nbsp;            return TopLevelContext.wrap(symbols, this);</b>
+<i>361</i>&nbsp;        }
+<i>362</i>&nbsp;        // the preceding elements symbol table is our next
+<b class="fc"><i>363</i>&nbsp;        IonValueLite preceding = (index &gt; 0) ? get_child(index - 1) : null;</b>
+<b class="fc"><i>364</i>&nbsp;        if (preceding != null &amp;&amp; preceding._context != this) {</b>
+<b class="fc"><i>365</i>&nbsp;            return preceding._context;</b>
+<i>366</i>&nbsp;        }
+<i>367</i>&nbsp;        // otherwise element will just default to the system
+<i>368</i>&nbsp;        // symbol table
+<b class="fc"><i>369</i>&nbsp;        return TopLevelContext.wrap(null, this);</b>
+<i>370</i>&nbsp;    }
+<i>371</i>&nbsp;
+<i>372</i>&nbsp;
+<i>373</i>&nbsp;    @Override
+<i>374</i>&nbsp;    public void accept(ValueVisitor visitor) throws Exception
+<i>375</i>&nbsp;    {
+<b class="fc"><i>376</i>&nbsp;        visitor.visit(this);</b>
+<b class="fc"><i>377</i>&nbsp;    }</b>
+<i>378</i>&nbsp;
+<i>379</i>&nbsp;    @Override
+<i>380</i>&nbsp;    public void addTypeAnnotation(String annotation)
+<i>381</i>&nbsp;    {
+<b class="nc"><i>382</i>&nbsp;        String message = &quot;Datagrams do not have annotations&quot;;</b>
+<b class="nc"><i>383</i>&nbsp;        throw new UnsupportedOperationException(message);</b>
+<i>384</i>&nbsp;    }
+<i>385</i>&nbsp;
+<i>386</i>&nbsp;
+<i>387</i>&nbsp;    @Override
+<i>388</i>&nbsp;    public IonContainerLite getContainer()
+<i>389</i>&nbsp;    {
+<b class="fc"><i>390</i>&nbsp;        return null;</b>
+<i>391</i>&nbsp;    }
+<i>392</i>&nbsp;
+<i>393</i>&nbsp;    @Override
+<i>394</i>&nbsp;    public IonSystemLite getSystem()
+<i>395</i>&nbsp;    {
+<b class="fc"><i>396</i>&nbsp;        return this._system;</b>
+<i>397</i>&nbsp;    }
+<i>398</i>&nbsp;
+<i>399</i>&nbsp;    @Override
+<i>400</i>&nbsp;    public IonType getType()
+<i>401</i>&nbsp;    {
+<b class="fc"><i>402</i>&nbsp;        return IonType.DATAGRAM;</b>
+<i>403</i>&nbsp;    }
+<i>404</i>&nbsp;
+<i>405</i>&nbsp;    /*
+<i>406</i>&nbsp;     * NOTE: IonDatagramLite overrides the main writeTo mechanism prescribed in:
+<i>407</i>&nbsp;     * IonValueLite#writeTo which works by eagerly resolving the SymbolTable as the IonDatagram does
+<i>408</i>&nbsp;     * not have a symbol table (throws UnsupportedOperationException) and so needs to write each
+<i>409</i>&nbsp;     * child out independently where the child will act as it&#39;s own top-level value (inc symbol table)
+<i>410</i>&nbsp;     */
+<i>411</i>&nbsp;    @Override
+<i>412</i>&nbsp;    public final void writeTo(IonWriter writer)
+<i>413</i>&nbsp;    {
+<b class="fc"><i>414</i>&nbsp;        if (writer.getSymbolTable().isSystemTable()) {</b>
+<i>415</i>&nbsp;            // If the writer was configured with a non-default symbol table, writing an IVM here will
+<i>416</i>&nbsp;            // reset that symbol table. If the datagram contains any symbols with unknown text that
+<i>417</i>&nbsp;            // refer to slots in shared symbol table imports declared by the discarded table, an
+<i>418</i>&nbsp;            // error will be raised unnecessarily. To avoid that, only write an IVM when the writer&#39;s
+<i>419</i>&nbsp;            // symbol table is already the system symbol table.
+<i>420</i>&nbsp;            // TODO evaluate whether an IVM should ever be written here. amzn/ion-java#200
+<i>421</i>&nbsp;            try {
+<b class="fc"><i>422</i>&nbsp;                writer.writeSymbol(SystemSymbols.ION_1_0);</b>
+<b class="nc"><i>423</i>&nbsp;            } catch (IOException ioe) {</b>
+<b class="nc"><i>424</i>&nbsp;                throw new IonException(ioe);</b>
+<b class="fc"><i>425</i>&nbsp;            }</b>
+<i>426</i>&nbsp;        }
+<b class="fc"><i>427</i>&nbsp;        for (IonValue iv : this) {</b>
+<b class="fc"><i>428</i>&nbsp;            iv.writeTo(writer);</b>
+<b class="fc"><i>429</i>&nbsp;        }</b>
+<b class="fc"><i>430</i>&nbsp;    }</b>
+<i>431</i>&nbsp;
+<i>432</i>&nbsp;    @Override
+<i>433</i>&nbsp;    final void writeBodyTo(IonWriter writer, SymbolTableProvider symbolTableProvider)
+<i>434</i>&nbsp;        throws IOException
+<i>435</i>&nbsp;    {
+<b class="nc"><i>436</i>&nbsp;        throw new UnsupportedOperationException(&quot;IonDatagram does not operate with a Symbol Table&quot;);</b>
+<i>437</i>&nbsp;    }
+<i>438</i>&nbsp;
+<i>439</i>&nbsp;
+<i>440</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>441</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>442</i>&nbsp;
+<i>443</i>&nbsp;    //  these are the datagram methods
+<i>444</i>&nbsp;
+<i>445</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>446</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>447</i>&nbsp;
+<i>448</i>&nbsp;    public int byteSize() throws IonException
+<i>449</i>&nbsp;    {
+<i>450</i>&nbsp;        // TODO this is horrible, users will end up encoding multiple times!
+<b class="fc"><i>451</i>&nbsp;        ReverseBinaryEncoder encoder =</b>
+<i>452</i>&nbsp;            new ReverseBinaryEncoder(REVERSE_BINARY_ENCODER_INITIAL_SIZE);
+<b class="fc"><i>453</i>&nbsp;        encoder.serialize(this);</b>
+<b class="fc"><i>454</i>&nbsp;        return encoder.byteSize();</b>
+<i>455</i>&nbsp;    }
+<i>456</i>&nbsp;
+<i>457</i>&nbsp;    public byte[] getBytes() throws IonException
+<i>458</i>&nbsp;    {
+<b class="fc"><i>459</i>&nbsp;        ReverseBinaryEncoder encoder =</b>
+<i>460</i>&nbsp;            new ReverseBinaryEncoder(REVERSE_BINARY_ENCODER_INITIAL_SIZE);
+<b class="fc"><i>461</i>&nbsp;        encoder.serialize(this);</b>
+<b class="fc"><i>462</i>&nbsp;        return encoder.toNewByteArray();</b>
+<i>463</i>&nbsp;    }
+<i>464</i>&nbsp;
+<i>465</i>&nbsp;    public int getBytes(byte[] dst) throws IonException
+<i>466</i>&nbsp;    {
+<b class="fc"><i>467</i>&nbsp;        ReverseBinaryEncoder encoder =</b>
+<i>468</i>&nbsp;            new ReverseBinaryEncoder(REVERSE_BINARY_ENCODER_INITIAL_SIZE);
+<b class="fc"><i>469</i>&nbsp;        encoder.serialize(this);</b>
+<b class="fc"><i>470</i>&nbsp;        return encoder.toNewByteArray(dst);</b>
+<i>471</i>&nbsp;    }
+<i>472</i>&nbsp;
+<i>473</i>&nbsp;    public int getBytes(byte[] dst, int offset) throws IonException
+<i>474</i>&nbsp;    {
+<b class="fc"><i>475</i>&nbsp;        ReverseBinaryEncoder encoder =</b>
+<i>476</i>&nbsp;            new ReverseBinaryEncoder(REVERSE_BINARY_ENCODER_INITIAL_SIZE);
+<b class="fc"><i>477</i>&nbsp;        encoder.serialize(this);</b>
+<b class="fc"><i>478</i>&nbsp;        return encoder.toNewByteArray(dst, offset);</b>
+<i>479</i>&nbsp;    }
+<i>480</i>&nbsp;
+<i>481</i>&nbsp;    public int getBytes(OutputStream out) throws IOException, IonException
+<i>482</i>&nbsp;    {
+<b class="fc"><i>483</i>&nbsp;        ReverseBinaryEncoder encoder =</b>
+<i>484</i>&nbsp;            new ReverseBinaryEncoder(REVERSE_BINARY_ENCODER_INITIAL_SIZE);
+<b class="fc"><i>485</i>&nbsp;        encoder.serialize(this);</b>
+<b class="fc"><i>486</i>&nbsp;        return encoder.writeBytes(out);</b>
+<i>487</i>&nbsp;    }
+<i>488</i>&nbsp;
+<i>489</i>&nbsp;    // TODO: optimize this, if there&#39;s a real use case
+<i>490</i>&nbsp;    //       deprecate this is there isn&#39;t (which I suspect is actually the case)
+<i>491</i>&nbsp;    public IonValue systemGet(int index) throws IndexOutOfBoundsException
+<i>492</i>&nbsp;    {
+<b class="fc"><i>493</i>&nbsp;        ListIterator&lt;IonValue&gt; iterator = systemIterator();</b>
+<b class="fc"><i>494</i>&nbsp;        IonValue value = null;</b>
+<i>495</i>&nbsp;
+<b class="fc"><i>496</i>&nbsp;        if (index &lt; 0) {</b>
+<b class="nc"><i>497</i>&nbsp;            throw new IndexOutOfBoundsException(&quot;&quot;+index);</b>
+<i>498</i>&nbsp;        }
+<i>499</i>&nbsp;
+<i>500</i>&nbsp;        int ii;
+<b class="fc"><i>501</i>&nbsp;        for (ii=0; ii&lt;=index; ii++) {</b>
+<b class="fc"><i>502</i>&nbsp;            if (!iterator.hasNext()) {</b>
+<b class="nc"><i>503</i>&nbsp;                throw new IndexOutOfBoundsException(&quot;&quot;+index);</b>
+<i>504</i>&nbsp;            }
+<b class="fc"><i>505</i>&nbsp;            value = iterator.next();</b>
+<i>506</i>&nbsp;        }
+<b class="fc"><i>507</i>&nbsp;        return value;</b>
+<i>508</i>&nbsp;    }
+<i>509</i>&nbsp;
+<i>510</i>&nbsp;    public ListIterator&lt;IonValue&gt; systemIterator()
+<i>511</i>&nbsp;    {
+<b class="fc"><i>512</i>&nbsp;        return new SystemContentIterator(isReadOnly());</b>
+<i>513</i>&nbsp;    }
+<i>514</i>&nbsp;
+<i>515</i>&nbsp;    // TODO: optimize this, if there&#39;s a real use case
+<i>516</i>&nbsp;    //       deprecate this is there isn&#39;t (which I suspect is actually the case)
+<i>517</i>&nbsp;    public int systemSize()
+<i>518</i>&nbsp;    {
+<b class="fc"><i>519</i>&nbsp;        int count = 0;</b>
+<b class="fc"><i>520</i>&nbsp;        ListIterator&lt;IonValue&gt; iterator = systemIterator();</b>
+<b class="fc"><i>521</i>&nbsp;        while (iterator.hasNext()) {</b>
+<i>522</i>&nbsp;            @SuppressWarnings(&quot;unused&quot;)
+<b class="fc"><i>523</i>&nbsp;            IonValue value = iterator.next();</b>
+<b class="fc"><i>524</i>&nbsp;            count++;</b>
+<b class="fc"><i>525</i>&nbsp;        }</b>
+<b class="fc"><i>526</i>&nbsp;        return count;</b>
+<i>527</i>&nbsp;    }
+<i>528</i>&nbsp;
+<i>529</i>&nbsp;    /*
+<i>530</i>&nbsp;     * Sets the context of all elements following elementid to context, until it encounters
+<i>531</i>&nbsp;     * a context different to the original context at elementid.
+<i>532</i>&nbsp;     */
+<i>533</i>&nbsp;    void setSymbolTableAtIndex(int elementid, SymbolTable symbols)
+<i>534</i>&nbsp;    {
+<b class="nc"><i>535</i>&nbsp;        assert(elementid &lt; get_child_count());</b>
+<b class="nc"><i>536</i>&nbsp;        TopLevelContext context = TopLevelContext.wrap(symbols, this);</b>
+<b class="nc"><i>537</i>&nbsp;        TopLevelContext startContext = (TopLevelContext) _children[elementid].getContext();</b>
+<i>538</i>&nbsp;
+<b class="nc"><i>539</i>&nbsp;        while (elementid &lt; get_child_count() &amp;&amp; _children[elementid].getContext() == startContext){</b>
+<b class="nc"><i>540</i>&nbsp;            _children[elementid++].setContext(context);</b>
+<i>541</i>&nbsp;        }
+<b class="nc"><i>542</i>&nbsp;    }</b>
+<i>543</i>&nbsp;
+<i>544</i>&nbsp;    public byte[] toBytes() throws IonException
+<i>545</i>&nbsp;    {
+<b class="nc"><i>546</i>&nbsp;        return getBytes();</b>
+<i>547</i>&nbsp;    }
+<i>548</i>&nbsp;
+<i>549</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>550</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>551</i>&nbsp;
+<i>552</i>&nbsp;    //  these are the local helper methods
+<i>553</i>&nbsp;
+<i>554</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>555</i>&nbsp;    //////////////////////////////////////////////////////////////////////////////
+<i>556</i>&nbsp;
+<i>557</i>&nbsp;    protected synchronized IonSymbolLite get_ivm()
+<i>558</i>&nbsp;    {
+<b class="fc"><i>559</i>&nbsp;        if (_ivm == null) {</b>
+<b class="fc"><i>560</i>&nbsp;            _ivm = getSystem().newSymbol(ION_1_0);</b>
+<i>561</i>&nbsp;        }
+<b class="fc"><i>562</i>&nbsp;        return _ivm;</b>
+<i>563</i>&nbsp;    }
+<i>564</i>&nbsp;
+<i>565</i>&nbsp;    /**
+<i>566</i>&nbsp;     * Encapsulates an iterator and implements a custom remove method
+<i>567</i>&nbsp;     *
+<i>568</i>&nbsp;     *  this is tied to the _child array of the IonSequenceImpl
+<i>569</i>&nbsp;     *  through the _children and _child_count members which this
+<i>570</i>&nbsp;     *  iterator directly uses.
+<i>571</i>&nbsp;     *
+<i>572</i>&nbsp;     *  This is a specialization for returning a system view of the
+<i>573</i>&nbsp;     *  current datagram.  It does this by synthesizing system values
+<i>574</i>&nbsp;     *  (Ion Version Markers &amp; local symbol tables) as symbol tables
+<i>575</i>&nbsp;     *  change between user values.
+<i>576</i>&nbsp;     *
+<i>577</i>&nbsp;     *  It accumulates a count of the system values it encounters
+<i>578</i>&nbsp;     *  the need to inject them in the iteration stream.
+<i>579</i>&nbsp;     *
+<i>580</i>&nbsp;     *  It may need more than 1 system value between user values
+<i>581</i>&nbsp;     *  if the system is reset or the local symbol table itself
+<i>582</i>&nbsp;     *  has local symbols (this is rare but in principal could
+<i>583</i>&nbsp;     *  be an arbitrarily long sequence).
+<i>584</i>&nbsp;     *
+<i>585</i>&nbsp;     *  The current position is between the value to be returned
+<i>586</i>&nbsp;     *  by next and the value that would be returned by previous.
+<i>587</i>&nbsp;     *  This is calculated in next_index_helper() (or previous_).
+<i>588</i>&nbsp;     *  It is represented by a &quot;struct&quot; with a position in the
+<i>589</i>&nbsp;     *  child array, an optional position in the local stack
+<i>590</i>&nbsp;     *  of system values, and a flag indicating which list should
+<i>591</i>&nbsp;     *  be used to fetch the actual value.
+<i>592</i>&nbsp;     *
+<i>593</i>&nbsp;     *  The local synthetic system values are held in the array
+<i>594</i>&nbsp;     *  __local_system_value.  These are the values that should
+<i>595</i>&nbsp;     *  preceed the value at _child[__user_content_pos].
+<i>596</i>&nbsp;     *
+<i>597</i>&nbsp;     *  TODO with the updated next and previous logic, particularly
+<i>598</i>&nbsp;     *  the force_position_sync logic and lastMoveWasPrevious flag
+<i>599</i>&nbsp;     *  we could implement add and set correctly.
+<i>600</i>&nbsp;     *
+<i>601</i>&nbsp;     *  NOTE this closely resembles the iterator defined in IonSequenceLite,
+<i>602</i>&nbsp;     *  so changes here are likely to be needed in IonSequenceLite as well.
+<i>603</i>&nbsp;     */
+<b class="fc"><i>604</i>&nbsp;    protected final class SystemContentIterator</b>
+<i>605</i>&nbsp;        implements ListIterator&lt;IonValue&gt;
+<i>606</i>&nbsp;    {
+<i>607</i>&nbsp;        private final boolean                __readOnly;
+<i>608</i>&nbsp;        private       IonValueLite           __current;
+<i>609</i>&nbsp;        private       SystemIteratorPosition __pos;
+<i>610</i>&nbsp;
+<i>611</i>&nbsp;        private       SystemIteratorPosition __temp_pos;
+<i>612</i>&nbsp;
+<i>613</i>&nbsp;        public SystemContentIterator(boolean readOnly)
+<b class="fc"><i>614</i>&nbsp;        {</b>
+<b class="fc"><i>615</i>&nbsp;            if (_isLocked() &amp;&amp; !readOnly) {</b>
+<b class="nc"><i>616</i>&nbsp;                throw new IllegalStateException(&quot;you can&#39;t open an updatable iterator on a read only value&quot;);</b>
+<i>617</i>&nbsp;            }
+<b class="fc"><i>618</i>&nbsp;            __readOnly = readOnly;</b>
+<i>619</i>&nbsp;
+<b class="fc"><i>620</i>&nbsp;            __temp_pos = new SystemIteratorPosition(this); // we flip back and forth between two positions to avoid allocating these on every value (or more)</b>
+<b class="fc"><i>621</i>&nbsp;            __pos = new SystemIteratorPosition(this);</b>
+<b class="fc"><i>622</i>&nbsp;            __pos.load_initial_position();</b>
+<b class="fc"><i>623</i>&nbsp;        }</b>
+<i>624</i>&nbsp;
+<i>625</i>&nbsp;        private IonSystem getSystem()
+<i>626</i>&nbsp;        {
+<b class="nc"><i>627</i>&nbsp;            return IonDatagramLite.this.getSystem();</b>
+<i>628</i>&nbsp;        }
+<i>629</i>&nbsp;
+<i>630</i>&nbsp;        protected IonValueLite set_position(SystemIteratorPosition newPos)
+<i>631</i>&nbsp;        {
+<i>632</i>&nbsp;            // swap our active position with our temp position
+<b class="fc"><i>633</i>&nbsp;            __temp_pos = __pos;</b>
+<b class="fc"><i>634</i>&nbsp;            __pos = newPos;</b>
+<i>635</i>&nbsp;
+<i>636</i>&nbsp;            // load out current value from the position, and return it
+<b class="fc"><i>637</i>&nbsp;            __current = __pos.load_position();</b>
+<b class="fc"><i>638</i>&nbsp;            return __current;</b>
+<i>639</i>&nbsp;        }
+<i>640</i>&nbsp;
+<i>641</i>&nbsp;        private void force_position_sync()
+<i>642</i>&nbsp;        {
+<b class="fc"><i>643</i>&nbsp;            int user_index = __pos.__user_index;</b>
+<b class="fc"><i>644</i>&nbsp;            if (user_index &lt; 0 || user_index &gt;= _child_count) {</b>
+<b class="fc"><i>645</i>&nbsp;                return;</b>
+<i>646</i>&nbsp;            }
+<b class="fc"><i>647</i>&nbsp;            IonValueLite user_value = __pos.__current_user_value;</b>
+<b class="fc"><i>648</i>&nbsp;            if (user_value == null || user_value == _children[user_index]) {</b>
+<b class="fc"><i>649</i>&nbsp;                return;</b>
+<i>650</i>&nbsp;            }
+<b class="nc"><i>651</i>&nbsp;            if (__readOnly) {</b>
+<b class="nc"><i>652</i>&nbsp;                throw new IonException(&quot;read only sequence was changed&quot;);</b>
+<i>653</i>&nbsp;            }
+<b class="nc"><i>654</i>&nbsp;            __pos.force_position_sync_helper();</b>
+<b class="nc"><i>655</i>&nbsp;        }</b>
+<i>656</i>&nbsp;
+<i>657</i>&nbsp;        public void add(IonValue element)
+<i>658</i>&nbsp;        {
+<b class="nc"><i>659</i>&nbsp;            throw new UnsupportedOperationException();</b>
+<i>660</i>&nbsp;        }
+<i>661</i>&nbsp;
+<i>662</i>&nbsp;        public final boolean hasNext()
+<i>663</i>&nbsp;        {
+<b class="fc"><i>664</i>&nbsp;            return __pos.has_next();</b>
+<i>665</i>&nbsp;        }
+<i>666</i>&nbsp;
+<i>667</i>&nbsp;        public IonValue next()
+<i>668</i>&nbsp;        {
+<b class="fc"><i>669</i>&nbsp;            SystemIteratorPosition pos = next_index_helper();</b>
+<b class="fc"><i>670</i>&nbsp;            if (pos == null) {</b>
+<b class="nc"><i>671</i>&nbsp;                throw new NoSuchElementException();</b>
+<i>672</i>&nbsp;            }
+<b class="fc"><i>673</i>&nbsp;            IonValueLite current_value = set_position(pos);</b>
+<b class="fc"><i>674</i>&nbsp;            assert(current_value == this.__current);</b>
+<b class="fc"><i>675</i>&nbsp;            return current_value;</b>
+<i>676</i>&nbsp;        }
+<i>677</i>&nbsp;
+<i>678</i>&nbsp;        public final int nextIndex()
+<i>679</i>&nbsp;        {
+<b class="nc"><i>680</i>&nbsp;            SystemIteratorPosition pos = next_index_helper();</b>
+<b class="nc"><i>681</i>&nbsp;            if (pos == null) {</b>
+<i>682</i>&nbsp;                // we can do this because we hold the __pos
+<i>683</i>&nbsp;                // even when we run off the end, it will be
+<i>684</i>&nbsp;                // positioned at the value that wasn&#39;t there
+<b class="nc"><i>685</i>&nbsp;                return __pos.get_external_pos() + 1;</b>
+<i>686</i>&nbsp;            }
+<b class="nc"><i>687</i>&nbsp;            int idx = pos.get_external_pos();</b>
+<b class="nc"><i>688</i>&nbsp;            return idx;</b>
+<i>689</i>&nbsp;        }
+<i>690</i>&nbsp;
+<i>691</i>&nbsp;        private final SystemIteratorPosition next_index_helper()
+<i>692</i>&nbsp;        {
+<b class="fc"><i>693</i>&nbsp;            SystemIteratorPosition next = null;</b>
+<b class="fc"><i>694</i>&nbsp;            force_position_sync();</b>
+<i>695</i>&nbsp;
+<b class="fc"><i>696</i>&nbsp;            if (__pos.has_next() == false) {</b>
+<b class="nc"><i>697</i>&nbsp;                return null;</b>
+<i>698</i>&nbsp;            }
+<i>699</i>&nbsp;
+<i>700</i>&nbsp;            // at this point we will have a next so prep out position now
+<b class="fc"><i>701</i>&nbsp;            next = __temp_pos;</b>
+<b class="fc"><i>702</i>&nbsp;            assert(next != null &amp;&amp; next != __pos);</b>
+<b class="fc"><i>703</i>&nbsp;            next.copyFrom(__pos);</b>
+<i>704</i>&nbsp;
+<i>705</i>&nbsp;            // see if there&#39;s a system value waiting for use
+<b class="fc"><i>706</i>&nbsp;            next.__local_index++;</b>
+<b class="fc"><i>707</i>&nbsp;            if (next.__local_index &lt; next.__local_value_count) {</b>
+<b class="fc"><i>708</i>&nbsp;                return next;</b>
+<i>709</i>&nbsp;            }
+<i>710</i>&nbsp;
+<i>711</i>&nbsp;            // if there&#39;s not system value there must be another user value
+<i>712</i>&nbsp;            // so we shouldn&#39;t get here since has_next() should have failed
+<b class="fc"><i>713</i>&nbsp;            assert(next.__user_index &lt;= get_child_count());</b>
+<i>714</i>&nbsp;
+<i>715</i>&nbsp;            // if we were on a system value then we&#39;re just stepping onto the
+<i>716</i>&nbsp;            // since has_next() already declared we do have a waiting value
+<b class="fc"><i>717</i>&nbsp;            next.__user_index++;</b>
+<b class="fc"><i>718</i>&nbsp;            next.load_updated_position();</b>
+<i>719</i>&nbsp;            // we step onto the first local value
+<b class="fc"><i>720</i>&nbsp;            next.__local_index = 0;</b>
+<b class="fc"><i>721</i>&nbsp;            return next;</b>
+<i>722</i>&nbsp;        }
+<i>723</i>&nbsp;
+<i>724</i>&nbsp;        public final boolean hasPrevious()
+<i>725</i>&nbsp;        {
+<b class="nc"><i>726</i>&nbsp;            return __pos.has_prev();</b>
+<i>727</i>&nbsp;        }
+<i>728</i>&nbsp;
+<i>729</i>&nbsp;        public IonValue previous()
+<i>730</i>&nbsp;        {
+<b class="nc"><i>731</i>&nbsp;            SystemIteratorPosition pos = previous_index_helper();</b>
+<b class="nc"><i>732</i>&nbsp;            if (pos == null) {</b>
+<b class="nc"><i>733</i>&nbsp;                throw new NoSuchElementException();</b>
+<i>734</i>&nbsp;            }
+<b class="nc"><i>735</i>&nbsp;            IonValueLite current_value = set_position(pos);</b>
+<b class="nc"><i>736</i>&nbsp;            assert(current_value == this.__current);</b>
+<b class="nc"><i>737</i>&nbsp;            return current_value;</b>
+<i>738</i>&nbsp;        }
+<i>739</i>&nbsp;
+<i>740</i>&nbsp;        public final int previousIndex()
+<i>741</i>&nbsp;        {
+<b class="nc"><i>742</i>&nbsp;            SystemIteratorPosition pos = previous_index_helper();</b>
+<b class="nc"><i>743</i>&nbsp;            if (pos == null) {</b>
+<b class="nc"><i>744</i>&nbsp;                return -1;</b>
+<i>745</i>&nbsp;            }
+<b class="nc"><i>746</i>&nbsp;            int idx = pos.get_external_pos();</b>
+<b class="nc"><i>747</i>&nbsp;            return idx;</b>
+<i>748</i>&nbsp;        }
+<i>749</i>&nbsp;
+<i>750</i>&nbsp;        private final SystemIteratorPosition previous_index_helper()
+<i>751</i>&nbsp;        {
+<b class="nc"><i>752</i>&nbsp;            SystemIteratorPosition prev = null;</b>
+<i>753</i>&nbsp;
+<b class="nc"><i>754</i>&nbsp;            force_position_sync();</b>
+<b class="nc"><i>755</i>&nbsp;            if (__pos.has_prev() == false) {</b>
+<b class="nc"><i>756</i>&nbsp;                return null;</b>
+<i>757</i>&nbsp;            }
+<i>758</i>&nbsp;
+<i>759</i>&nbsp;            // at this point we will have a prev so prep out position now
+<b class="nc"><i>760</i>&nbsp;            prev = __temp_pos;</b>
+<b class="nc"><i>761</i>&nbsp;            assert(prev != null &amp;&amp; prev != __pos);</b>
+<b class="nc"><i>762</i>&nbsp;            prev.copyFrom(__pos);</b>
+<i>763</i>&nbsp;
+<b class="nc"><i>764</i>&nbsp;            prev.__local_index--;</b>
+<b class="nc"><i>765</i>&nbsp;            if (prev.__local_index &gt;= 0) {</b>
+<b class="nc"><i>766</i>&nbsp;                return prev;</b>
+<i>767</i>&nbsp;            }
+<i>768</i>&nbsp;
+<i>769</i>&nbsp;            // if there&#39;s not system value there must be another user value
+<i>770</i>&nbsp;            // we would have bailed with has_prev returned false above otherwise
+<b class="nc"><i>771</i>&nbsp;            assert(prev.__user_index &gt; 0);</b>
+<i>772</i>&nbsp;
+<i>773</i>&nbsp;            // if this is the 2nd prev then we really have to back up
+<b class="nc"><i>774</i>&nbsp;            prev.__index_adjustment -= prev.__local_value_count;</b>
+<b class="nc"><i>775</i>&nbsp;            prev.__user_index--;</b>
+<b class="nc"><i>776</i>&nbsp;            prev.load_updated_position();</b>
+<i>777</i>&nbsp;
+<i>778</i>&nbsp;            // going backwards we &quot;start&quot; at the end of our local list
+<b class="nc"><i>779</i>&nbsp;            prev.__local_index = prev.__local_value_count - 1;</b>
+<i>780</i>&nbsp;
+<b class="nc"><i>781</i>&nbsp;            return prev;</b>
+<i>782</i>&nbsp;        }
+<i>783</i>&nbsp;
+<i>784</i>&nbsp;        /**
+<i>785</i>&nbsp;         * removes the current member from the containing
+<i>786</i>&nbsp;         * datagram if it is a user value.
+<i>787</i>&nbsp;         *
+<i>788</i>&nbsp;         * If there is no current value it throws NoSuchElementException
+<i>789</i>&nbsp;         * If the current value is not a user value in the datagram
+<i>790</i>&nbsp;         * this throws UnsupportedOperationException.
+<i>791</i>&nbsp;         * And if the iterator is a read only iterator this also
+<i>792</i>&nbsp;         * throws UnsupportedOperationException.
+<i>793</i>&nbsp;         */
+<i>794</i>&nbsp;        public void remove()
+<i>795</i>&nbsp;        {
+<b class="nc"><i>796</i>&nbsp;            if (__readOnly) {</b>
+<b class="nc"><i>797</i>&nbsp;                throw new UnsupportedOperationException();</b>
+<i>798</i>&nbsp;            }
+<b class="nc"><i>799</i>&nbsp;            force_position_sync();</b>
+<i>800</i>&nbsp;
+<b class="nc"><i>801</i>&nbsp;            if (__current == null || __pos == null) {</b>
+<b class="nc"><i>802</i>&nbsp;                throw new NoSuchElementException();</b>
+<i>803</i>&nbsp;            }
+<b class="nc"><i>804</i>&nbsp;            if (__pos.on_system_value()) {</b>
+<b class="nc"><i>805</i>&nbsp;                throw new UnsupportedOperationException();</b>
+<i>806</i>&nbsp;            }
+<i>807</i>&nbsp;
+<b class="nc"><i>808</i>&nbsp;            int idx = __pos.__user_index;</b>
+<b class="nc"><i>809</i>&nbsp;            assert(idx &gt;= 0);</b>
+<i>810</i>&nbsp;
+<b class="nc"><i>811</i>&nbsp;            IonValueLite concrete = __current;</b>
+<b class="nc"><i>812</i>&nbsp;            int concrete_idx = concrete._elementid();</b>
+<b class="nc"><i>813</i>&nbsp;            assert(concrete_idx == idx);</b>
+<i>814</i>&nbsp;
+<i>815</i>&nbsp;            // here we remove the member from the container&#39;s list of elements
+<b class="nc"><i>816</i>&nbsp;            remove_child(idx);</b>
+<b class="nc"><i>817</i>&nbsp;            patch_elements_helper(concrete_idx);</b>
+<i>818</i>&nbsp;
+<i>819</i>&nbsp;            // when we remove the current value we remove
+<i>820</i>&nbsp;            // its associated system values and this
+<i>821</i>&nbsp;            // may change the index adjustment
+<b class="nc"><i>822</i>&nbsp;            __pos.__index_adjustment -= __pos.__local_value_count;</b>
+<b class="nc"><i>823</i>&nbsp;            if (__pos.__user_index &lt; get_child_count() - 1)</b>
+<i>824</i>&nbsp;            {
+<b class="nc"><i>825</i>&nbsp;                __pos.load_updated_position();</b>
+<b class="nc"><i>826</i>&nbsp;                __pos.__local_index = -1;</b>
+<i>827</i>&nbsp;            }
+<b class="nc"><i>828</i>&nbsp;            __current = null;</b>
+<b class="nc"><i>829</i>&nbsp;        }</b>
+<i>830</i>&nbsp;
+<i>831</i>&nbsp;        public void set(IonValue element)
+<i>832</i>&nbsp;        {
+<b class="nc"><i>833</i>&nbsp;            throw new UnsupportedOperationException();</b>
+<i>834</i>&nbsp;        }
+<i>835</i>&nbsp;        protected int get_datagram_child_count()
+<i>836</i>&nbsp;        {
+<b class="fc"><i>837</i>&nbsp;            return get_child_count();</b>
+<i>838</i>&nbsp;        }
+<i>839</i>&nbsp;        protected IonValueLite get_datagram_child(int idx)
+<i>840</i>&nbsp;        {
+<b class="fc"><i>841</i>&nbsp;            return get_child(idx);</b>
+<i>842</i>&nbsp;        }
+<i>843</i>&nbsp;        protected IonSystem get_datagram_system()
+<i>844</i>&nbsp;        {
+<b class="fc"><i>845</i>&nbsp;            return _system;</b>
+<i>846</i>&nbsp;        }
+<i>847</i>&nbsp;        protected boolean datagram_contains(IonValueLite value)
+<i>848</i>&nbsp;        {
+<b class="nc"><i>849</i>&nbsp;            return contains(value);</b>
+<i>850</i>&nbsp;        }
+<i>851</i>&nbsp;        protected IonSymbolLite get_datagram_ivm()
+<i>852</i>&nbsp;        {
+<b class="fc"><i>853</i>&nbsp;            return get_ivm();</b>
+<i>854</i>&nbsp;        }
+<i>855</i>&nbsp;    }
+<b class="fc"><i>856</i>&nbsp;    static class SystemIteratorPosition</b>
+<i>857</i>&nbsp;    {
+<i>858</i>&nbsp;        /**
+<i>859</i>&nbsp;         * this position points to the user value that
+<i>860</i>&nbsp;         * we might have just passed calling next
+<i>861</i>&nbsp;         *
+<i>862</i>&nbsp;         * that is this position is between the last
+<i>863</i>&nbsp;         * value returned by next and the next value
+<i>864</i>&nbsp;         * that will be returned.
+<i>865</i>&nbsp;         *
+<i>866</i>&nbsp;         * As we change the user index we load the
+<i>867</i>&nbsp;         * current user value and synthesize any needed
+<i>868</i>&nbsp;         * local system values
+<i>869</i>&nbsp;         *
+<i>870</i>&nbsp;         * we also push the user value onto the same
+<i>871</i>&nbsp;         * local stack.  that way out local index can
+<i>872</i>&nbsp;         * run off either end of the local &quot;list&quot;
+<i>873</i>&nbsp;         * and only when we go yet another past either
+<i>874</i>&nbsp;         * end do we need to reload the value to
+<i>875</i>&nbsp;         * one side of the other, and which side of
+<i>876</i>&nbsp;         * our local list we ran off of will tell
+<i>877</i>&nbsp;         * us that.
+<i>878</i>&nbsp;         */
+<i>879</i>&nbsp;        protected final SystemContentIterator __iterator;
+<i>880</i>&nbsp;        protected       int                   __index_adjustment;      // delta between the user_content_pos and the external_pos
+<i>881</i>&nbsp;
+<i>882</i>&nbsp;        protected       int                   __local_index;           // index of the next value in the system array (__local_system_value), if __on_system_value
+<b class="fc"><i>883</i>&nbsp;        protected       IonValueLite[]        __local_values = new IonValueLite[3]; // more than the value, a symbol table, and a version marker would be MOST unusual</b>
+<i>884</i>&nbsp;        protected       int                   __local_value_count;
+<i>885</i>&nbsp;
+<i>886</i>&nbsp;        protected       int                   __user_index;            // index of next value in the user content array (_children)
+<i>887</i>&nbsp;        protected       IonValueLite          __current_user_value;    // value from the child array at the time the user_index was moved forward == get_child(next_user_index -1)
+<i>888</i>&nbsp;        protected       SymbolTable           __current_symbols;
+<i>889</i>&nbsp;        protected       int                   __current_symbols_index;
+<i>890</i>&nbsp;
+<i>891</i>&nbsp;        SystemIteratorPosition(SystemContentIterator iterator)
+<b class="fc"><i>892</i>&nbsp;        {</b>
+<b class="fc"><i>893</i>&nbsp;            __iterator = iterator;</b>
+<b class="fc"><i>894</i>&nbsp;        }</b>
+<i>895</i>&nbsp;
+<i>896</i>&nbsp;        void load_initial_position()
+<i>897</i>&nbsp;        {
+<b class="fc"><i>898</i>&nbsp;            __user_index = 0;</b>
+<b class="fc"><i>899</i>&nbsp;            __local_index = -1; // we&#39;re before the first value</b>
+<b class="fc"><i>900</i>&nbsp;            __current_symbols_index = -1;</b>
+<b class="fc"><i>901</i>&nbsp;            load_updated_position();</b>
+<b class="fc"><i>902</i>&nbsp;        }</b>
+<i>903</i>&nbsp;
+<i>904</i>&nbsp;        protected int get_external_pos()
+<i>905</i>&nbsp;        {
+<i>906</i>&nbsp;            int user_index;
+<b class="nc"><i>907</i>&nbsp;            user_index  = __user_index;</b>
+<b class="nc"><i>908</i>&nbsp;            user_index += __index_adjustment;</b>
+<b class="nc"><i>909</i>&nbsp;            user_index -= __local_value_count;</b>
+<b class="nc"><i>910</i>&nbsp;            user_index += __local_index;</b>
+<b class="nc"><i>911</i>&nbsp;            return user_index;</b>
+<i>912</i>&nbsp;        }
+<i>913</i>&nbsp;
+<i>914</i>&nbsp;        protected boolean on_system_value()
+<i>915</i>&nbsp;        {
+<b class="nc"><i>916</i>&nbsp;            return (__current_user_value != __local_values[0]);</b>
+<i>917</i>&nbsp;        }
+<i>918</i>&nbsp;        protected boolean has_next()
+<i>919</i>&nbsp;        {
+<b class="fc"><i>920</i>&nbsp;            if (__local_index + 1 &lt; __local_value_count) {</b>
+<b class="fc"><i>921</i>&nbsp;                return true;</b>
+<i>922</i>&nbsp;            }
+<b class="fc"><i>923</i>&nbsp;            if (__user_index + 1 &lt; __iterator.get_datagram_child_count()) {</b>
+<b class="fc"><i>924</i>&nbsp;                return true;</b>
+<i>925</i>&nbsp;            }
+<b class="fc"><i>926</i>&nbsp;            return false;</b>
+<i>927</i>&nbsp;        }
+<i>928</i>&nbsp;        protected boolean has_prev()
+<i>929</i>&nbsp;        {
+<i>930</i>&nbsp;            // if we&#39;re not at the beginning of the datagram list
+<i>931</i>&nbsp;            // we always have another user value
+<b class="nc"><i>932</i>&nbsp;            if (__user_index &gt; 0) {</b>
+<b class="nc"><i>933</i>&nbsp;                return true;</b>
+<i>934</i>&nbsp;            }
+<b class="nc"><i>935</i>&nbsp;            if (__local_index &gt; 0) {</b>
+<b class="nc"><i>936</i>&nbsp;                return true;</b>
+<i>937</i>&nbsp;            }
+<i>938</i>&nbsp;            // we&#39;re out of both user and system values
+<b class="nc"><i>939</i>&nbsp;            return false;</b>
+<i>940</i>&nbsp;        }
+<i>941</i>&nbsp;
+<i>942</i>&nbsp;        protected void copyFrom(SystemIteratorPosition source)
+<i>943</i>&nbsp;        {
+<b class="fc"><i>944</i>&nbsp;            this.__index_adjustment         = source.__index_adjustment;</b>
+<b class="fc"><i>945</i>&nbsp;            this.__user_index               = source.__user_index;</b>
+<b class="fc"><i>946</i>&nbsp;            this.__local_index              = source.__local_index;</b>
+<b class="fc"><i>947</i>&nbsp;            this.__current_user_value       = source.__current_user_value;</b>
+<b class="fc"><i>948</i>&nbsp;            this.__current_symbols          = source.__current_symbols;</b>
+<b class="fc"><i>949</i>&nbsp;            this.__current_symbols_index    = source.__current_symbols_index;</b>
+<i>950</i>&nbsp;
+<i>951</i>&nbsp;            // for the local system values each position needs its own
+<i>952</i>&nbsp;            // array, but the can share the value references
+<b class="fc"><i>953</i>&nbsp;            if (source.__local_value_count &gt; 0) {</b>
+<b class="fc"><i>954</i>&nbsp;                if (this.__local_values == null || source.__local_value_count &gt;= this.__local_values.length) {</b>
+<b class="fc"><i>955</i>&nbsp;                    this.__local_values = new IonValueLite[source.__local_values.length];</b>
+<i>956</i>&nbsp;                }
+<b class="fc"><i>957</i>&nbsp;                System.arraycopy(source.__local_values, 0, this.__local_values, 0, source.__local_value_count);</b>
+<i>958</i>&nbsp;            }
+<b class="fc"><i>959</i>&nbsp;            this.__local_value_count = source.__local_value_count;</b>
+<b class="fc"><i>960</i>&nbsp;        }</b>
+<i>961</i>&nbsp;
+<i>962</i>&nbsp;        private void load_updated_position()
+<i>963</i>&nbsp;        {
+<b class="fc"><i>964</i>&nbsp;            IonValueLite prev_value = __current_user_value;</b>
+<i>965</i>&nbsp;            // we load our referenced user value (@ __user_index if
+<i>966</i>&nbsp;            // it exists).
+<b class="fc"><i>967</i>&nbsp;            if (__user_index &lt; 0 || (__user_index &gt; 0 &amp;&amp; __user_index &gt;=  __iterator.get_datagram_child_count())) {</b>
+<b class="nc"><i>968</i>&nbsp;                throw new IonException(&quot;attempt to position iterator past end of values&quot;);</b>
+<i>969</i>&nbsp;            }
+<b class="fc"><i>970</i>&nbsp;            if (__user_index &lt; __iterator.get_datagram_child_count()) {</b>
+<b class="fc"><i>971</i>&nbsp;                __current_user_value = __iterator.get_datagram_child(__user_index);</b>
+<b class="fc"><i>972</i>&nbsp;                assert(__current_user_value != null);</b>
+<i>973</i>&nbsp;            }
+<i>974</i>&nbsp;            else {
+<i>975</i>&nbsp;                // when there are no user values and we&#39;re at index == 0
+<b class="fc"><i>976</i>&nbsp;                assert(__user_index == 0 &amp;&amp; __iterator.get_datagram_child_count() == 0);</b>
+<b class="fc"><i>977</i>&nbsp;                __current_user_value = null;</b>
+<i>978</i>&nbsp;            }
+<i>979</i>&nbsp;
+<b class="fc"><i>980</i>&nbsp;            int old_count = __local_value_count;</b>
+<b class="fc"><i>981</i>&nbsp;            __local_value_count = 0;</b>
+<b class="fc"><i>982</i>&nbsp;            if (__current_user_value != null) {</b>
+<b class="fc"><i>983</i>&nbsp;                push_system_value(__current_user_value);</b>
+<i>984</i>&nbsp;            }
+<b class="fc"><i>985</i>&nbsp;            load_current_symbol_table(prev_value);</b>
+<i>986</i>&nbsp;
+<b class="fc"><i>987</i>&nbsp;            for (int ii=__local_value_count; ii&lt;old_count; ii++) {</b>
+<b class="fc"><i>988</i>&nbsp;                __local_values[ii] = null;</b>
+<i>989</i>&nbsp;            }
+<b class="fc"><i>990</i>&nbsp;            __index_adjustment += __local_value_count - 1;</b>
+<i>991</i>&nbsp;
+<b class="fc"><i>992</i>&nbsp;            return;</b>
+<i>993</i>&nbsp;        }
+<i>994</i>&nbsp;
+<i>995</i>&nbsp;        void load_current_symbol_table(IonValueLite prev_user_value)
+<i>996</i>&nbsp;        {
+<b class="fc"><i>997</i>&nbsp;            IonValueLite curr_value  = __current_user_value;</b>
+<b class="fc"><i>998</i>&nbsp;            int          curr_index  = __user_index;</b>
+<i>999</i>&nbsp;
+<b class="fc"><i>1000</i>&nbsp;            IonValueLite prev_value  = prev_user_value;</b>
+<b class="fc"><i>1001</i>&nbsp;            SymbolTable  prev_symtab = __current_symbols;</b>
+<b class="fc"><i>1002</i>&nbsp;            int          prev_index  = __current_symbols_index;</b>
+<i>1003</i>&nbsp;
+<i>1004</i>&nbsp;            // set our new position symbol table
+<b class="fc"><i>1005</i>&nbsp;            __current_symbols  = null;</b>
+<b class="fc"><i>1006</i>&nbsp;            __current_symbols_index = curr_index;</b>
+<b class="fc"><i>1007</i>&nbsp;            SymbolTable  curr_symtab = null;</b>
+<b class="fc"><i>1008</i>&nbsp;           if (curr_value != null) {</b>
+<b class="fc"><i>1009</i>&nbsp;                curr_symtab = curr_value.getAssignedSymbolTable();</b>
+<b class="fc"><i>1010</i>&nbsp;                __current_symbols = curr_symtab;</b>
+<i>1011</i>&nbsp;            }
+<i>1012</i>&nbsp;
+<i>1013</i>&nbsp;            // if we need to we reset the previous values here
+<i>1014</i>&nbsp;            // this happens when the caller is scanning backwards
+<b class="fc"><i>1015</i>&nbsp;            if (curr_index - 1 != prev_index) {</b>
+<b class="nc"><i>1016</i>&nbsp;                prev_index = curr_index - 1;</b>
+<b class="nc"><i>1017</i>&nbsp;                prev_symtab = null;</b>
+<b class="nc"><i>1018</i>&nbsp;                if (prev_index &gt;= 0 &amp;&amp; prev_index &lt; __iterator.get_datagram_child_count()) {</b>
+<b class="nc"><i>1019</i>&nbsp;                    prev_value  = __iterator.get_datagram_child(prev_index);</b>
+<b class="nc"><i>1020</i>&nbsp;                    prev_symtab = prev_value.getAssignedSymbolTable();</b>
+<i>1021</i>&nbsp;                }
+<i>1022</i>&nbsp;            }
+<i>1023</i>&nbsp;
+<i>1024</i>&nbsp;            // Now if there was a change push the local symbol
+<i>1025</i>&nbsp;            // tables onto our system value stack
+<i>1026</i>&nbsp;
+<i>1027</i>&nbsp;            // note that our chain of preceding symbol tables
+<i>1028</i>&nbsp;            // might match our list of previous structs in the
+<i>1029</i>&nbsp;            // user list.  Until there&#39;s a difference we don&#39;t
+<i>1030</i>&nbsp;            // push the symbol tables (because they&#39;ve already
+<i>1031</i>&nbsp;            // been processed as real values).
+<b class="fc"><i>1032</i>&nbsp;            if (curr_symtab != prev_symtab) {</b>
+<b class="fc"><i>1033</i>&nbsp;                SymbolTable new_symbol_table = curr_symtab;</b>
+<b class="fc"><i>1034</i>&nbsp;                while (new_symbol_table != null)</b>
+<i>1035</i>&nbsp;                {
+<b class="fc"><i>1036</i>&nbsp;                    final boolean new_symbol_table_is_system = new_symbol_table.isSystemTable();</b>
+<i>1037</i>&nbsp;                    IonValue rep;
+<b class="fc"><i>1038</i>&nbsp;                    if (new_symbol_table_is_system) {</b>
+<b class="fc"><i>1039</i>&nbsp;                        rep = __iterator.get_datagram_ivm();</b>
+<i>1040</i>&nbsp;                    }
+<i>1041</i>&nbsp;                    else {
+<b class="fc"><i>1042</i>&nbsp;                        IonSystem sys = __iterator.get_datagram_system();</b>
+<b class="fc"><i>1043</i>&nbsp;                        rep = _Private_Utils.symtabTree(new_symbol_table);</b>
+<i>1044</i>&nbsp;                    }
+<b class="fc"><i>1045</i>&nbsp;                    assert(rep != null &amp;&amp; __iterator.get_datagram_system() == rep.getSystem());</b>
+<i>1046</i>&nbsp;
+<b class="fc"><i>1047</i>&nbsp;                    if (rep == prev_value || (is_ivm(curr_value) &amp;&amp; new_symbol_table_is_system)) {</b>
+<b class="nc"><i>1048</i>&nbsp;                        int prev_idx = (prev_value == null) ? -1 : (prev_value._elementid() - 1);</b>
+<b class="nc"><i>1049</i>&nbsp;                        if (prev_idx &gt;= 0) {</b>
+<b class="nc"><i>1050</i>&nbsp;                            prev_value = __iterator.get_datagram_child(prev_idx);</b>
+<i>1051</i>&nbsp;                        }
+<i>1052</i>&nbsp;                        else {
+<b class="nc"><i>1053</i>&nbsp;                            prev_value = null;</b>
+<i>1054</i>&nbsp;                        }
+<b class="nc"><i>1055</i>&nbsp;                    }</b>
+<i>1056</i>&nbsp;                    else {
+<b class="fc"><i>1057</i>&nbsp;                        push_system_value((IonValueLite)rep);</b>
+<b class="fc"><i>1058</i>&nbsp;                        prev_value = null; // end of the matches</b>
+<i>1059</i>&nbsp;                    }
+<b class="fc"><i>1060</i>&nbsp;                    new_symbol_table = rep.getSymbolTable();</b>
+<b class="fc"><i>1061</i>&nbsp;                    if (new_symbol_table == null || new_symbol_table.isSystemTable()) {</b>
+<b class="fc"><i>1062</i>&nbsp;                        break;</b>
+<i>1063</i>&nbsp;                    }
+<b class="nc"><i>1064</i>&nbsp;                }</b>
+<i>1065</i>&nbsp;            }
+<i>1066</i>&nbsp;            // and at the front we need to put in the ion version marker
+<b class="fc"><i>1067</i>&nbsp;            if (curr_index == 0 &amp;&amp; !is_ivm(curr_value)) {</b>
+<i>1068</i>&nbsp;                // TODO this is wrong, because we may have already pushed
+<i>1069</i>&nbsp;                // a rep above. This is just making up an additional symtab
+<i>1070</i>&nbsp;                // where one was not placed by the user.
+<b class="fc"><i>1071</i>&nbsp;                IonValueLite ivm = __iterator.get_datagram_ivm();</b>
+<b class="fc"><i>1072</i>&nbsp;                push_system_value(ivm);</b>
+<i>1073</i>&nbsp;            }
+<b class="fc"><i>1074</i>&nbsp;        }</b>
+<i>1075</i>&nbsp;
+<i>1076</i>&nbsp;        private static final boolean is_ivm(IonValue value)
+<i>1077</i>&nbsp;        {
+<b class="fc"><i>1078</i>&nbsp;            if (value instanceof IonSymbol</b>
+<b class="fc"><i>1079</i>&nbsp;                &amp;&amp; value.getTypeAnnotationSymbols().length == 0) {</b>
+<i>1080</i>&nbsp;                // $ion_1_0 is read as an IVM only if it is not annotated
+<b class="fc"><i>1081</i>&nbsp;                IonSymbol sym = (IonSymbol)value;</b>
+<b class="fc"><i>1082</i>&nbsp;                SymbolToken tok = sym.symbolValue();</b>
+<b class="fc"><i>1083</i>&nbsp;                if (tok != null &amp;&amp; ION_1_0.equals(tok.getText()))</b>
+<i>1084</i>&nbsp;                {
+<b class="nc"><i>1085</i>&nbsp;                    return true;</b>
+<i>1086</i>&nbsp;                }
+<i>1087</i>&nbsp;            }
+<b class="fc"><i>1088</i>&nbsp;            return false;</b>
+<i>1089</i>&nbsp;        }
+<i>1090</i>&nbsp;
+<i>1091</i>&nbsp;        private void push_system_value(IonValueLite value)
+<i>1092</i>&nbsp;        {
+<b class="fc"><i>1093</i>&nbsp;            if (__local_value_count &gt;= __local_values.length) {</b>
+<b class="nc"><i>1094</i>&nbsp;                int new_size = (__local_values == null) ? 2 : (__local_values.length * 2);</b>
+<b class="nc"><i>1095</i>&nbsp;                assert( new_size &gt; __local_value_count); // we should only need to add 1 value at a time</b>
+<b class="nc"><i>1096</i>&nbsp;                IonValueLite[] temp = new IonValueLite[new_size];</b>
+<b class="nc"><i>1097</i>&nbsp;                if (__local_value_count &gt; 0) {</b>
+<b class="nc"><i>1098</i>&nbsp;                    System.arraycopy(__local_values, 0, temp, 0, __local_value_count);</b>
+<i>1099</i>&nbsp;                }
+<b class="nc"><i>1100</i>&nbsp;                __local_values = temp;</b>
+<i>1101</i>&nbsp;            }
+<b class="fc"><i>1102</i>&nbsp;            __local_values[__local_value_count++] = value;</b>
+<b class="fc"><i>1103</i>&nbsp;        }</b>
+<i>1104</i>&nbsp;
+<i>1105</i>&nbsp;        protected IonValueLite load_position()
+<i>1106</i>&nbsp;        {
+<b class="fc"><i>1107</i>&nbsp;            IonValueLite current = null;</b>
+<i>1108</i>&nbsp;
+<b class="fc"><i>1109</i>&nbsp;            assert(__local_index &lt; __local_value_count);</b>
+<i>1110</i>&nbsp;
+<b class="fc"><i>1111</i>&nbsp;            current = __local_values[__local_value_count - __local_index - 1];</b>
+<i>1112</i>&nbsp;
+<b class="fc"><i>1113</i>&nbsp;            return current;</b>
+<i>1114</i>&nbsp;        }
+<i>1115</i>&nbsp;
+<i>1116</i>&nbsp;        private final void force_position_sync_helper()
+<i>1117</i>&nbsp;        {
+<b class="nc"><i>1118</i>&nbsp;            if (!__iterator.datagram_contains(__current_user_value)) {</b>
+<b class="nc"><i>1119</i>&nbsp;                throw new IonException(&quot;current user value removed outside this iterator - position lost&quot;);</b>
+<i>1120</i>&nbsp;            }
+<b class="nc"><i>1121</i>&nbsp;            int old_index = __user_index;</b>
+<b class="nc"><i>1122</i>&nbsp;            int new_index = __current_user_value._elementid();</b>
+<i>1123</i>&nbsp;
+<b class="nc"><i>1124</i>&nbsp;            if (old_index != new_index) {</b>
+<i>1125</i>&nbsp;                // if our current value moved we have to recompute
+<i>1126</i>&nbsp;                // the adjustment from scratch since we don&#39;t really
+<i>1127</i>&nbsp;                // have any idea why this moved in either direction.
+<b class="nc"><i>1128</i>&nbsp;                int adjustment = 0;</b>
+<b class="nc"><i>1129</i>&nbsp;                SymbolTable curr, prev = null;</b>
+<b class="nc"><i>1130</i>&nbsp;                for (int ii=0; ii&lt;new_index; ii--) {</b>
+<b class="nc"><i>1131</i>&nbsp;                    curr = __iterator.get_datagram_child(ii).getSymbolTable();</b>
+<b class="nc"><i>1132</i>&nbsp;                    if (curr != prev) {</b>
+<b class="nc"><i>1133</i>&nbsp;                        IonSystem sys = __iterator.getSystem();</b>
+<b class="nc"><i>1134</i>&nbsp;                        adjustment += count_system_values(sys, prev, curr);</b>
+<i>1135</i>&nbsp;                    }
+<b class="nc"><i>1136</i>&nbsp;                    prev = curr;</b>
+<i>1137</i>&nbsp;                }
+<b class="nc"><i>1138</i>&nbsp;                __index_adjustment = adjustment + __local_value_count;</b>
+<b class="nc"><i>1139</i>&nbsp;                __user_index = new_index;</b>
+<i>1140</i>&nbsp;            }
+<b class="nc"><i>1141</i>&nbsp;        }</b>
+<i>1142</i>&nbsp;
+<i>1143</i>&nbsp;        private static int count_system_values(IonSystem sys,
+<i>1144</i>&nbsp;                                               SymbolTable prev,
+<i>1145</i>&nbsp;                                               SymbolTable curr)
+<i>1146</i>&nbsp;        {
+<b class="nc"><i>1147</i>&nbsp;            int count = 0;</b>
+<b class="nc"><i>1148</i>&nbsp;            while (curr.isLocalTable()) {</b>
+<b class="nc"><i>1149</i>&nbsp;                count++;</b>
+<b class="nc"><i>1150</i>&nbsp;                curr = _Private_Utils.symtabTree(curr).getSymbolTable();</b>
+<i>1151</i>&nbsp;            }
+<i>1152</i>&nbsp;            // we should terminate when the symbol tables symbol table is the system symbol table
+<b class="nc"><i>1153</i>&nbsp;            assert(curr != null);</b>
+<b class="nc"><i>1154</i>&nbsp;            if (prev == null || prev.getIonVersionId().equals(curr.getIonVersionId())) {</b>
+<b class="nc"><i>1155</i>&nbsp;                count++;</b>
+<i>1156</i>&nbsp;            }
+<b class="nc"><i>1157</i>&nbsp;            return count;</b>
+<i>1158</i>&nbsp;        }
+<i>1159</i>&nbsp;    }
+<i>1160</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

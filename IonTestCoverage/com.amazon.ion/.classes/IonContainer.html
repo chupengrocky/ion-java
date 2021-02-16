@@ -1,0 +1,154 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonContainer</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonContainer (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonContainer</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import java.util.Collection;
+<i>19</i>&nbsp;import java.util.Iterator;
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;/**
+<i>22</i>&nbsp; * Common functionality of Ion &lt;code&gt;struct&lt;/code&gt;, &lt;code&gt;list&lt;/code&gt;, and
+<i>23</i>&nbsp; * &lt;code&gt;sexp&lt;/code&gt; types.
+<i>24</i>&nbsp; * &lt;p&gt;
+<i>25</i>&nbsp; * &lt;b&gt;WARNING:&lt;/b&gt; This interface should not be implemented or extended by
+<i>26</i>&nbsp; * code outside of this library.
+<i>27</i>&nbsp; */
+<i>28</i>&nbsp;public interface IonContainer
+<i>29</i>&nbsp;    extends IonValue, Iterable&lt;IonValue&gt;
+<i>30</i>&nbsp;{
+<i>31</i>&nbsp;
+<i>32</i>&nbsp;    /**
+<i>33</i>&nbsp;     * Returns the number of elements in this container.
+<i>34</i>&nbsp;     *
+<i>35</i>&nbsp;     * @return the number of elements, zero if {@code this.isNullValue()}.
+<i>36</i>&nbsp;     */
+<i>37</i>&nbsp;    public int size();
+<i>38</i>&nbsp;
+<i>39</i>&nbsp;    /**
+<i>40</i>&nbsp;     * Creates an iterator providing the (direct) elements of this container.
+<i>41</i>&nbsp;     * If this is an {@linkplain #isNullValue() Ion null value}, then this
+<i>42</i>&nbsp;     * method returns an empty iterator.
+<i>43</i>&nbsp;     * &lt;p&gt;
+<i>44</i>&nbsp;     * Note that iteration over a {@link IonStruct} has unspecified ordering,
+<i>45</i>&nbsp;     * while iteration over an {@link IonSequence} ({@link IonList} or
+<i>46</i>&nbsp;     * {@link IonSexp}) must return elements
+<i>47</i>&nbsp;     * in order of their appearance in the Ion representation.
+<i>48</i>&nbsp;     *
+<i>49</i>&nbsp;     * @return a new iterator, not {@code null}.
+<i>50</i>&nbsp;     */
+<i>51</i>&nbsp;    public Iterator&lt;IonValue&gt; iterator();
+<i>52</i>&nbsp;
+<i>53</i>&nbsp;
+<i>54</i>&nbsp;    /**
+<i>55</i>&nbsp;     * Removes the given element from this container.
+<i>56</i>&nbsp;     * If this is an {@linkplain #isNullValue() Ion null value}, then this
+<i>57</i>&nbsp;     * method returns {@code false}.
+<i>58</i>&nbsp;     * &lt;p&gt;
+<i>59</i>&nbsp;     * Note that, unlike {@link Collection#remove(Object)}, this method uses
+<i>60</i>&nbsp;     * object identity, not {@link Object#equals(Object)}, to find the element.
+<i>61</i>&nbsp;     * That is, the given instance is removed, not other similarly &quot;equal&quot;
+<i>62</i>&nbsp;     * instances.
+<i>63</i>&nbsp;     *
+<i>64</i>&nbsp;     * @param element the element to be removed from this container,
+<i>65</i>&nbsp;     * if present.
+<i>66</i>&nbsp;     * @return &lt;code&gt;true&lt;/code&gt; if this container contained the specified
+<i>67</i>&nbsp;     * element.
+<i>68</i>&nbsp;     * @throws NullPointerException if the &lt;code&gt;element&lt;/code&gt;
+<i>69</i>&nbsp;     * is &lt;code&gt;null&lt;/code&gt;.
+<i>70</i>&nbsp;     */
+<i>71</i>&nbsp;    public boolean remove(IonValue element);
+<i>72</i>&nbsp;
+<i>73</i>&nbsp;
+<i>74</i>&nbsp;    /**
+<i>75</i>&nbsp;     * Checks if this container is empty.
+<i>76</i>&nbsp;     *
+<i>77</i>&nbsp;     * @return &lt;code&gt;true&lt;/code&gt; if this container has no contents
+<i>78</i>&nbsp;     * @throws NullValueException if this container is an Ion
+<i>79</i>&nbsp;     * &lt;code&gt;null&lt;/code&gt; value
+<i>80</i>&nbsp;     */
+<i>81</i>&nbsp;    public boolean isEmpty()
+<i>82</i>&nbsp;        throws NullValueException;
+<i>83</i>&nbsp;
+<i>84</i>&nbsp;    /**
+<i>85</i>&nbsp;     * Clears the contents of this container (if any) and set it to empty.
+<i>86</i>&nbsp;     * If this container is an Ion &lt;code&gt;null&lt;/code&gt; value, set it to
+<i>87</i>&nbsp;     * empty.
+<i>88</i>&nbsp;     * &lt;p&gt;
+<i>89</i>&nbsp;     * Use {@link #makeNull} to make this container null rather than empty.
+<i>90</i>&nbsp;     * &lt;p&gt;
+<i>91</i>&nbsp;     * &lt;b&gt;WARNING:&lt;/b&gt; This method is not support for instances of
+<i>92</i>&nbsp;     * {@link IonDatagram}.
+<i>93</i>&nbsp;     */
+<i>94</i>&nbsp;    public void clear();
+<i>95</i>&nbsp;
+<i>96</i>&nbsp;    /**
+<i>97</i>&nbsp;     * Sets the contents of this container to an Ion &lt;code&gt;null&lt;/code&gt;
+<i>98</i>&nbsp;     * value.
+<i>99</i>&nbsp;     * &lt;p&gt;
+<i>100</i>&nbsp;     * Use {@link #clear} to make this container empty rather than null.
+<i>101</i>&nbsp;     */
+<i>102</i>&nbsp;    public void makeNull();
+<i>103</i>&nbsp;
+<i>104</i>&nbsp;
+<i>105</i>&nbsp;    public IonContainer clone()
+<i>106</i>&nbsp;        throws UnknownSymbolException;
+<i>107</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

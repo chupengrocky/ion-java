@@ -1,0 +1,111 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: _Private_IonManagedWriter</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl.bin</a> ]
+</div>
+
+<h1>Coverage Summary for Class: _Private_IonManagedWriter (com.amazon.ion.impl.bin)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">_Private_IonManagedWriter</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl.bin;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import com.amazon.ion.IonWriter;
+<i>19</i>&nbsp;import java.io.IOException;
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;/**
+<i>22</i>&nbsp; * An {@link IonWriter} that manages local symbol tables, while providing access
+<i>23</i>&nbsp; * to its underlying IonRawWriter.
+<i>24</i>&nbsp; *
+<i>25</i>&nbsp; * @deprecated This is a private API subject to change without notice.
+<i>26</i>&nbsp; */
+<i>27</i>&nbsp;@Deprecated
+<i>28</i>&nbsp;public interface _Private_IonManagedWriter extends IonWriter
+<i>29</i>&nbsp;{
+<i>30</i>&nbsp;    /**
+<i>31</i>&nbsp;     * Get the underlying raw user value writer. This may be used to directly
+<i>32</i>&nbsp;     * write user values, field names, and annotations, bypassing any symbol
+<i>33</i>&nbsp;     * table management performed by this IonManagedWriter.
+<i>34</i>&nbsp;     * @return the {@link _Private_IonRawWriter} responsible for writing this
+<i>35</i>&nbsp;     *         IonManagedWriter&#39;s user values.
+<i>36</i>&nbsp;     */
+<i>37</i>&nbsp;    _Private_IonRawWriter getRawWriter();
+<i>38</i>&nbsp;
+<i>39</i>&nbsp;    /**
+<i>40</i>&nbsp;     * If a local symbol table has not already been started by this writer since
+<i>41</i>&nbsp;     * it was constructed or last finished, start writing a local symbol table
+<i>42</i>&nbsp;     * by opening the struct and declaring the imports. Any local symbols
+<i>43</i>&nbsp;     * subsequently written using this IonManagedWriter will be appended as they
+<i>44</i>&nbsp;     * are encountered.
+<i>45</i>&nbsp;     *
+<i>46</i>&nbsp;     * When using the raw writer, a call to this API is required unless one of
+<i>47</i>&nbsp;     * the following applies:
+<i>48</i>&nbsp;     * &lt;ul&gt;
+<i>49</i>&nbsp;     *     &lt;li&gt;The user won&#39;t be writing any symbols.&lt;/li&gt;
+<i>50</i>&nbsp;     *     &lt;li&gt;The user has manually written the symbol table struct to the
+<i>51</i>&nbsp;     *         correct raw writer. In this case, making this call would start a
+<i>52</i>&nbsp;     *         new (and probably redundant) symbol table context, which is
+<i>53</i>&nbsp;     *         wasteful but not harmful.&lt;/li&gt;
+<i>54</i>&nbsp;     *     &lt;li&gt;The user definitely will be writing more symbols in this context
+<i>55</i>&nbsp;     *         using the managed writer.&lt;/li&gt;
+<i>56</i>&nbsp;     * &lt;/ul&gt;
+<i>57</i>&nbsp;     * Failing to call this when required will leave the system symbol table as
+<i>58</i>&nbsp;     * the active symbol table context for the subsequently written values, which
+<i>59</i>&nbsp;     * will lead to missing symbol ID mappings.
+<i>60</i>&nbsp;     * @throws IOException
+<i>61</i>&nbsp;     */
+<i>62</i>&nbsp;    void requireLocalSymbolTable() throws IOException;
+<i>63</i>&nbsp;
+<i>64</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,132 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: IonBinaryWriter</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion</a> ]
+</div>
+
+<h1>Coverage Summary for Class: IonBinaryWriter (com.amazon.ion)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">IonBinaryWriter</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import java.io.IOException;
+<i>19</i>&nbsp;import java.io.OutputStream;
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;/**
+<i>22</i>&nbsp; * An {@link IonWriter} that encodes Ion binary data.
+<i>23</i>&nbsp; *
+<i>24</i>&nbsp; * @deprecated Use {@link IonSystem#newBinaryWriter(OutputStream, SymbolTable...)} instead.
+<i>25</i>&nbsp; */
+<i>26</i>&nbsp;@Deprecated
+<i>27</i>&nbsp;public interface IonBinaryWriter
+<i>28</i>&nbsp;    extends IonWriter
+<i>29</i>&nbsp;{
+<i>30</i>&nbsp;
+<i>31</i>&nbsp;    /**
+<i>32</i>&nbsp;     * Gets the size in bytes of this binary data.
+<i>33</i>&nbsp;     * This is generally needed before calling {@link #getBytes()} or
+<i>34</i>&nbsp;     * {@link #getBytes(byte[], int, int)}.
+<i>35</i>&nbsp;     *
+<i>36</i>&nbsp;     * @return the size in bytes.
+<i>37</i>&nbsp;     */
+<i>38</i>&nbsp;    @Deprecated
+<i>39</i>&nbsp;    public int byteSize();
+<i>40</i>&nbsp;
+<i>41</i>&nbsp;    /**
+<i>42</i>&nbsp;     * Copies the current contents of this writer as a new byte array holding
+<i>43</i>&nbsp;     * Ion binary-encoded data.
+<i>44</i>&nbsp;     * This allocates an array of the size needed to exactly
+<i>45</i>&nbsp;     * hold the output and copies the entire value to it.
+<i>46</i>&nbsp;     *
+<i>47</i>&nbsp;     * @return the byte array with the writers output
+<i>48</i>&nbsp;     * @throws IOException
+<i>49</i>&nbsp;     */
+<i>50</i>&nbsp;    @Deprecated
+<i>51</i>&nbsp;    public byte[] getBytes()
+<i>52</i>&nbsp;        throws IOException;
+<i>53</i>&nbsp;
+<i>54</i>&nbsp;
+<i>55</i>&nbsp;    /**
+<i>56</i>&nbsp;     * Copies the current contents of the writer to a given byte array
+<i>57</i>&nbsp;     * array.  This starts writing to the array at offset and writes
+<i>58</i>&nbsp;     * up to maxlen bytes.
+<i>59</i>&nbsp;     * If this writer is not able to stop in the middle of its
+<i>60</i>&nbsp;     * work this may overwrite the array and later throw and exception.
+<i>61</i>&nbsp;     *
+<i>62</i>&nbsp;     * @param bytes users byte array to write into
+<i>63</i>&nbsp;     * @param offset initial offset in the array to write into
+<i>64</i>&nbsp;     * @param maxlen maximum number of bytes to write
+<i>65</i>&nbsp;     * @return number of bytes written
+<i>66</i>&nbsp;     * @throws IOException
+<i>67</i>&nbsp;     */
+<i>68</i>&nbsp;    @Deprecated
+<i>69</i>&nbsp;    public int getBytes(byte[] bytes, int offset, int maxlen)
+<i>70</i>&nbsp;        throws IOException;
+<i>71</i>&nbsp;
+<i>72</i>&nbsp;    /**
+<i>73</i>&nbsp;     * Writes the current contents of the writer to the output
+<i>74</i>&nbsp;     * stream.  This is only valid if the writer is not in the
+<i>75</i>&nbsp;     * middle of writing a container.
+<i>76</i>&nbsp;     *
+<i>77</i>&nbsp;     * @param userstream OutputStream to write the bytes to
+<i>78</i>&nbsp;     * @return int length of bytes written
+<i>79</i>&nbsp;     * @throws IOException
+<i>80</i>&nbsp;     */
+<i>81</i>&nbsp;    @Deprecated
+<i>82</i>&nbsp;    public int writeBytes(OutputStream userstream)
+<i>83</i>&nbsp;        throws IOException;
+<i>84</i>&nbsp;
+<i>85</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>

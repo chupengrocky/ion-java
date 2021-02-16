@@ -1,0 +1,131 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: _Private_IonRawWriter</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.amazon.ion.impl.bin</a> ]
+</div>
+
+<h1>Coverage Summary for Class: _Private_IonRawWriter (com.amazon.ion.impl.bin)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">_Private_IonRawWriter</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;/*
+<i>2</i>&nbsp; * Copyright 2007-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+<i>3</i>&nbsp; *
+<i>4</i>&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;).
+<i>5</i>&nbsp; * You may not use this file except in compliance with the License.
+<i>6</i>&nbsp; * A copy of the License is located at
+<i>7</i>&nbsp; *
+<i>8</i>&nbsp; *     http://www.apache.org/licenses/LICENSE-2.0
+<i>9</i>&nbsp; *
+<i>10</i>&nbsp; * or in the &quot;license&quot; file accompanying this file. This file is distributed
+<i>11</i>&nbsp; * on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+<i>12</i>&nbsp; * express or implied. See the License for the specific language governing
+<i>13</i>&nbsp; * permissions and limitations under the License.
+<i>14</i>&nbsp; */
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;package com.amazon.ion.impl.bin;
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;import com.amazon.ion.IonWriter;
+<i>19</i>&nbsp;import java.io.IOException;
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;/**
+<i>22</i>&nbsp; * An {@link IonWriter} with no symbol table management.
+<i>23</i>&nbsp; *
+<i>24</i>&nbsp; * @deprecated This is a private API subject to change without notice.
+<i>25</i>&nbsp; */
+<i>26</i>&nbsp;@Deprecated
+<i>27</i>&nbsp;public interface _Private_IonRawWriter extends IonWriter
+<i>28</i>&nbsp;{
+<i>29</i>&nbsp;    /**
+<i>30</i>&nbsp;     * Sets the current field name to the given symbol ID. It is up to the
+<i>31</i>&nbsp;     * caller to make sure the given symbol ID has a mapping in the current
+<i>32</i>&nbsp;     * context&#39;s symbol table. The pending field name symbol is cleared when the
+<i>33</i>&nbsp;     * current value is written via stepIn() or one of the write*() methods.
+<i>34</i>&nbsp;     * @param sid - a symbol ID
+<i>35</i>&nbsp;     */
+<i>36</i>&nbsp;    public void setFieldNameSymbol(int sid);
+<i>37</i>&nbsp;
+<i>38</i>&nbsp;    /**
+<i>39</i>&nbsp;     * Sets the full list of pending annotations to the given symbol IDs. Any
+<i>40</i>&nbsp;     * pending annotation symbol IDs are cleared. It is up to the caller to make
+<i>41</i>&nbsp;     * sure the given symbol IDs have mappings in the current context&#39;s symbol
+<i>42</i>&nbsp;     * table. The contents of the given array are copied into this writer, so
+<i>43</i>&nbsp;     * the caller does not need to preserve the array. The list of pending
+<i>44</i>&nbsp;     * annotation symbol IDs is cleared when the current value is written via
+<i>45</i>&nbsp;     * stepIn() or one of the write*() methods.
+<i>46</i>&nbsp;     * @param sids - symbol IDs representing the annotation symbols for the
+<i>47</i>&nbsp;     *               current value
+<i>48</i>&nbsp;     */
+<i>49</i>&nbsp;    public void setTypeAnnotationSymbols(int... sids);
+<i>50</i>&nbsp;
+<i>51</i>&nbsp;    /**
+<i>52</i>&nbsp;     * Adds the given symbol ID to the list of pending annotation symbol IDs. It
+<i>53</i>&nbsp;     * is up to the caller to make sure the given symbol ID has a mapping in the
+<i>54</i>&nbsp;     * current context&#39;s symbol table. The list of pending annotation symbol IDs
+<i>55</i>&nbsp;     * is cleared when the current value is written via stepIn() or one of the
+<i>56</i>&nbsp;     * write*() methods.
+<i>57</i>&nbsp;     * @param sid - a symbol ID
+<i>58</i>&nbsp;     */
+<i>59</i>&nbsp;    public void addTypeAnnotationSymbol(int sid);
+<i>60</i>&nbsp;
+<i>61</i>&nbsp;    /**
+<i>62</i>&nbsp;     * Directly write the given symbol ID to represent a symbol value. It is up
+<i>63</i>&nbsp;     * to the caller to make sure the given symbol ID has a mapping in the
+<i>64</i>&nbsp;     * current context&#39;s symbol table.
+<i>65</i>&nbsp;     * @param sid - a symbol ID
+<i>66</i>&nbsp;     * @throws IOException
+<i>67</i>&nbsp;     */
+<i>68</i>&nbsp;    public void writeSymbolToken(int sid) throws IOException;
+<i>69</i>&nbsp;
+<i>70</i>&nbsp;    /**
+<i>71</i>&nbsp;     * Writes a portion of the byte array out as an IonString value.  This
+<i>72</i>&nbsp;     * copies the portion of the byte array that is written.
+<i>73</i>&nbsp;     *
+<i>74</i>&nbsp;     * @param data well-formed UTF-8-encoded bytes to be written.
+<i>75</i>&nbsp;     * May be {@code null} to represent {@code null.string}.
+<i>76</i>&nbsp;     * @param offset offset of the first byte in value to write
+<i>77</i>&nbsp;     * @param length number of bytes to write from value
+<i>78</i>&nbsp;     * @see IonWriter#writeClob(byte[], int, int)
+<i>79</i>&nbsp;     * @see IonWriter#writeBlob(byte[], int, int)
+<i>80</i>&nbsp;     */
+<i>81</i>&nbsp;    public void writeString(byte[] data, int offset, int length)
+<i>82</i>&nbsp;        throws IOException;
+<i>83</i>&nbsp;
+<i>84</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-02-15 21:53</div>
+</div>
+</body>
+</html>
