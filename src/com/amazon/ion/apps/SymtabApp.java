@@ -109,7 +109,7 @@ public class SymtabApp
                 {
                     throw new RuntimeException("Multiple versions");
                 }
-                int version = Integer.parseInt(arg);
+                int version = Integer.parseInt(args[++i]);
                 if (version < 1)
                 {
                     throw new RuntimeException("Version must be at least 1");

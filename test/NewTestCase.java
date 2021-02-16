@@ -17,6 +17,7 @@ import static org.junit.Assert.*;
 
 public class NewTestCase {
 
+
     //Boundary setStreamCopyOptimized() true & false
     //In this case, we test whether setStreamCopyOptimized() works or not.
     @Test

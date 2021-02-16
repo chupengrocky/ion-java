@@ -90,9 +90,8 @@ public class EncodeApp
                                                + path);
                 }
             }
-            else if ("--output".equals(arg))
-	    {
-		String path = args[++i];
+            else if ("--output".equals(arg)) {
+                String path = args[++i];
                 myOutputFile = path;
                 myOutputDir = new File(path).getParentFile();
                 if (! myOutputDir.isDirectory() || ! myOutputDir.canWrite())
@@ -100,7 +99,7 @@ public class EncodeApp
                     throw new RuntimeException("Not a writeable directory: "
                                                + path);
                 }
-            }
+	    }
             else
             {
                 // this arg is not an option, we're done here
@@ -109,7 +108,6 @@ public class EncodeApp
         }
 
         myImports = imports.toArray(new SymbolTable[0]);
-
         return i;
     }
 
