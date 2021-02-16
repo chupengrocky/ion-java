@@ -13,55 +13,9 @@
  * permissions and limitations under the License.
  */
 
-import com.amazon.ion.AnnotationEscapesTest;
-import com.amazon.ion.AssertionsEnabledTest;
-import com.amazon.ion.BadIonTest;
-import com.amazon.ion.BinaryReaderWrappedValueLengthTest;
-import com.amazon.ion.BinaryTest;
-import com.amazon.ion.BlobTest;
-import com.amazon.ion.BoolTest;
-import com.amazon.ion.ClobTest;
-import com.amazon.ion.CloneTest;
-import com.amazon.ion.DatagramTest;
-import com.amazon.ion.DecimalTest;
-import com.amazon.ion.EquivTimelineTest;
-import com.amazon.ion.EquivsTest;
-import com.amazon.ion.ExtendedDecimalTest;
-import com.amazon.ion.FieldNameEscapesTest;
-import com.amazon.ion.FloatTest;
-import com.amazon.ion.GoodIonTest;
-import com.amazon.ion.HashCodeCorrectnessTest;
-import com.amazon.ion.HashCodeDeltaCollisionTest;
-import com.amazon.ion.HashCodeDistributionTest;
-import com.amazon.ion.IntTest;
-import com.amazon.ion.IonExceptionTest;
-import com.amazon.ion.IonRawWriterBasicTest;
-import com.amazon.ion.IonRawWriterSymbolsTest;
-import com.amazon.ion.IonReaderToIonValueTest;
-import com.amazon.ion.IonSystemTest;
-import com.amazon.ion.IonValueTest;
-import com.amazon.ion.JavaNumericsTest;
-import com.amazon.ion.ListTest;
-import com.amazon.ion.LoaderTest;
-import com.amazon.ion.LongStringTest;
-import com.amazon.ion.NonEquivsTest;
-import com.amazon.ion.NopPaddingTest;
-import com.amazon.ion.NullTest;
-import com.amazon.ion.RawValueSpanReaderBasicTest;
+import com.amazon.ion.*;
 import com.amazon.ion.impl.IonReaderBinaryRawLargeStreamTest;
 import com.amazon.ion.impl.RawValueSpanReaderTest;
-import com.amazon.ion.RoundTripTest;
-import com.amazon.ion.SexpTest;
-import com.amazon.ion.StringFieldNameEscapesTest;
-import com.amazon.ion.StringTest;
-import com.amazon.ion.StructTest;
-import com.amazon.ion.SurrogateEscapeTest;
-import com.amazon.ion.SymbolTest;
-import com.amazon.ion.SystemProcessingTests;
-import com.amazon.ion.TimestampBadTest;
-import com.amazon.ion.TimestampGoodTest;
-import com.amazon.ion.TimestampTest;
-import com.amazon.ion.ValueFactorySequenceTest;
 import com.amazon.ion.facet.FacetsTest;
 import com.amazon.ion.impl.ByteBufferTest;
 import com.amazon.ion.impl.CharacterReaderTest;
@@ -226,7 +180,11 @@ import org.junit.runners.Suite;
     RawValueSpanReaderTest.class,
 
     // DOM Lifecycle / mode tests
-    SIDPresentLifecycleTest.class
+    SIDPresentLifecycleTest.class,
+
+    //Project 261
+    NewTestCase_part1.class,
+    NewTestCase_part2.class
 })
 public class AllTests
 {

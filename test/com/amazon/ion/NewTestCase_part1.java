@@ -1,3 +1,5 @@
+package com.amazon.ion;
+
 import com.amazon.ion.IonSystem;
 import com.amazon.ion.IonWriter;
 import com.amazon.ion.SymbolTable;
@@ -15,7 +17,7 @@ import java.io.OutputStream;
 
 import static org.junit.Assert.*;
 
-public class NewTestCase {
+public class NewTestCase_part1 {
 
 
     //Boundary setStreamCopyOptimized() true & false
