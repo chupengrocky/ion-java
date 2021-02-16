@@ -21,6 +21,7 @@ GitHub URL: [Ion-Java](https://github.com/chupengrocky/ion-java)
    1. [Structural-Testing](#Structural-Testing)
    2. [Previous-Test-Coverage](#Previous-Test-Coverage)
    3. [After-Test-Coverage](#After-Test-Coverage)
+   4. [Explanation](#Explanation)
 4. [Setup](#Setup)
 5. [Pulling-in-Upstream-Changes](#Pulling-in-Upstream-Changes)
 6. [Depending-on-the-Library](#Depending-on-the-Library)
@@ -163,7 +164,64 @@ After adding the new test cases the cover rate becomes:
 | :----------------------------------------------------------- | :--------------------------------------------------- | :----------------------------------------------------- | :------------------------------------------------------ |
 | [**SimpleByteBuffer**](IonTestCoverage/.classes/SimpleByteBuffer.html) | **75% (3/ 4)**                                       | **23% (20/ 84)**                                       | **11% (75/ 606)**                                       |
 
+### Explanation
 
+The test case for com.amazon.ion.apps test the functionality of the Ion app's main method, which allow user to pass command argument to the method. Here we use java reflection to stimulate the process of invoking the app and passing the argument to the system:
+
+```java
+public class AddTests {
+    @Test
+    public void testEncodeApp(){
+        EncodeApp encodeApp = new EncodeApp();
+        Class c = EncodeApp.class;
+        assertEquals(4, TestUtil.invoke(encodeApp, "processOptions",
+                new String[]{"--catalog", ".\\new.txt", "--output-dir", ".\\",
+                ".\\new.txt"}));
+    }
+
+    @Test
+    public void testPrintApp(){
+        PrintApp printApp = new PrintApp();
+        Class c = PrintApp.class;
+        assertEquals(4, TestUtil.invoke(printApp, "processOptions",
+                new String[]{"--catalog", ".\\new.txt", "--output-dir", ".\\",
+                        ".\\new.txt"}));
+    }
+
+    @Test
+    public void testSymtabApp(){
+        SymtabApp symtabapp = new SymtabApp();
+        Class c = SymtabApp.class;
+        assertEquals(6, TestUtil.invoke(symtabapp, "processOptions",
+                new String[]{"--catalog", ".\\new.txt", "--name","test",
+                        "--version", "1", "--output-dir", ".\\",
+                        ".\\new.txt"}));
+    }
+}
+```
+
+ The test Cases for class SimpleByteBuffer test the constructors and encapsulation, for example:
+
+```java
+@Test
+public void testByteBuffer(){
+    byte[] bytes = "Test Content".getBytes();
+    boolean isReadOnly = false;
+    int length = bytes.length;
+    int start = 0;
+    SimpleByteBuffer sb1 = new SimpleByteBuffer(bytes);
+    SimpleByteBuffer sb2 = new SimpleByteBuffer(bytes, isReadOnly);
+    SimpleByteBuffer sb3 = new SimpleByteBuffer(bytes, start, length);
+    SimpleByteBuffer sb4 = new SimpleByteBuffer(bytes, start, length, isReadOnly);
+
+    assertEquals(length - start, sb4.getLength());
+    assertNotNull(sb4.getBytes());
+    assertNotNull(sb3.getBytes(bytes, start, length));
+    assertNotNull(sb4.getReader());
+    assertNotNull(sb4.getWriter());
+    assertNotNull(sb4.getWriter());
+}
+```
 
 ## Setup
 
