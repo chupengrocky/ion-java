@@ -34,6 +34,7 @@ import com.amazon.ion.impl.bin.PooledBlockAllocatorProviderTest;
 import com.amazon.ion.impl.bin.WriteBufferTest;
 import com.amazon.ion.impl.lite.IonContextTest;
 import com.amazon.ion.impl.lite.SIDPresentLifecycleTest;
+import com.amazon.ion.impl.NewTestCase_part3;
 import com.amazon.ion.streaming.BadIonStreamingTest;
 import com.amazon.ion.streaming.BinaryStreamingTest;
 import com.amazon.ion.streaming.GoodIonStreamingTest;
@@ -184,7 +185,9 @@ import org.junit.runners.Suite;
 
     //Project 261
     NewTestCase_part1.class,
-    NewTestCase_part2.class
+    NewTestCase_part2.class,
+    NewTestCase_part3.class
+
 })
 public class AllTests
 {
