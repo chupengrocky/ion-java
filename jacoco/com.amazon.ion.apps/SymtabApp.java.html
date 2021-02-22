@@ -109,7 +109,7 @@ import java.util.Iterator;
                 {
 <span class="nc" id="L110">                    throw new RuntimeException(&quot;Multiple versions&quot;);</span>
                 }
-<span class="nc" id="L112">                int version = Integer.parseInt(arg);</span>
+<span class="nc" id="L112">                int version = Integer.parseInt(args[++i]);</span>
 <span class="nc bnc" id="L113" title="All 2 branches missed.">                if (version &lt; 1)</span>
                 {
 <span class="nc" id="L115">                    throw new RuntimeException(&quot;Version must be at least 1&quot;);</span>

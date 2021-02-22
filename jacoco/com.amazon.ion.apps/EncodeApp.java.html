@@ -90,17 +90,16 @@ public class EncodeApp
                                                + path);
                 }
 <span class="nc" id="L92">            }</span>
-<span class="nc bnc" id="L93" title="All 2 branches missed.">            else if (&quot;--output&quot;.equals(arg))</span>
-	    {
-<span class="nc" id="L95">		String path = args[++i];</span>
-<span class="nc" id="L96">                myOutputFile = path;</span>
-<span class="nc" id="L97">                myOutputDir = new File(path).getParentFile();</span>
-<span class="nc bnc" id="L98" title="All 4 branches missed.">                if (! myOutputDir.isDirectory() || ! myOutputDir.canWrite())</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">            else if (&quot;--output&quot;.equals(arg)) {</span>
+<span class="nc" id="L94">                String path = args[++i];</span>
+<span class="nc" id="L95">                myOutputFile = path;</span>
+<span class="nc" id="L96">                myOutputDir = new File(path).getParentFile();</span>
+<span class="nc bnc" id="L97" title="All 4 branches missed.">                if (! myOutputDir.isDirectory() || ! myOutputDir.canWrite())</span>
                 {
-<span class="nc" id="L100">                    throw new RuntimeException(&quot;Not a writeable directory: &quot;</span>
+<span class="nc" id="L99">                    throw new RuntimeException(&quot;Not a writeable directory: &quot;</span>
                                                + path);
                 }
-            }
+	    }
             else
             {
                 // this arg is not an option, we're done here
@@ -108,9 +107,8 @@ public class EncodeApp
             }
         }
 
-<span class="nc" id="L111">        myImports = imports.toArray(new SymbolTable[0]);</span>
-
-<span class="nc" id="L113">        return i;</span>
+<span class="nc" id="L110">        myImports = imports.toArray(new SymbolTable[0]);</span>
+<span class="nc" id="L111">        return i;</span>
     }
 
 
@@ -118,59 +116,59 @@ public class EncodeApp
     protected void process(File inputFile, IonReader reader)
         throws IOException, IonException
     {
-<span class="nc" id="L121">        IonBinaryWriter writer = mySystem.newBinaryWriter(myImports);</span>
+<span class="nc" id="L119">        IonBinaryWriter writer = mySystem.newBinaryWriter(myImports);</span>
 
-<span class="nc" id="L123">        writer.writeValues(reader);</span>
+<span class="nc" id="L121">        writer.writeValues(reader);</span>
 
-<span class="nc" id="L125">        byte[] binaryBytes = writer.getBytes();</span>
+<span class="nc" id="L123">        byte[] binaryBytes = writer.getBytes();</span>
 
-<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (myOutputDir != null)</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        if (myOutputDir != null)</span>
         {
-<span class="nc" id="L129">            String fileName = inputFile.getName();</span>
-<span class="nc" id="L130">            File outputFile = new File(myOutputDir, fileName);</span>
-<span class="nc" id="L131">            FileOutputStream out = new FileOutputStream(outputFile);</span>
+<span class="nc" id="L127">            String fileName = inputFile.getName();</span>
+<span class="nc" id="L128">            File outputFile = new File(myOutputDir, fileName);</span>
+<span class="nc" id="L129">            FileOutputStream out = new FileOutputStream(outputFile);</span>
             try
             {
-<span class="nc" id="L134">                out.write(binaryBytes);</span>
+<span class="nc" id="L132">                out.write(binaryBytes);</span>
             }
             finally
             {
-<span class="nc" id="L138">                out.close();</span>
+<span class="nc" id="L136">                out.close();</span>
             }
-<span class="nc" id="L140">        }</span>
+<span class="nc" id="L138">        }</span>
         else
         {
-<span class="nc" id="L143">            System.out.write(binaryBytes);</span>
+<span class="nc" id="L141">            System.out.write(binaryBytes);</span>
         }
-<span class="nc" id="L145">    }</span>
+<span class="nc" id="L143">    }</span>
 
     @Override
     protected void process(IonReader reader)
         throws IOException, IonException
     {
-<span class="nc" id="L151">        IonBinaryWriter writer = mySystem.newBinaryWriter(myImports);</span>
+<span class="nc" id="L149">        IonBinaryWriter writer = mySystem.newBinaryWriter(myImports);</span>
 
-<span class="nc" id="L153">        writer.writeValues(reader);</span>
+<span class="nc" id="L151">        writer.writeValues(reader);</span>
 
-<span class="nc" id="L155">        byte[] binaryBytes = writer.getBytes();</span>
+<span class="nc" id="L153">        byte[] binaryBytes = writer.getBytes();</span>
 
-<span class="nc bnc" id="L157" title="All 2 branches missed.">        if (myOutputDir != null)</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        if (myOutputDir != null)</span>
         {
-<span class="nc" id="L159">            File outputFile = new File(myOutputFile);</span>
-<span class="nc" id="L160">            FileOutputStream out = new FileOutputStream(outputFile);</span>
+<span class="nc" id="L157">            File outputFile = new File(myOutputFile);</span>
+<span class="nc" id="L158">            FileOutputStream out = new FileOutputStream(outputFile);</span>
             try
             {
-<span class="nc" id="L163">                out.write(binaryBytes);</span>
+<span class="nc" id="L161">                out.write(binaryBytes);</span>
             }
             finally
             {
-<span class="nc" id="L167">                out.close();</span>
+<span class="nc" id="L165">                out.close();</span>
             }
-<span class="nc" id="L169">        }</span>
+<span class="nc" id="L167">        }</span>
         else
         {
-<span class="nc" id="L172">            System.out.write(binaryBytes);</span>
+<span class="nc" id="L170">            System.out.write(binaryBytes);</span>
         }
-<span class="nc" id="L174">    }</span>
+<span class="nc" id="L172">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

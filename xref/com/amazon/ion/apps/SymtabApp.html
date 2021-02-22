@@ -117,7 +117,7 @@
 <a class="jxr_linenumber" name="L109" href="#L109">109</a>                 {
 <a class="jxr_linenumber" name="L110" href="#L110">110</a>                     <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(<span class="jxr_string">"Multiple versions"</span>);
 <a class="jxr_linenumber" name="L111" href="#L111">111</a>                 }
-<a class="jxr_linenumber" name="L112" href="#L112">112</a>                 <strong class="jxr_keyword">int</strong> version = Integer.parseInt(arg);
+<a class="jxr_linenumber" name="L112" href="#L112">112</a>                 <strong class="jxr_keyword">int</strong> version = Integer.parseInt(args[++i]);
 <a class="jxr_linenumber" name="L113" href="#L113">113</a>                 <strong class="jxr_keyword">if</strong> (version &lt; 1)
 <a class="jxr_linenumber" name="L114" href="#L114">114</a>                 {
 <a class="jxr_linenumber" name="L115" href="#L115">115</a>                     <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> RuntimeException(<span class="jxr_string">"Version must be at least 1"</span>);
@@ -261,6 +261,6 @@
 <a class="jxr_linenumber" name="L253" href="#L253">253</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2020. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2021. All rights reserved.</div>
 </body>
 </html>
