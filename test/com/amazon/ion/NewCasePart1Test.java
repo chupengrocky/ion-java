@@ -17,7 +17,7 @@ import java.io.OutputStream;
 
 import static org.junit.Assert.*;
 
-public class NewTestCase_part1 {
+public class NewCasePart1Test {
 
 
     //Boundary setStreamCopyOptimized() true & false

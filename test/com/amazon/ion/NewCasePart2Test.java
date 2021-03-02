@@ -20,7 +20,7 @@ import java.io.*;
 import static org.junit.Assert.*;
 
 
-public class NewTestCase_part2 extends IonTestCase{
+public class NewCasePart2Test extends IonTestCase{
     @Test
     public void testFiniteStateMachineReader(){
         IonReaderBuilder readerBuilder = IonReaderBuilder.standard();
@@ -42,7 +42,7 @@ public class NewTestCase_part2 extends IonTestCase{
     }
 
     @Test
-    public void testFiniteStateMachineText()  throws Exception{
+    public void testFiniteStateMachineTextWriter()  throws Exception{
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         IonTextWriterBuilder textWriterBuilder = IonTextWriterBuilder.standard();
 
@@ -57,7 +57,7 @@ public class NewTestCase_part2 extends IonTestCase{
     }
 
     @Test
-    public void testFiniteStateMachineBinary()  throws Exception {
+    public void testFiniteStateMachineBinaryWriter()  throws Exception {
         IonSystem system = IonSystemBuilder.standard().build();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         IonReaderBuilder readerBuilder = IonReaderBuilder.standard();

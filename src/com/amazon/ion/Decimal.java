@@ -310,6 +310,28 @@ public class Decimal
         return ibd;
     }
 
+    public static Decimal valueOf(char[] in)
+    {
+        boolean negative = (in[0]=='-');
+        Decimal ibd = new Decimal(in);
+        if (negative && ibd.signum() == 0)
+        {
+            ibd = new NegativeZero(ibd.scale());
+        }
+        return ibd;
+    }
+
+    public static Decimal valueOf(char[] in, MathContext mc)
+    {
+        boolean negative = (in[0]=='-');
+        Decimal ibd = new Decimal(in, mc);
+        if (negative && ibd.signum() == 0)
+        {
+            ibd = new NegativeZero(ibd.scale(), mc);
+        }
+        return ibd;
+    }
+
 
     //=========================================================================
     // Constructors are private so we have flexibility in changing
@@ -353,18 +375,18 @@ public class Decimal
         super(val);
     }
 
-    private Decimal(long val, MathContext mc)
+    public Decimal(long val, MathContext mc)
     {
         super(val, mc);
     }
 
 
-    private Decimal(double val)
+    public Decimal(double val)
     {
         super(val);
     }
 
-    private Decimal(double val, MathContext mc)
+    public Decimal(double val, MathContext mc)
     {
         super(val, mc);
     }
@@ -384,7 +406,7 @@ public class Decimal
 
 
     // TODO create static valueOf to check for -0
-    private Decimal(char[] in)
+    public Decimal(char[] in)
     {
         super(in);
     }

@@ -8,7 +8,7 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-public class NewTestCase_part3 {
+public class NewCasePart3Test {
     @Test
     public void testByteBuffer(){
         byte[] bytes = "Test Content".getBytes();
@@ -44,12 +44,5 @@ public class NewTestCase_part3 {
         assertNotNull(sbr.read());
         assertNotNull(sbr.readULong(0));
         assertNotNull(sbr.readULong(1));
-        assertNotNull(sbr.readULong(2));
-        assertNotNull(sbr.readULong(3));
-        assertNotNull(sbr.readULong(4));
-        assertNotNull(sbr.readULong(5));
-        assertNotNull(sbr.readULong(6));
-        assertNotNull(sbr.readULong(7));
-        assertNotNull(sbr.readULong(8));
     }
 }
