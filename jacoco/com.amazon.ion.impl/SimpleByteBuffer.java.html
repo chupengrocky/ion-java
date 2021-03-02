@@ -44,16 +44,16 @@ final class SimpleByteBuffer
      * @param bytes assumed to be owned by this new instance.
      */
     public SimpleByteBuffer(byte[] bytes) {
-<span class="nc" id="L47">        this(bytes, 0, bytes.length, false);</span>
-<span class="nc" id="L48">    }</span>
+<span class="fc" id="L47">        this(bytes, 0, bytes.length, false);</span>
+<span class="fc" id="L48">    }</span>
 
     /**
      *
      * @param bytes assumed to be owned by this new instance.
      */
     public SimpleByteBuffer(byte[] bytes, boolean isReadOnly) {
-<span class="nc" id="L55">        this(bytes, 0, bytes.length, isReadOnly);</span>
-<span class="nc" id="L56">    }</span>
+<span class="fc" id="L55">        this(bytes, 0, bytes.length, isReadOnly);</span>
+<span class="fc" id="L56">    }</span>
 
     /**
      * Creates a read-write buffer.
@@ -61,27 +61,27 @@ final class SimpleByteBuffer
      * @param bytes assumed to be owned by this new instance.
      */
     public SimpleByteBuffer(byte[] bytes, int start, int length) {
-<span class="nc" id="L64">        this(bytes, start, length, false);</span>
-<span class="nc" id="L65">    }</span>
+<span class="fc" id="L64">        this(bytes, start, length, false);</span>
+<span class="fc" id="L65">    }</span>
 
     /**
      *
      * @param bytes assumed to be owned by this new instance.
      */
-<span class="nc" id="L71">    public SimpleByteBuffer(byte[] bytes, int start, int length, boolean isReadOnly) {</span>
-<span class="nc bnc" id="L72" title="All 10 branches missed.">        if (bytes == null || start &lt; 0 || start &gt; bytes.length || length &lt; 0 || start + length &gt; bytes.length) {</span>
+<span class="fc" id="L71">    public SimpleByteBuffer(byte[] bytes, int start, int length, boolean isReadOnly) {</span>
+<span class="pc bpc" id="L72" title="5 of 10 branches missed.">        if (bytes == null || start &lt; 0 || start &gt; bytes.length || length &lt; 0 || start + length &gt; bytes.length) {</span>
 <span class="nc" id="L73">            throw new IllegalArgumentException();</span>
         }
-<span class="nc" id="L75">        _bytes = bytes;</span>
-<span class="nc" id="L76">        _start = start;</span>
-<span class="nc" id="L77">        _eob   = start + length;</span>
-<span class="nc" id="L78">        _is_read_only = isReadOnly;</span>
-<span class="nc" id="L79">    }</span>
+<span class="fc" id="L75">        _bytes = bytes;</span>
+<span class="fc" id="L76">        _start = start;</span>
+<span class="fc" id="L77">        _eob   = start + length;</span>
+<span class="fc" id="L78">        _is_read_only = isReadOnly;</span>
+<span class="fc" id="L79">    }</span>
 
     public int getLength()
     {
-<span class="nc" id="L83">        int length = _eob - _start;</span>
-<span class="nc" id="L84">        return length;</span>
+<span class="fc" id="L83">        int length = _eob - _start;</span>
+<span class="fc" id="L84">        return length;</span>
     }
 
     /**
@@ -89,41 +89,41 @@ final class SimpleByteBuffer
      */
     public byte[] getBytes()
     {
-<span class="nc" id="L92">        int length = _eob - _start;</span>
-<span class="nc" id="L93">        byte[] copy = new byte[length];</span>
-<span class="nc" id="L94">        System.arraycopy(_bytes, _start, copy, 0, length);</span>
-<span class="nc" id="L95">        return copy;</span>
+<span class="fc" id="L92">        int length = _eob - _start;</span>
+<span class="fc" id="L93">        byte[] copy = new byte[length];</span>
+<span class="fc" id="L94">        System.arraycopy(_bytes, _start, copy, 0, length);</span>
+<span class="fc" id="L95">        return copy;</span>
     }
 
     public int getBytes(byte[] buffer, int offset, int length)
     {
-<span class="nc bnc" id="L100" title="All 10 branches missed.">        if (buffer == null || offset &lt; 0 || offset &gt; buffer.length || length &lt; 0 || offset + length &gt; buffer.length) {</span>
+<span class="pc bpc" id="L100" title="5 of 10 branches missed.">        if (buffer == null || offset &lt; 0 || offset &gt; buffer.length || length &lt; 0 || offset + length &gt; buffer.length) {</span>
 <span class="nc" id="L101">            throw new IllegalArgumentException();</span>
         }
 
-<span class="nc" id="L104">        int datalength = _eob - _start;</span>
-<span class="nc bnc" id="L105" title="All 2 branches missed.">        if (datalength &gt; length) {</span>
+<span class="fc" id="L104">        int datalength = _eob - _start;</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">        if (datalength &gt; length) {</span>
 <span class="nc" id="L106">            throw new IllegalArgumentException(&quot;insufficient space in destination buffer&quot;);</span>
         }
 
-<span class="nc" id="L109">        System.arraycopy(_bytes, _start, buffer, offset, datalength);</span>
+<span class="fc" id="L109">        System.arraycopy(_bytes, _start, buffer, offset, datalength);</span>
 
-<span class="nc" id="L111">        return datalength;</span>
+<span class="fc" id="L111">        return datalength;</span>
 
     }
     public ByteReader getReader()
     {
-<span class="nc" id="L116">        ByteReader reader = new SimpleByteReader(this);</span>
-<span class="nc" id="L117">        return reader;</span>
+<span class="fc" id="L116">        ByteReader reader = new SimpleByteReader(this);</span>
+<span class="fc" id="L117">        return reader;</span>
     }
 
     public ByteWriter getWriter()
     {
-<span class="nc bnc" id="L122" title="All 2 branches missed.">        if (_is_read_only) {</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">        if (_is_read_only) {</span>
 <span class="nc" id="L123">            throw new IllegalStateException(&quot;this buffer is read only&quot;);</span>
         }
-<span class="nc" id="L125">        SimpleByteWriter writer = new SimpleByteWriter(this);</span>
-<span class="nc" id="L126">        return writer;</span>
+<span class="fc" id="L125">        SimpleByteWriter writer = new SimpleByteWriter(this);</span>
+<span class="fc" id="L126">        return writer;</span>
     }
 
     public void writeBytes(OutputStream out) throws IOException
@@ -132,51 +132,51 @@ final class SimpleByteBuffer
 <span class="nc" id="L132">        out.write(_bytes, _start, length);</span>
 <span class="nc" id="L133">    }</span>
 
-<span class="nc bnc" id="L135" title="All 2 branches missed.">    static final class SimpleByteReader implements ByteReader</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">    static final class SimpleByteReader implements ByteReader</span>
     {
         SimpleByteBuffer _buffer;
         int              _position;
 
-<span class="nc" id="L140">        SimpleByteReader(SimpleByteBuffer bytebuffer) {</span>
-<span class="nc" id="L141">            _buffer = bytebuffer;</span>
-<span class="nc" id="L142">            _position = bytebuffer._start;</span>
-<span class="nc" id="L143">        }</span>
+<span class="fc" id="L140">        SimpleByteReader(SimpleByteBuffer bytebuffer) {</span>
+<span class="fc" id="L141">            _buffer = bytebuffer;</span>
+<span class="fc" id="L142">            _position = bytebuffer._start;</span>
+<span class="fc" id="L143">        }</span>
 
         public int position()
         {
-<span class="nc" id="L147">            int pos = _position - _buffer._start;</span>
-<span class="nc" id="L148">            return pos;</span>
+<span class="fc" id="L147">            int pos = _position - _buffer._start;</span>
+<span class="fc" id="L148">            return pos;</span>
         }
 
         public void position(int newPosition)
         {
-<span class="nc bnc" id="L153" title="All 2 branches missed.">            if (newPosition &lt; 0) {</span>
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">            if (newPosition &lt; 0) {</span>
 <span class="nc" id="L154">                throw new IllegalArgumentException(&quot;position must be non-negative&quot;);</span>
             }
-<span class="nc" id="L156">            int pos = newPosition + _buffer._start;</span>
-<span class="nc bnc" id="L157" title="All 2 branches missed.">            if (pos &gt; _buffer._eob) {</span>
+<span class="fc" id="L156">            int pos = newPosition + _buffer._start;</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">            if (pos &gt; _buffer._eob) {</span>
 <span class="nc" id="L158">               throw new IllegalArgumentException(&quot;position is past end of buffer&quot;);</span>
             }
-<span class="nc" id="L160">            _position = pos;</span>
-<span class="nc" id="L161">        }</span>
+<span class="fc" id="L160">            _position = pos;</span>
+<span class="fc" id="L161">        }</span>
 
         public void skip(int length)
         {
-<span class="nc bnc" id="L165" title="All 2 branches missed.">            if (length &lt; 0) {</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">            if (length &lt; 0) {</span>
 <span class="nc" id="L166">                throw new IllegalArgumentException(&quot;length to skip must be non-negative&quot;);</span>
             }
-<span class="nc" id="L168">            int pos = _position + length;</span>
-<span class="nc bnc" id="L169" title="All 2 branches missed.">            if (pos &gt; _buffer._eob) {</span>
+<span class="fc" id="L168">            int pos = _position + length;</span>
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">            if (pos &gt; _buffer._eob) {</span>
 <span class="nc" id="L170">               throw new IllegalArgumentException(&quot;skip would skip past end of buffer&quot;);</span>
             }
-<span class="nc" id="L172">            _position = pos;</span>
-<span class="nc" id="L173">        }</span>
+<span class="fc" id="L172">            _position = pos;</span>
+<span class="fc" id="L173">        }</span>
 
         public int read()
         {
-<span class="nc bnc" id="L177" title="All 2 branches missed.">            if (_position &gt;= _buffer._eob) return EOF;</span>
-<span class="nc" id="L178">            int b = _buffer._bytes[_position++];</span>
-<span class="nc" id="L179">            return (b &amp; 0xff);</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">            if (_position &gt;= _buffer._eob) return EOF;</span>
+<span class="fc" id="L178">            int b = _buffer._bytes[_position++];</span>
+<span class="fc" id="L179">            return (b &amp; 0xff);</span>
         }
 
         public int read(byte[] dst, int start, int len)
@@ -202,10 +202,10 @@ final class SimpleByteBuffer
 
         public long readULong(int len) throws IOException
         {
-<span class="nc" id="L205">            long    retvalue = 0;</span>
+<span class="fc" id="L205">            long    retvalue = 0;</span>
             int b;
 
-<span class="nc bnc" id="L208" title="All 10 branches missed.">            switch (len) {</span>
+<span class="pc bpc" id="L208" title="8 of 10 branches missed.">            switch (len) {</span>
             default:
 <span class="nc" id="L210">                throw new IonException(&quot;value too large for Java long&quot;);</span>
             case 8:
@@ -230,12 +230,12 @@ final class SimpleByteBuffer
 <span class="nc bnc" id="L230" title="All 2 branches missed.">                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</span>
 <span class="nc" id="L231">                retvalue = (retvalue &lt;&lt; 8) | b;</span>
             case 1:
-<span class="nc bnc" id="L233" title="All 2 branches missed.">                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</span>
-<span class="nc" id="L234">                retvalue = (retvalue &lt;&lt; 8) | b;</span>
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">                if ((b = read()) &lt; 0) throwUnexpectedEOFException();</span>
+<span class="fc" id="L234">                retvalue = (retvalue &lt;&lt; 8) | b;</span>
             case 0:
                 // do nothing, it's just a 0 length is a 0 value
             }
-<span class="nc" id="L238">            return retvalue;</span>
+<span class="fc" id="L238">            return retvalue;</span>
         }
 
 
@@ -838,18 +838,18 @@ done:       for (;;) {
         }
     }
 
-<span class="nc bnc" id="L841" title="All 2 branches missed.">    static final class SimpleByteWriter extends OutputStream implements ByteWriter</span>
+<span class="pc bpc" id="L841" title="1 of 2 branches missed.">    static final class SimpleByteWriter extends OutputStream implements ByteWriter</span>
     {
         private static final int _ib_FLOAT64_LEN         =    8;
-<span class="nc" id="L844">        private static final Double DOUBLE_POS_ZERO = Double.valueOf(0.0);</span>
+<span class="fc" id="L844">        private static final Double DOUBLE_POS_ZERO = Double.valueOf(0.0);</span>
 
         SimpleByteBuffer _buffer;
         int              _position;
 
-<span class="nc" id="L849">        SimpleByteWriter(SimpleByteBuffer bytebuffer) {</span>
-<span class="nc" id="L850">            _buffer = bytebuffer;</span>
-<span class="nc" id="L851">            _position = bytebuffer._start;</span>
-<span class="nc" id="L852">        }</span>
+<span class="fc" id="L849">        SimpleByteWriter(SimpleByteBuffer bytebuffer) {</span>
+<span class="fc" id="L850">            _buffer = bytebuffer;</span>
+<span class="fc" id="L851">            _position = bytebuffer._start;</span>
+<span class="fc" id="L852">        }</span>
 
         protected void flushTo(OutputStream userOutput) throws IOException {
 <span class="nc" id="L855">            _buffer.writeBytes(userOutput);</span>
