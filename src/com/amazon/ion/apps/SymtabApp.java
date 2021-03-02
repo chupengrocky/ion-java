@@ -30,6 +30,7 @@ import java.util.Iterator;
 public class SymtabApp
     extends BaseApp
 {
+    private IonReader ionReader;
     private ArrayList<SymbolTable> myImports = new ArrayList<SymbolTable>();
     private ArrayList<String>      mySymbols = new ArrayList<String>();
 
@@ -60,6 +61,9 @@ public class SymtabApp
     {
     }
 
+    public SymtabApp(IonReader ionReader){
+        this.ionReader = ionReader;
+    }
 
     //=========================================================================
 
@@ -184,28 +188,23 @@ public class SymtabApp
         }
     }
 
-
-    @Override
-    protected void process(IonReader reader)
-        throws IonException
+    public void process()
+            throws IonException
     {
-        while (reader.hasNext())
+        IonReader reader = this.ionReader;
+        if (reader.hasNext())
         {
             IonType type = reader.next();
-
 //            System.err.println("Next: " + type);
 //            System.err.println("isInStruct=" + reader.isInStruct());
-
             String fieldName = reader.getFieldName();
             intern(fieldName);
 
-            internAnnotations(reader);
 
             switch (type) {
                 case SYMBOL:
                 {
                     String text = reader.stringValue();
-                    intern(text);
                     break;
                 }
                 case LIST:
@@ -228,7 +227,48 @@ public class SymtabApp
 //                System.err.println("stepping out");
                 reader.stepOut();
             }
+
         }
+    }
+
+    @Override
+    public boolean process(IonReader reader)
+        throws IonException
+    {
+        while (reader.hasNext())
+        {
+            IonType type = reader.next();
+            String fieldName = reader.getFieldName();
+            intern(fieldName);
+
+            internAnnotations(reader);
+
+            switch (type) {
+                case SYMBOL:
+                {
+                    String text = reader.stringValue();
+                    intern(text);
+                    break;
+                }
+                case LIST:
+                case SEXP:
+                case STRUCT:
+                {
+                    reader.stepIn();
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
+            }
+
+            while (! reader.hasNext() && reader.getDepth() > 0)
+            {
+                reader.stepOut();
+            }
+        }
+        return false;
     }
 
     private void internAnnotations(IonReader reader)

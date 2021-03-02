@@ -121,7 +121,7 @@ public class PrintApp
     }
 
     @Override
-    protected void process(IonReader reader)
+    public boolean process(IonReader reader)
         throws IOException, IonException
     {
         if (myOutputDir == null)
@@ -141,6 +141,7 @@ public class PrintApp
                 out.close();
             }
         }
+        return false;
     }
 
     protected void process(IonReader reader, OutputStream out)

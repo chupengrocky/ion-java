@@ -201,10 +201,11 @@ abstract class BaseApp
         process(reader);
     }
 
-    protected void process(IonReader reader)
+    public boolean process(IonReader reader)
         throws IOException, IonException
     {
         // Do nothing...
+        return false;
     }
 
 

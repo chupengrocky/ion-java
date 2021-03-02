@@ -143,7 +143,7 @@ public class EncodeApp
     }
 
     @Override
-    protected void process(IonReader reader)
+    public boolean process(IonReader reader)
         throws IOException, IonException
     {
         IonBinaryWriter writer = mySystem.newBinaryWriter(myImports);
@@ -169,5 +169,6 @@ public class EncodeApp
         {
             System.out.write(binaryBytes);
         }
+        return false;
     }
 }
