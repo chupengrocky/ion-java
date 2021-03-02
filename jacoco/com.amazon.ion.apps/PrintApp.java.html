@@ -121,7 +121,7 @@ import java.io.OutputStream;
 <span class="nc" id="L121">    }</span>
 
     @Override
-    protected void process(IonReader reader)
+    public boolean process(IonReader reader)
         throws IOException, IonException
     {
 <span class="nc bnc" id="L127" title="All 2 branches missed.">        if (myOutputDir == null)</span>
@@ -141,19 +141,20 @@ import java.io.OutputStream;
 <span class="nc" id="L141">                out.close();</span>
             }
         }
-<span class="nc" id="L144">    }</span>
+<span class="nc" id="L144">        return false;</span>
+    }
 
     protected void process(IonReader reader, OutputStream out)
         throws IOException, IonException
     {
-<span class="nc" id="L149">        IonSystem system = this.mySystem;</span>
-<span class="nc" id="L150">        IonWriter writer = system.newTextWriter(out);</span>
+<span class="nc" id="L150">        IonSystem system = this.mySystem;</span>
+<span class="nc" id="L151">        IonWriter writer = system.newTextWriter(out);</span>
 
-<span class="nc" id="L152">        writer.writeValues(reader);</span>
+<span class="nc" id="L153">        writer.writeValues(reader);</span>
 
         // Ensure there's a newline at the end and flush the buffer.
-<span class="nc" id="L155">        out.write('\n');</span>
-<span class="nc" id="L156">        out.flush();</span>
-<span class="nc" id="L157">    }</span>
+<span class="nc" id="L156">        out.write('\n');</span>
+<span class="nc" id="L157">        out.flush();</span>
+<span class="nc" id="L158">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

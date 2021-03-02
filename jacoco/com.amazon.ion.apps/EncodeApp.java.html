@@ -143,7 +143,7 @@ public class EncodeApp
 <span class="nc" id="L143">    }</span>
 
     @Override
-    protected void process(IonReader reader)
+    public boolean process(IonReader reader)
         throws IOException, IonException
     {
 <span class="nc" id="L149">        IonBinaryWriter writer = mySystem.newBinaryWriter(myImports);</span>
@@ -169,6 +169,7 @@ public class EncodeApp
         {
 <span class="nc" id="L170">            System.out.write(binaryBytes);</span>
         }
-<span class="nc" id="L172">    }</span>
+<span class="nc" id="L172">        return false;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

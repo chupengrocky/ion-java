@@ -33,12 +33,12 @@ import java.io.InputStream;
 /**
  *   ion_encode  ion_print
  */
-<span class="nc bnc" id="L36" title="All 2 branches missed.">abstract class BaseApp</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">abstract class BaseApp</span>
 {
-<span class="nc" id="L38">    protected SimpleCatalog myCatalog = new SimpleCatalog();</span>
-<span class="nc" id="L39">    protected IonSystem mySystem = IonSystemBuilder.standard()</span>
-<span class="nc" id="L40">                                                   .withCatalog(myCatalog)</span>
-<span class="nc" id="L41">                                                   .build();</span>
+<span class="fc" id="L38">    protected SimpleCatalog myCatalog = new SimpleCatalog();</span>
+<span class="fc" id="L39">    protected IonSystem mySystem = IonSystemBuilder.standard()</span>
+<span class="fc" id="L40">                                                   .withCatalog(myCatalog)</span>
+<span class="fc" id="L41">                                                   .build();</span>
 
 
     //=========================================================================
@@ -201,45 +201,46 @@ import java.io.InputStream;
 <span class="nc" id="L201">        process(reader);</span>
 <span class="nc" id="L202">    }</span>
 
-    protected void process(IonReader reader)
+    public boolean process(IonReader reader)
         throws IOException, IonException
     {
         // Do nothing...
-<span class="nc" id="L208">    }</span>
+<span class="nc" id="L208">        return false;</span>
+    }
 
 
     protected void loadCatalog(String catalogPath)
     {
-<span class="nc" id="L213">        System.err.println(&quot;Loading catalog from &quot; + catalogPath);</span>
-<span class="nc" id="L214">        File catalogFile = new File(catalogPath);</span>
+<span class="nc" id="L214">        System.err.println(&quot;Loading catalog from &quot; + catalogPath);</span>
+<span class="nc" id="L215">        File catalogFile = new File(catalogPath);</span>
         try
         {
-<span class="nc" id="L217">            InputStream in =</span>
+<span class="nc" id="L218">            InputStream in =</span>
                 new BufferedInputStream(new FileInputStream(catalogFile));
             try
             {
-<span class="nc" id="L221">                IonReader reader = mySystem.newReader(in);</span>
-<span class="nc bnc" id="L222" title="All 2 branches missed.">                while (reader.next() != null)</span>
+<span class="nc" id="L222">                IonReader reader = mySystem.newReader(in);</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">                while (reader.next() != null)</span>
                 {
-<span class="nc" id="L224">                    SymbolTable symtab =</span>
-<span class="nc" id="L225">                        mySystem.newSharedSymbolTable(reader, true);</span>
-<span class="nc" id="L226">                    myCatalog.putTable(symtab);</span>
-<span class="nc" id="L227">                }</span>
+<span class="nc" id="L225">                    SymbolTable symtab =</span>
+<span class="nc" id="L226">                        mySystem.newSharedSymbolTable(reader, true);</span>
+<span class="nc" id="L227">                    myCatalog.putTable(symtab);</span>
+<span class="nc" id="L228">                }</span>
             }
             finally
             {
-<span class="nc" id="L231">                in.close();</span>
+<span class="nc" id="L232">                in.close();</span>
             }
         }
-<span class="nc" id="L234">        catch (Exception e)</span>
+<span class="nc" id="L235">        catch (Exception e)</span>
         {
-<span class="nc" id="L236">            throw new RuntimeException(&quot;Error loading catalog from &quot;</span>
-<span class="nc" id="L237">                                         + catalogPath + &quot;: &quot; + e.getMessage(),</span>
+<span class="nc" id="L237">            throw new RuntimeException(&quot;Error loading catalog from &quot;</span>
+<span class="nc" id="L238">                                         + catalogPath + &quot;: &quot; + e.getMessage(),</span>
                                        e);
-<span class="nc" id="L239">        }</span>
+<span class="nc" id="L240">        }</span>
 
-<span class="nc" id="L241">        IonCatalog catalog = mySystem.getCatalog();</span>
-<span class="nc bnc" id="L242" title="All 4 branches missed.">        assert myCatalog == catalog;</span>
+<span class="nc" id="L242">        IonCatalog catalog = mySystem.getCatalog();</span>
+<span class="nc bnc" id="L243" title="All 4 branches missed.">        assert myCatalog == catalog;</span>
 //        logDebug(&quot;----Catalog content:&quot;);
 //        for (Iterator&lt;StaticSymbolTable&gt; i = catalog.iterator(); i.hasNext(); )
 //        {
@@ -247,28 +248,28 @@ import java.io.InputStream;
 //            logDebug(table.getName() + &quot;@&quot; + table.getVersion());
 //        }
 //        logDebug(&quot;----&quot;);
-<span class="nc" id="L250">    }</span>
+<span class="nc" id="L251">    }</span>
 
 
     protected SymbolTable getLatestSharedSymtab(String name)
     {
-<span class="nc" id="L255">        IonCatalog catalog = mySystem.getCatalog();</span>
-<span class="nc" id="L256">        SymbolTable table = catalog.getTable(name);</span>
-<span class="nc bnc" id="L257" title="All 2 branches missed.">        if (table == null)</span>
+<span class="nc" id="L256">        IonCatalog catalog = mySystem.getCatalog();</span>
+<span class="nc" id="L257">        SymbolTable table = catalog.getTable(name);</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        if (table == null)</span>
         {
-<span class="nc" id="L259">            String message =</span>
+<span class="nc" id="L260">            String message =</span>
                 &quot;There's no symbol table in the catalog named &quot; + name;
-<span class="nc" id="L261">            throw new RuntimeException(message);</span>
+<span class="nc" id="L262">            throw new RuntimeException(message);</span>
         }
-<span class="nc" id="L263">        logDebug(&quot;Found shared symbol table &quot; + name</span>
-<span class="nc" id="L264">                   + &quot;@&quot; + table.getVersion());</span>
-<span class="nc" id="L265">        return table;</span>
+<span class="nc" id="L264">        logDebug(&quot;Found shared symbol table &quot; + name</span>
+<span class="nc" id="L265">                   + &quot;@&quot; + table.getVersion());</span>
+<span class="nc" id="L266">        return table;</span>
     }
 
 
     protected void logDebug(String message)
     {
-<span class="nc" id="L271">        System.err.println(message);</span>
-<span class="nc" id="L272">    }</span>
+<span class="nc" id="L272">        System.err.println(message);</span>
+<span class="nc" id="L273">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>
