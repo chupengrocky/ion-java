@@ -30,4 +30,20 @@ public class AddTests {
                         "--version", "1", "--output-dir", ".\\",
                         ".\\new.txt"}));
     }
+    @Test
+    public void testoptionsAreValid(){
+        SymtabApp symtabapp = new SymtabApp();
+        Class c = SymtabApp.class;
+        TestUtil.invoke(symtabapp, "processOptions",
+                new String[]{"--catalog", ".\\new.txt", "--name","test",
+                        "--version", "1", "--output-dir", ".\\",
+                        ".\\new.txt"});
+        assertTrue((Boolean) TestUtil.invoke(symtabapp, "optionsAreValid",
+                new String[]{"--catalog", ".\\new.txt", "--name","test",
+                        "--version", "1", "--output-dir", ".\\",
+                        ".\\new.txt"}));
+        assertFalse((Boolean) TestUtil.invoke(symtabapp, "optionsAreValid",
+                new String[]{}));
+    }
+
 }
